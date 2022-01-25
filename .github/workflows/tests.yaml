@@ -3,7 +3,7 @@ on: [pull_request, push]
 jobs:
   pytest:
     runs-on: ubuntu-latest
-    stategy:
+    strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
     name: Pytest (${{ matrix.python-version }})
