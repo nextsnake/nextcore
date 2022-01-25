@@ -22,9 +22,20 @@ pytest = "^6.2.5"
 taskipy = "^1.9.0"
 
 [tool.taskipy.tasks]
-black_check = "black . --target-version py39 --diff --check"
-isort_check = "isort . --check --diff --profile black"
+black_check = "black . --diff --check"
+isort_check = "isort . --check --diff"
 tests = "pytest tests"
+black = "black ."
+isort = "isort ."
+lint = "black . && isort ."
+
+[tool.black]
+line-length = 120
+target-version = ["py38"]
+
+[tool.isort]
+profile = "black"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
