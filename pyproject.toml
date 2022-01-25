@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "nextcore"
+version = "1.0.0a"
+description = "A minimal gateway and http handler for discord bot libraries"
+authors = ["Nextcore developers"]
+license = "MIT"
+
+packages = [
+    { include = "nextcore" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+Sphinx = "^4.4.0"
+sphinx-copybutton = "^0.4.0"
+furo = "^2022.1.2"
+isort = "^5.10.1"
+black = "^21.12b0"
+pytest = "^6.2.5"
+taskipy = "^1.9.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
