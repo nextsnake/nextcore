@@ -59,7 +59,11 @@ jobs:
         run: pip install poetry
       - name: Install dependencies
         run: poetry install
+      - uses: actions/setup-node@v2
+        name: Install node
+        with:
+          node-version: '14'
       - name: Install pyright
-        run: apt install pyright
+        run: npm install -g pyright
       - name: Run pyright
         run: pyright nextcore/
