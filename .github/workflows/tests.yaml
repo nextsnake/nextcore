@@ -1,0 +1,65 @@
+name: Tests
+on: [pull_request, push]
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    stategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+    name: Pytest (${{ matrix.python-version }})
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Run tests
+        run: poetry run task tests
+  black:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.10"
+      - name: Install poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Run tests
+        run: poetry run task black_check
+  isort:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.10"
+      - name: Install poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Run tests
+        run: poetry run task isort_check
+  pyright:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.10"
+      - name: Install poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Install pyright
+        run: apt install pyright
+      - name: Run pyright
+        run: pyright nextcore/
