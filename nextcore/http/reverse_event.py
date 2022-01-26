@@ -33,7 +33,7 @@ class ReversedTimedEvent:
 
     def __init__(self) -> None:
         self._loop: AbstractEventLoop = get_event_loop()
-        self._event: Event = Event()
+        self._event = Event()
         self._event.set()
 
     async def wait(self) -> None:
