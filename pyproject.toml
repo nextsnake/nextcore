@@ -11,6 +11,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
+aiohttp = ">=3.6.0,<4.0.0"
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.4.0"

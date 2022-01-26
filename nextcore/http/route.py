@@ -16,4 +16,42 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__version__ = "1.0.0a"
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from typing import Any, Literal, Optional
+
+
+class Route:
+    __slots__ = ("method", "path", "bucket", "use_webhook_global")
+
+    def __init__(
+        self,
+        method: Literal[
+            "GET",
+            "HEAD",
+            "POST",
+            "PUT",
+            "DELETE",
+            "CONNECT",
+            "OPTIONS",
+            "TRACE",
+            "PATCH",
+        ],
+        path: str,
+        *,
+        use_webhook_global: bool = False,
+        **parameters: Any,
+    ) -> None:
+        self.method: str = method
+        self.path: str = path.format(**parameters)
+        self.use_webhook_global = use_webhook_global
+
+        # Bucket
+        guild_id: Optional[int] = parameters.get("guild_id")
+        channel_id: Optional[int] = parameters.get("channel_id")
+        webhook_id: Optional[int] = parameters.get("webhook_id")
+
+        self.bucket: int = hash(f"{guild_id}{channel_id}{webhook_id}{path}")
