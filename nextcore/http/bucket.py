@@ -113,8 +113,7 @@ class Bucket:
             flood = await self._first_fetch_ratelimit.acquire()
             if flood:
                 return await self.__aenter__()
-            else:
-                logger.debug("Letting ratelimit fetcher through")
+            logger.debug("Letting ratelimit fetcher through")
         self._reserved += 1
         return self
 
