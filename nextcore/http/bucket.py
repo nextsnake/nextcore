@@ -36,6 +36,7 @@ logger = getLogger(__name__)
 
 
 class Bucket:
+    __slots__ = ("limit", "_pending", "_pending_reset", "_remaining", "_reserved", "_loop", "_first_fetch_ratelimit")
     """A HTTP ratelimit handler
 
     .. note::
