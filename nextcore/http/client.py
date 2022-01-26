@@ -105,7 +105,6 @@ class HTTPClient:
         headers = kwargs.pop("headers", {})
         headers = {**self.default_headers, **headers}
 
-
         for _ in range(self.max_retries):
             await global_lock.wait()
             async with bucket:
