@@ -42,7 +42,7 @@ from .reverse_event import ReversedTimedEvent
 from .route import Route
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Optional, Type
 
 logger = getLogger(__name__)
 
@@ -79,7 +79,7 @@ class HTTPClient:
         self._global_lock: ReversedTimedEvent = ReversedTimedEvent()
         self._buckets: defaultdict[int, Bucket] = defaultdict(lambda: Bucket())
         self._session = ClientSession()
-        self._status_to_exception: dict[int, HTTPStatusError] = {
+        self._status_to_exception: dict[int, Type[HTTPStatusError]] = {
             400: BadRequestError,
             403: ForbiddenError,
             404: NotFoundError,
@@ -138,7 +138,7 @@ class HTTPClient:
                         assert False, "Reached post handle http exception"
                 return r
         # Generally only happens when clustering
-        raise RatelimitingFailedError
+        raise RatelimitingFailedError(self.max_retries)
 
     async def _handle_http_exception(self, response: ClientResponse) -> None:
         error = self._status_to_exception.get(response.status, HTTPStatusError)
