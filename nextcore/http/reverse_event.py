@@ -21,11 +21,12 @@
 
 from __future__ import annotations
 
-from asyncio import AbstractEventLoop, Event, get_event_loop
+from asyncio import Event, get_event_loop
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from asyncio import AbstractEventLoop
+    from typing import Optional
 
 
 class ReversedTimedEvent:
