@@ -25,8 +25,8 @@ from asyncio import Future
 class FloodGate:
     """A class to partially or fully drain a queue
 
-    You can call :meth:`FloodGate.pop` to only remove the first element in
-    You can call :meth:`FloodGate.drain` to empty the entire queue and all future occurences
+    You can call :meth:`FloodGate.pop` to only remove the first element in.
+    You can call :meth:`FloodGate.drain` to empty the entire queue and all future occurences.
     """
 
     def __init__(self):
@@ -41,6 +41,7 @@ class FloodGate:
         for future in self._pending:
             future.set_result(True)
         self._pending.clear()
+        self.drained = True
 
     def pop(self):
         """Make the first task return.

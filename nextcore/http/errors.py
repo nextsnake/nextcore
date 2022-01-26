@@ -18,11 +18,20 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
+
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from aiohttp.client_reqrep import ClientResponse
+
+
 class HTTPError(Exception):
     ...
 
 
-class RatelimitingFailedError(HTTPError):
+class RateLimitFailedError(HTTPError):
     def __init__(self, times: int) -> None:
         self.times = times
         super().__init__(
@@ -30,18 +39,19 @@ class RatelimitingFailedError(HTTPError):
         )
 
 
-class HTTPStatusError(HTTPError):
-    def __init__(self, discord_error_code: int, message: str) -> None:
+class HTTPRequestError(HTTPError):
+    def __init__(self, discord_error_code: int, message: str, response: ClientResponse) -> None:
+        self.response: ClientResponse = response
         super().__init__(f"({discord_error_code}) {message}")
 
 
-class BadRequestError(HTTPStatusError):
+class BadRequestError(HTTPRequestError):
     ...
 
 
-class ForbiddenError(HTTPStatusError):
+class ForbiddenError(HTTPRequestError):
     ...
 
 
-class NotFoundError(HTTPStatusError):
+class NotFoundError(HTTPRequestError):
     ...

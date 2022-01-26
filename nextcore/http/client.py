@@ -34,9 +34,9 @@ from .bucket import Bucket
 from .errors import (
     BadRequestError,
     ForbiddenError,
-    HTTPStatusError,
+    HTTPRequestError,
     NotFoundError,
-    RatelimitingFailedError,
+    RateLimitFailedError,
 )
 from .reverse_event import ReversedTimedEvent
 from .route import Route
@@ -65,21 +65,21 @@ class HTTPClient:
         token_type: Optional[str] = None,
         token: Optional[str] = None,
         *,
-        base_url: str = "https://discord.com/api",
+        base_url: Optional[str] = None,
         trust_local_time: bool = True,
-        max_retries: int = 10,
+        max_retries: int = 5,
         library_info: Optional[tuple[str, str]] = None,
     ) -> None:
         self.trust_local_time: bool = trust_local_time
         self.max_retries: int = max_retries
-        self.base_url: str = base_url
+        self.base_url: str = base_url or "https://discord.com/api/v9"
 
         # Internals
-        self._global_webhook_lock: ReversedTimedEvent = ReversedTimedEvent()
-        self._global_lock: ReversedTimedEvent = ReversedTimedEvent()
-        self._buckets: defaultdict[int, Bucket] = defaultdict(lambda: Bucket())
+        self._global_webhook_lock = ReversedTimedEvent()
+        self._global_lock = ReversedTimedEvent()
+        self._buckets: defaultdict[int, Bucket] = defaultdict(Bucket)
         self._session = ClientSession()
-        self._status_to_exception: dict[int, Type[HTTPStatusError]] = {
+        self._status_to_exception: dict[int, Type[HTTPRequestError]] = {
             400: BadRequestError,
             403: ForbiddenError,
             404: NotFoundError,
@@ -138,19 +138,19 @@ class HTTPClient:
                         assert False, "Reached post handle http exception"
                 return r
         # Generally only happens when clustering
-        raise RatelimitingFailedError(self.max_retries)
+        raise RateLimitFailedError(self.max_retries)
 
     async def _handle_http_exception(self, response: ClientResponse) -> None:
-        error = self._status_to_exception.get(response.status, HTTPStatusError)
+        error = self._status_to_exception.get(response.status, HTTPRequestError)
 
         data = await response.json()
         message = data["message"]
         code = data["code"]
 
-        raise error(code, message)
+        raise error(code, message, response)
 
-    def _update_ratelimits(self, r: ClientResponse, bucket: Bucket) -> None:
-        headers = r.headers
+    def _update_ratelimits(self, response: ClientResponse, bucket: Bucket) -> None:
+        headers = response.headers
         try:
             remaining = int(headers["X-RateLimit-Remaining"])
             limit = int(headers["X-RateLimit-Limit"])

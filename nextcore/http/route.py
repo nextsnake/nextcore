@@ -23,7 +23,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any, Literal, Optional
@@ -48,15 +48,15 @@ class Route:
         path: str,
         *,
         use_webhook_global: bool = False,
-        **parameters: Any,
+        **parameters: str | int,
     ) -> None:
         self.method: str = method
         self.path: str = path.format(**parameters)
         self.use_webhook_global = use_webhook_global
 
         # Bucket
-        guild_id: Optional[int] = parameters.get("guild_id")
-        channel_id: Optional[int] = parameters.get("channel_id")
-        webhook_id: Optional[int] = parameters.get("webhook_id")
+        guild_id: str | int | None = parameters.get("guild_id")
+        channel_id: str | int | None = parameters.get("channel_id")
+        webhook_id: str | int | None = parameters.get("webhook_id")
 
         self.bucket: int = hash(f"{guild_id}{channel_id}{webhook_id}{path}")

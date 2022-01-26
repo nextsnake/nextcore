@@ -119,10 +119,8 @@ class Bucket:
     async def __aexit__(self, *_: Any) -> None:
         self._reserved -= 1
         if self._remaining is not None:
+            self._first_fetch_ratelimit.drain()
             self._remaining -= 1
-        # Initial ratelimit fetch handling
-        if self._remaining is None:
+        else:
             # It failed, try again.
             self._first_fetch_ratelimit.pop()
-        else:
-            self._first_fetch_ratelimit.drain()
