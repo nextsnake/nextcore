@@ -52,7 +52,7 @@ class Bucket:
         self._remaining: Optional[int] = None
         self._reserved: int = 0
         self._loop: AbstractEventLoop = get_event_loop()
-        self._first_fetch_ratelimit: FloodGate = FloodGate()
+        self._first_fetch_ratelimit = FloodGate()
 
         # Let the first request through
         self._first_fetch_ratelimit.pop()
