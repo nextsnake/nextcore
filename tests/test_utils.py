@@ -6,4 +6,4 @@ def test_loads():
 
 
 def test_dumps():
-    assert json_dumps({"a": 1}) == '{"a":1}'
+    assert json_dumps({"a": 1}) in ['{"a":1}', '{"a": 1}']
