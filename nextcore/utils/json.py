@@ -1,13 +1,16 @@
 # The MIT License (MIT)
-# Copyright (c) 2021-present nextcore developers
+# Copyright (c) 2021-present nextsnake developers
+
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
 # to deal in the Software without restriction, including without limitation
 # the rights to use, copy, modify, merge, publish, distribute, sublicense,
 # and/or sell copies of the Software, and to permit persons to whom the
 # Software is furnished to do so, subject to the following conditions:
+
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
+
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -15,20 +18,32 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
+from __future__ import annotations
 
-from .bucket import Bucket
-from .client import HTTPClient
-from .errors import *
-from .route import Route
+from typing import TYPE_CHECKING
 
-__all__ = (
-    "HTTPClient",
-    "Bucket",
-    "Route",
-    "HTTPError",
-    "RateLimitFailedError",
-    "HTTPRequestError",
-    "BadRequestError",
-    "ForbiddenError",
-    "NotFoundError",
-)
+if TYPE_CHECKING:
+    from typing import Any
+
+try:
+    from orjson import dumps, loads  # type: ignore
+
+    _has_orjson = True
+except ImportError:
+    from json import dumps, loads
+
+    _has_orjson = False
+
+__all__ = ("json_loads", "json_dumps")
+
+
+def json_loads(json: str) -> Any:
+    return loads(json)
+
+
+def json_dumps(to_dump: Any) -> str:
+    if _has_orjson:
+        # Seems like pyright has some issues with having two modules under the same name.
+        return dumps(to_dump).decode("utf-8")  # type: ignore
+    # MyPy issues...
+    return dumps(to_dump)  # type: ignore

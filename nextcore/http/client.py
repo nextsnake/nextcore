@@ -26,7 +26,7 @@ from logging import getLogger
 from time import time
 from typing import TYPE_CHECKING
 
-from aiohttp import ClientResponse, ClientSession
+from aiohttp import ClientSession
 
 from nextcore import __version__ as nextcore_version
 
@@ -42,12 +42,35 @@ from .reverse_event import ReversedTimedEvent
 from .route import Route
 
 if TYPE_CHECKING:
-    from typing import Optional, Type
+    from typing import Any, Optional, Type
+
+    from aiohttp import ClientResponse, ClientWebSocketResponse
+
+    from ..typings.http import GetGateway, GetGatewayBot
 
 logger = getLogger(__name__)
 
+__all__ = ("HTTPClient",)
+
 
 class HTTPClient:
+    """A HTTP client to interact with the Discord API.
+    This handles ratelimits for you.
+
+    Parameters
+    ----------
+    token_type: Optional[str]
+        The type of token to use. This will be prepended to the token.
+    token: Optional[str]
+        The token to use.
+    base_url: Optional[str]
+        The discord API url to use. This should generally be left as the default, unless you are running a compatible server.
+    trust_local_time: bool
+        Whether to trust the local time or not. Having it on will make your bot faster, however if your local time is wrong it might lead to ratelimits being exceeded.
+    library_info: Optional[tuple[str, str]]
+        The library information to pass to Discord for analytics. First element is a URL, second is the version.
+    """
+
     __slots__ = (
         "trust_local_time",
         "max_retries",
@@ -97,7 +120,21 @@ class HTTPClient:
         if token_type is not None and token is not None:
             self.default_headers["Authorization"] = f"{token_type} {token}"
 
-    async def request(self, route: Route, **kwargs) -> ClientResponse:
+    async def _request(self, route: Route, **kwargs: Any) -> ClientResponse:
+        """Makes a request to the Discord API.
+
+        Parameters
+        ----------
+        route: Route
+            Metadata about the route and ratelimits.
+        kwargs:
+            Arguments to pass to `ClientSession.request <https://docs.aiohttp.org/en/stable/client_reference.html#aiohttp.ClientSession.trace_config>`_
+
+        Returns
+        -------
+        ClientResponse
+            The response from the API.
+        """
         if route.use_webhook_global:
             global_lock = self._global_webhook_lock
         else:
@@ -140,7 +177,24 @@ class HTTPClient:
         # Generally only happens when clustering
         raise RateLimitFailedError(self.max_retries)
 
+    async def ws_connect(self, url: str) -> ClientWebSocketResponse:
+        """Connects to a websocket.
+
+        Parameters
+        ----------
+        url: str
+            The url to connect to.
+
+        Returns
+        -------
+        ClientWebSocketResponse
+            The websocket response.
+        """
+        return await self._session.ws_connect(url, autoclose=False)
+
     async def _handle_http_exception(self, response: ClientResponse) -> None:
+        """Handles an HTTP error."""
+        # TODO: Not sure if this should be a seperate method or not
         error = self._status_to_exception.get(response.status, HTTPRequestError)
 
         data = await response.json()
@@ -150,6 +204,15 @@ class HTTPClient:
         raise error(code, message, response)
 
     def _update_ratelimits(self, response: ClientResponse, bucket: Bucket) -> None:
+        """Updates a :class:`Bucket` with the ratelimits from the response.
+
+        Parameters
+        ----------
+        response: ClientResponse
+            The response from the API.
+        bucket: Bucket
+            The bucket to update.
+        """
         headers = response.headers
         try:
             remaining = int(headers["X-RateLimit-Remaining"])
@@ -164,3 +227,27 @@ class HTTPClient:
 
         bucket.update(limit, remaining, reset_after)
         logger.debug("Ratelimiter updated by headers!")
+
+    # Util functions
+    # Gateway related
+    async def get_gateway(self) -> GetGateway:
+        """Gets the gateway URL to connect to discord.
+        See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway>`_
+
+        .. note::
+            This endpoint does not require any authentication.
+        """
+        route = Route("GET", "/gateway", requires_auth=False)
+        r = await self._request(route)
+        return await r.json()  # type: ignore
+
+    async def get_gateway_bot(self) -> GetGatewayBot:
+        """Gets gateway connection information.
+        See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`_
+
+        .. note::
+            This endpoint requires a bot token.
+        """
+        route = Route("GET", "/gateway/bot")
+        r = await self._request(route)
+        return await r.json()  # type: ignore

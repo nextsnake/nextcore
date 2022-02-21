@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath(".."))
 
 project = "nextcore"
 copyright = "2022 nextcore developers"
-author = "nextcord developers"
+author = "nextcore developers"
 
 
 # -- General configuration ---------------------------------------------------
@@ -42,6 +42,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- Extension configuration -------------------------------------------------
 intersphinx_mapping = {
     "aiohttp": ("https://docs.aiohttp.org/en/stable/", None),
+    "python": ("https://docs.python.org/3/", None),
 }
 
 # -- Options for HTML output -------------------------------------------------

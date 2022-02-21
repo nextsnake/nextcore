@@ -16,19 +16,14 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .bucket import Bucket
-from .client import HTTPClient
-from .errors import *
-from .route import Route
+from .decompressor import Decompressor
+from .gateway import Gateway
+from .shard import Shard
+from .times_per import TimesPer
 
 __all__ = (
-    "HTTPClient",
-    "Bucket",
-    "Route",
-    "HTTPError",
-    "RateLimitFailedError",
-    "HTTPRequestError",
-    "BadRequestError",
-    "ForbiddenError",
-    "NotFoundError",
+    "Gateway",
+    "Shard",
+    "TimesPer",
+    "Decompressor",
 )

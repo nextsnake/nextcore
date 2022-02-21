@@ -12,6 +12,8 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.8"
 aiohttp = ">=3.6.0,<4.0.0"
+frozendict = "^2.3.0"
+ujson = {version = "^5.1.0", optional = true}
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.4.0"
@@ -21,11 +23,15 @@ isort = "^5.10.1"
 black = "^21.12b0"
 pytest = "^6.2.5"
 taskipy = "^1.9.0"
+pytest-asyncio = "^0.18.1"
+
+[tool.poetry.extras]
+speed = ["ujson"]
 
 [tool.taskipy.tasks]
 black_check = "black . --diff --check"
 isort_check = "isort . --check --diff"
-tests = "pytest tests"
+tests = "pytest"
 black = "black ."
 isort = "isort ."
 lint = "black . && isort ."
@@ -37,6 +43,27 @@ target-version = ["py38"]
 [tool.isort]
 profile = "black"
 
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+testpaths = ["tests"]
+
+[tool.pyright]
+pythonPlatform = "All"
+typeCheckingMode = "strict"
+pythonVersion = "3.8"
+exclude = ["tests/"]
+
+[tool.mypy]
+python_version = "3.8"
+strict = true
+exclude = ["tests/"]
+warn_unused_ignores = false # Theres some issues in pyright that we have to ignore
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.'messages control']
+disable = ["too-few-public-methods", "duplicate-code", "fixme", "missing-module-docstring", "too-many-instance-attributes", "used-before-assignment"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

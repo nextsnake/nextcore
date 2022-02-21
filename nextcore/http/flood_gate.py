@@ -18,6 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
+from __future__ import annotations
 
 from asyncio import Future
 
@@ -29,12 +30,12 @@ class FloodGate:
     You can call :meth:`FloodGate.drain` to empty the entire queue and all future occurences.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._pending: list[Future[bool]] = []
         self._remove_next: bool = False
         self.drained: bool = False
 
-    def drain(self):
+    def drain(self) -> None:
         """Clear out all waiting tasks.
         This will also make all future tasks immidiatly return.
         """
@@ -43,7 +44,7 @@ class FloodGate:
         self._pending.clear()
         self.drained = True
 
-    def pop(self):
+    def pop(self) -> None:
         """Make the first task return.
         If there is no task waiting the next task will immidiatly return.
 
@@ -70,6 +71,6 @@ class FloodGate:
             return False
         if self.drained:
             return False
-        future = Future()
+        future: Future[bool] = Future()
         self._pending.append(future)
         return await future

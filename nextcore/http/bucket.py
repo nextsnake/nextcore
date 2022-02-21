@@ -43,7 +43,9 @@ class Bucket:
         View the `documentation <https://discord.dev/topics/rate-limits>`_
     """
 
-    def __init__(self):
+    __slots__ = ("limit", "_pending", "_pending_reset", "_remaining", "_reserved", "_loop", "_first_fetch_ratelimit")
+
+    def __init__(self) -> None:
         self.limit: Optional[int] = None
         """How many this bucket can hold. This will be None if the info has not been fetched yet."""
 
@@ -105,7 +107,7 @@ class Bucket:
     async def __aenter__(self) -> "Bucket":
         if self._remaining is not None and self._remaining - self._reserved <= 0:
             # Bucket used up, wait for it to complete
-            future = Future()
+            future: Future[None] = Future()
             self._pending.append(future)
             await future
         else:
