@@ -66,4 +66,4 @@ jobs:
       - name: Install pyright
         run: npm install -g pyright
       - name: Run pyright
-        run: pyright nextcore/
+        run: poetry run pyright nextcore/
