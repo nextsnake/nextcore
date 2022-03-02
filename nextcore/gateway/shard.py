@@ -31,12 +31,12 @@ from aiohttp import ClientWebSocketResponse, WSMsgType
 from frozendict import frozendict
 
 from ..utils import json_dumps, json_loads
+from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .dispatcher import Dispatcher
 from .errors import ReconnectCheckFailedError
 from .opcodes import GatewayOpcode
 from .times_per import TimesPer
-from .close_code import GatewayCloseCode
 
 if TYPE_CHECKING:
     from typing import ClassVar, cast
@@ -107,14 +107,12 @@ class Shard:
         self.raw_dispatcher.add_listener(self._handle_hello, GatewayOpcode.HELLO)
         self.raw_dispatcher.add_listener(self._handle_heartbeat_ack, GatewayOpcode.HEARTBEAT_ACK)
         self.raw_dispatcher.add_listener(self._handle_dispatch, GatewayOpcode.DISPATCH)
-        
+
         # Events
         self.event_dispatcher.add_listener(self._handle_ready, "READY")
 
         # Disconnects
         self.disconnect_dispatcher.add_listener(self._handle_disconnect)
-
-
 
     async def connect(self) -> None:
         # Clear state
@@ -137,7 +135,7 @@ class Shard:
             # Session stored, resume it.
             # Resumes don't use up the IDENTIFY ratelimit so we should prefer using it.
             await self.resume()
-            
+
             # Discord does not provide a "session resume ok" event, they only do it after resuming every event which can take a long time.
             # We really have to hope that discord does not consume multiple events at once.
             self.ready.set()
@@ -189,7 +187,6 @@ class Shard:
     async def _heartbeat_loop(self, heartbeat_interval: float) -> None:
         assert self._ws is not None, "_ws is not set?"
         assert not self._ws.closed, "Websocket is closed"
-
 
         # Here we create our own reference to the current websocket as we override self._ws on reconnect so there may be a chance that it gets overriden before the loop exists
         # This prevents multiple heartbeat loops from running at the same time.
@@ -323,7 +320,6 @@ class Shard:
         self.session_id = data["session_id"]
         self.ready.set()
 
-
     async def _handle_disconnect(self, close_code: int):
         if close_code in (GatewayCloseCode.SESSION_TIMEOUT, GatewayCloseCode.INVALID_SEQUENCE):
             # Session is dead.
@@ -343,7 +339,6 @@ class Shard:
             # Just try to reconnect and hope for the best.
             # TODO: This needs to be discussed?
             await self.connect()
-
 
     # Send wrappers
     async def identify(self) -> None:

@@ -20,7 +20,8 @@
 # DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
-from zlib import decompressobj, error as zlib_error
+from zlib import decompressobj
+from zlib import error as zlib_error
 
 ZLIB_SUFFIX = b"\x00\x00\xff\xff"
 
