@@ -14,6 +14,7 @@ python = "^3.8"
 aiohttp = ">=3.6.0,<4.0.0"
 frozendict = "^2.3.0"
 ujson = {version = "^5.1.0", optional = true}
+types-frozendict = "^2.0.6"
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.4.0"
@@ -59,11 +60,8 @@ strict = true
 exclude = ["tests/"]
 warn_unused_ignores = false # Theres some issues in pyright that we have to ignore
 
-[tool.pylint.format]
-max-line-length = 120
-
 [tool.pylint.'messages control']
-disable = ["too-few-public-methods", "duplicate-code", "fixme", "missing-module-docstring", "too-many-instance-attributes", "used-before-assignment"]
+disable = ["too-few-public-methods", "duplicate-code", "fixme", "missing-module-docstring", "too-many-instance-attributes", "used-before-assignment", "line-too-long"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -82,7 +82,7 @@ class TimesPer:
 
         self._drop(self.total)
 
-        if len(self._waiting):
+        if self._waiting:
             # There is still some waiting, they would not be released until someone else uses this if this was not here.
             self.reset_at = time.time() + self.per
             loop = get_running_loop()

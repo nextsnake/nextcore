@@ -1,16 +1,16 @@
 # The MIT License (MIT)
-# Copyright (c) 2021-present nextsnake developers
-
+#
+# Copyright (c) 2022-present tag-epic
+#
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
 # to deal in the Software without restriction, including without limitation
 # the rights to use, copy, modify, merge, publish, distribute, sublicense,
 # and/or sell copies of the Software, and to permit persons to whom the
 # Software is furnished to do so, subject to the following conditions:
-
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,324 +18,365 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
+
 from __future__ import annotations
 
-from asyncio import Event, create_task, sleep
-from logging import getLogger
+from asyncio import Event, get_running_loop, sleep
+from logging import Logger, getLogger
 from random import random
 from sys import platform
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
-from aiohttp import WSMsgType
-from frozendict import frozendict  # type: ignore # No source package?
+from aiohttp import ClientWebSocketResponse, WSMsgType
+from frozendict import frozendict
 
-from ..utils import json_loads
+from ..utils import json_dumps, json_loads
 from .decompressor import Decompressor
 from .dispatcher import Dispatcher
+from .errors import ReconnectCheckFailedError
+from .opcodes import GatewayOpcode
 from .times_per import TimesPer
+from .close_code import GatewayCloseCode
 
 if TYPE_CHECKING:
-    from aiohttp import ClientWebSocketResponse
+    from typing import ClassVar, cast
 
-    from ..http import HTTPClient
-    from ..typings.gateway.inner.dispatch.ready import ReadyData
-    from ..typings.gateway.inner.hello import HelloData
-    from ..typings.gateway.outer import (
+    from nextcore.typings.gateway.inner.dispatch.ready import ReadyData
+    from nextcore.typings.gateway.inner.hello import HelloData
+    from nextcore.typings.gateway.outer import (
         ClientGatewayPayload,
         ServerGatewayDispatchPayload,
         ServerGatewayPayload,
     )
-    from ..typings.objects.update_presence import UpdatePresence
+    from nextcore.typings.objects.update_presence import UpdatePresence
+
+    from ..http import HTTPClient
 
 
 class Shard:
-    """A discord shard implementation.
-
-    .. note::
-        You are probably looking for :class:`nextcore.gateway.Gateway` instead. This class requires you to manually respect max_concurrency and similar things.
-
-    Parameters
-    ----------
-    shard_id: int
-        The shard id.
-    shard_count: int
-        How many shards there are. This is used to compute which shard gets which events.
-    token: str
-        The bot token.
-    intents: int
-        The intents to use.
-    http_client: :class:`nextcore.http.HTTPClient`
-        HTTP Client to make requests from.
-    library_name: str
-        The name of the library you are making. If you are not making your own library, please use the default.
-    default_presence: :class:`nextcore.objects.update_presence.UpdatePresence`
-        The default presence to use when connecting. You should prefer this over :meth:`Shard.update_presence`
-    """
-
-    GATEWAY_URL = "wss://gateway.discord.gg?v=9&compress=zlib-stream"
+    API_VERSION: ClassVar[int] = 10
+    API_URL: ClassVar[str] = f"wss://gateway.discord.gg?v={API_VERSION}&compress=zlib-stream"
 
     def __init__(
         self,
         shard_id: int,
         shard_count: int,
-        token: str,
         intents: int,
+        token: str,
+        identify_ratelimiter: TimesPer,
         http_client: HTTPClient,
         *,
+        presence: UpdatePresence | None = None,
+        large_threshold: int | None = None,
         library_name: str = "nextcore",
-        default_presence: UpdatePresence | None = None,
     ) -> None:
-        self.id: int = shard_id
-        """The shard id."""
+        # User's params
+        self.shard_id: int = shard_id
         self.shard_count: int = shard_count
-        """How many shards there are."""
-        self.token: str = token
-        """The bot token."""
         self.intents: int = intents
-        """The intents to use."""
-        self.default_presence: UpdatePresence | None = default_presence
-        """The default presence to use when connecting."""
+        self.token: str = token
+        self.http_client: HTTPClient = http_client
+        self.presence: UpdatePresence | None = presence
+        self.large_threshold: int | None = large_threshold
+        self.library_name: str = library_name
 
+        # Publics
         self.ready: Event = Event()
-        """Event that is triggered when the shard has identified and connected to the gateway."""
         self.raw_dispatcher: Dispatcher = Dispatcher()
-        """A dispatcher for raw websocket events."""
         self.event_dispatcher: Dispatcher = Dispatcher()
-        """A dispatcher for DISPATCH events."""
+        self.disconnect_dispatcher: Dispatcher = Dispatcher()
 
-        # Internal vars
+        # Session related
+        self.session_id: str | None = None
+        self.session_sequence_number: int | None = None
+        self.should_reconnect: bool = True  # This should be set by the user.
+
+        # User's internals
+        # Should generally only be set once
+        self._identify_ratelimiter: TimesPer = identify_ratelimiter
+
+        # Internals
+        self._send_ratelimit = TimesPer(60 - 3, 120)
         self._ws: ClientWebSocketResponse | None = None
-        self._connected: Event = Event()
-        self._http_client: HTTPClient = http_client
-        # We allocate 3 spots for heartbeats. 2 for normal operations and one spare incase discord requests it.
-        self._send_ratelimit = TimesPer(120 - 3, 60)
-        self._library_name: str = library_name
-        self._decompressor = Decompressor()
-        self._logger = getLogger(f"nextcore.gateway.shard.{self.id}")
-        self._has_acknowledged_heartbeat = True
-        # Resuming info
-        self._last_sequence: int | None = None
-        self._session_id: str | None = None
+        self._decompressor: Decompressor = Decompressor()
+        self._logger: Logger = getLogger(f"nextcore.gateway.shard.{self.shard_id}")
+        self._received_heartbeat_ack: bool = True
 
-        # Listener registration
-        self.raw_dispatcher.add_listener(self._handle_hello, 10)
-        self.raw_dispatcher.add_listener(self._handle_dispatch, 0)
-        self.raw_dispatcher.add_listener(self._handle_reconnect, 7)
+        # Register handlers
+        # Raw
+        self.raw_dispatcher.add_listener(self._handle_hello, GatewayOpcode.HELLO)
+        self.raw_dispatcher.add_listener(self._handle_heartbeat_ack, GatewayOpcode.HEARTBEAT_ACK)
+        self.raw_dispatcher.add_listener(self._handle_dispatch, GatewayOpcode.DISPATCH)
+        
+        # Events
+        self.event_dispatcher.add_listener(self._handle_ready, "READY")
+
+        # Disconnects
+        self.disconnect_dispatcher.add_listener(self._handle_disconnect)
+
+
 
     async def connect(self) -> None:
-        """Connects to discord's gateway.
-
-        .. warning::
-            The caller has to handle max_concurrency and similar things.
-        """
-        if self._ws is not None and not self._ws.closed:
-            # Sessions will be invalidated if we disconnect with a 1000 status code (the default)
-            await self._ws.close(code=999)
-        if self._ws is None or self._ws.closed:
-            # Here we are still allowing connected websockets to
-            self._ws = await self._http_client.ws_connect(self.GATEWAY_URL)
-        # Zlib shares state across messages, so we need to reset it.
+        # Clear state
         self._decompressor = Decompressor()
 
-        if self._last_sequence is not None and self._session_id is not None:
-            # TODO: Reconnect
-            raise NotImplementedError("Reconnecting is not implemented yet")
-        else:
+        # Connect to gateway
+        if self._ws is not None and not self._ws.closed:
+            # This is to keep the session alive.
+            await self._ws.close(code=999)
+        self._ws = await self.http_client.ws_connect(Shard.API_URL)
+
+        if self.session_id is None and self.session_sequence_number and not self.should_reconnect:
+            # Don't waste IDENTIFY's when we know they will fail
+            raise ReconnectCheckFailedError
+        if self.session_id is None and self.session_sequence_number is None:
+            # No session stored, create a new one.
+            await self._identify_ratelimiter.wait()
             await self.identify()
-        create_task(self._receive_loop(), name=f"nextcore:Shard {self.id}/{self.shard_count} receive loop")
+        else:
+            # Session stored, resume it.
+            # Resumes don't use up the IDENTIFY ratelimit so we should prefer using it.
+            await self.resume()
+            
+            # Discord does not provide a "session resume ok" event, they only do it after resuming every event which can take a long time.
+            # We really have to hope that discord does not consume multiple events at once.
+            self.ready.set()
+
+        loop = get_running_loop()
+        loop.create_task(self._receive_loop())
 
     async def _send(
-        self, data: ClientGatewayPayload, *, respect_ratelimit: bool = True, wait_until_identify: bool = True
+        self, data: ClientGatewayPayload, *, respect_ratelimit: bool = True, wait_until_ready: bool = True
     ) -> None:
-        """Sends raw data to discord.
-
-        Parameters
-        ----------
-        data: :class:`nextcore.gateway.outer.ClientGatewayPayload`
-            The data to send.
-        respect_ratelimit: bool
-            .. warning::
-                Invalid usage of this can lead to frequent disconnects and potentially your library being banned from discord.
-            Whether to respect the ratelimit. This is useful as heartbeats have reserved 3 spots in the ratelimit.
-        wait_until_identify: bool
-            Whether to wait until the shard has identified and connected to the gateway.
-        """
-        # Most methods should never be called before identify as this will cause a disconnect.
-        if wait_until_identify:
+        if wait_until_ready:
+            self._logger.debug("Waiting until ready")
             await self.ready.wait()
-
-        # Heartbeats has reserved 3 spots in the ratelimit, so they should not be counted towards the common pool.
         if respect_ratelimit:
+            # This pretty much only used for heartbeat as we allocate 3 spots in the ratelimit for it.
+            # This is made as we have to heartbeat to avoid a disconnect.
+            # This has a few downsides though. If discord changes the heartbeat interval or spams request heartbeats we would be instantly disconnected.
             await self._send_ratelimit.wait()
-        # Just a quick safety check to make sure we're connected.
-        assert self._ws is not None, "Shard is not connected"
-        assert not self._ws.closed, "Shard is not connected"
+        assert self._ws is not None, "Websocket is not connected"
+        assert self._ws.closed is False, "Websocket is closed"
 
-        self._logger.debug("Sending %s", data)
-        await self._ws.send_json(data)
+        # We are formatting data outside to provide a JSON string. TODO: Possibly change this?
+        formatted_data = json_dumps(data)
+        self._logger.debug("Sent: %s", formatted_data)
 
+        await self._ws.send_str(formatted_data)
+
+    # Loops
     async def _receive_loop(self) -> None:
-        """Receives data from discord.
-        This calls :meth:`Shard._on_receive` for every message received.
-        """
-        assert self._ws is not None, "Shard is not connected to a websocket connection"
-        async for message in self._ws:
-            # Seems like type is unknown? Maybe create a issue in aiohttp?
-            message_type: WSMsgType = message.type  # type: ignore
-            if message_type == WSMsgType.BINARY:
-                data: bytes = message.data  # type: ignore
-                await self._on_receive(data)
-        close_code = self._ws.close_code
-        self._logger.debug("Websocket connection was closed. Code: %s", close_code)
+        assert self._ws is not None, "Websocket is not connected"
+        assert not self._ws.closed, "Websocket is closed"
 
-    async def _on_receive(self, uncompressed_data: bytes) -> None:
-        """Callback for when data is received from discord."""
+        # Here we create our own reference to the current websocket as we override self._ws on reconnect so there may be a chance that it gets overriden before the loop exists
+        # This prevents multiple receive loops from running at the same time.
+        ws = self._ws
+
+        async for message in ws:
+            # Aiohttp is not typing this? This should probably be fixed in aiohttp?
+            message_type: WSMsgType = message.type  # type: ignore [reportUnknownMemberType]
+            if message_type is WSMsgType.BINARY:
+                # Same issue as above here.
+                message_data: bytes = message.data  # type: ignore [reportUnknownMemberType]
+                await self._on_raw_receive(message_data)
+
+        # Generally having the exit condition outside is more consistent that having it inside.
+        self._logger.debug("Disconnected!")
+        await self._on_disconnect(ws)
+
+    async def _heartbeat_loop(self, heartbeat_interval: float) -> None:
+        assert self._ws is not None, "_ws is not set?"
+        assert not self._ws.closed, "Websocket is closed"
+
+
+        # Here we create our own reference to the current websocket as we override self._ws on reconnect so there may be a chance that it gets overriden before the loop exists
+        # This prevents multiple heartbeat loops from running at the same time.
+        ws = self._ws
+
+        while not ws.closed:
+            payload: ClientGatewayPayload = {
+                "op": GatewayOpcode.HEARTBEAT.value,
+                "d": self.session_sequence_number,
+            }
+
+            # Handle dead connecton checking
+            # self._received_heartbeat_ack is set in self._handle_heartbeat_ack
+            if not self._received_heartbeat_ack:
+                # We have not received a heartbeat ack. This is usually a sign of a dead connection.
+                # Just reconnect and hope that our session is still valid.
+                return await self.connect()
+            self._received_heartbeat_ack = False
+
+            # Send the heartbeat
+            await self._send(payload, respect_ratelimit=False, wait_until_ready=False)
+            await sleep(heartbeat_interval)
+
+    # Loop callbacks
+    async def _on_raw_receive(self, compressed_data: bytes) -> None:
         try:
-            raw_data = self._decompressor.decompress(uncompressed_data)
-            if raw_data is None:
-                # Partial message, wait for more data.
-                return
-        except ValueError:
-            # Data is corrupt, we have to void all context.
+            raw_data = self._decompressor.decompress(compressed_data)
+        except ValueError as e:
+            # Data is corrupted. Zlib requires context which we now do not have, so no future messages would be understood.
+            # The best bet we have is to reconnect.
+            self._logger.error("Failed to decompress message", exc_info=e)
             await self.connect()
+            return
+        if raw_data is None:
+            # Partial data received. We should try to receive more.
+            # Pretty sure this is un-used by discord however it is here just in case.
+            self._logger.debug("Received partial data, waiting for more")
             return
 
         decoded_data = raw_data.decode("utf-8")
         self._logger.debug("Received %s", decoded_data)
 
         data = json_loads(decoded_data)
-        # As we are dispatching this it can't be mutable as it would cause modifying listeners to modify for all listeners.
-        # Type ignore is here as frozendict is technically not a subclass of dict, meaning TypedDict does not support it.
-        frozen_data: ServerGatewayPayload = frozendict(data)  # type: ignore
-        del data
-        self.raw_dispatcher.dispatch(frozen_data["op"], frozen_data)
+        # We are going to trust discord to provide us with the correct data here.
+        # If it doesn't we have bigger issues
+        frozen_data: ServerGatewayPayload = frozendict(data)  # type: ignore [assignment]
 
-        if "t" in frozen_data:
-            # This is a dispatch event.
-            # FrozenDict implements everything dict does so this should be fine.
-            data: ServerGatewayDispatchPayload = frozen_data  # type: ignore
-            self.event_dispatcher.dispatch(data["t"], frozen_data)
+        # Processing of the payload
+        opcode = frozen_data["op"]
 
-    async def _on_close(self, close_code: int) -> None:
-        """Callback for when the websocket connection is closed.
+        self.raw_dispatcher.dispatch(opcode, frozen_data)
 
-        .. note::
-            This will not include the client closing the websocket connection.
+        if opcode == GatewayOpcode.DISPATCH:
+            # Received dispatch
+            # We are just trusing discord to provide the correct data here.
+            dispatch_data: ServerGatewayDispatchPayload = frozen_data  # type: ignore [assignment]
+            self.event_dispatcher.dispatch(dispatch_data["t"], dispatch_data["d"])
 
-        Parameters
-        ----------
-        close_code: :class:`int`
-            The close code of the websocket connection.
-        """
+    async def _on_disconnect(self, ws: ClientWebSocketResponse) -> None:
+        self.ready.clear()
 
-    async def _heartbeat_loop(self, interval: float) -> None:
-        """Sends heartbeats to discord.
+        close_code = ws.close_code
+        if ws.close_code is None:
+            # This happens when we closed the websocket. Just ignore it as there is basically no info here.
+            return
 
-        .. note::
-            The caller should implement jitter
+        self._logger.debug("Disconnected with code %s", close_code)
 
-        Parameters
-        ----------
-        interval: :class:`float`
-            The interval to send heartbeats at.
-        """
-        # We create our own variable here to avoid a weird bug where the loop would run twice.
-        # This is due to self._ws being a new non-closed instance before the while loop check kicks in.
-        # The fix for this is just to create a new reference to the ws that is running right now
-        ws = self._ws
-        assert ws is not None, "Shard is not connected"
-        while ws is not None and not ws.closed:
-            payload: ClientGatewayPayload = {"op": 1, "d": self._last_sequence}
-            await self._send(payload, respect_ratelimit=False, wait_until_identify=False)
-            await sleep(interval)
+        self.disconnect_dispatcher.dispatch(close_code)
 
-    async def close(self) -> None:
-        """Reset the internal state and disconnect from discord."""
-        if self._ws is not None:
-            await self._ws.close()
-            self._ws = None
-        # Zlib shares state across messages, so we need to reset it.
-        self._decompressor = Decompressor()
-
-    # Default responses
-    async def _handle_hello(self, data: ServerGatewayPayload) -> None:
+    # Raw handlers
+    # TODO: Fix consistency in naming between on_... and handle_...
+    async def _handle_hello(self, data: ServerGatewayPayload):
+        # ReadyData only exists while type checking hence the check here.
+        # Please note that you may get a warning that the else block is unreachable. This is a bug and you should report it to your linter.
+        # TODO: Report it
         if TYPE_CHECKING:
-            # Here we cast to a new variable due to a possible MyPY bug? I have not created a issue yet.
             inner = cast(HelloData, data["d"])
         else:
-            # Some type hinters might warn about unused code here, however that is a bug
             inner = data["d"]
-        heartbeat_interval = inner["heartbeat_interval"] / 1000  # Interval is in milliseconds
+
+        heartbeat_interval = inner["heartbeat_interval"] / 1000  # Convert from ms to seconds
+
+        # Discord requires us to wait a random amount up to heartbeat_interval.
         jitter = random()
+        initial_heartbeat = heartbeat_interval * jitter
 
-        self._logger.debug("Starting heartbeating with interval %s and jitter %s", heartbeat_interval, jitter)
-        await sleep(heartbeat_interval * jitter)  # Discord wants us to wait a random time.
-        create_task(
-            self._heartbeat_loop(heartbeat_interval), name=f"nextcore:Shard {self.id}/{self.shard_count} heartbeat loop"
+        self._logger.debug(
+            "Starting heartbeat with interval %s with initial heartbeat %s", heartbeat_interval, initial_heartbeat
         )
+        await sleep(initial_heartbeat)
 
-    async def _handle_dispatch(self, data: ServerGatewayDispatchPayload) -> None:
-        """Handles a dispatch event.
+        loop = get_running_loop()
+        loop.create_task(self._heartbeat_loop(heartbeat_interval))
 
-        Parameters
-        ----------
-        data: :class:`nextcore.gateway.outer.ServerGatewayDispatchPayload`
-            The event data.
-        """
-        self._logger.debug("Updated dispatch sequence to %s", data["s"])
-        self._last_sequence = data["s"]
+    async def _handle_heartbeat_ack(self, data: ServerGatewayPayload):
+        del data  # Unused
+        self._received_heartbeat_ack = True
 
-    async def _handle_ready(self, data: ServerGatewayDispatchPayload) -> None:
-        """Handles a hello event.
-
-        Parameters
-        ----------
-        data: :class:`nextcore.gateway.outer.ServerGatewayDispatchPayload`
-            The event data.
-        """
-        if TYPE_CHECKING:
-            # Here we cast to a new variable due to a possible MyPY bug? I have not created a issue yet.
-            inner = cast(ReadyData, data["d"])
-        else:
-            # Some type hinters might warn about unused code here, however that is a bug
-            inner = data["d"]
-
-        self._session_id = inner["session_id"]
-
-    async def _handle_reconnect(self, data: ServerGatewayPayload) -> None:
-        """Handles a reconnect request event.
-
-        Parameters
-        ----------
-        data: :class:`nextcore.gateway.outer.ServerGatewayPayload`
-            The event data.
-        """
-        self._logger.debug("Discord requested a reconnect")
+    async def _handle_reconnect(self, data: ServerGatewayPayload):
+        del data  # Unused
         await self.connect()
 
-    # Helper functions
-    async def identify(self) -> None:
-        """Identifies the shard to discord.
+    async def _handle_invalid_session(self, data: ServerGatewayPayload):
+        del data  # Unused
+        self._logger.debug("Invalid session! Creating a new one")
 
-        .. warning::
-            This is automatically called when running :meth:`Shard.connect`. Running this multiple times will cause a disconnect.
-        """
+        self.session_id = None
+        self.session_sequence_number = None
+
+        if self.should_reconnect:
+            # TODO: Maybe add a sanity check if we are connected?
+            assert self._ws is not None, "_ws is not set?"
+            if self._ws.closed:
+                self._ws = await self.http_client.ws_connect(Shard.API_URL)
+
+            # Discord expects us to wait for up to 5s before resuming?
+            jitter = random()
+            resume_after = 5 * jitter
+            self._logger.debug("Resuming after %s seconds", resume_after)
+            await sleep(resume_after)
+
+            await self.identify()
+
+    async def _handle_dispatch(self, data: ServerGatewayDispatchPayload):
+        # Save sequence number for reconnection
+        self.session_sequence_number = data["s"]
+
+    async def _handle_ready(self, data: ReadyData):
+        # Save session id for resuming
+        self.session_id = data["session_id"]
+        self.ready.set()
+
+
+    async def _handle_disconnect(self, close_code: int):
+        if close_code in (GatewayCloseCode.SESSION_TIMEOUT, GatewayCloseCode.INVALID_SEQUENCE):
+            # Session is dead.
+            self.session_id = None
+            self.session_sequence_number = None
+            await self.connect()
+        elif close_code in [
+            GatewayCloseCode.AUTHENTICATION_FAILED,
+            GatewayCloseCode.INVALID_API_VERSION,
+            GatewayCloseCode.INVALID_INTENTS,
+            GatewayCloseCode.DISALLOWED_INTENTS,
+        ]:
+            # TODO: Crash callback or similar?
+            self._logger.critical("Received bad close code!")
+        else:
+            # Unknown issue.
+            # Just try to reconnect and hope for the best.
+            # TODO: This needs to be discussed?
+            await self.connect()
+
+
+    # Send wrappers
+    async def identify(self) -> None:
         payload: ClientGatewayPayload = {
-            "op": 2,
+            "op": GatewayOpcode.IDENTIFY.value,
             "d": {
                 "token": self.token,
                 "intents": self.intents,
-                "compress": True,
                 "properties": {
                     "$os": platform,
-                    "$browser": self._library_name,
-                    "$device": self._library_name,
+                    "$browser": self.library_name,
+                    "$device": self.library_name,
                 },
+                "compress": True,
+                "shard": [self.shard_id, self.shard_count],
             },
         }
+        # Not required parameters can't be set to anything for
+        if self.large_threshold is not None:
+            payload["d"]["large_thereshold"] = self.large_threshold
+        if self.presence is not None:
+            payload["d"]["presence"] = self.presence
+        await self._send(payload, wait_until_ready=False)
 
-        # Presence can't be None, only pass it if set.
-        if self.default_presence is not None:
-            payload["d"]["presence"] = self.default_presence
-
-        await self._send(payload, wait_until_identify=False)
+    async def resume(self) -> None:
+        if self.session_id is None or self.session_sequence_number is None:
+            raise ValueError("Session id or sequence number is not set")
+        payload: ClientGatewayPayload = {
+            "op": GatewayOpcode.RESUME.value,
+            "d": {
+                "token": self.token,
+                "session_id": self.session_id,
+                "seq": self.session_sequence_number,
+            },
+        }
+        await self._send(payload, wait_until_ready=False)

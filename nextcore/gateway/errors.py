@@ -1,5 +1,7 @@
 # The MIT License (MIT)
-# Copyright (c) 2021-present nextcore developers
+#
+# Copyright (c) 2022-present tag-epic
+#
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
 # to deal in the Software without restriction, including without limitation
@@ -8,6 +10,7 @@
 # Software is furnished to do so, subject to the following conditions:
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -16,14 +19,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .decompressor import Decompressor
-from .shard import Shard
-from .shard_manager import ShardManager
-from .times_per import TimesPer
 
-__all__ = (
-    "ShardManager",
-    "Shard",
-    "TimesPer",
-    "Decompressor",
-)
+class ReconnectCheckFailedError(Exception):
+    def __init__(self) -> None:
+        super().__init__('Reconnect check failed. This shard should be considered "dead".')

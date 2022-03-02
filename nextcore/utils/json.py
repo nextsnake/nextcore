@@ -38,10 +38,24 @@ __all__ = ("json_loads", "json_dumps")
 
 
 def json_loads(json: str) -> Any:
+    """Loads a json string into a python object.
+
+    Parameters
+    ----------
+    json: :class:`str`
+        The json string to load.
+    """
     return loads(json)
 
 
 def json_dumps(to_dump: Any) -> str:
+    """Dumps a python object into a json string.
+
+    Parameters
+    ----------
+    to_dump: :class:`typing.Any`
+        The python object to dump.
+    """
     if _has_orjson:
         # Seems like pyright has some issues with having two modules under the same name.
         return dumps(to_dump).decode("utf-8")  # type: ignore

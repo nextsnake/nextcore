@@ -36,7 +36,6 @@ logger = getLogger(__name__)
 
 
 class Bucket:
-    __slots__ = ("limit", "_pending", "_pending_reset", "_remaining", "_reserved", "_loop", "_first_fetch_ratelimit")
     """A HTTP ratelimit handler
 
     .. note::
@@ -126,3 +125,11 @@ class Bucket:
         else:
             # It failed, try again.
             self._first_fetch_ratelimit.pop()
+
+    def undo(self):
+        """Undo the last request.
+
+        This should be used when discord does not send any ratelimit info.
+        """
+        if self._remaining is not None:
+            self._remaining += 1

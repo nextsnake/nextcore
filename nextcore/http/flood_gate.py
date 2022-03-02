@@ -52,12 +52,12 @@ class FloodGate:
             ValueError: If the FloodGate is drained or if it has already been popped while empty.
         """
         if self.drained:
-            raise ValueError("FloodGate is flooded.")
+            raise ValueError("FloodGate has been already been drained") from None
         try:
             self._pending.pop(0).set_result(False)
         except IndexError:
             if self._remove_next:
-                raise ValueError("Cannot queue two pops")
+                raise ValueError("Cannot queue two pops") from None
             self._remove_next = True
 
     async def acquire(self) -> bool:

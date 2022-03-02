@@ -174,7 +174,7 @@ class HTTPClient:
                         await self._handle_http_exception(r)
                         assert False, "Reached post handle http exception"
                 return r
-        # Generally only happens when clustering
+        # Generally only happens when running multiple bots on the same bot account.
         raise RateLimitFailedError(self.max_retries)
 
     async def ws_connect(self, url: str) -> ClientWebSocketResponse:
@@ -182,18 +182,24 @@ class HTTPClient:
 
         Parameters
         ----------
-        url: str
+        url: :class:`str`
             The url to connect to.
 
         Returns
         -------
-        ClientWebSocketResponse
+        :class:`ClientWebSocketResponse`
             The websocket response.
         """
         return await self._session.ws_connect(url, autoclose=False)
 
     async def _handle_http_exception(self, response: ClientResponse) -> None:
-        """Handles an HTTP error."""
+        """Handles an HTTP error.
+
+        Parameters
+        ----------
+        response: ClientResponse
+            The response from the API to process the errors for.
+        """
         # TODO: Not sure if this should be a seperate method or not
         error = self._status_to_exception.get(response.status, HTTPRequestError)
 
@@ -220,6 +226,7 @@ class HTTPClient:
             reset_after = float(headers["X-RateLimit-Reset-After"])
             reset_at = float(headers["X-RateLimit-Reset"])
         except KeyError:
+            bucket.undo()
             return
 
         if self.trust_local_time:

@@ -20,7 +20,7 @@
 # DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
-from zlib import decompressobj
+from zlib import decompressobj, error as zlib_error
 
 ZLIB_SUFFIX = b"\x00\x00\xff\xff"
 
@@ -53,8 +53,8 @@ class Decompressor:
 
         try:
             data = self._decompressor.decompress(data)
-        except ValueError:
-            raise ValueError("Data is corrupted. Please void all zlib context.")
+        except zlib_error:
+            raise ValueError("Data is corrupted. Please void all zlib context.") from None
 
         # If successful, clear the pending data.
         self._buffer = bytearray()
