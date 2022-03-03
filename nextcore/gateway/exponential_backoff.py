@@ -38,6 +38,7 @@ class ExponentialBackoff:
         self._current_time: float = initial
         self.base: float = base
         self.max: float = max_value
+        self._initial: bool = True
 
     @property
     def next(self) -> float:
@@ -47,6 +48,9 @@ class ExponentialBackoff:
         return self
 
     async def __anext__(self) -> None:
-        self._current_time = min(self.max, self.next)
-        logger.debug("Sleeping for %s seconds", self._current_time)
-        await sleep(self._current_time)
+        if not self._initial:
+            self._current_time = min(self.max, self.next)
+            logger.debug("Sleeping for %s seconds", self._current_time)
+            await sleep(self._current_time)
+        else:
+            self._initial = False

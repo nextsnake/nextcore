@@ -5,7 +5,7 @@ from tests.utils import match_time
 
 
 @mark.asyncio
-@match_time(0.12, 0.01)
+@match_time(0.06, 0.01)
 async def test_basic():
     backoff = ExponentialBackoff(0.001, 2, 0.3)
 
