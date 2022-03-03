@@ -34,7 +34,14 @@ from ..utils import json_dumps, json_loads
 from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .dispatcher import Dispatcher
-from .errors import DisallowedIntentsError, DisconnectError, InvalidApiVersionError, InvalidIntentsError, InvalidTokenError, ReconnectCheckFailedError
+from .errors import (
+    DisallowedIntentsError,
+    DisconnectError,
+    InvalidApiVersionError,
+    InvalidIntentsError,
+    InvalidTokenError,
+    ReconnectCheckFailedError,
+)
 from .exponential_backoff import ExponentialBackoff
 from .opcodes import GatewayOpcode
 from .times_per import TimesPer
@@ -333,7 +340,12 @@ class Shard:
 
     async def _handle_disconnect(self, close_code: int) -> None:
         # TODO: Is this really cleaner than having a ton of if blocks?
-        assert close_code not in (GatewayCloseCode.SHARDING_REQUIRED, GatewayCloseCode.DECODE_ERROR, GatewayCloseCode.NOT_AUTHENTICATED, GatewayCloseCode.ALREADY_AUTHENTICATED), f"Received close code which should never be received. Code: {GatewayCloseCode(close_code)}"
+        assert close_code not in (
+            GatewayCloseCode.SHARDING_REQUIRED,
+            GatewayCloseCode.DECODE_ERROR,
+            GatewayCloseCode.NOT_AUTHENTICATED,
+            GatewayCloseCode.ALREADY_AUTHENTICATED,
+        ), f"Received close code which should never be received. Code: {GatewayCloseCode(close_code)}"
 
         if close_code < 2000:
             self._logger.debug("Received disconnect in 1xxx range, reconnecting")
@@ -363,7 +375,10 @@ class Shard:
             self.dispatcher.dispatch("critical", DisallowedIntentsError())
         else:
             self._logger.error("Received unknown close code %s. This can probably be fixed by updating!")
-            self.dispatcher.dispatch("critical", DisconnectError(f"Received unknown close code {close_code}. This can probably be fixed by updating!"))
+            self.dispatcher.dispatch(
+                "critical",
+                DisconnectError(f"Received unknown close code {close_code}. This can probably be fixed by updating!"),
+            )
 
     # Send wrappers
     async def identify(self) -> None:

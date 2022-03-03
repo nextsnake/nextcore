@@ -22,27 +22,38 @@
 
 class ReconnectCheckFailedError(Exception):
     def __init__(self) -> None:
-        super().__init__("Reconnect check failed. This shard should be considered \"dead\".")
+        super().__init__('Reconnect check failed. This shard should be considered "dead".')
+
 
 class DisconnectError(Exception):
     """A unexpected disconnect from the gateway happened."""
 
+
 class InvalidIntentsError(DisconnectError):
     """The intents provided are invalid."""
+
     def __init__(self) -> None:
         super().__init__("The intents provided are invalid.")
 
+
 class DisallowedIntentsError(DisconnectError):
     """The intents provided are disallowed."""
+
     def __init__(self) -> None:
-        super().__init__("You can't use intents you are not allowed to use. Enable them in the switches in the developer portal or apply for them.")
+        super().__init__(
+            "You can't use intents you are not allowed to use. Enable them in the switches in the developer portal or apply for them."
+        )
+
 
 class InvalidTokenError(DisconnectError):
     """The token provided is invalid."""
+
     def __init__(self) -> None:
         super().__init__("The token provided is invalid.")
 
+
 class InvalidApiVersionError(DisconnectError):
     """The api version provided is invalid."""
+
     def __init__(self) -> None:
         super().__init__("The api version provided is invalid. This can probably be fixed by updating!")

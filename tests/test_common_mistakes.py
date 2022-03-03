@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+from ast import Import, ImportFrom, parse
 from pathlib import Path
-from ast import parse, ImportFrom, Import
-
 from typing import Any
+
 
 def test_bad_typings():
     source_path = Path("nextcore/")
@@ -30,9 +30,12 @@ def test_bad_typings():
                             replacement = "<type> | <type>"
                         else:
                             replacement = name.name.lower()
-                        print(f"{path} has a typing import of {name.name}. Please use {replacement} instead. (Note: This requires from __future__ import annotations)")
+                        print(
+                            f"{path} has a typing import of {name.name}. Please use {replacement} instead. (Note: This requires from __future__ import annotations)"
+                        )
                         failures += 1
     assert failures == 0, f"{failures} bad typings found"
+
 
 def test_using_get_event_loop():
     source_path = Path("nextcore/")
@@ -56,6 +59,7 @@ def test_using_get_event_loop():
                             failures += 1
     assert failures == 0, f"{failures} uses of get_event_loop found"
 
+
 def test_use_relative_imports():
     source_path = Path("nextcore/")
     failures = 0
@@ -74,7 +78,6 @@ def test_use_relative_imports():
                     print(f"{path} uses non-relative imports for {name.name}. Please use relative imports instead.")
                     failures += 1
     assert failures == 0, f"{failures} uses of relative imports found"
-
 
 
 def flatten_ast(ast: Any) -> list[Any]:
