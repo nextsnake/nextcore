@@ -54,7 +54,7 @@ class Bucket:
         self._loop: AbstractEventLoop = get_event_loop()
         self._first_fetch_ratelimit = FloodGate()
 
-        # Let the first request through
+        # Let the first request through to fetch initial info
         self._first_fetch_ratelimit.pop()
 
     def update(self, limit: int, remaining: int, reset_after: float) -> None:
@@ -91,10 +91,11 @@ class Bucket:
 
         Parameters
         ----------
-        limit: int
+        limit: :class:`int`
             How many to requests to attempt to return. If there is not enough it will return early.
-
         """
+        # This is not optimal as if there is multiple bots on the same token there would be a few ratelimit responses
+        # There is also a issue with globals however there is really no way to solve that.
         for _ in range(limit):
             try:
                 future = self._pending.pop(0)
@@ -117,18 +118,10 @@ class Bucket:
         return self
 
     async def __aexit__(self, *_: Any) -> None:
+        # There is no reason to decrement remaining here as it should always be updated by Bucket.update
         self._reserved -= 1
         if self._remaining is not None:
             self._first_fetch_ratelimit.drain()
-            self._remaining -= 1
         else:
             # It failed, try again.
             self._first_fetch_ratelimit.pop()
-
-    def undo(self):
-        """Undo the last request.
-
-        This should be used when discord does not send any ratelimit info.
-        """
-        if self._remaining is not None:
-            self._remaining += 1

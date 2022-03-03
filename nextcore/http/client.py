@@ -226,7 +226,6 @@ class HTTPClient:
             reset_after = float(headers["X-RateLimit-Reset-After"])
             reset_at = float(headers["X-RateLimit-Reset"])
         except KeyError:
-            bucket.undo()
             return
 
         if self.trust_local_time:
