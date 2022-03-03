@@ -41,7 +41,7 @@ async def test_failure_no_info():
 
     for _ in range(5):
         async with bucket:
-            bucket.undo()
+            ...
 
 
 @mark.asyncio
@@ -53,4 +53,4 @@ async def test_failure_initial_info():
 
     for _ in range(3):
         async with bucket:
-            bucket.undo()
+            ...
