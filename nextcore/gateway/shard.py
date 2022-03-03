@@ -270,7 +270,7 @@ class Shard:
 
     # Raw handlers
     # TODO: Fix consistency in naming between on_... and handle_...
-    async def _handle_hello(self, data: ServerGatewayPayload):
+    async def _handle_hello(self, data: ServerGatewayPayload) -> None:
         # ReadyData only exists while type checking hence the check here.
         # Please note that you may get a warning that the else block is unreachable. This is a bug and you should report it to your linter.
         # TODO: Report it
@@ -293,16 +293,16 @@ class Shard:
         loop = get_running_loop()
         loop.create_task(self._heartbeat_loop(heartbeat_interval))
 
-    async def _handle_heartbeat_ack(self, data: ServerGatewayPayload):
+    async def _handle_heartbeat_ack(self, data: ServerGatewayPayload) -> None:
         del data  # Unused
         self._received_heartbeat_ack = True
 
-    async def _handle_reconnect(self, data: ServerGatewayPayload):
+    async def _handle_reconnect(self, data: ServerGatewayPayload) -> None:
         del data  # Unused
         self._logger.debug("Reconnecting due to gateway going away")
         await self.connect()
 
-    async def _handle_invalid_session(self, data: ServerGatewayPayload):
+    async def _handle_invalid_session(self, data: ServerGatewayPayload) -> None:
         del data  # Unused
         self._logger.debug("Invalid session! Creating a new one")
 
@@ -323,16 +323,16 @@ class Shard:
 
             await self.identify()
 
-    async def _handle_dispatch(self, data: ServerGatewayDispatchPayload):
+    async def _handle_dispatch(self, data: ServerGatewayDispatchPayload) -> None:
         # Save sequence number for reconnection
         self.session_sequence_number = data["s"]
 
-    async def _handle_ready(self, data: ReadyData):
+    async def _handle_ready(self, data: ReadyData) -> None:
         # Save session id for resuming
         self.session_id = data["session_id"]
         self.ready.set()
 
-    async def _handle_disconnect(self, close_code: int):
+    async def _handle_disconnect(self, close_code: int) -> None:
         if close_code in (GatewayCloseCode.SESSION_TIMEOUT, GatewayCloseCode.INVALID_SEQUENCE):
             # Session is dead.
             self.session_id = None
