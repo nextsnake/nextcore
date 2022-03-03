@@ -21,13 +21,9 @@
 
 from __future__ import annotations
 
-import time
-from asyncio import Future, get_running_loop
+from time import time
+from asyncio import Lock, sleep
 from logging import getLogger
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import List, Optional
 
 logger = getLogger(__name__)
 
@@ -45,61 +41,41 @@ class TimesPer:
         How long each period lasts in seconds.
     """
 
-    __slots__ = ("total", "remaining", "per", "reset_at", "_loop", "_waiting")
+    __slots__ = ("total", "remaining", "per", "_reset_at", "_lock")
 
     def __init__(self, total: int, per: float):
         self.total: int = total
+        """How many times the ratelimit can be used before it can be reset to total"""
         self.remaining: int = total
+        """How many times the ratelimit can be used before it can be reset to total"""
         self.per: float = per
-        self.reset_at: Optional[float] = None
+        """How many seconds before reset"""
 
-        self._waiting: List[Future[None]] = []
+        self._reset_at: float | None = None
+        self._lock: Lock = Lock()
 
     async def wait(self) -> None:
         """Waits until the ratelimit is available
         This will return immediately if the ratelimit is available
         """
-        if self.reset_at is None:
-            # No info was found, start a reset
-            self.reset_at = time.time() + self.per
-            loop = get_running_loop()
-            loop.call_later(self.per, self._reset)
-        if self.remaining <= 0:  # Just in case we get some bad calculations
-            # Ran out, lets wait.
-            future: Future[None] = Future()
-            self._waiting.append(future)
-            await future
-        self.remaining -= 1
+        async with self._lock:
+            current_time = time()
+            if self._reset_at is None or self._reset_at < current_time:
+                # Time expired, reset.
+                self._reset_at = current_time + self.per
+                self.remaining = self.total
+            if self.remaining == 0:
+                await sleep(self._reset_at - current_time)
+            self.remaining -= 1
 
-    def _reset(self) -> None:
-        """Resets the ratelimit
-        This will end the current period.
-        If there are any left waiting after removing :attr:`TimesPer.total`, the method will call itself.
-        """
-        self.reset_at = None
-        self.remaining = self.total
+    @property
+    def reset_at(self) -> float | None:
+        """When the ratelimit will reset"""
+        reset_at = self._reset_at
+        if reset_at is None or reset_at <= time():
+            return None
+        return self._reset_at
 
-        self._drop(self.total)
-
-        if self._waiting:
-            # There is still some waiting, they would not be released until someone else uses this if this was not here.
-            self.reset_at = time.time() + self.per
-            loop = get_running_loop()
-            loop.call_later(self.per, self._reset)
-
-    def _drop(self, limit: int) -> None:
-        """Releases pending calls to :meth:`TimesPer.wait`
-
-        Parameters
-        ----------
-        limit: int
-            The max number of calls to release.
-        """
-        for _ in range(limit):
-            try:
-                self._waiting.pop().set_result(None)
-            except IndexError:
-                break
 
     def __repr__(self) -> str:
-        return f"TimesPer(total={self.total}, per={self.per}, remaining={self.remaining} waiting={len(self._waiting)} reset_at={self.reset_at})"
+        return f"TimesPer(total={self.total}, per={self.per}, remaining={self.remaining} waiting={self._lock.locked} reset_at={self.reset_at})"
