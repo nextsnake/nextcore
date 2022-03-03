@@ -1,6 +1,5 @@
 # The MIT License (MIT)
-#
-# Copyright (c) 2022-present tag-epic
+# Copyright (c) 2021-present nextcore developers
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -8,6 +7,7 @@
 # the rights to use, copy, modify, merge, publish, distribute, sublicense,
 # and/or sell copies of the Software, and to permit persons to whom the
 # Software is furnished to do so, subject to the following conditions:
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
@@ -107,6 +107,8 @@ class Shard:
         self.raw_dispatcher.add_listener(self._handle_hello, GatewayOpcode.HELLO)
         self.raw_dispatcher.add_listener(self._handle_heartbeat_ack, GatewayOpcode.HEARTBEAT_ACK)
         self.raw_dispatcher.add_listener(self._handle_dispatch, GatewayOpcode.DISPATCH)
+        self.raw_dispatcher.add_listener(self._handle_invalid_session, GatewayOpcode.INVALID_SESSION)
+        self.raw_dispatcher.add_listener(self._handle_reconnect, GatewayOpcode.RECONNECT)
 
         # Events
         self.event_dispatcher.add_listener(self._handle_ready, "READY")
