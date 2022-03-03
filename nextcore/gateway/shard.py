@@ -34,7 +34,7 @@ from ..utils import json_dumps, json_loads
 from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .dispatcher import Dispatcher
-from .errors import ReconnectCheckFailedError
+from .errors import DisallowedIntentsError, DisconnectError, InvalidApiVersionError, InvalidIntentsError, InvalidTokenError, ReconnectCheckFailedError
 from .exponential_backoff import ExponentialBackoff
 from .opcodes import GatewayOpcode
 from .times_per import TimesPer
@@ -332,25 +332,38 @@ class Shard:
         self.ready.set()
 
     async def _handle_disconnect(self, close_code: int) -> None:
-        if close_code in (GatewayCloseCode.SESSION_TIMEOUT, GatewayCloseCode.INVALID_SEQUENCE):
-            # Session is dead.
+        # TODO: Is this really cleaner than having a ton of if blocks?
+        assert close_code not in (GatewayCloseCode.SHARDING_REQUIRED, GatewayCloseCode.DECODE_ERROR, GatewayCloseCode.NOT_AUTHENTICATED, GatewayCloseCode.ALREADY_AUTHENTICATED), f"Received close code which should never be received. Code: {GatewayCloseCode(close_code)}"
+
+        if close_code < 2000:
+            self._logger.debug("Received disconnect in 1xxx range, reconnecting")
+            await self.connect()
+        elif close_code in (GatewayCloseCode.SESSION_TIMEOUT, GatewayCloseCode.INVALID_SEQUENCE):
+            # Delete session and reconnect
             self.session_id = None
             self.session_sequence_number = None
             await self.connect()
-        elif close_code in [
-            GatewayCloseCode.AUTHENTICATION_FAILED,
-            GatewayCloseCode.INVALID_API_VERSION,
-            GatewayCloseCode.INVALID_INTENTS,
-            GatewayCloseCode.DISALLOWED_INTENTS,
-        ]:
-            # TODO: Crash callback or similar?
-            self._logger.critical("Received bad close code!")
-        else:
-            # Unknown issue.
-            # Just try to reconnect and hope for the best.
-            # TODO: This needs to be discussed?
-            self._logger.debug("Reconnecting due to a unknown close code")
+        elif close_code == GatewayCloseCode.UNKNOWN_ERROR:
+            # Reconnect
             await self.connect()
+        elif close_code == GatewayCloseCode.RATE_LIMITED:
+            self._logger.warning("Received gateway ratelimit disconnect. This should not happen?")
+            await self.connect()
+        elif close_code == GatewayCloseCode.INVALID_API_VERSION:
+            self._logger.warning("Library out of date!")
+            self.dispatcher.dispatch("critical", InvalidApiVersionError())
+        elif close_code == GatewayCloseCode.AUTHENTICATION_FAILED:
+            self._logger.debug("Disconnected due to invalid token")
+            self.dispatcher.dispatch("critical", InvalidTokenError())
+        elif close_code == GatewayCloseCode.INVALID_INTENTS:
+            self._logger.debug("Disconnected due to invalid intents")
+            self.dispatcher.dispatch("critical", InvalidIntentsError())
+        elif close_code == GatewayCloseCode.DISALLOWED_INTENTS:
+            self._logger.debug("Disconnected due to disallowed intents")
+            self.dispatcher.dispatch("critical", DisallowedIntentsError())
+        else:
+            self._logger.error("Received unknown close code %s. This can probably be fixed by updating!")
+            self.dispatcher.dispatch("critical", DisconnectError(f"Received unknown close code {close_code}. This can probably be fixed by updating!"))
 
     # Send wrappers
     async def identify(self) -> None:
@@ -373,11 +386,13 @@ class Shard:
             payload["d"]["large_thereshold"] = self.large_threshold
         if self.presence is not None:
             payload["d"]["presence"] = self.presence
+
         await self._send(payload, wait_until_ready=False)
 
     async def resume(self) -> None:
         if self.session_id is None or self.session_sequence_number is None:
             raise ValueError("Session id or sequence number is not set")
+
         payload: ClientGatewayPayload = {
             "op": GatewayOpcode.RESUME.value,
             "d": {
