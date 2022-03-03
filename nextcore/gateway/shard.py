@@ -119,6 +119,7 @@ class Shard:
     async def connect(self) -> None:
         # Clear state
         self._decompressor = Decompressor()
+        self._received_heartbeat_ack = True
 
         # Connect to gateway
         if self._ws is not None and not self._ws.closed:
@@ -205,6 +206,7 @@ class Shard:
             if not self._received_heartbeat_ack:
                 # We have not received a heartbeat ack. This is usually a sign of a dead connection.
                 # Just reconnect and hope that our session is still valid.
+                self._logger.debug("Disconnecting due to lack of heartbeats!")
                 return await self.connect()
             self._received_heartbeat_ack = False
 
@@ -290,6 +292,7 @@ class Shard:
 
     async def _handle_reconnect(self, data: ServerGatewayPayload):
         del data  # Unused
+        self._logger.debug("Reconnecting due to gateway going away")
         await self.connect()
 
     async def _handle_invalid_session(self, data: ServerGatewayPayload):
@@ -340,6 +343,7 @@ class Shard:
             # Unknown issue.
             # Just try to reconnect and hope for the best.
             # TODO: This needs to be discussed?
+            self._logger.debug("Reconnecting due to a unknown close code")
             await self.connect()
 
     # Send wrappers
