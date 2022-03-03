@@ -18,3 +18,35 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
+
+from __future__ import annotations
+
+from asyncio import sleep
+from logging import getLogger
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import TypeVar
+
+    T = TypeVar("T")
+
+logger = getLogger(__name__)
+
+
+class ExponentialBackoff:
+    def __init__(self, initial: float, base: float, max_value: float) -> None:
+        self._current_time: float = initial
+        self.base: float = base
+        self.max: float = max_value
+
+    @property
+    def next(self) -> float:
+        return self._current_time * self.base
+
+    def __aiter__(self: T) -> T:
+        return self
+
+    async def __anext__(self) -> None:
+        self._current_time = min(self.max, self.next)
+        logger.debug("Sleeping for %s seconds", self._current_time)
+        await sleep(self._current_time)

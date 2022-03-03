@@ -27,7 +27,7 @@ from random import random
 from sys import platform
 from typing import TYPE_CHECKING
 
-from aiohttp import ClientWebSocketResponse, WSMsgType
+from aiohttp import ClientConnectorError, ClientWebSocketResponse, WSMsgType
 from frozendict import frozendict
 
 from ..utils import json_dumps, json_loads
@@ -35,6 +35,7 @@ from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .dispatcher import Dispatcher
 from .errors import ReconnectCheckFailedError
+from .exponential_backoff import ExponentialBackoff
 from .opcodes import GatewayOpcode
 from .times_per import TimesPer
 
@@ -125,12 +126,18 @@ class Shard:
         if self._ws is not None and not self._ws.closed:
             # This is to keep the session alive.
             await self._ws.close(code=999)
-        self._ws = await self.http_client.ws_connect(Shard.API_URL)
 
-        if self.session_id is None and self.session_sequence_number and not self.should_reconnect:
-            # Don't waste IDENTIFY's when we know they will fail
-            raise ReconnectCheckFailedError
+        # Retry connection
+        async for _ in ExponentialBackoff(0.5, 2, 10):
+            try:
+                self._ws = await self.http_client.ws_connect(Shard.API_URL)
+                break
+            except ClientConnectorError:
+                self._logger.error("Failed to connect to gateway? Check your internet connection.")
+        
         if self.session_id is None and self.session_sequence_number is None:
+            if not self.should_reconnect:
+                raise ReconnectCheckFailedError
             # No session stored, create a new one.
             await self._identify_ratelimiter.wait()
             await self.identify()
