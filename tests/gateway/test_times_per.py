@@ -4,7 +4,6 @@ from pytest import mark
 
 from nextcore.gateway.times_per import TimesPer
 
-
 @mark.asyncio
 async def test_should_not_sleep():
     ratelimiter = TimesPer(5, 5)
@@ -29,3 +28,6 @@ async def test_should_sleep():
 
     assert time_used >= 0.1, f"Time used should be ~0.1s, but was {time_used}s"
     assert time_used <= 0.2, f"Time used should be ~0.1s, but was {time_used}s"
+
+def test_repr():
+    repr(TimesPer(1, 1))
