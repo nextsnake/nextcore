@@ -310,7 +310,6 @@ class Shard:
         self.session_sequence_number = None
 
         if self.should_reconnect:
-            # TODO: Maybe add a sanity check if we are connected?
             assert self._ws is not None, "_ws is not set?"
             if self._ws.closed:
                 self._ws = await self.http_client.ws_connect(Shard.API_URL)
