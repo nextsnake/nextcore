@@ -21,19 +21,13 @@
 
 from __future__ import annotations
 
-from asyncio import Event, get_event_loop
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from asyncio import AbstractEventLoop
-    from typing import Optional
+from asyncio import Event, get_running_loop
 
 
 class ReversedTimedEvent:
     """:class:`asyncio.Event` but default-open. It also includes a clear_after time."""
 
     def __init__(self) -> None:
-        self._loop: AbstractEventLoop = get_event_loop()
         self._event = Event()
         self._event.set()
 
@@ -41,7 +35,7 @@ class ReversedTimedEvent:
         """Wait for the event to be unset"""
         await self._event.wait()
 
-    def set(self, clear_after: Optional[float] = None) -> None:
+    def set(self, clear_after: float | None = None) -> None:
         """Set/lock the event
         This will block anyone who calls :meth:`ReversedTimedEvent.wait`
 
@@ -51,4 +45,5 @@ class ReversedTimedEvent:
         self._event.clear()
 
         if clear_after is not None:
-            self._loop.call_later(clear_after, self._event.set)
+            loop = get_running_loop()
+            loop.call_later(clear_after, self._event.set)

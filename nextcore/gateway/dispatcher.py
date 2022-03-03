@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from asyncio import get_event_loop
+from asyncio import get_running_loop
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -39,7 +39,7 @@ class Dispatcher:
         self._listeners: defaultdict[Any, list[async_coro]] = defaultdict(list)
 
     def dispatch(self, event_name: Any, *event_args: Any) -> None:
-        loop = get_event_loop()
+        loop = get_running_loop()
         for listener in self._global_listeners:
             loop.create_task(self._dispatch_maybe_predicate(listener, event_name, *event_args))
         for listener in self._listeners[event_name]:

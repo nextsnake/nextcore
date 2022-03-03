@@ -42,7 +42,7 @@ from .reverse_event import ReversedTimedEvent
 from .route import Route
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type
+    from typing import Any, Type
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
 
@@ -59,11 +59,11 @@ class HTTPClient:
 
     Parameters
     ----------
-    token_type: Optional[str]
+    token_type: str | None
         The type of token to use. This will be prepended to the token.
-    token: Optional[str]
+    token: str | None
         The token to use.
-    base_url: Optional[str]
+    base_url: str | None
         The discord API url to use. This should generally be left as the default, unless you are running a compatible server.
     trust_local_time: bool
         Whether to trust the local time or not. Having it on will make your bot faster, however if your local time is wrong it might lead to ratelimits being exceeded.
@@ -85,13 +85,13 @@ class HTTPClient:
 
     def __init__(
         self,
-        token_type: Optional[str] = None,
-        token: Optional[str] = None,
+        token_type: str | None = None,
+        token: str | None = None,
         *,
-        base_url: Optional[str] = None,
+        base_url: str | None = None,
         trust_local_time: bool = True,
         max_retries: int = 5,
-        library_info: Optional[tuple[str, str]] = None,
+        library_info: tuple[str, str] | None = None,
     ) -> None:
         self.trust_local_time: bool = trust_local_time
         self.max_retries: int = max_retries

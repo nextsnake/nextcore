@@ -21,15 +21,14 @@
 
 from __future__ import annotations
 
-from asyncio import Future, get_event_loop
+from asyncio import Future, get_running_loop
 from logging import getLogger
 from typing import TYPE_CHECKING
 
 from .flood_gate import FloodGate
 
 if TYPE_CHECKING:
-    from asyncio import AbstractEventLoop
-    from typing import Any, Optional
+    from typing import Any
 
 logger = getLogger(__name__)
 
@@ -44,14 +43,13 @@ class Bucket:
     __slots__ = ("limit", "_pending", "_pending_reset", "_remaining", "_reserved", "_loop", "_first_fetch_ratelimit")
 
     def __init__(self) -> None:
-        self.limit: Optional[int] = None
+        self.limit: int | None = None
         """How many this bucket can hold. This will be None if the info has not been fetched yet."""
 
         self._pending: list[Future[None]] = []
         self._pending_reset: bool = False
-        self._remaining: Optional[int] = None
+        self._remaining: int | None = None
         self._reserved: int = 0
-        self._loop: AbstractEventLoop = get_event_loop()
         self._first_fetch_ratelimit = FloodGate()
 
         # Let the first request through to fetch initial info
@@ -74,7 +72,9 @@ class Bucket:
 
         if not self._pending_reset:
             self._pending_reset = True
-            self._loop.call_later(reset_after, self._reset)
+
+            loop = get_running_loop()
+            loop.call_later(reset_after, self._reset)
 
     def _reset(self) -> None:
         """Reset the state of this bucket"""
