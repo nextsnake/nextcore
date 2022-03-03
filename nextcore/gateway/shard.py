@@ -85,7 +85,7 @@ class Shard:
         self.ready: Event = Event()
         self.raw_dispatcher: Dispatcher = Dispatcher()
         self.event_dispatcher: Dispatcher = Dispatcher()
-        self.disconnect_dispatcher: Dispatcher = Dispatcher()
+        self.dispatcher: Dispatcher = Dispatcher()
 
         # Session related
         self.session_id: str | None = None
@@ -115,7 +115,7 @@ class Shard:
         self.event_dispatcher.add_listener(self._handle_ready, "READY")
 
         # Disconnects
-        self.disconnect_dispatcher.add_listener(self._handle_disconnect)
+        self.dispatcher.add_listener(self._handle_disconnect, "disconnect")
 
     async def connect(self) -> None:
         # Clear state
@@ -266,7 +266,7 @@ class Shard:
 
         self._logger.debug("Disconnected with code %s", close_code)
 
-        self.disconnect_dispatcher.dispatch(close_code)
+        self.dispatcher.dispatch("disconnect", close_code)
 
     # Raw handlers
     # TODO: Fix consistency in naming between on_... and handle_...
