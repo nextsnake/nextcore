@@ -21,9 +21,9 @@
 
 from __future__ import annotations
 
-from time import time
 from asyncio import Lock, sleep
 from logging import getLogger
+from time import time
 
 logger = getLogger(__name__)
 
@@ -75,7 +75,6 @@ class TimesPer:
         if reset_at is None or reset_at <= time():
             return None
         return self._reset_at
-
 
     def __repr__(self) -> str:
         return f"TimesPer(total={self.total}, per={self.per}, remaining={self.remaining} waiting={self._lock.locked} reset_at={self.reset_at})"

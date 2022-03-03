@@ -15,6 +15,7 @@ async def test_basic():
             break
         i += 1
 
+
 @mark.asyncio
 @match_time(0.04, 0.01)
 async def test_max():
@@ -25,4 +26,3 @@ async def test_max():
         if i == 2:
             break
         i += 1
-
