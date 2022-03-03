@@ -134,7 +134,7 @@ class Shard:
                 break
             except ClientConnectorError:
                 self._logger.error("Failed to connect to gateway? Check your internet connection.")
-        
+
         if self.session_id is None and self.session_sequence_number is None:
             if not self.should_reconnect:
                 raise ReconnectCheckFailedError
@@ -167,7 +167,7 @@ class Shard:
         assert self._ws is not None, "Websocket is not connected"
         assert self._ws.closed is False, "Websocket is closed"
 
-        # We are formatting data outside to provide a JSON string. TODO: Possibly change this?
+        # We are formatting data outside to provide a JSON string to the logger. TODO: Possibly change this?
         formatted_data = json_dumps(data)
         self._logger.debug("Sent: %s", formatted_data)
 
