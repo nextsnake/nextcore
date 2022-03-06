@@ -95,7 +95,7 @@ class HTTPClient:
     ) -> None:
         self.trust_local_time: bool = trust_local_time
         self.max_retries: int = max_retries
-        self.base_url: str = base_url or "https://discord.com/api/v9"
+        self.base_url: str = base_url or "https://discord.com/api/v10"
 
         # Internals
         self._global_webhook_lock = ReversedTimedEvent()
