@@ -98,7 +98,6 @@ class HTTPClient:
         self.base_url: str = base_url or "https://discord.com/api/v10"
 
         # Internals
-        self._global_webhook_lock = ReversedTimedEvent()
         self._global_lock = ReversedTimedEvent()
         self._buckets: defaultdict[int, Bucket] = defaultdict(Bucket)
         self._session = ClientSession()
@@ -135,18 +134,15 @@ class HTTPClient:
         ClientResponse
             The response from the API.
         """
-        if route.use_webhook_global:
-            global_lock = self._global_webhook_lock
-        else:
-            global_lock = self._global_lock
-
         bucket = self._buckets[route.bucket]
 
         headers = kwargs.pop("headers", {})
         headers = {**self.default_headers, **headers}
 
         for _ in range(self.max_retries):
-            await global_lock.wait()
+            # Some routes are not affected by the global ratelimit.
+            if not route.ignore_global:
+                await self._global_lock.wait()
             async with bucket:
                 logger.debug("%s: %s", route.method, route.path)
                 r = await self._session.request(route.method, self.base_url + route.path, headers=headers, **kwargs)
@@ -161,16 +157,17 @@ class HTTPClient:
                         if "X-RateLimit-Global" in r.headers.keys():
                             # Global ratelimit
                             data = await r.json()
-                            global_lock.set(data["retry_after"])
-                            logger.info("Global ratelimit exceeded")
+                            self._global_lock.set(data["retry_after"])
+                            logger.info("Global ratelimit exceeded. Retrying in %ss.", data["retry_after"])
                             continue
                         else:
                             # Per route ratelimit
                             logger.warning(
-                                "Ratelimit exceeded on bucket %s. This should only happen if you are clustering which is not supported."
+                                "Ratelimit exceeded on bucket %s. Bucket expires in ~%ss", route.bucket, r.headers["X-RateLimit-Reset-After"]
                             )
                             continue
                     else:
+                        # This should always error, if not we have a serious issue
                         await self._handle_http_exception(r)
                         assert False, "Reached post handle http exception"
                 return r

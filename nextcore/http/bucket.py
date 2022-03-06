@@ -83,7 +83,7 @@ class Bucket:
         self._remaining = self.limit
 
         drop_count = self._remaining - self._reserved
-        logger.debug("Dropping %s pending requests", drop_count)
+        logger.debug("Attempting to drop %s pending requests", drop_count)
         self._drop_pending(drop_count)
 
     def _drop_pending(self, limit: int) -> None:
@@ -104,11 +104,13 @@ class Bucket:
             future.set_result(None)
 
     async def __aenter__(self) -> "Bucket":
-        if self._remaining is not None and self._remaining - self._reserved <= 0:
-            # Bucket used up, wait for it to complete
-            future: Future[None] = Future()
-            self._pending.append(future)
-            await future
+        if self._remaining is not None:
+            # Bucket has info.
+            if self._remaining - self._reserved <= 0:
+                # Bucket used up, wait for it to complete
+                future: Future[None] = Future()
+                self._pending.append(future)
+                await future
         else:
             flood = await self._first_fetch_ratelimit.acquire()
             if flood:
@@ -124,4 +126,5 @@ class Bucket:
             self._first_fetch_ratelimit.drain()
         else:
             # It failed, try again.
+            logger.debug("Could not fetch initial ratelimit info, trying again")
             self._first_fetch_ratelimit.pop()

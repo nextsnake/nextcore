@@ -43,10 +43,9 @@ class Route:
         If `guild_id` `channel_id` or `webhook_id` is in the parameters,
         they will be used to change the major parameters of the route.
         This will be included in :attr:`Route.bucket`
-
     """
 
-    __slots__ = ("method", "path", "bucket", "use_webhook_global")
+    __slots__ = ("method", "path", "bucket", "ignore_global")
 
     def __init__(
         self,
@@ -68,7 +67,7 @@ class Route:
     ) -> None:
         self.method: str = method
         self.path: str = path.format(**parameters)
-        self.use_webhook_global = use_webhook_global
+        self.ignore_global: bool = use_webhook_global
 
         # Bucket
         guild_id: str | int | None = parameters.get("guild_id")

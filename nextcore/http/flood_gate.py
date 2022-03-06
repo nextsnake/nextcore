@@ -22,6 +22,9 @@
 from __future__ import annotations
 
 from asyncio import Future
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class FloodGate:
@@ -68,10 +71,11 @@ class FloodGate:
             bool: If the FloodGate was drained.
         """
         if self._remove_next:
+            logger.debug(self._remove_next)
             self._remove_next = False
             return False
         if self.drained:
-            return False
+            return True
         future: Future[bool] = Future()
         self._pending.append(future)
         return await future
