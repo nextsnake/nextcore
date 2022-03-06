@@ -167,7 +167,9 @@ class HTTPClient:
                         else:
                             # Per route ratelimit
                             logger.warning(
-                                "Ratelimit exceeded on bucket %s. Bucket expires in ~%ss", route.bucket, r.headers["X-RateLimit-Reset-After"]
+                                "Ratelimit exceeded on bucket %s. Bucket expires in ~%ss",
+                                route.bucket,
+                                r.headers["X-RateLimit-Reset-After"],
                             )
                             continue
                     else:
