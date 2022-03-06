@@ -140,10 +140,14 @@ class HTTPClient:
         headers = {**self.default_headers, **headers}
 
         for _ in range(self.max_retries):
-            # Some routes are not affected by the global ratelimit.
-            if not route.ignore_global:
-                await self._global_lock.wait()
             async with bucket:
+                if not route.ignore_global:
+                    # Some routes are not affected by the global ratelimit.
+                    # WARNING: This sucks!
+                    # There is a issue where more requests are fired before we get this info. This can't be fixed until
+                    # discord adds a way for us to get the global limit.
+                    await self._global_lock.wait()
+
                 logger.debug("%s: %s", route.method, route.path)
                 r = await self._session.request(route.method, self.base_url + route.path, headers=headers, **kwargs)
 
