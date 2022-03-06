@@ -24,7 +24,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Literal
+    from typing import Literal, ClassVar
 
 
 class Route:
@@ -46,6 +46,9 @@ class Route:
     """
 
     __slots__ = ("method", "path", "bucket", "ignore_global")
+
+    API_VERSION: ClassVar[int] = 10
+    BASE_URL: ClassVar[str] = f"https://discord.com/api/v{API_VERSION}"
 
     def __init__(
         self,

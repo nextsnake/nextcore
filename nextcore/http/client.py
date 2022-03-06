@@ -74,7 +74,6 @@ class HTTPClient:
     __slots__ = (
         "trust_local_time",
         "max_retries",
-        "base_url",
         "_global_webhook_lock",
         "_global_lock",
         "_buckets",
@@ -88,14 +87,12 @@ class HTTPClient:
         token_type: str | None = None,
         token: str | None = None,
         *,
-        base_url: str | None = None,
         trust_local_time: bool = True,
         max_retries: int = 5,
         library_info: tuple[str, str] | None = None,
     ) -> None:
         self.trust_local_time: bool = trust_local_time
         self.max_retries: int = max_retries
-        self.base_url: str = base_url or "https://discord.com/api/v10"
 
         # Internals
         self._global_lock = ReversedTimedEvent()
@@ -149,7 +146,7 @@ class HTTPClient:
                     await self._global_lock.wait()
 
                 logger.debug("%s: %s", route.method, route.path)
-                r = await self._session.request(route.method, self.base_url + route.path, headers=headers, **kwargs)
+                r = await self._session.request(route.method, route.BASE_URL + route.path, headers=headers, **kwargs)
 
                 self._update_ratelimits(r, bucket)
 
