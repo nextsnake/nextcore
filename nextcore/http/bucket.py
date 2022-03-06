@@ -29,6 +29,7 @@ from .flood_gate import FloodGate
 
 if TYPE_CHECKING:
     from typing import Any
+    from typing_extensions import Self
 
 logger = getLogger(__name__)
 
@@ -103,7 +104,7 @@ class Bucket:
                 return
             future.set_result(None)
 
-    async def __aenter__(self) -> "Bucket":
+    async def __aenter__(self) -> Self: # type: ignore [valid-type]
         if self._remaining is not None:
             # Bucket has info.
             if self._remaining - self._reserved <= 0:
@@ -116,12 +117,14 @@ class Bucket:
             if flood:
                 return await self.__aenter__()
             logger.debug("Letting ratelimit fetcher through")
+
         self._reserved += 1
         return self
 
     async def __aexit__(self, *_: Any) -> None:
         # There is no reason to decrement remaining here as it should always be updated by Bucket.update
         self._reserved -= 1
+
         if self._remaining is not None:
             self._first_fetch_ratelimit.drain()
         else:
