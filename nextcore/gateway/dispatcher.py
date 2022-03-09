@@ -21,54 +21,157 @@
 
 from __future__ import annotations
 
-from asyncio import get_running_loop
+from asyncio import create_task, Future, wait_for, TimeoutError as AsyncioTimeoutError
 from collections import defaultdict
 from typing import TYPE_CHECKING
+from ..utils import maybe_coro
+from logging import getLogger
 
 if TYPE_CHECKING:
     from typing import Any, Awaitable, Callable
 
-    async_coro = Callable[..., Awaitable[Any]]
-
+logger = getLogger(__name__)
 
 class Dispatcher:
-    __slots__ = ("_global_listeners", "_listeners")
+    def __init__(self):
+        # Exception handler
+        self._exception_handlers: list[Callable[[Exception], Any]] = []
 
-    def __init__(self) -> None:
-        self._global_listeners: list[async_coro] = []
-        self._listeners: defaultdict[Any, list[async_coro]] = defaultdict(list)
+        self._listeners: defaultdict[Any, list[Callable[..., Any]]] = defaultdict(list)
+        self._global_listeners: list[Callable[..., Any]] = []
+        
+        # TODO: Better name and some comments. Conditional listeners suck!
+        self._wait_for_listeners: defaultdict[Any, list[tuple[Callable[..., Awaitable[bool] | bool], Future[list[Any]]]]] = defaultdict(list)
+        self._wait_for_global_listeners: list[tuple[Callable[..., Awaitable[bool] | bool], Future[list[Any]]]] = []
 
-    def dispatch(self, event_name: Any, *event_args: Any) -> None:
-        loop = get_running_loop()
-        for listener in self._global_listeners:
-            loop.create_task(self._dispatch_maybe_predicate(listener, event_name, *event_args))
-        for listener in self._listeners[event_name]:
-            loop.create_task(self._dispatch_maybe_predicate(listener, *event_args))
+    def add_listener(self, callback: Callable[..., Any], event_name: Any = None) -> None:
+        """Adds a listener to the dispatcher.
 
-    async def _dispatch_maybe_predicate(
-        self, listener: async_coro | tuple[Callable[..., Awaitable[bool]], async_coro], *args: Any
-    ) -> None:
-        if isinstance(listener, tuple):
-            predicate, listener = listener
-            if not await predicate(*args):
-                # Condition was not met, try again next time
-                return
-            self.remove_listener(listener)
-            await listener(*args)
-        else:
-            await listener(*args)
-
-    def add_listener(self, listener: async_coro, event_name: Any = None) -> None:
+        Parameters
+        ----------
+        callback: Callable[..., Any]
+            The callback to be added.
+        event_name: Any
+            The event name to listen to. If:class:`None`, the callback will receive all events. Global listeners will also receive the event name as the first param.
+        """
+        logger.debug("Adding listener for event %s", event_name)
         if event_name is None:
-            self._global_listeners.append(listener)
+            self._global_listeners.append(callback)
         else:
-            self._listeners[event_name].append(listener)
+            self._listeners[event_name].append(callback)
 
-    def remove_listener(self, listener: async_coro) -> None:
-        if listener in self._global_listeners:
-            self._global_listeners.remove(listener)
-            return
+    async def wait_for(self, check: Callable[..., Awaitable[bool] | bool], event_name: Any = None, *, timeout: float | None = None) -> list[Any]:
+        """Waits for an event to be dispatched and returns it if it matches a check.
+
+        Parameters
+        ----------
+        check: Callable[..., Awaitable[bool] | bool]
+            The check to check if it should return the event.
+        event_name: Any
+            The event name to wait for. If :class:`None`, the check will be called for all events. The check will receive the event name as the first param.
+        timeout: float | None
+            The timeout in seconds. If :class:`None`, there is no timeout.
+        """
+
+        future: Future[list[Any]] = Future()
+
+        if event_name is None:
+            self._wait_for_global_listeners.append((check, future))
+        else:
+            self._wait_for_listeners[event_name].append((check, future))
+        try:
+            result: list[Any] = await wait_for(future, timeout)
+        except AsyncioTimeoutError:
+            # Timeout reached, remove the listener
+            if event_name is None:
+                self._wait_for_global_listeners.remove((check, future))
+            else:
+                self._wait_for_listeners[event_name].remove((check, future))
+            raise
+
+        # Success!
+        return result
+    
+    def remove_listener(self, callback: Callable[..., Any]):
+        """Removes a listener from the dispatcher.
+        
+        Parameters
+        ----------
+        callback: Callable[..., Any]
+            The callback to be removed.
+
+        Raises
+        ------
+        ValueError
+            The callback was not registered on this dispatcher.
+        """
         for listeners in self._listeners.values():
-            if listener in listeners:
-                listeners.remove(listener)
+            if callback in listeners:
+                listeners.remove(callback)
                 return
+        if callback in self._global_listeners:
+            self._global_listeners.remove(callback)
+            return
+        raise ValueError("There is no such listener in this dispatcher")
+
+    def dispatch(self, event_name: Any, *event_args: Any):
+        """Dispatches an event to all listeners watching that event.
+
+        Parameters
+        ----------
+        event_name: Any
+            The event name to dispatch.
+        event_args: Any
+            The event arguments.
+        """
+        logger.debug("Dispatching event %s", event_name)
+        
+        # Regular listeners
+        for listener in self._global_listeners:
+            # Global listeners
+            create_task(self._dispatch_event_wrapper(listener, event_name, *event_args), name=f"nextcord:Dispatch listener {event_name} (global)")
+        for listener in self._listeners.get(event_name, []):
+            # Per event listeners
+            create_task(self._dispatch_event_wrapper(listener, *event_args), name=f"nextcord:Dispatch listener {event_name}")
+
+        # Wait for listeners
+        for info in self._wait_for_global_listeners:
+            # Global wait for listeners
+            create_task(self._dispatch_wait_for(*info, event_name, *event_args), name=f"nextcord:Dispatch wait_for listener {event_name} (global)")
+        for info in self._wait_for_listeners.get(event_name, []):
+            # Per event wait for listeners
+            create_task(self._dispatch_wait_for(*info, *event_args), name=f"nextcord:Dispatch wait_for listener {event_name}")
+
+    async def _dispatch_event_wrapper(self, listener: Callable[..., Any], *event_args: Any) -> None:
+        try:
+            await maybe_coro(listener, *event_args)
+        except Exception as e:
+            for exception_handler in self._exception_handlers:
+                try:
+                    await maybe_coro(exception_handler, e)
+                except:
+                    logger.error("Exception handler failed", exc_info=True)
+
+    async def _dispatch_wait_for(self, check: Callable[..., Awaitable[bool] | bool], future: Future[list[Any]], event_name: Any, *event_args: Any) -> None:
+        try:
+            check_success = await maybe_coro(check)
+        except:
+            logger.error("Exception in wait_for check", exc_info=True)
+            return
+        if not check_success:
+            # Check failed, try again on next event.
+            return
+
+        # Release future
+        future.set_result([event_name, *event_args])
+        logger.debug(future)
+
+        # Check succeeded, resolve and remove the listener.
+        # TODO: This needs to be better commented.
+        for info in self._wait_for_listeners.get(event_name, []):
+            if info[1] is future:
+                self._wait_for_listeners[event_name].remove(info)
+                return
+        for info in self._wait_for_global_listeners:
+            if info[1] is future:
+                self._wait_for_global_listeners.remove(info)

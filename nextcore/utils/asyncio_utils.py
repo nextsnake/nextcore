@@ -19,9 +19,36 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from inspect import isawaitable
 
-from .json import *
-from .asyncio_utils import *
+if TYPE_CHECKING:
+    from typing import Callable, Any
 
-__all__ = ("json_loads", "json_dumps", "maybe_coro")
 
+
+
+async def maybe_coro(coro: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+    """Execute a sync or async function
+
+    Parameters
+    ----------
+    coro: :class:`Callable[..., Any]`
+        The function to execute
+    args: Any
+        The arguments to pass to the function
+    kwargs: Any
+        The keyword arguments to pass to the function
+
+    Returns
+    -------
+    Any
+        The result of the function
+    """
+    result = coro(*args, **kwargs)
+
+    if isawaitable(result):
+        return await result
+    else:
+        return result

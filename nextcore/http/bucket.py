@@ -104,7 +104,7 @@ class Bucket:
                 return
             future.set_result(None)
 
-    async def __aenter__(self) -> Self: # type: ignore [valid-type]
+    async def __aenter__(self) -> Self: # type: ignore [valid-type] TODO: Remove this after it's fixed in mypy.
         if self._remaining is not None:
             # Bucket has info.
             if self._remaining - self._reserved <= 0:
