@@ -202,7 +202,6 @@ class HTTPClient:
         response: ClientResponse
             The response from the API to process the errors for.
         """
-        # TODO: Not sure if this should be a seperate method or not
         error = self._status_to_exception.get(response.status, HTTPRequestError)
 
         data = await response.json()

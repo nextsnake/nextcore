@@ -44,7 +44,7 @@ class Dispatcher:
         self._listeners: defaultdict[Any, list[Callable[..., Any]]] = defaultdict(list)
         self._global_listeners: list[Callable[..., Any]] = []
 
-        # TODO: Better name and some comments. Conditional listeners suck!
+        # Conditional listeners are listeners which can only be called once and that also has a check.
         self._wait_for_listeners: defaultdict[
             Any, list[tuple[Callable[..., Awaitable[bool] | bool], Future[list[Any]]]]
         ] = defaultdict(list)
@@ -182,16 +182,19 @@ class Dispatcher:
             # Check failed, try again on next event.
             return
 
+        # Check succeeded, resolve and remove the listener.
         # Release future
         future.set_result([event_name, *event_args])
         logger.debug(future)
 
-        # Check succeeded, resolve and remove the listener.
-        # TODO: This needs to be better commented.
+        # Remove listener
+        # TODO: Could this be simplified?
         for info in self._wait_for_listeners.get(event_name, []):
             if info[1] is future:
+                # 0th is the check, 1st is the future
                 self._wait_for_listeners[event_name].remove(info)
                 return
         for info in self._wait_for_global_listeners:
             if info[1] is future:
+                # 0th is the check, 1st is the future
                 self._wait_for_global_listeners.remove(info)

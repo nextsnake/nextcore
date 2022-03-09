@@ -30,8 +30,6 @@ if TYPE_CHECKING:
 class HTTPError(Exception):
     """Base class for exceptions raised by the nextcore.http module."""
 
-    ...
-
 
 class RateLimitFailedError(HTTPError):
     """Raised when ratelimiting has failed over max_retries times.
@@ -86,8 +84,6 @@ class BadRequestError(HTTPRequestError):
 
     """
 
-    ...
-
 
 class ForbiddenError(HTTPRequestError):
     """Raised when a HTTP request got a 403 status code.
@@ -103,8 +99,6 @@ class ForbiddenError(HTTPRequestError):
 
     """
 
-    ...
-
 
 class NotFoundError(HTTPRequestError):
     """Raised when a HTTP request got a 404 status code.
@@ -119,5 +113,3 @@ class NotFoundError(HTTPRequestError):
         Response object from aiohttp.
 
     """
-
-    ...

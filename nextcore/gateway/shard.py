@@ -229,6 +229,7 @@ class Shard:
             await sleep(heartbeat_interval)
 
     # Loop callbacks
+    # These should be prefixed by on_ to avoid confusiuon with handlers
     async def _on_raw_receive(self, compressed_data: bytes) -> None:
         try:
             raw_data = self._decompressor.decompress(compressed_data)
@@ -276,7 +277,7 @@ class Shard:
         self.dispatcher.dispatch("disconnect", close_code)
 
     # Raw handlers
-    # TODO: Fix consistency in naming between on_... and handle_...
+    # These should be prefixed by handle_ to avoid confusiuon with loop callbacks
     async def _handle_hello(self, data: ServerGatewayPayload) -> None:
         # ReadyData only exists while type checking hence the check here.
         # Please note that you may get a warning that the else block is unreachable. This is a bug and you should report it to your linter.
