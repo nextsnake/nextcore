@@ -125,14 +125,14 @@ class Bucket:
                 return await self.__aenter__()
             logger.debug("Letting ratelimit fetcher through")
         
-        self._reserved = max(0, self._reserved - 1) # Decrement with min of 0
+        self._reserved += 1
         return self
 
     async def __aexit__(self, *_: Any) -> None:
         if  self.unlimited:
             return 
         # There is no reason to decrement remaining here as it should always be updated by Bucket.update
-        self._reserved -= 1
+        self._reserved = max(0, self._reserved - 1)
 
         if self._remaining is not None:
             self._first_fetch_ratelimit.drain()
@@ -147,6 +147,7 @@ class Bucket:
         return self._unlimited
     @unlimited.setter
     def unlimited(self, value: bool) -> None:
+        logger.debug("Toggling unlimited mode")
         self._unlimited = value
         if not value:
             self._pending_reset = False

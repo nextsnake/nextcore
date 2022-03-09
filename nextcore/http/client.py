@@ -232,7 +232,6 @@ class HTTPClient:
             bucket_hash = headers["X-RateLimit-Bucket"]
         except KeyError:
             logger.debug("No ratelimit headers found. Status code: %s", response.status)
-            logger.debug(bucket.unlimited)
             if response.status < 300 and not bucket.unlimited:
                 logger.debug("Bucket %s is now unlimited", repr(bucket))
             return
