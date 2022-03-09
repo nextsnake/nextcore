@@ -281,7 +281,6 @@ class Shard:
     async def _handle_hello(self, data: ServerGatewayPayload) -> None:
         # ReadyData only exists while type checking hence the check here.
         # Please note that you may get a warning that the else block is unreachable. This is a bug and you should report it to your linter.
-        # TODO: Report it
         if TYPE_CHECKING:
             inner = cast(HelloData, data["d"])
         else:
