@@ -77,6 +77,7 @@ class HTTPClient:
         "_global_webhook_lock",
         "_global_lock",
         "_buckets",
+        "_discord_bucket_to_bucket",
         "_session",
         "_status_to_exception",
         "default_headers",
@@ -97,6 +98,7 @@ class HTTPClient:
         # Internals
         self._global_lock = ReversedTimedEvent()
         self._buckets: defaultdict[int, Bucket] = defaultdict(Bucket)
+        self._discord_bucket_to_bucket: dict[str, Bucket] = {}
         self._session = ClientSession()
         self._status_to_exception: dict[int, Type[HTTPRequestError]] = {
             400: BadRequestError,
@@ -148,7 +150,7 @@ class HTTPClient:
                 logger.debug("%s: %s", route.method, route.path)
                 r = await self._session.request(route.method, route.BASE_URL + route.path, headers=headers, **kwargs)
 
-                self._update_ratelimits(r, bucket)
+                self._update_ratelimits(r, route, bucket)
 
                 # Handle http errors
                 if r.status >= 300:
@@ -209,13 +211,15 @@ class HTTPClient:
 
         raise error(code, message, response)
 
-    def _update_ratelimits(self, response: ClientResponse, bucket: Bucket) -> None:
+    def _update_ratelimits(self, response: ClientResponse, route: Route, bucket: Bucket) -> None:
         """Updates a :class:`Bucket` with the ratelimits from the response.
 
         Parameters
         ----------
         response: ClientResponse
             The response from the API.
+        route: Route
+            The route to update the ratelimits for.
         bucket: Bucket
             The bucket to update.
         """
@@ -225,13 +229,29 @@ class HTTPClient:
             limit = int(headers["X-RateLimit-Limit"])
             reset_after = float(headers["X-RateLimit-Reset-After"])
             reset_at = float(headers["X-RateLimit-Reset"])
+            bucket_hash = headers["X-RateLimit-Bucket"]
         except KeyError:
+            logger.debug("No ratelimit headers found. Status code: %s", response.status)
+            logger.debug(bucket.unlimited)
+            if response.status < 300 and not bucket.unlimited:
+                logger.debug("Bucket %s is now unlimited", repr(bucket))
             return
 
         if self.trust_local_time:
             reset_after = reset_at - time()
 
         bucket.update(limit, remaining, reset_after)
+        
+        # Scoped bucket linking.
+        if bucket_hash in self._discord_bucket_to_bucket.keys():
+            if (correct_bucket := self._discord_bucket_to_bucket[bucket_hash]) != bucket:
+                logger.debug("Linking bucket %s to bucket %s", bucket_hash, route.bucket)
+                self._buckets[route.bucket] = correct_bucket
+        else:
+            logger.debug("Setting discord bucket mapping for bucket %s", bucket_hash)
+            self._discord_bucket_to_bucket[bucket_hash] = bucket
+
+
         logger.debug("Ratelimiter updated by headers!")
 
     # Util functions

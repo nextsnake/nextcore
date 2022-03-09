@@ -71,7 +71,6 @@ class FloodGate:
             bool: If the FloodGate was drained.
         """
         if self._remove_next:
-            logger.debug(self._remove_next)
             self._remove_next = False
             return False
         if self.drained:

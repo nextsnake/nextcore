@@ -41,11 +41,14 @@ class Bucket:
         View the `documentation <https://discord.dev/topics/rate-limits>`_
     """
 
-    __slots__ = ("limit", "_pending", "_pending_reset", "_remaining", "_reserved", "_loop", "_first_fetch_ratelimit")
+    __slots__ = ("limit", "_unlimited", "_pending", "_pending_reset", "_remaining", "_reserved", "_loop", "_first_fetch_ratelimit")
 
     def __init__(self) -> None:
         self.limit: int | None = None
         """How many this bucket can hold. This will be None if the info has not been fetched yet."""
+        self._unlimited: bool = False
+        """Whether this bucket is unlimited"""
+        
 
         self._pending: list[Future[None]] = []
         self._pending_reset: bool = False
@@ -87,16 +90,18 @@ class Bucket:
         logger.debug("Attempting to drop %s pending requests", drop_count)
         self._drop_pending(drop_count)
 
-    def _drop_pending(self, limit: int) -> None:
+    def _drop_pending(self, limit: int | None) -> None:
         """Make up to limit waiting requests return
 
         Parameters
         ----------
-        limit: :class:`int`
+        limit: :class:`int` | :class:`None`
             How many to requests to attempt to return. If there is not enough it will return early.
         """
         # This is not optimal as if there is multiple bots on the same token there would be a few ratelimit responses
         # There is also a issue with globals however there is really no way to solve that.
+        if limit is None:
+            limit = len(self._pending)
         for _ in range(limit):
             try:
                 future = self._pending.pop(0)
@@ -105,6 +110,8 @@ class Bucket:
             future.set_result(None)
 
     async def __aenter__(self) -> Self: # type: ignore [valid-type] TODO: Remove this after it's fixed in mypy.
+        if self.unlimited:
+            return self
         if self._remaining is not None:
             # Bucket has info.
             if self._remaining - self._reserved <= 0:
@@ -117,11 +124,13 @@ class Bucket:
             if flood:
                 return await self.__aenter__()
             logger.debug("Letting ratelimit fetcher through")
-
-        self._reserved += 1
+        
+        self._reserved = max(0, self._reserved - 1) # Decrement with min of 0
         return self
 
     async def __aexit__(self, *_: Any) -> None:
+        if  self.unlimited:
+            return 
         # There is no reason to decrement remaining here as it should always be updated by Bucket.update
         self._reserved -= 1
 
@@ -131,3 +140,15 @@ class Bucket:
             # It failed, try again.
             logger.debug("Could not fetch initial ratelimit info, trying again")
             self._first_fetch_ratelimit.pop()
+
+    @property
+    def unlimited(self) -> bool:
+        """Whether this bucket is unlimited"""
+        return self._unlimited
+    @unlimited.setter
+    def unlimited(self, value: bool) -> None:
+        self._unlimited = value
+        if not value:
+            self._pending_reset = False
+            self._remaining = None
+            self._reserved = 0
