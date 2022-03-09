@@ -1,6 +1,10 @@
+from asyncio import TimeoutError as AsyncioTimeoutError
+from asyncio import wait_for
+
+from pytest import mark, raises
+
 from nextcore.http.flood_gate import FloodGate
-from asyncio import wait_for, TimeoutError as AsyncioTimeoutError
-from pytest import raises, mark
+
 
 @mark.asyncio
 async def test_should_wait_forever():
@@ -8,6 +12,7 @@ async def test_should_wait_forever():
 
     with raises(AsyncioTimeoutError):
         await wait_for(gate.acquire(), timeout=0.1)
+
 
 @mark.asyncio
 async def test_should_error_on_double_pop():
@@ -17,6 +22,7 @@ async def test_should_error_on_double_pop():
 
     with raises(ValueError):
         gate.pop()
+
 
 @mark.asyncio
 async def test_pop_should_reset():
@@ -28,6 +34,7 @@ async def test_pop_should_reset():
 
     gate.pop()
 
+
 @mark.asyncio
 async def test_should_error_pop_after_drain():
     gate = FloodGate()
@@ -37,11 +44,12 @@ async def test_should_error_pop_after_drain():
     with raises(ValueError):
         gate.pop()
 
+
 @mark.asyncio
 async def test_always_returns_after_drain():
     gate = FloodGate()
 
     gate.drain()
-    
+
     for _ in range(5):
         await gate.acquire()

@@ -29,6 +29,7 @@ from .flood_gate import FloodGate
 
 if TYPE_CHECKING:
     from typing import Any
+
     from typing_extensions import Self
 
 logger = getLogger(__name__)
@@ -41,14 +42,22 @@ class Bucket:
         View the `documentation <https://discord.dev/topics/rate-limits>`_
     """
 
-    __slots__ = ("limit", "_unlimited", "_pending", "_pending_reset", "_remaining", "_reserved", "_loop", "_first_fetch_ratelimit")
+    __slots__ = (
+        "limit",
+        "_unlimited",
+        "_pending",
+        "_pending_reset",
+        "_remaining",
+        "_reserved",
+        "_loop",
+        "_first_fetch_ratelimit",
+    )
 
     def __init__(self) -> None:
         self.limit: int | None = None
         """How many this bucket can hold. This will be None if the info has not been fetched yet."""
         self._unlimited: bool = False
         """Whether this bucket is unlimited"""
-        
 
         self._pending: list[Future[None]] = []
         self._pending_reset: bool = False
@@ -109,7 +118,7 @@ class Bucket:
                 return
             future.set_result(None)
 
-    async def __aenter__(self) -> Self: # type: ignore [valid-type] TODO: Remove this after it's fixed in mypy.
+    async def __aenter__(self) -> Self:  # type: ignore [valid-type] TODO: Remove this after it's fixed in mypy.
         if self.unlimited:
             return self
         if self._remaining is not None:
@@ -124,13 +133,13 @@ class Bucket:
             if flood:
                 return await self.__aenter__()
             logger.debug("Letting ratelimit fetcher through")
-        
+
         self._reserved += 1
         return self
 
     async def __aexit__(self, *_: Any) -> None:
-        if  self.unlimited:
-            return 
+        if self.unlimited:
+            return
         # There is no reason to decrement remaining here as it should always be updated by Bucket.update
         self._reserved = max(0, self._reserved - 1)
 
@@ -145,6 +154,7 @@ class Bucket:
     def unlimited(self) -> bool:
         """Whether this bucket is unlimited"""
         return self._unlimited
+
     @unlimited.setter
     def unlimited(self, value: bool) -> None:
         logger.debug("Toggling unlimited mode")

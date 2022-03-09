@@ -240,7 +240,7 @@ class HTTPClient:
             reset_after = reset_at - time()
 
         bucket.update(limit, remaining, reset_after)
-        
+
         # Scoped bucket linking.
         if bucket_hash in self._discord_bucket_to_bucket.keys():
             if (correct_bucket := self._discord_bucket_to_bucket[bucket_hash]) != bucket:
@@ -249,7 +249,6 @@ class HTTPClient:
         else:
             logger.debug("Setting discord bucket mapping for bucket %s", bucket_hash)
             self._discord_bucket_to_bucket[bucket_hash] = bucket
-
 
         logger.debug("Ratelimiter updated by headers!")
 

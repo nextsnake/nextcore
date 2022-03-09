@@ -21,16 +21,20 @@
 
 from __future__ import annotations
 
-from asyncio import create_task, Future, wait_for, TimeoutError as AsyncioTimeoutError
+from asyncio import Future
+from asyncio import TimeoutError as AsyncioTimeoutError
+from asyncio import create_task, wait_for
 from collections import defaultdict
-from typing import TYPE_CHECKING
-from ..utils import maybe_coro
 from logging import getLogger
+from typing import TYPE_CHECKING
+
+from ..utils import maybe_coro
 
 if TYPE_CHECKING:
     from typing import Any, Awaitable, Callable
 
 logger = getLogger(__name__)
+
 
 class Dispatcher:
     def __init__(self):
@@ -39,9 +43,11 @@ class Dispatcher:
 
         self._listeners: defaultdict[Any, list[Callable[..., Any]]] = defaultdict(list)
         self._global_listeners: list[Callable[..., Any]] = []
-        
+
         # TODO: Better name and some comments. Conditional listeners suck!
-        self._wait_for_listeners: defaultdict[Any, list[tuple[Callable[..., Awaitable[bool] | bool], Future[list[Any]]]]] = defaultdict(list)
+        self._wait_for_listeners: defaultdict[
+            Any, list[tuple[Callable[..., Awaitable[bool] | bool], Future[list[Any]]]]
+        ] = defaultdict(list)
         self._wait_for_global_listeners: list[tuple[Callable[..., Awaitable[bool] | bool], Future[list[Any]]]] = []
 
     def add_listener(self, callback: Callable[..., Any], event_name: Any = None) -> None:
@@ -60,7 +66,9 @@ class Dispatcher:
         else:
             self._listeners[event_name].append(callback)
 
-    async def wait_for(self, check: Callable[..., Awaitable[bool] | bool], event_name: Any = None, *, timeout: float | None = None) -> list[Any]:
+    async def wait_for(
+        self, check: Callable[..., Awaitable[bool] | bool], event_name: Any = None, *, timeout: float | None = None
+    ) -> list[Any]:
         """Waits for an event to be dispatched and returns it if it matches a check.
 
         Parameters
@@ -91,10 +99,10 @@ class Dispatcher:
 
         # Success!
         return result
-    
+
     def remove_listener(self, callback: Callable[..., Any]):
         """Removes a listener from the dispatcher.
-        
+
         Parameters
         ----------
         callback: Callable[..., Any]
@@ -125,22 +133,32 @@ class Dispatcher:
             The event arguments.
         """
         logger.debug("Dispatching event %s", event_name)
-        
+
         # Regular listeners
         for listener in self._global_listeners:
             # Global listeners
-            create_task(self._dispatch_event_wrapper(listener, event_name, *event_args), name=f"nextcord:Dispatch listener {event_name} (global)")
+            create_task(
+                self._dispatch_event_wrapper(listener, event_name, *event_args),
+                name=f"nextcord:Dispatch listener {event_name} (global)",
+            )
         for listener in self._listeners.get(event_name, []):
             # Per event listeners
-            create_task(self._dispatch_event_wrapper(listener, *event_args), name=f"nextcord:Dispatch listener {event_name}")
+            create_task(
+                self._dispatch_event_wrapper(listener, *event_args), name=f"nextcord:Dispatch listener {event_name}"
+            )
 
         # Wait for listeners
         for info in self._wait_for_global_listeners:
             # Global wait for listeners
-            create_task(self._dispatch_wait_for(*info, event_name, *event_args), name=f"nextcord:Dispatch wait_for listener {event_name} (global)")
+            create_task(
+                self._dispatch_wait_for(*info, event_name, *event_args),
+                name=f"nextcord:Dispatch wait_for listener {event_name} (global)",
+            )
         for info in self._wait_for_listeners.get(event_name, []):
             # Per event wait for listeners
-            create_task(self._dispatch_wait_for(*info, *event_args), name=f"nextcord:Dispatch wait_for listener {event_name}")
+            create_task(
+                self._dispatch_wait_for(*info, *event_args), name=f"nextcord:Dispatch wait_for listener {event_name}"
+            )
 
     async def _dispatch_event_wrapper(self, listener: Callable[..., Any], *event_args: Any) -> None:
         try:
@@ -152,7 +170,9 @@ class Dispatcher:
                 except:
                     logger.error("Exception handler failed", exc_info=True)
 
-    async def _dispatch_wait_for(self, check: Callable[..., Awaitable[bool] | bool], future: Future[list[Any]], event_name: Any, *event_args: Any) -> None:
+    async def _dispatch_wait_for(
+        self, check: Callable[..., Awaitable[bool] | bool], future: Future[list[Any]], event_name: Any, *event_args: Any
+    ) -> None:
         try:
             check_success = await maybe_coro(check)
         except:

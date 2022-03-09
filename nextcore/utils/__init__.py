@@ -20,8 +20,7 @@
 # DEALINGS IN THE SOFTWARE.
 
 
-from .json import *
 from .asyncio_utils import *
+from .json import *
 
 __all__ = ("json_loads", "json_dumps", "maybe_coro")
-
