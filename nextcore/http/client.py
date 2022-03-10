@@ -230,7 +230,7 @@ class HTTPClient:
             reset_at = float(headers["X-RateLimit-Reset"])
             bucket_hash = headers["X-RateLimit-Bucket"]
         except KeyError:
-            logger.debug("No ratelimit headers found. Status code: %s", response.status)
+            # Some endpoints don't have ratelimits, some error responses don't show ratelimits.
             if response.status < 300 and not bucket.unlimited:
                 logger.debug("Bucket %s is now unlimited", repr(bucket))
             return
