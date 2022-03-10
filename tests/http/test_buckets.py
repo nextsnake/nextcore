@@ -17,7 +17,7 @@ async def test_consecutive():
             bucket.update(1, 0, 0.1)
 
 
-async def use_bucket(bucket):
+async def use_bucket(bucket: Bucket):
     async with bucket:
         # It needs a update to be reset.
         bucket.update(1, 0, 0.1)
@@ -50,6 +50,18 @@ async def test_failure_initial_info():
     bucket = Bucket()
 
     bucket.update(1, 1, 0.1)
+
+    for _ in range(3):
+        async with bucket:
+            ...
+
+@mark.asyncio
+@match_time(0, 0.1)
+async def test_unlimited():
+    bucket = Bucket()
+    
+    bucket.update(1, 1, 1)
+    bucket.unlimited = True
 
     for _ in range(3):
         async with bucket:
