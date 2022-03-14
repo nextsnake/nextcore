@@ -18,3 +18,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
+
+from asyncio.futures import Future
+
+
+class RequestSession:
+    """A metadata class about a pending request. This is used by :class:`Bucket`"""
+
+    def __init__(self, unlimited: bool):
+        self.pending_future: Future[None] = Future()
+        """When waiting for ratelimits, this future will be waited for to be set. Set this to get the request to execute."""
+        self.unlimited: bool = unlimited
+        """If this request was made when the request was unlimited."""

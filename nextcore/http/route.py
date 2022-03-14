@@ -45,7 +45,7 @@ class Route:
         This will be included in :attr:`Route.bucket`
     """
 
-    __slots__ = ("method", "path", "bucket", "ignore_global")
+    __slots__ = ("method", "route", "path", "ignore_global", "bucket")
 
     API_VERSION: ClassVar[int] = 10
     BASE_URL: ClassVar[str] = f"https://discord.com/api/v{API_VERSION}"
@@ -69,6 +69,7 @@ class Route:
         **parameters: str | int,
     ) -> None:
         self.method: str = method
+        self.route: str = path
         self.path: str = path.format(**parameters)
         self.ignore_global: bool = use_webhook_global
 
@@ -77,4 +78,4 @@ class Route:
         channel_id: str | int | None = parameters.get("channel_id")
         webhook_id: str | int | None = parameters.get("webhook_id")
 
-        self.bucket: int = hash(f"{guild_id}{channel_id}{webhook_id}{path}")
+        self.bucket: str = f"{guild_id}{channel_id}{webhook_id}{path}"

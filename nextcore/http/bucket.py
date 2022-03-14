@@ -21,145 +21,152 @@
 
 from __future__ import annotations
 
-from asyncio import Future, get_running_loop
+from asyncio import get_running_loop
+from contextlib import asynccontextmanager
 from logging import getLogger
 from typing import TYPE_CHECKING
 
-from .flood_gate import FloodGate
+from .request_session import RequestSession
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import AsyncIterator
 
-    from typing_extensions import Self
+    from .bucket_metadata import BucketMetadata
 
 logger = getLogger(__name__)
 
 
 class Bucket:
-    """A HTTP ratelimit handler
+    """A discord ratelimit implementation around a bucket.
 
-    .. note::
-        View the `documentation <https://discord.dev/topics/rate-limits>`_
+    Parameters
+    ----------
+    metadata: :class:`BucketMetadata`
+        The metadata for the bucket.
     """
 
-    __slots__ = (
-        "limit",
-        "_unlimited",
-        "_pending",
-        "_pending_reset",
-        "_remaining",
-        "_reserved",
-        "_loop",
-        "_first_fetch_ratelimit",
-    )
-
-    def __init__(self) -> None:
-        self.limit: int | None = None
-        """How many this bucket can hold. This will be None if the info has not been fetched yet."""
-        self._unlimited: bool = False
-        """Whether this bucket is unlimited"""
-
-        self._pending: list[Future[None]] = []
+    def __init__(self, metadata: BucketMetadata):
+        self.metadata: BucketMetadata = metadata
+        """The metadata about this bucket."""
+        self._remaining: int | None = self.metadata.limit
+        """How many requests we estimate are left. This might be out of date if :attr:`Bucket._reserved` is not 0. This will be None if no ratelimit is fetched."""
+        self._reserved: list[RequestSession] = []
+        """Requests currently being processed."""
+        self._pending: list[RequestSession] = []
+        """Requests waiting for a spot in the Bucket"""
         self._pending_reset: bool = False
-        self._remaining: int | None = None
-        self._reserved: int = 0
-        self._first_fetch_ratelimit = FloodGate()
+        """Whether or not we are waiting for a reset to happen."""
+        self._fetched_ratelimit_info: bool = False
 
-        # Let the first request through to fetch initial info
-        self._first_fetch_ratelimit.pop()
+    @asynccontextmanager
+    async def acquire(self) -> AsyncIterator[None]:  # TODO: Fix type
+        """Reserve a spot in the bucket to do a request."""
+        session = await self._aenter()
+        try:
+            yield None
+        finally:
+            # Exit
+            await self._aexit(session)
 
-    def update(self, limit: int, remaining: int, reset_after: float) -> None:
-        """Update the internal bucket counters
+    async def _aenter(self) -> RequestSession:
+        """Start a request session."""
+        session = RequestSession(self.metadata.unlimited)
+
+        if self._remaining is None:
+            # No info! Let's do one request at once to fetch ratelimits.
+            remaining = 1
+        else:
+            # Info gathered, let's use it.
+            remaining = self._remaining
+
+        # No spots left
+        if not self.metadata.unlimited and remaining - self._reserved_count == 0:
+            # No more spots, add it as a pending request
+            logger.debug("No more spots in ratelimit, waiting! Remaining: %s, reserved: %s", remaining, self._reserved_count)
+            self._pending.append(session)
+            await session.pending_future
+
+        # We have a spot, reserve it!
+        self._reserved.append(session)
+
+        return session
+
+    async def _aexit(self, session: RequestSession) -> None:
+        """Clean up a request session
 
         Parameters
         ----------
-        limit: int
-            How many requests this bucket can hold
-        remaining: int
-            How many requests the current bucket can hold
-        reset_after: float
-            How many seeconds until we reset.
+        session: :class:`RequestSession`
+            The session to clean up.
         """
-        self.limit = limit
-        self._remaining = remaining
+        self._reserved.remove(session)
 
-        if not self._pending_reset:
-            self._pending_reset = True
+        if not self._fetched_ratelimit_info:
+            if self.metadata.unlimited:
+                # Unlimited, this is handled in Bucket.update
+                pass
+            elif self._remaining is not None:
+                # Info fetched, let this buckets requests through
+                self._fetched_ratelimit_info = True
+                self._release_pending(self._remaining)
+            else:
+                # Request failed, attempt another one!
+                self._release_pending(1)
 
-            loop = get_running_loop()
-            loop.call_later(reset_after, self._reset)
+            self._fetched_ratelimit_info = True
 
-    def _reset(self) -> None:
-        """Reset the state of this bucket"""
-        self._pending_reset = False
-        assert self.limit is not None, "Can't reset when bucket info has not been fetched yet."
-        self._remaining = self.limit
 
-        drop_count = self._remaining - self._reserved
-        logger.debug("Attempting to drop %s pending requests", drop_count)
-        self._drop_pending(drop_count)
-
-    def _drop_pending(self, limit: int | None) -> None:
-        """Make up to limit waiting requests return
-
-        Parameters
-        ----------
-        limit: :class:`int` | :class:`None`
-            How many to requests to attempt to return. If there is not enough it will return early.
-        """
-        # This is not optimal as if there is multiple bots on the same token there would be a few ratelimit responses
-        # There is also a issue with globals however there is really no way to solve that.
-        if limit is None:
-            limit = len(self._pending)
-        for _ in range(limit):
-            try:
-                future = self._pending.pop(0)
-            except IndexError:
-                return
-            future.set_result(None)
-
-    async def __aenter__(self) -> Self:  # type: ignore [valid-type] TODO: Remove this after it's fixed in mypy.
-        if self.unlimited:
-            return self
-        if self._remaining is not None:
-            # Bucket has info.
-            if self._remaining - self._reserved <= 0:
-                # Bucket used up, wait for it to complete
-                future: Future[None] = Future()
-                self._pending.append(future)
-                await future
-        else:
-            flood = await self._first_fetch_ratelimit.acquire()
-            if flood:
-                return await self.__aenter__()
-            logger.debug("Letting ratelimit fetcher through")
-
-        self._reserved += 1
-        return self
-
-    async def __aexit__(self, *_: Any) -> None:
-        if self.unlimited:
-            return
-        # There is no reason to decrement remaining here as it should always be updated by Bucket.update
-        self._reserved = max(0, self._reserved - 1)
-
-        if self._remaining is not None:
-            self._first_fetch_ratelimit.drain()
-        else:
-            # It failed, try again.
-            logger.debug("Could not fetch initial ratelimit info, trying again")
-            self._first_fetch_ratelimit.pop()
 
     @property
-    def unlimited(self) -> bool:
-        """Whether this bucket is unlimited"""
-        return self._unlimited
+    def _reserved_count(self) -> int:
+        """How many requests are currently being processed."""
+        limited_reserved = filter(lambda session: not session.unlimited, self._reserved)
+        return len(list(limited_reserved))
 
-    @unlimited.setter
-    def unlimited(self, value: bool) -> None:
-        logger.debug("Toggling unlimited mode")
-        self._unlimited = value
-        if not value:
-            self._pending_reset = False
-            self._remaining = None
-            self._reserved = 0
+    async def update(
+        self, remaining: int | None = None, reset_after: float | None = None, *, unlimited: bool = False
+    ) -> None:
+        if not unlimited:
+            # Not unlimited
+
+            # Validation
+            if remaining is None:
+                raise ValueError("Remaining must be set if unlimited is False.")
+            if reset_after is None:
+                raise ValueError("Reset after must be set if unlimited is False.")
+
+            # Update remaining
+            # TODO: Fix race condition where receiving from a old bucket after reset.
+            if self._remaining is None:
+                self._remaining = remaining
+            else:
+                # This fixes a race condition when receiving the ratelimit
+                self._remaining = min(self._remaining, remaining)
+            if not self._pending_reset:
+                self._pending_reset = True
+
+                # TODO: Can we use asyncio.call_later or similar?
+                loop = get_running_loop()
+                loop.call_later(reset_after, self._reset)
+        else:
+            self._release_pending()
+
+    def _reset(self):
+        self._remaining = self.metadata.limit
+        self._pending_reset = False
+        self._release_pending(
+            self.metadata.limit or len(self._pending)
+        )  # Release limit or all if we are suddenly unlimited
+
+    def _release_pending(self, limit: int | None = None):
+        if limit is None:
+            limit = len(self._pending)
+        
+        # Make sure we don't try to release more requests than is pending
+        limit = min(limit, len(self._pending))
+
+        logger.debug("Releasing %s pending requests", limit)
+
+        for session in self._pending[:limit]:
+            session.pending_future.set_result(None)
+            self._pending.remove(session)

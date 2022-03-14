@@ -18,3 +18,26 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
+
+from __future__ import annotations
+
+
+class BucketMetadata:
+    """Metadata about a discord bucket.
+
+    Parameters
+    ----------
+    limit: :class:`int` | :class:`None`
+        The maximum number of requests that can be made in the given time period.
+    unlimited: :class:`bool`
+        Whether the bucket has an unlimited number of requests. If this is :class:`True`,
+        limit has to be None.
+    """
+
+    __slots__ = ("limit", "unlimited")
+
+    def __init__(self, limit: int | None = None, *, unlimited: bool = False):
+        self.limit: int | None = limit
+        """The maximum number of requests that can be made in the given time period."""
+        self.unlimited: bool = unlimited
+        """Whether the bucket has an unlimited number of requests."""

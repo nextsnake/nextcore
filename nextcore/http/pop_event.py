@@ -19,31 +19,36 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from __future__ import annotations
-
-from asyncio import Event, get_running_loop
+from asyncio import Future
 
 
-class ReversedTimedEvent:
-    """:class:`asyncio.Event` but default-open. It also includes a clear_after time."""
+class PopEvent:
+    """A :class:`asyncio.Event` that allows popping the first waiting task."""
 
     def __init__(self) -> None:
-        self._event = Event()
-        self._event.set()
+        self._pending: list[Future[bool]] = []
+        """Tasks waiting for a pop or set."""
+        self._set: bool = False
 
-    async def wait(self) -> None:
-        """Wait for the event to be unset"""
-        await self._event.wait()
-
-    def set(self, clear_after: float | None = None) -> None:
-        """Set/lock the event
-        This will block anyone who calls :meth:`ReversedTimedEvent.wait`
-
-        Args:
-            clear_after (Optional[float]): In seconds when the event gets unset.
+    def set(self) -> None:
+        """Sets the event and clears all waiting tasks.
+        This will also make all future calls to :meth:`PopEvent.wait` instantly return
         """
-        self._event.clear()
+        self._set = True
 
-        if clear_after is not None:
-            loop = get_running_loop()
-            loop.call_later(clear_after, self._event.set)
+        # Clear waiting
+        for future in self._pending:
+            future.set_result(True)
+
+    def clear(self) -> None:
+        """Makes future calls to :meth:`PopEvent.wait` not return unless :meth:`PopEvent.set` or :meth:`PopEvent.pop` is called."""
+        self._set = False
+
+    async def wait(self) -> bool:
+        """Waits until :meth:`PopEvent.set` or :meth:`PopEvent.pop` is called."""
+        if self._set:
+            return True
+
+        future: Future[bool] = Future()
+        self._pending.append(future)
+        return await future

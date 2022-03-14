@@ -28,7 +28,7 @@ from aiohttp.helpers import get_running_loop
 
 from nextcore.gateway.times_per import TimesPer
 
-from .dispatcher import Dispatcher
+from ..common.dispatcher import Dispatcher
 from .shard import Shard
 
 if TYPE_CHECKING:

@@ -3,7 +3,7 @@ from asyncio import create_task, sleep
 
 from pytest import mark, raises
 
-from nextcore.gateway.dispatcher import Dispatcher
+from nextcore.common.dispatcher import Dispatcher
 
 
 def test_sync_add_remove_listener():

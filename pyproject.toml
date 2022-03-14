@@ -25,6 +25,7 @@ black = "^21.12b0"
 pytest = "^6.2.5"
 taskipy = "^1.9.0"
 pytest-asyncio = "^0.18.1"
+pytest-mock = "^3.7.0"
 
 [tool.poetry.extras]
 speed = ["ujson"]

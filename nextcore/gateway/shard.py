@@ -30,10 +30,10 @@ from typing import TYPE_CHECKING
 from aiohttp import ClientConnectorError, ClientWebSocketResponse, WSMsgType
 from frozendict import frozendict
 
+from ..common.dispatcher import Dispatcher
 from ..utils import json_dumps, json_loads
 from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
-from .dispatcher import Dispatcher
 from .errors import (
     DisallowedIntentsError,
     DisconnectError,
