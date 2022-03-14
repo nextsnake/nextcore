@@ -51,7 +51,7 @@ class ShardManager:
         The bot's token
     intents: :class:`int`
         The intents the bot should connect with. See the `documentation <https://discord.dev/topics/gateway#gateway-intents>`__.
-    http_client: :class:`HTTPClient`
+    http_client: :class:`HTTPClient<nextcore.http.HTTPClient>`
         The HTTP client to use for fetching info to connect to the gateway.
     shard_count: :class:`int`
         The amount of shards the bot should spawn. If this is not set, the bot will automatically decide and keep the shard count up to date.

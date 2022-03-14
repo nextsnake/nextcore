@@ -76,7 +76,7 @@ class Shard:
         The bot's token to connect with.
     identify_ratelimiter: :class:`TimesPer`
         The ratelimiter for IDENTIFYing the bot.
-    http_client: :class:`HTTPClient`
+    http_client: :class:`HTTPClient<nextcore.http.HTTPClient>`
         HTTP client used to connect to Discord's gateway.
     presence: :class:`UpdatePresence`
         The initial presence info to send when connecting.
