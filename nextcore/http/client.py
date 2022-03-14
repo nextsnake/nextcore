@@ -46,7 +46,7 @@ class HTTPClient:
     API_BASE: ClassVar[str] = "https://discord.com/api/v10"
     """The API base URL. This is what changes the API version or if the canary API is used."""
 
-    def __init__(self, *, trust_local_time: bool = True, timeout: float = 60, max_ratelimit_retries: int = 10):
+    def __init__(self, *, trust_local_time: bool = True, timeout: float = 60, max_ratelimit_retries: int = 10, global_ratelimit: int | None = None):
         self.trust_local_time: bool = trust_local_time
         """Whether to trust local time."""
         self.timeout: float = timeout
@@ -64,7 +64,7 @@ class HTTPClient:
         self._discord_buckets: dict[str, Bucket] = {}  # X-RateLimit-Bucket -> Bucket
         self._bucket_metadata: dict[str, BucketMetadata] = {}  # Route.route -> BucketMetadata
 
-        self._global_lock: GlobalLock = GlobalLock()
+        self._global_lock: GlobalLock = GlobalLock(global_ratelimit)
         self._session: ClientSession | None = None
 
     async def _request(self, route: Route, *, headers: dict[str, str] | None = None, **kwargs: Any) -> ClientResponse:
