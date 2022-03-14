@@ -43,6 +43,22 @@ logger = getLogger(__name__)
 
 
 class HTTPClient:
+    """The HTTP client to interface with the Discord API.
+
+    Parameters
+    ----------
+    trust_local_time: :class:`bool`
+        Whether to trust local time.
+        If this is not set HTTP ratelimiting will be a bit slower but may be a bit more accurate on systems where the local time is off.
+    timeout: :class:`float`
+        The default request timeout in seconds.
+    max_retries: :class:`int`
+        How many times to attempt to retry a request after ratelimiting failed.
+    global_ratelimit: :class:`int`
+        The global ratelimit your bot has.
+        Unless you have contacted support about a raise, this will always be 50.
+        Leaving this as None will cause the ratelimiter to allow until a failure which is not ideal.
+    """
     API_BASE: ClassVar[str] = "https://discord.com/api/v10"
     """The API base URL. This is what changes the API version or if the canary API is used."""
 
