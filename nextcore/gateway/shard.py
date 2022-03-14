@@ -84,8 +84,39 @@ class Shard:
         A value between 50 and 250 that determines how many members a guild needs for the gateway to stop sending offline members in the guild member list.
     library_name: :class:`str`
         The name of the library that is using this gateway. This should be set if you are making your own library on top of nextcore.
+
+    Attributes
+    ----------
+    shard_id: :class:`int`
+        The ID of this shard.
+    shard_count: :class:`int`
+        How many shards are in this shard set. Used for splitting events on Discord's side.
+    intents: :class:`int`
+        The intents to connect with.
+    token: :class:`str`
+        The bot's token to connect with. If this is changed, the session will be invalidated.
+    presence: :class:`UpdatePresence`
+        The initial presence info to send when connecting.
+    large_threshold: :class:`int`
+        A value between 50 and 250 that determines how many members a guild needs for the gateway to stop sending offline members in the guild member list.
+    library_name: :class:`str`
+        The name of the library that is using this gateway. This should be set if you are making your own library on top of nextcore.
+    ready: :class:`asyncio.Event`
+        Fires when the gateway has connected and received the READY event.
+    raw_dispatcher: :class:`Dispatcher`
+        A dispatcher with raw payloads sent by discord. The event name is the opcode, and the value is the raw data.
+    event_dispatcher: :class:`Dispatcher`
+        A dispatcher for DISPATCH events sent by discord. The event name is the event name, and the value is the inner payload.
+    dispatcher: :class:`Dispatcher`
+        A dispatcher for internal events.
+    session_id: :class:`str`
+        The ID of the current session.
+    session_sequence_number: :class:`int`
+        The last sequence number of the current session.
+    should_reconnect: :class:`bool`
+        Whether the gateway should reconnect or not.
     """
-    API_URL: Final[str] = f"wss://gateway.discord.gg?v=10&compress=zlib-stream"
+    API_URL: Final[str] = "wss://gateway.discord.gg?v=10&compress=zlib-stream"
     """The gateway URL to connect to"""
 
     def __init__(
@@ -103,38 +134,24 @@ class Shard:
     ) -> None:
         # User's params
         self.shard_id: Final[int] = shard_id
-        """The ID of this shard"""
         self.shard_count: Final[int] = shard_count
-        """How many shards are in this shard set."""
         self.intents: int = intents
-        """The intents used when connecting"""
         self.token: str = token
-        """The bot's token to connect with. If this is changed, the session will expire."""
         self.http_client: HTTPClient = http_client # TODO: Should this be private?
         self.presence: UpdatePresence | None = presence
-        """The initial presence info to send when connecting."""
         self.large_threshold: int | None = large_threshold
-        """A value between 50 and 250, total number of members where the gateway will stop sending offline members in the guild member list"""
         self.library_name: str = library_name
-        """The name of the library that is using this gateway. This should be set if you are making your own library on top of nextcore."""
 
         # Publics
         self.ready: Event = Event()
-        """When the bot has connected to the gateway"""
         self.raw_dispatcher: Dispatcher = Dispatcher()
-        """A dispatcher with raw payloads sent by discord. The event name is the opcode, and the value is the raw data."""
         self.event_dispatcher: Dispatcher = Dispatcher()
-        """A dispatcher for DISPATCH events sent by discord. The event name is the event name, and the value is the inner payload."""
         self.dispatcher: Dispatcher = Dispatcher()
-        """A dispatcher with internal events."""
 
         # Session related
         self.session_id: str | None = None
-        """Session id for resuming the session after a unexpected disconnect"""
         self.session_sequence_number: int | None = None
-        """The last sequence number of the session"""
         self.should_reconnect: bool = True  # This should be set by the user.
-        """If the shard should automatically reconnect."""
 
         # User's internals
         # Should generally only be set once
