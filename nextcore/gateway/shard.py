@@ -47,7 +47,7 @@ from .opcodes import GatewayOpcode
 from .times_per import TimesPer
 
 if TYPE_CHECKING:
-    from typing import ClassVar, cast
+    from typing import Final, cast
 
     from nextcore.typings.gateway.inner.dispatch.ready import ReadyData
     from nextcore.typings.gateway.inner.hello import HelloData
@@ -62,8 +62,31 @@ if TYPE_CHECKING:
 
 
 class Shard:
-    API_VERSION: ClassVar[int] = 10
-    API_URL: ClassVar[str] = f"wss://gateway.discord.gg?v={API_VERSION}&compress=zlib-stream"
+    """A shard connection to the Discord gateway
+
+    Parameters
+    ----------
+    shard_id: :class:`int`
+        The ID of this shard.
+    shard_count: :class:`int`
+        How many shards is in this shard set. Used for splitting events on Discord's side.
+    intents: :class:`int`
+        The intents to connect with.
+    token: :class:`str`
+        The bot's token to connect with.
+    identify_ratelimiter: :class:`TimesPer`
+        The ratelimiter for IDENTIFYing the bot.
+    http_client: :class:`HTTPClient`
+        HTTP client used to connect to Discord's gateway.
+    presence: :class:`UpdatePresence`
+        The initial presence info to send when connecting.
+    large_threshold: :class:`int`
+        A value between 50 and 250 that determines how many members a guild needs for the gateway to stop sending offline members in the guild member list.
+    library_name: :class:`str`
+        The name of the library that is using this gateway. This should be set if you are making your own library on top of nextcore.
+    """
+    API_URL: Final[str] = f"wss://gateway.discord.gg?v=10&compress=zlib-stream"
+    """The gateway URL to connect to"""
 
     def __init__(
         self,
@@ -79,25 +102,39 @@ class Shard:
         library_name: str = "nextcore",
     ) -> None:
         # User's params
-        self.shard_id: int = shard_id
-        self.shard_count: int = shard_count
+        self.shard_id: Final[int] = shard_id
+        """The ID of this shard"""
+        self.shard_count: Final[int] = shard_count
+        """How many shards are in this shard set."""
         self.intents: int = intents
+        """The intents used when connecting"""
         self.token: str = token
-        self.http_client: HTTPClient = http_client
+        """The bot's token to connect with. If this is changed, the session will expire."""
+        self.http_client: HTTPClient = http_client # TODO: Should this be private?
         self.presence: UpdatePresence | None = presence
+        """The initial presence info to send when connecting."""
         self.large_threshold: int | None = large_threshold
+        """A value between 50 and 250, total number of members where the gateway will stop sending offline members in the guild member list"""
         self.library_name: str = library_name
+        """The name of the library that is using this gateway. This should be set if you are making your own library on top of nextcore."""
 
         # Publics
         self.ready: Event = Event()
+        """When the bot has connected to the gateway"""
         self.raw_dispatcher: Dispatcher = Dispatcher()
+        """A dispatcher with raw payloads sent by discord. The event name is the opcode, and the value is the raw data."""
         self.event_dispatcher: Dispatcher = Dispatcher()
+        """A dispatcher for DISPATCH events sent by discord. The event name is the event name, and the value is the inner payload."""
         self.dispatcher: Dispatcher = Dispatcher()
+        """A dispatcher with internal events."""
 
         # Session related
         self.session_id: str | None = None
+        """Session id for resuming the session after a unexpected disconnect"""
         self.session_sequence_number: int | None = None
+        """The last sequence number of the session"""
         self.should_reconnect: bool = True  # This should be set by the user.
+        """If the shard should automatically reconnect."""
 
         # User's internals
         # Should generally only be set once
@@ -125,6 +162,10 @@ class Shard:
         self.dispatcher.add_listener(self._handle_disconnect, "disconnect")
 
     async def connect(self) -> None:
+        """Connect to the gateway.
+        
+        This will automatically RESUME if a session is set.
+        """
         # Clear state
         self._decompressor = Decompressor()
         self._received_heartbeat_ack = True
@@ -382,6 +423,11 @@ class Shard:
 
     # Send wrappers
     async def identify(self) -> None:
+        """Identify to the gateway.
+
+        .. note::
+            See the `documentation <https://discord.dev/topics/gateway#identify>`__
+        """
         payload: ClientGatewayPayload = {
             "op": GatewayOpcode.IDENTIFY.value,
             "d": {
@@ -405,6 +451,11 @@ class Shard:
         await self._send(payload, wait_until_ready=False)
 
     async def resume(self) -> None:
+        """Resume the session
+
+        .. note::
+            See the `documentation <https://discord.dev/topics/gateway#resume>`__
+        """
         if self.session_id is None or self.session_sequence_number is None:
             raise ValueError("Session id or sequence number is not set")
 

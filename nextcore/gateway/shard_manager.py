@@ -39,9 +39,28 @@ if TYPE_CHECKING:
     from nextcore.typings.objects.update_presence import UpdatePresence
 
     from ..http.client import HTTPClient
+    from typing import Final
 
 
 class ShardManager:
+    """A automatic sharder implementation
+    
+    Parameters
+    ----------
+    token: :class:`str`
+        The bot's token
+    intents: :class:`int`
+        The intents the bot should connect with. See the `documentation <https://discord.dev/topics/gateway#gateway-intents>`__.
+    http_client: :class:`HTTPClient`
+        The HTTP client to use for fetching info to connect to the gateway.
+    shard_count: :class:`int`
+        The amount of shards the bot should spawn. If this is not set, the bot will automatically decide and keep the shard count up to date.
+    shard_ids: list[:class:`int`] | :data:`None`
+        The shard ids the bot should spawn. If this is not set, the bot will use all shard ids possible with the :attr:`ShardManager.shard_count`. This requires :attr:`ShardManager.shard_count` to be set.
+    presence: :class:`UpdatePresence`
+        The initial presence the bot should connect with.
+    """
+    # TODO: Fix typehints in the docstring for shard_ids
     def __init__(
         self,
         token: str,
@@ -54,18 +73,29 @@ class ShardManager:
     ) -> None:
         # User's params
         self.token: str = token
+        """The bot's token"""
         self.intents: int = intents
-        self.http_client: HTTPClient = http_client
-        self.shard_count: int | None = shard_count
-        self.shard_ids: list[int] | None = shard_ids
+        """The intents the bot should connect with."""
+        self.http_client: HTTPClient = http_client # TODO: Should this be privated?
+        """The HTTP client to use for fetching info to connect to the gateway."""
+        self.shard_count: Final[int | None] = shard_count
+        """How many shards to use. If this is not set, the bot will automatically decide and keep the shard count up to date."""
+        self.shard_ids: Final[list[int] | None] = shard_ids
+        """Which shard ids to connect with. If this is not set, the bot will use all shard ids possible with the :attr:`ShardManager.shard_count`. This requires :attr:`ShardManager.shard_count` to be set."""
         self.presence: UpdatePresence | None = presence
+        """The initial presence the bot should connect with."""
 
         # Publics
         self.active_shards: list[Shard] = []
+        """The currently running shards"""
         self.pending_shards: list[Shard] = []
+        """Shards pending connection. This only exists if :attr:`ShardManager.shard_count` is :data:`None` and the bot is re-scaling."""
         self.raw_dispatcher: Dispatcher = Dispatcher()
+        """Dispatcher for raw events."""
         self.event_dispatcher: Dispatcher = Dispatcher()
+        """Dispatcher for DISPATCH events."""
         self.max_concurrency: int | None = None
+        """How many shards can be connected concurrently. This is set after :meth:`ShardManager.connect` is called."""
 
         # Privates
         self._active_shard_count: int | None = self.shard_count
@@ -77,6 +107,11 @@ class ShardManager:
             raise ValueError("You have to specify shard_count if you specify shard_ids")
 
     async def connect(self) -> None:
+        """Connect all the shards to the gateway.
+        
+        .. note::
+            This will return once all shards are connected.
+        """
         connection_info = await self.http_client.get_gateway_bot()
         session_start_limits = connection_info["session_start_limit"]
         self.max_concurrency = session_start_limits["max_concurrency"]

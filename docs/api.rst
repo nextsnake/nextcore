@@ -1,6 +1,6 @@
 API Reference
 ==============
-.. autoclass:: nextcore.gateway.Gateway
+.. autoclass:: nextcore.gateway.ShardManager
     :members:
 .. autoclass:: nextcore.gateway.Shard
     :members:

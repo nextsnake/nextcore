@@ -52,7 +52,7 @@ class HTTPClient:
         If this is not set HTTP ratelimiting will be a bit slower but may be a bit more accurate on systems where the local time is off.
     timeout: :class:`float`
         The default request timeout in seconds.
-    max_retries: :class:`int`
+    max_ratelimit_retries: :class:`int`
         How many times to attempt to retry a request after ratelimiting failed.
     global_ratelimit: :class:`int`
         The global ratelimit your bot has.
@@ -94,6 +94,11 @@ class HTTPClient:
             Headers to mix with :attr:`HTTPClient.default_headers` to pass to :meth:`aiohttp.ClientSession.request`
         kwargs: :class:`Any`
             Keyword arguments to pass to :meth:`aiohttp.ClientSession.request`
+
+        Returns
+        -------
+        :class:`ClientResponse`
+            The response from the request.
         """
         # Make a ClientSession if we don't have one
         await self._ensure_session()
@@ -169,12 +174,12 @@ class HTTPClient:
         ----------
         url: :class:`str`
             The url to connect to.
-        kwargs: :class:`Any`
+        kwargs: `typing.Any <https://docs.python.org/3/library/typing.html#the-any-type>`_
             Keyword arguments to pass to :meth:`aiohttp.ClientSession.ws_connect`
 
         Returns
         -------
-        :class:`ClientWebSocketResponse`
+        :class:`aiohttp.ClientWebSocketResponse`
             The websocket response.
         """
         await self._ensure_session()

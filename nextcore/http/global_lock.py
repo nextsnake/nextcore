@@ -90,6 +90,7 @@ class GlobalLock:
             if i > self.limit:
                 return
             future.set_result(None)
+            self._pending.remove(future)
 
     def lock(self) -> None:
         """Locks the GlobalLock meaning no further calls will go through unless :meth:`GlobalLock.unlock` is called"""
