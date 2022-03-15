@@ -58,7 +58,7 @@ jobs:
       - name: Install poetry
         run: pip install poetry
       - name: Install dependencies
-        run: poetry install
+        run: poetry install -E speed
       - uses: actions/setup-node@v2
         name: Install node
         with:
