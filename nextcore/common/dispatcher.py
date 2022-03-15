@@ -49,7 +49,7 @@ class Dispatcher:
         "_wait_for_global_listeners",
     )
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Exception handler
         self._exception_handlers: list[Callable[[Exception], Any]] = []
 

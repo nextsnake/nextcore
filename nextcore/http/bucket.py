@@ -155,14 +155,14 @@ class Bucket:
         else:
             self._release_pending()
 
-    def _reset(self):
+    def _reset(self) -> None:
         self._remaining = self.metadata.limit
         self._pending_reset = False
         self._release_pending(
             self.metadata.limit or len(self._pending)
         )  # Release limit or all if we are suddenly unlimited
 
-    def _release_pending(self, limit: int | None = None):
+    def _release_pending(self, limit: int | None = None) -> None:
         if limit is None:
             limit = len(self._pending)
 
