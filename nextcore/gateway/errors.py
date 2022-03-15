@@ -19,8 +19,21 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+__all__ = (
+    "ReconnectCheckFailedError",
+    "DisconnectError",
+    "InvalidIntentsError",
+    "DisallowedIntentsError",
+    "InvalidTokenError",
+    "InvalidApiVersionError",
+)
+
 
 class ReconnectCheckFailedError(Exception):
+    """Error for when auto reconnect is set to False and the shard needs to IDENTIFY"""
+
+    __slots__ = ()
+
     def __init__(self) -> None:
         super().__init__('Reconnect check failed. This shard should be considered "dead".')
 

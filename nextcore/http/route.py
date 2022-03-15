@@ -26,6 +26,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import ClassVar, Literal
 
+__all__ = ("Route",)
+
 
 class Route:
     """Metadata about a discord API route
@@ -47,8 +49,7 @@ class Route:
 
     __slots__ = ("method", "route", "path", "ignore_global", "bucket")
 
-    API_VERSION: ClassVar[int] = 10
-    BASE_URL: ClassVar[str] = f"https://discord.com/api/v{API_VERSION}"
+    BASE_URL: ClassVar[str] = f"https://discord.com/api/v10"
 
     def __init__(
         self,

@@ -32,6 +32,8 @@ from ..common.dispatcher import Dispatcher
 from .shard import Shard
 
 if TYPE_CHECKING:
+    from typing import Final
+
     from nextcore.typings.gateway.outer import (
         ServerGatewayDispatchPayload,
         ServerGatewayPayload,
@@ -39,12 +41,13 @@ if TYPE_CHECKING:
     from nextcore.typings.objects.update_presence import UpdatePresence
 
     from ..http.client import HTTPClient
-    from typing import Final
+
+__all__ = ("ShardManager",)
 
 
 class ShardManager:
     """A automatic sharder implementation
-    
+
     Parameters
     ----------
     token: :class:`str`
@@ -74,13 +77,31 @@ class ShardManager:
         The initial presence the bot should connect with.
     active_shards: list[:class:`Shard`]
         A list of all shards that are currently connected.
-    raw_dispatcher: :class:`Dispatcher`
+    raw_dispatcher: :class:`Dispatcher<nextcore.common.Dispatcher>`
         A dispatcher with raw payloads sent by discord. The event name is the opcode, and the value is the raw data.
-    event_dispatcher: :class:`Dispatcher`
+    event_dispatcher: :class:`Dispatcher<nextcore.common.Dispatcher>`
         A dispatcher for DISPATCH events sent by discord. The event name is the event name, and the value is the inner payload.
     max_concurrency: :class:`int`
         The maximum amount of concurrent IDENTIFY's the bot can make.
     """
+
+    __slots__ = (
+        "token",
+        "intents",
+        "http_client",
+        "shard_count",
+        "shard_ids",
+        "presence",
+        "active_shards",
+        "pending_shards",
+        "raw_dispatcher",
+        "event_dispatcher",
+        "max_concurrency",
+        "_active_shard_count",
+        "_pending_shard_count",
+        "_identify_ratelimits",
+    )
+
     # TODO: Fix typehints in the docstring for shard_ids
     def __init__(
         self,
@@ -95,7 +116,7 @@ class ShardManager:
         # User's params
         self.token: str = token
         self.intents: int = intents
-        self.http_client: HTTPClient = http_client # TODO: Should this be privated?
+        self.http_client: HTTPClient = http_client  # TODO: Should this be privated?
         self.shard_count: Final[int | None] = shard_count
         self.shard_ids: Final[list[int] | None] = shard_ids
         self.presence: UpdatePresence | None = presence
@@ -118,7 +139,7 @@ class ShardManager:
 
     async def connect(self) -> None:
         """Connect all the shards to the gateway.
-        
+
         .. note::
             This will return once all shards are connected.
         """

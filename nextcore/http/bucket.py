@@ -35,6 +35,8 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
+__all__ = ("Bucket",)
+
 
 class Bucket:
     """A discord ratelimit implementation around a bucket.
@@ -44,6 +46,8 @@ class Bucket:
     metadata: :class:`BucketMetadata`
         The metadata for the bucket.
     """
+
+    __slots__ = ("metadata", "_remaining", "_reserved", "_pending", "_pending_reset", "_fetched_ratelimit_info")
 
     def __init__(self, metadata: BucketMetadata):
         self.metadata: BucketMetadata = metadata
@@ -82,7 +86,9 @@ class Bucket:
         # No spots left
         if not self.metadata.unlimited and remaining - self._reserved_count == 0:
             # No more spots, add it as a pending request
-            logger.debug("No more spots in ratelimit, waiting! Remaining: %s, reserved: %s", remaining, self._reserved_count)
+            logger.debug(
+                "No more spots in ratelimit, waiting! Remaining: %s, reserved: %s", remaining, self._reserved_count
+            )
             self._pending.append(session)
             await session.pending_future
 
@@ -114,8 +120,6 @@ class Bucket:
                 self._release_pending(1)
 
             self._fetched_ratelimit_info = True
-
-
 
     @property
     def _reserved_count(self) -> int:
@@ -161,7 +165,7 @@ class Bucket:
     def _release_pending(self, limit: int | None = None):
         if limit is None:
             limit = len(self._pending)
-        
+
         # Make sure we don't try to release more requests than is pending
         limit = min(limit, len(self._pending))
 

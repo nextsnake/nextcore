@@ -21,9 +21,13 @@
 
 from asyncio import Future
 
+__all__ = ("PopEvent",)
+
 
 class PopEvent:
     """A :class:`asyncio.Event` that allows popping the first waiting task."""
+
+    __slots__ = ("_pending", "_set")
 
     def __init__(self) -> None:
         self._pending: list[Future[bool]] = []

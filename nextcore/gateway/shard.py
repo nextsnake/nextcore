@@ -60,6 +60,8 @@ if TYPE_CHECKING:
 
     from ..http import HTTPClient
 
+__all__ = ("Shard",)
+
 
 class Shard:
     """A shard connection to the Discord gateway
@@ -116,6 +118,30 @@ class Shard:
     should_reconnect: :class:`bool`
         Whether the gateway should reconnect or not.
     """
+
+    __slots__ = (
+        "shard_id",
+        "shard_count",
+        "intents",
+        "token",
+        "http_client",
+        "presence",
+        "large_threshold",
+        "library_name",
+        "ready",
+        "raw_dispatcher",
+        "event_dispatcher",
+        "dispatcher",
+        "session_id",
+        "session_sequence_number",
+        "should_reconnect",
+        "_identify_ratelimiter",
+        "_send_ratelimit",
+        "_ws",
+        "_decompressor",
+        "_logger",
+        "_received_heartbeat_ack",
+    )
     API_URL: Final[str] = "wss://gateway.discord.gg?v=10&compress=zlib-stream"
     """The gateway URL to connect to"""
 
@@ -137,7 +163,7 @@ class Shard:
         self.shard_count: Final[int] = shard_count
         self.intents: int = intents
         self.token: str = token
-        self.http_client: HTTPClient = http_client # TODO: Should this be private?
+        self.http_client: HTTPClient = http_client  # TODO: Should this be private?
         self.presence: UpdatePresence | None = presence
         self.large_threshold: int | None = large_threshold
         self.library_name: str = library_name
@@ -180,7 +206,7 @@ class Shard:
 
     async def connect(self) -> None:
         """Connect to the gateway.
-        
+
         This will automatically RESUME if a session is set.
         """
         # Clear state

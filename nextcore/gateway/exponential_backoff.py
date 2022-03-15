@@ -32,8 +32,31 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
+__all__ = ("ExponentialBackoff",)
+
 
 class ExponentialBackoff:
+    """A implementation of exponential backoff
+
+    Parameters
+    ----------
+    initial: :class:`float`
+        The initial value of the backoff
+    base: :class:`float`
+        What to multiply the current time with when the next iteration of backoff is called
+    max_value: :class:`float`
+        The max value to cap the backoff at
+
+    Attributes
+    ----------
+    base: :class:`float`
+        What to multiply the current time with when the next iteration of backoff is called
+    max: :class:`float`
+        The max value to cap the backoff at
+    """
+
+    __slots__ = ("_current_time", "base", "max", "_initial")
+
     def __init__(self, initial: float, base: float, max_value: float) -> None:
         self._current_time: float = initial
         self.base: float = base
@@ -42,6 +65,7 @@ class ExponentialBackoff:
 
     @property
     def next(self) -> float:
+        """What the next value of the backoff should be"""
         return self._current_time * self.base
 
     def __aiter__(self: T) -> T:

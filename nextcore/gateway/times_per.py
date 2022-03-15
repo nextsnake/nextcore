@@ -27,6 +27,8 @@ from time import time
 
 logger = getLogger(__name__)
 
+__all__ = ("TimesPer",)
+
 
 class TimesPer:
     """A simple ratelimiting implementation

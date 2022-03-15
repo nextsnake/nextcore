@@ -27,22 +27,24 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any, Callable
 
+__all__ = ("maybe_coro",)
+
 
 async def maybe_coro(coro: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
     """Execute a sync or async function
 
     Parameters
     ----------
-    coro: :class:`Callable[..., Any]`
+    coro: Callable[..., :data:`Any`]
         The function to execute
-    args: Any
+    args: :data:`typing.Any`
         The arguments to pass to the function
-    kwargs: Any
+    kwargs: :data:`Any`
         The keyword arguments to pass to the function
 
     Returns
     -------
-    Any
+    :data:`typing.Any`
         The result of the function
     """
     result = coro(*args, **kwargs)

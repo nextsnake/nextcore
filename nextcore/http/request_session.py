@@ -21,9 +21,13 @@
 
 from asyncio.futures import Future
 
+__slots__ = ("RequestSession",)
+
 
 class RequestSession:
     """A metadata class about a pending request. This is used by :class:`Bucket`"""
+
+    __slots__ = ("pending_future", "unlimited")
 
     def __init__(self, unlimited: bool):
         self.pending_future: Future[None] = Future()

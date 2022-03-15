@@ -21,6 +21,8 @@
 
 from __future__ import annotations
 
+__all__ = ("BucketMetadata",)
+
 
 class BucketMetadata:
     """Metadata about a discord bucket.

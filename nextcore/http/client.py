@@ -21,12 +21,12 @@
 
 from __future__ import annotations
 
+from asyncio import get_running_loop
 from logging import getLogger
 from time import time
 from typing import TYPE_CHECKING
 
 from aiohttp import ClientSession
-from asyncio import get_running_loop
 
 from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
@@ -37,9 +37,12 @@ if TYPE_CHECKING:
     from typing import Any, ClassVar, Final
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
+
     from ..typings.http.get_gateway_bot import GetGatewayBot
 
 logger = getLogger(__name__)
+
+__all__ = ("HTTPClient",)
 
 
 class HTTPClient:
@@ -59,10 +62,30 @@ class HTTPClient:
         Unless you have contacted support about a raise, this will always be 50.
         Leaving this as None will cause the ratelimiter to allow until a failure which is not ideal.
     """
+
+    __slots__ = (
+        "trust_local_time",
+        "timeout",
+        "default_headers",
+        "max_retries",
+        "_buckets",
+        "_discord_buckets",
+        "_bucket_metadata",
+        "_global_lock",
+        "_session",
+    )
+
     API_BASE: ClassVar[str] = "https://discord.com/api/v10"
     """The API base URL. This is what changes the API version or if the canary API is used."""
 
-    def __init__(self, *, trust_local_time: bool = True, timeout: float = 60, max_ratelimit_retries: int = 10, global_ratelimit: int | None = None):
+    def __init__(
+        self,
+        *,
+        trust_local_time: bool = True,
+        timeout: float = 60,
+        max_ratelimit_retries: int = 10,
+        global_ratelimit: int | None = None,
+    ):
         self.trust_local_time: bool = trust_local_time
         """Whether to trust local time."""
         self.timeout: float = timeout
@@ -260,7 +283,7 @@ class HTTPClient:
         self._discord_buckets[bucket_hash] = bucket
 
     # Wrapper functions for requests
-        # Wrapper functions
+    # Wrapper functions
     async def get_gateway_bot(self) -> GetGatewayBot:
         """Gets gateway connection information.
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`_

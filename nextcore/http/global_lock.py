@@ -22,16 +22,21 @@
 from __future__ import annotations
 
 from asyncio import Event, Future, get_running_loop
-from typing import TYPE_CHECKING
 from logging import getLogger
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any, Final
 
 logger = getLogger(__name__)
 
+__all__ = ("GlobalLock",)
+
+
 class GlobalLock:
     """Minified version of :class:`Bucket` to allow for no info at all."""
+
+    __slots__ = ("limit", "_remaining", "_reserved", "_active", "_pending_reset", "_pending")
 
     def __init__(self, limit: int | None = None) -> None:
         self.limit: Final[int | None] = limit

@@ -35,9 +35,20 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
+__all__ = ("Dispatcher",)
+
 
 class Dispatcher:
     """A event dispatcher"""
+
+    __slots__ = (
+        "_exception_handlers",
+        "_listeners",
+        "_global_listeners",
+        "_wait_for_listeners",
+        "_wait_for_global_listeners",
+    )
+
     def __init__(self):
         # Exception handler
         self._exception_handlers: list[Callable[[Exception], Any]] = []
