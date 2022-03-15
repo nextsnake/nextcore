@@ -37,6 +37,7 @@ logger = getLogger(__name__)
 
 
 class Dispatcher:
+    """A event dispatcher"""
     def __init__(self):
         # Exception handler
         self._exception_handlers: list[Callable[[Exception], Any]] = []
@@ -55,9 +56,9 @@ class Dispatcher:
 
         Parameters
         ----------
-        callback: Callable[..., Any]
+        callback: typing.Callable[..., :data:`typing.Any`]
             The callback to be added.
-        event_name: Any
+        event_name: :data:`typing.Any`
             The event name to listen to. If:class:`None`, the callback will receive all events. Global listeners will also receive the event name as the first param.
         """
         logger.debug("Adding listener for event %s", event_name)
@@ -73,12 +74,17 @@ class Dispatcher:
 
         Parameters
         ----------
-        check: Callable[..., Awaitable[bool] | bool]
+        check: typing.Callable[..., typing.Awaitable[:class:`bool`] | :class:`bool`]
             The check to check if it should return the event.
-        event_name: Any
+        event_name: :data:`typing.Any`
             The event name to wait for. If :class:`None`, the check will be called for all events. The check will receive the event name as the first param.
-        timeout: float | None
+        timeout: :class:`float` | :data:`None`
             The timeout in seconds. If :class:`None`, there is no timeout.
+
+        Returns
+        -------
+        list[:data:`typing.Any`]
+            The event arguments.
         """
 
         future: Future[list[Any]] = Future()
@@ -100,17 +106,17 @@ class Dispatcher:
         # Success!
         return result
 
-    def remove_listener(self, callback: Callable[..., Any]):
+    def remove_listener(self, callback: Callable[..., Any]) -> None:
         """Removes a listener from the dispatcher.
 
         Parameters
         ----------
-        callback: Callable[..., Any]
+        callback: Callable[..., :data:`typing.Any`]
             The callback to be removed.
 
         Raises
         ------
-        ValueError
+        :class:`ValueError`
             The callback was not registered on this dispatcher.
         """
         for listeners in self._listeners.values():
@@ -122,14 +128,14 @@ class Dispatcher:
             return
         raise ValueError("There is no such listener in this dispatcher")
 
-    def dispatch(self, event_name: Any, *event_args: Any):
+    def dispatch(self, event_name: Any, *event_args: Any) -> None:
         """Dispatches an event to all listeners watching that event.
 
         Parameters
         ----------
-        event_name: Any
+        event_name: :data:`typing.Any`
             The event name to dispatch.
-        event_args: Any
+        event_args: :data:`typing.Any`
             The event arguments.
         """
         logger.debug("Dispatching event %s", event_name)

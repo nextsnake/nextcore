@@ -6,3 +6,5 @@ API Reference
     :members:
 .. autoclass:: nextcore.http.HTTPClient
     :members:
+.. autoclass:: nextcore.common.Dispatcher
+    :members:

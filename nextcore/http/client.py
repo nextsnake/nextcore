@@ -92,7 +92,7 @@ class HTTPClient:
             The route to request
         headers: :class:`dict[str, str]`
             Headers to mix with :attr:`HTTPClient.default_headers` to pass to :meth:`aiohttp.ClientSession.request`
-        kwargs: :class:`Any`
+        kwargs: :data:`typing.Any`
             Keyword arguments to pass to :meth:`aiohttp.ClientSession.request`
 
         Returns
@@ -174,7 +174,7 @@ class HTTPClient:
         ----------
         url: :class:`str`
             The url to connect to.
-        kwargs: `typing.Any <https://docs.python.org/3/library/typing.html#the-any-type>`_
+        kwargs: :data:`typing.Any`
             Keyword arguments to pass to :meth:`aiohttp.ClientSession.ws_connect`
 
         Returns
