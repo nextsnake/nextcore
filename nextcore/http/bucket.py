@@ -45,22 +45,22 @@ class Bucket:
     ----------
     metadata: :class:`BucketMetadata`
         The metadata for the bucket.
+
+    Attributes
+    ----------
+    metadata: :class:`BucketMetadata`
+        The metadata for the bucket.
     """
 
     __slots__ = ("metadata", "_remaining", "_reserved", "_pending", "_pending_reset", "_fetched_ratelimit_info")
 
     def __init__(self, metadata: BucketMetadata):
         self.metadata: BucketMetadata = metadata
-        """The metadata about this bucket."""
         self._remaining: int | None = self.metadata.limit
-        """How many requests we estimate are left. This might be out of date if :attr:`Bucket._reserved` is not 0. This will be None if no ratelimit is fetched."""
-        self._reserved: list[RequestSession] = []
-        """Requests currently being processed."""
-        self._pending: list[RequestSession] = []
-        """Requests waiting for a spot in the Bucket"""
-        self._pending_reset: bool = False
-        """Whether or not we are waiting for a reset to happen."""
-        self._fetched_ratelimit_info: bool = False
+        self._reserved: list[RequestSession] = [] # Requests currently being processed
+        self._pending: list[RequestSession] = [] # Requests waiting for a spot
+        self._pending_reset: bool = False # Waiting for the bucket to reset
+        self._fetched_ratelimit_info: bool = False # Initial fetch of ratelimit info
 
     @asynccontextmanager
     async def acquire(self) -> AsyncIterator[None]:  # TODO: Fix type
