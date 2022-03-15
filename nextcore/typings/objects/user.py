@@ -31,33 +31,53 @@ if TYPE_CHECKING:
     from .locale import locale as user_locale
 
     class User(TypedDict):
+        """A Discord user.
+
+        Attributes
+        ----------
+        id: :class:`int`
+            The user's ID.
+        username: :class:`str`
+            The user's username.
+        discriminator: :class:`str`
+            The user's discriminator.
+        avatar: :class:`str`
+            The user's avatar hash.
+        bot: NotRequired[:class:`bool`]
+            Whether the user is a bot.
+        system: NotRequired[:class:`bool`]
+            Whether the user is a system user.
+        mfa_enabled: NotRequired[:class:`bool`]
+            Whether the user has two factor enabled on their account.
+        banner: NotRequired[:class:`str`]
+            The user's banner hash.
+        accent_color: NotRequired[:class:`str`]
+            The user's default banner color encoded as a hex string.
+        locale: NotRequired[:class:`str`]
+            The user's chosen language.
+        verified: NotRequired[:class:`bool`]
+            Whether the email on this account has been verified.
+        email: NotRequired[:class:`str`]
+            The user's email.
+        flags: NotRequired[:class:`int`]
+            The user's flags.
+        premium_type: NotRequired[:data:`typing.Literal[0, 1, 2]`]
+            The user's type of Nitro subscription.
+        public_flags: NotRequired[:class:`int`]
+            The user's public flags.
+        """
         id: int
-        """The user's ID"""
         username: str
-        """The user's username"""
         discriminator: str
-        """The user's discriminator"""
         avatar: str
-        """The user's avatar hash"""
         bot: NotRequired[bool]
-        """Whether the user is a bot"""
         system: NotRequired[bool]
-        """whether the user is an Official Discord System user (part of the urgent message system)"""
         mfa_enabled: NotRequired[bool]
-        """Whether the user has 2FA enabled"""
         banner: NotRequired[str]
-        """The user's banner hash"""
         accent_color: NotRequired[str]
-        """The user's default banner color encoded as a hex string"""
         locale: NotRequired[user_locale]
-        """The user's chosen language"""
         verified: NotRequired[bool]
-        """Whether the email on this account has been verified"""
         email: NotRequired[str]
-        """The user's email"""
         flags: NotRequired[int]
-        """The user's flags"""
         premium_type: NotRequired[Literal[0, 1, 2]]
-        """The user's type of Nitro subscription"""
         public_flags: NotRequired[int]
-        """The user's public flags"""
