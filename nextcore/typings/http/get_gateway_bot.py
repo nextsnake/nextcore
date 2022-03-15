@@ -28,7 +28,17 @@ if TYPE_CHECKING:
     from .get_gateway import GetGateway
 
     class GetGatewayBot(GetGateway):
+        """Gateway connection info
+
+        See the `documentation <https://discord.dev/topics/gateway#get-gateway-bot>`__
+
+        Attributes
+        ----------
+        shards: :class:`int`
+            How many shards Discord recommends you connect with.
+        session_start_limit: :class:`SessionStartLimit`
+            IDENTIFY ratelimiting info
+        """
+
         shards: int
-        """How many shards discord recommends you use."""
         session_start_limit: SessionStartLimit
-        """IDENTIFY ratelimit information."""

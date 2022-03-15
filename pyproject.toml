@@ -62,7 +62,7 @@ exclude = ["tests/"]
 warn_unused_ignores = false # Theres some issues in pyright that we have to ignore
 
 [tool.pylint.'messages control']
-disable = ["too-few-public-methods", "duplicate-code", "fixme", "missing-module-docstring", "too-many-instance-attributes", "used-before-assignment", "line-too-long"]
+disable = ["too-few-public-methods", "duplicate-code", "fixme", "missing-module-docstring", "too-many-instance-attributes", "used-before-assignment", "line-too-long", "too-many-arguments"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

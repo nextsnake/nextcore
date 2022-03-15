@@ -32,11 +32,21 @@ if TYPE_CHECKING:
     from .activity_type import activity_type as ActivityType
 
     class Activity(TypedDict):
+        """A Discord activity.
+
+        Attributes
+        ----------
+        name: :class:`str`
+            The activity name.
+        type: :class:`ActivityType`
+            The activity type.
+        created_at: :class:`int`
+            The activity start date. This is a unix timestamp.
+        timestamps: NotRequired[:class:`ActivityTimestamps`]
+            Unix timestamps for start and/or end of the game.
+        """
+
         name: str
-        """The activity name"""
         type: ActivityType
-        """The activity type"""
         created_at: int
-        """The activity start date. This is a unix timestamp"""
         timestamps: NotRequired[ActivityTimestamps]
-        """Unix timestamps for start and/or end of the game"""

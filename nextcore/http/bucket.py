@@ -130,6 +130,22 @@ class Bucket:
     async def update(
         self, remaining: int | None = None, reset_after: float | None = None, *, unlimited: bool = False
     ) -> None:
+        """Update the internal bucket state with information from the discord headers.
+
+        .. note::
+            This should be called before exiting the :func:`Bucket.acquire` context menu.
+        .. note::
+            This does not update the metadata!
+
+        Parameters
+        ----------
+        remaining: :class:`int`
+            The number of requests remaining in the bucket.
+        reset_after: :class:`float`
+            The time in seconds until the bucket resets.
+        unlimited: :class:`bool`
+            Whether the bucket is unlimited.
+        """
         if not unlimited:
             # Not unlimited
 

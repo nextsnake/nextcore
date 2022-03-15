@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING
 
 from aiohttp import ClientSession
 
+from .. import __version__ as nextcore_version
 from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
 from .global_lock import GlobalLock
@@ -91,7 +92,7 @@ class HTTPClient:
         self.timeout: float = timeout
         """The default request timeout in seconds."""
         self.default_headers: Final[dict[str, str]] = {
-            "User-Agent": f"DiscordBot (https://github.com/nextsnake/nextcore)"
+            "User-Agent": f"DiscordBot (https://github.com/nextsnake/nextcore, {nextcore_version})"
         }
         """Headers attached by default to every request."""
         self.max_retries: int = max_ratelimit_retries
@@ -168,8 +169,6 @@ class HTTPClient:
                         # Unlock it
                         logger.debug("Unlocking global!")
                         loop.call_later(retry_after, self._global_lock.unlock)
-
-                        continue
                     elif scope == "user":
                         # Failure in Bucket or clustering?
                         logger.warning(
@@ -233,22 +232,22 @@ class HTTPClient:
         if (bucket := self._buckets.get(route.bucket)) is not None:
             # Bucket already exists
             return bucket
-        elif (metadata := self._bucket_metadata.get(route.route)) is not None:
+        if (metadata := self._bucket_metadata.get(route.route)) is not None:
             # Create a new bucket with info from the metadata
             bucket = Bucket(metadata)
             self._buckets[route.bucket] = bucket
             return bucket
-        else:
-            # Create a new bucket with no info
-            # Create metadata
-            metadata = BucketMetadata()
-            self._bucket_metadata[route.route] = metadata
 
-            # Create the bucket
-            bucket = Bucket(metadata)
-            self._buckets[route.bucket] = bucket
+        # Create a new bucket with no info
+        # Create metadata
+        metadata = BucketMetadata()
+        self._bucket_metadata[route.route] = metadata
 
-            return bucket
+        # Create the bucket
+        bucket = Bucket(metadata)
+        self._buckets[route.bucket] = bucket
+
+        return bucket
 
     async def _update_bucket(self, response: ClientResponse, route: Route, bucket: Bucket) -> None:
         """Updates the bucket and metadata from the info received from the API."""

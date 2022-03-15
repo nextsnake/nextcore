@@ -28,5 +28,14 @@ if TYPE_CHECKING:
 
     # HTTP payloads
     class GetGateway(TypedDict):
+        """Get the gateway URL
+
+        See the `documentation <https://discord.dev/topics/gateway#get-gateway>`__
+
+        Attributes
+        ----------
+        url: :class:`str`
+            The URL to connect to the Discord gateway.
+        """
+
         url: str
-        """The URL to connect to the discord gateway."""

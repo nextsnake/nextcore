@@ -50,6 +50,8 @@ async def maybe_coro(coro: Callable[..., Any], *args: Any, **kwargs: Any) -> Any
     result = coro(*args, **kwargs)
 
     if isawaitable(result):
+        # coro was a async function
         return await result
-    else:
-        return result
+
+    # Not a async function, just return the result
+    return result

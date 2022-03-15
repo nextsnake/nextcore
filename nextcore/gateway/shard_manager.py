@@ -151,7 +151,7 @@ class ShardManager:
             self._active_shard_count = connection_info["shards"]
 
         if self.shard_ids is None:
-            shard_ids = [shard_id for shard_id in range(self._active_shard_count)]
+            shard_ids = list(range(self._active_shard_count))
         else:
             shard_ids = self.shard_ids
 
