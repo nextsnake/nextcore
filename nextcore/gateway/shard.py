@@ -142,7 +142,7 @@ class Shard:
         "_logger",
         "_received_heartbeat_ack",
     )
-    API_URL: Final[str] = "wss://gateway.discord.gg?v=10&compress=zlib-stream"
+    GATEWAY_URL: Final[str] = "wss://gateway.discord.gg?v=10&compress=zlib-stream"
     """The gateway URL to connect to"""
 
     def __init__(
@@ -221,7 +221,7 @@ class Shard:
         # Retry connection
         async for _ in ExponentialBackoff(0.5, 2, 10):
             try:
-                self._ws = await self.http_client.ws_connect(Shard.API_URL)
+                self._ws = await self.http_client.ws_connect(Shard.GATEWAY_URL)
                 break
             except ClientConnectorError:
                 self._logger.error("Failed to connect to gateway? Check your internet connection.")
