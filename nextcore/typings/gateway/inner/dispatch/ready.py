@@ -32,15 +32,28 @@ if TYPE_CHECKING:
     from ....objects.user import User
 
     class ReadyData(TypedDict):
+        """The inner payload for the READY event
+
+        Read the `documentation <https://discord.dev/topics/gateway#ready>`__
+
+        Attributes
+        ----------
+        v: :class:`int`
+            The Discord gateway version.
+        user: :class:`User`
+            The current bot.
+        guilds: list[:class:`UnavailableGuild`]
+            The list of guilds the bot is in.
+        session_id: :class:`str`
+            The current session ID. Used for resuming the connection
+        shard: NotRequired[tuple[:class:`int`, :class:`int`]]
+            The shard information sent when identifying.
+        application: NotRequired[dict[:class:`str`, :class:`int`]]
+            The application information sent when identifying. This only contains the ID and flags attributes.
+        """
         v: int
-        """The discord gateway version."""
         user: User
-        """The current user/bot"""
         guilds: list[UnavailableGuild]
-        """The guilds the bot is in."""
         session_id: str
-        """Session id for resuming."""
         shard: NotRequired[tuple[int, int]]
-        """Shard connection information. First int is shard id, second is shard count."""
         application: NotRequired[dict[str, int]]  # TODO: What do we do about partials?
-        """Application information. This only contains the id and flags"""
