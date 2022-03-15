@@ -403,7 +403,7 @@ class Shard:
         if self.should_reconnect:
             assert self._ws is not None, "_ws is not set?"
             if self._ws.closed:
-                self._ws = await self.http_client.ws_connect(Shard.API_URL)
+                self._ws = await self.http_client.ws_connect(Shard.GATEWAY_URL)
 
             # Discord expects us to wait for up to 5s before resuming?
             jitter = random()
