@@ -57,10 +57,10 @@ class Bucket:
     def __init__(self, metadata: BucketMetadata):
         self.metadata: BucketMetadata = metadata
         self._remaining: int | None = self.metadata.limit
-        self._reserved: list[RequestSession] = [] # Requests currently being processed
-        self._pending: list[RequestSession] = [] # Requests waiting for a spot
-        self._pending_reset: bool = False # Waiting for the bucket to reset
-        self._fetched_ratelimit_info: bool = False # Initial fetch of ratelimit info
+        self._reserved: list[RequestSession] = []  # Requests currently being processed
+        self._pending: list[RequestSession] = []  # Requests waiting for a spot
+        self._pending_reset: bool = False  # Waiting for the bucket to reset
+        self._fetched_ratelimit_info: bool = False  # Initial fetch of ratelimit info
 
     @asynccontextmanager
     async def acquire(self) -> AsyncIterator[None]:  # TODO: Fix type
