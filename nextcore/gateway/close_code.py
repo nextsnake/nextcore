@@ -31,8 +31,6 @@ class GatewayCloseCode(IntEnum):
         Read the `documentation <https://discord.dev/topics/opcodes-and-status-codes#gateway>`_
     """
 
-    __slots__ = ()
-
     UNKNOWN_ERROR = 4000
     """An unknown error occurred."""
     UNKNOWN_OPCODE = 4001

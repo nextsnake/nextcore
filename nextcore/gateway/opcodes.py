@@ -29,8 +29,6 @@ class GatewayOpcode(IntEnum):
     Enum of all opcodes that can be sent/received to/from the gateway.
     """
 
-    __slots__ = ()
-
     DISPATCH = 0
     """Can be received"""
     HEARTBEAT = 1
