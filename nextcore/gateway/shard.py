@@ -36,11 +36,9 @@ from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .errors import (
     DisallowedIntentsError,
-    DisconnectError,
     InvalidApiVersionError,
     InvalidIntentsError,
     InvalidShardCountError,
-    InvalidTokenError,
     ReconnectCheckFailedError,
     UnhandledCloseCodeError,
 )
