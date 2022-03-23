@@ -51,6 +51,7 @@ if TYPE_CHECKING:
         application: NotRequired[dict[:class:`str`, :class:`int`]]
             The application information sent when identifying. This only contains the ID and flags attributes.
         """
+
         v: int
         user: User
         guilds: list[UnavailableGuild]

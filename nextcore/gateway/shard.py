@@ -39,8 +39,10 @@ from .errors import (
     DisconnectError,
     InvalidApiVersionError,
     InvalidIntentsError,
+    InvalidShardCountError,
     InvalidTokenError,
     ReconnectCheckFailedError,
+    UnhandledCloseCodeError,
 )
 from .exponential_backoff import ExponentialBackoff
 from .opcodes import GatewayOpcode
@@ -423,46 +425,81 @@ class Shard:
         self.ready.set()
 
     async def _handle_disconnect(self, close_code: int) -> None:
-        # TODO: Is this really cleaner than having a ton of if blocks?
-        assert close_code not in (
-            GatewayCloseCode.SHARDING_REQUIRED,
-            GatewayCloseCode.DECODE_ERROR,
-            GatewayCloseCode.NOT_AUTHENTICATED,
-            GatewayCloseCode.ALREADY_AUTHENTICATED,
-        ), f"Received close code which should never be received. Code: {GatewayCloseCode(close_code)}"
-
         if close_code < 2000:
-            self._logger.debug("Received disconnect in 1xxx range, reconnecting")
-            await self.connect()
-        elif close_code in (GatewayCloseCode.SESSION_TIMEOUT, GatewayCloseCode.INVALID_SEQUENCE):
-            # Delete session and reconnect
-            self.session_id = None
-            self.session_sequence_number = None
+            self._logger.info("Received close code in 1xxx range, reconnecting. This is usually due to network issues.")
             await self.connect()
         elif close_code == GatewayCloseCode.UNKNOWN_ERROR:
+            # Unknown error, best we can do is just reconnect.
+            self._logger.info("Recieved unknown error reconnect, reconnecting.")
+            await self.connect()
+        elif close_code == GatewayCloseCode.UNKNOWN_OPCODE:
+            # This is probably a library fault!
+            self._logger.error(
+                "Sent unknown opcode, this is probably a library issue! Please make a issue on https://github.com/nextsnake/nextcore/issues"
+            )
+            await self.connect()  # Yes this can lead to a infinite loop. Not much we can do about it.
+        elif close_code == GatewayCloseCode.DECODE_ERROR:
+            # This is probably a library fault!
+            self._logger.error(
+                "Sent invalid data, this is probably a library issue! Please make a issue on https://github.com/nextsnake/nextcore/issues"
+            )
+            await self.connect()  # Yes this can lead to a infinite loop. Not much we can do about it.
+        elif close_code == GatewayCloseCode.NOT_AUTHENTICATED:
+            # This is probably a library fault!
+            self._logger.error(
+                "Sent a payload before authenticating. This is probably a library issue! Please make a issue on https://github.com/nextsnake/nextcore/issues"
+            )
+            await self.connect()  # Yes this can lead to a infinite loop. Not much we can do about it.
+        elif close_code == GatewayCloseCode.ALREADY_AUTHENTICATED:
+            # This is probably a library fault!
+            self._logger.error(
+                "Sent IDENTIFY/RESUME payload more than once. This is probably a library issue! Please make a issue on https://github.com/nextsnake/nextcore/issues"
+            )
+            await self.connect()  # Yes this can lead to a infinite loop. Not much we can do about it.
+        elif close_code == GatewayCloseCode.INVALID_SEQUENCE:
+            # Session data is broken? Let's just reconnect and hope for the best.
+            self._logger.info("Sent a invalid sequence number while resuming, let's clear the session and try again.")
+
+            # Clear session
+            self.session_sequence_number = None
+            self.session_id = None
+
             # Reconnect
             await self.connect()
         elif close_code == GatewayCloseCode.RATE_LIMITED:
-            self._logger.warning("Received gateway ratelimit disconnect. This should not happen?")
+            self._logger.error(
+                "Sent too many messages to the gateway. This is probably a library issue! Please make a issue on https://github.com/nextsnake/nextcore/issues"
+            )
+            await self.connect()  # Yes this can lead to a infinite loop. Not much we can do about it.
+        elif close_code == GatewayCloseCode.SESSION_TIMEOUT:
+            self._logger.info("Session timed out, reconnecting without one.")
+
+            # Clear session
+            self.session_sequence_number = None
+            self.session_id = None
+
+            # Reconnect
             await self.connect()
+        elif close_code == GatewayCloseCode.INVALID_SHARD:
+            self.dispatcher.dispatch("critical", InvalidShardCountError())
+        elif close_code == GatewayCloseCode.SHARDING_REQUIRED:
+            self._logger.critical(
+                "Received sharding required while sharding? Please make a issue on https://github.com/nextsnake/nextcore/issues"
+            )
+            # TODO: Should this be merged into the else block?
+            self.dispatcher.dispatch("critical", UnhandledCloseCodeError(close_code))
         elif close_code == GatewayCloseCode.INVALID_API_VERSION:
-            self._logger.warning("Library out of date!")
+            self._logger.critical("Received invalid api version. Please update nextcore!")
             self.dispatcher.dispatch("critical", InvalidApiVersionError())
-        elif close_code == GatewayCloseCode.AUTHENTICATION_FAILED:
-            self._logger.debug("Disconnected due to invalid token")
-            self.dispatcher.dispatch("critical", InvalidTokenError())
         elif close_code == GatewayCloseCode.INVALID_INTENTS:
-            self._logger.debug("Disconnected due to invalid intents")
+            self._logger.critical("Sent invalid intents. This should never happen!")
             self.dispatcher.dispatch("critical", InvalidIntentsError())
         elif close_code == GatewayCloseCode.DISALLOWED_INTENTS:
-            self._logger.debug("Disconnected due to disallowed intents")
+            self._logger.critical("Sent disallowed intents. This should be enabled in the settings.")
             self.dispatcher.dispatch("critical", DisallowedIntentsError())
         else:
-            self._logger.error("Received unknown close code %s. This can probably be fixed by updating!")
-            self.dispatcher.dispatch(
-                "critical",
-                DisconnectError(f"Received unknown close code {close_code}. This can probably be fixed by updating!"),
-            )
+            self.dispatcher.dispatch("critical", UnhandledCloseCodeError(close_code))
+            raise RuntimeError(f"Close code not handled: {close_code}")
 
     # Send wrappers
     async def identify(self) -> None:

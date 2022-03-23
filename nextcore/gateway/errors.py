@@ -35,7 +35,7 @@ class ReconnectCheckFailedError(Exception):
     __slots__ = ()
 
     def __init__(self) -> None:
-        super().__init__('Reconnect check failed. This shard should be considered "dead".')
+        super().__init__("Reconnect check failed. This shard should be considered 'dead'.")
 
 
 class DisconnectError(Exception):
@@ -70,3 +70,16 @@ class InvalidApiVersionError(DisconnectError):
 
     def __init__(self) -> None:
         super().__init__("The api version provided is invalid. This can probably be fixed by updating!")
+
+class InvalidShardCountError(DisconnectError):
+    """The shard count provided is invalid."""
+
+    def __init__(self) -> None:
+        super().__init__("The shard count provided is invalid. This can be due to specifying a shard_id larger than shard_count or that the bot needs more shards to connect.")
+
+class UnhandledCloseCodeError(DisconnectError):
+    """The close code provided is unknown to the library and as such it cannot be handled properly."""
+
+    def __init__(self, code: int) -> None:
+        self.code: int = code
+        super().__init__(f"The close code provided is unhandled: {code}")

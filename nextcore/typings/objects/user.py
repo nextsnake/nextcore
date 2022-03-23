@@ -66,6 +66,7 @@ if TYPE_CHECKING:
         public_flags: NotRequired[:class:`int`]
             The user's public flags.
         """
+
         id: int
         username: str
         discriminator: str
