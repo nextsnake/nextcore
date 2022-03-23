@@ -71,11 +71,15 @@ class InvalidApiVersionError(DisconnectError):
     def __init__(self) -> None:
         super().__init__("The api version provided is invalid. This can probably be fixed by updating!")
 
+
 class InvalidShardCountError(DisconnectError):
     """The shard count provided is invalid."""
 
     def __init__(self) -> None:
-        super().__init__("The shard count provided is invalid. This can be due to specifying a shard_id larger than shard_count or that the bot needs more shards to connect.")
+        super().__init__(
+            "The shard count provided is invalid. This can be due to specifying a shard_id larger than shard_count or that the bot needs more shards to connect."
+        )
+
 
 class UnhandledCloseCodeError(DisconnectError):
     """The close code provided is unknown to the library and as such it cannot be handled properly."""
