@@ -78,5 +78,21 @@ class TimesPer:
             return None
         return self._reset_at
 
+    @property
+    def reset_after(self) -> float | None:
+        """How many seconds until the ratelimit will reset
+        
+        Returns
+        -------
+        :class:`float`
+            The number of seconds until the ratelimit will reset
+        :data:`None`
+            The ratelimit is not pending reset
+        """
+        reset_at = self.reset_at
+        if reset_at is None:
+            return None
+        return time() - reset_at
+
     def __repr__(self) -> str:
         return f"TimesPer(total={self.total}, per={self.per}, remaining={self.remaining} waiting={self._lock.locked} reset_at={self.reset_at})"
