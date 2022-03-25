@@ -35,7 +35,7 @@ class ReconnectCheckFailedError(Exception):
     __slots__ = ()
 
     def __init__(self) -> None:
-        super().__init__("Reconnect check failed. This shard should be considered 'dead'.")
+        super().__init__("Reconnect check failed. This shard should be considered \"dead\".")
 
 
 class DisconnectError(Exception):
