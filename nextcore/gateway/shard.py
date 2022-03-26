@@ -258,11 +258,9 @@ class Shard:
         assert self._ws is not None, "Websocket is not connected"
         assert self._ws.closed is False, "Websocket is closed"
 
-        # We are formatting data outside to provide a JSON string to the logger. TODO: Possibly change this?
-        formatted_data = json_dumps(data)
-        self._logger.debug("Sent: %s", formatted_data)
+        self._logger.debug("Sent: %s", data)
 
-        await self._ws.send_str(formatted_data)
+        await self._ws.send_json(data, dumps=json_dumps)
 
     # Loops
     async def _receive_loop(self) -> None:
@@ -329,10 +327,11 @@ class Shard:
             self._logger.debug("Received partial data, waiting for more")
             return
 
-        decoded_data = raw_data.decode("utf-8")
-        self._logger.debug("Received %s", decoded_data)
+        # Discord is trusted to send valid payloads here.
+        data = json_loads(raw_data.decode("utf-8"))
 
-        data = json_loads(decoded_data)
+        self._logger.debug("Received %s", data)
+
         # We are going to trust discord to provide us with the correct data here.
         # If it doesn't we have bigger issues
         frozen_data: ServerGatewayPayload = frozendict(data)  # type: ignore [assignment]
