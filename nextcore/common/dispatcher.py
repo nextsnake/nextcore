@@ -54,13 +54,13 @@ class Dispatcher:
         self._exception_handlers: list[Callable[[Exception], Any]] = []
 
         self._listeners: defaultdict[Any, list[Callable[..., Any]]] = defaultdict(list)
-        self._global_listeners: list[Callable[..., Any]] = []
+        self._global_listeners: list[Callable[[Any, *Any], Any]] = []
 
         # Conditional listeners are listeners which can only be called once and that also has a check.
         self._wait_for_listeners: defaultdict[
             Any, list[tuple[Callable[..., Awaitable[bool] | bool], Future[list[Any]]]]
         ] = defaultdict(list)
-        self._wait_for_global_listeners: list[tuple[Callable[..., Awaitable[bool] | bool], Future[list[Any]]]] = []
+        self._wait_for_global_listeners: list[tuple[Callable[[Any, *Any], Awaitable[bool] | bool], Future[list[Any]]]] = []
 
     def add_listener(self, callback: Callable[..., Any], event_name: Any = None) -> None:
         """Adds a listener to the dispatcher.
