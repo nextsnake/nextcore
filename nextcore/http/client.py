@@ -208,8 +208,9 @@ class HTTPClient:
     async def _ensure_session(self) -> None:
         """Makes sure :attr:`HTTPClient._session` is set.
 
-        This is made due to
+        This is made due to :class:`aiohttp.ClientSession` requring to being created in a async context.
         """
+        # Maybe merge this into _request?
         if self._session is None:
             self._session = ClientSession()
 
