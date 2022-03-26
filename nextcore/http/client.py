@@ -76,9 +76,6 @@ class HTTPClient:
         "_session",
     )
 
-    API_BASE: ClassVar[str] = "https://discord.com/api/v10"
-    """The API base URL. This is what changes the API version or if the canary API is used."""
-
     def __init__(
         self,
         *,
