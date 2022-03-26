@@ -81,7 +81,7 @@ class TimesPer:
     @property
     def reset_after(self) -> float | None:
         """How many seconds until the ratelimit will reset
-        
+
         Returns
         -------
         :class:`float`

@@ -60,7 +60,9 @@ class Dispatcher:
         self._wait_for_listeners: defaultdict[
             Any, list[tuple[Callable[..., Awaitable[bool] | bool], Future[list[Any]]]]
         ] = defaultdict(list)
-        self._wait_for_global_listeners: list[tuple[Callable[[Any, *Any], Awaitable[bool] | bool], Future[list[Any]]]] = []
+        self._wait_for_global_listeners: list[
+            tuple[Callable[[Any, *Any], Awaitable[bool] | bool], Future[list[Any]]]
+        ] = []
 
     def add_listener(self, callback: Callable[..., Any], event_name: Any = None) -> None:
         """Adds a listener to the dispatcher.
