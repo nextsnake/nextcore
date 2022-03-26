@@ -72,7 +72,7 @@ class Dispatcher:
         callback: typing.Callable[..., :data:`typing.Any`]
             The callback to be added.
         event_name: :data:`typing.Any`
-            The event name to listen to. If:class:`None`, the callback will receive all events. Global listeners will also receive the event name as the first param.
+            The event name to listen to. If :class:`None`, the callback will receive all events. Global listeners will also receive the event name as the first param.
         """
         logger.debug("Adding listener for event %s", event_name)
         if event_name is None:
