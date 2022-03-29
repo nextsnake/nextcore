@@ -35,7 +35,7 @@ from .global_lock import GlobalLock
 from .route import Route
 
 if TYPE_CHECKING:
-    from typing import Any, ClassVar, Final
+    from typing import Any, Final
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
 
