@@ -41,17 +41,23 @@ class TimesPer:
         The total number of times this can be used per period.
     per: float
         How long each period lasts in seconds.
+
+    Attributes
+    ----------
+    total: :class:`int`
+        The amount of times this can be used per period.
+    remaining: :class:`int`
+        How many times this can be used this period.
+    per: :class:`float`
+        How long each period lasts in seconds.
     """
 
     __slots__ = ("total", "remaining", "per", "_reset_at", "_lock")
 
     def __init__(self, total: int, per: float):
         self.total: int = total
-        """How many times the ratelimit can be used before it can be reset to total"""
         self.remaining: int = total
-        """How many times the ratelimit can be used before it can be reset to total"""
         self.per: float = per
-        """How many seconds before reset"""
 
         self._reset_at: float | None = None
         self._lock: Lock = Lock()
@@ -72,7 +78,10 @@ class TimesPer:
 
     @property
     def reset_at(self) -> float | None:
-        """When the ratelimit will reset"""
+        """When the ratelimit will reset
+        
+        This is a unix timestamp
+        """
         reset_at = self._reset_at
         if reset_at is None or reset_at <= time():
             return None
