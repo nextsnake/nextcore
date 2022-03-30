@@ -33,6 +33,7 @@ from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
 from .global_lock import GlobalLock
 from .route import Route
+from .errors import BadRequestError, ForbiddenError, HTTPRequestError, InternalServerError, NotFoundError, RateLimitingFailedError, UnauthorizedError
 
 if TYPE_CHECKING:
     from typing import Any, Final
@@ -132,7 +133,9 @@ class HTTPClient:
         # Merge default headers with user provided ones
         headers = {**self.default_headers, **headers}
 
-        for _ in range(self.max_retries):
+        retries = max(self.max_retries + 1, 1)
+
+        for _ in range(retries):
             bucket = await self._get_bucket(route)
             async with bucket.acquire():
                 if not route.ignore_global:
@@ -179,12 +182,24 @@ class HTTPClient:
                         # Well shit... Lets try again and hope for the best.
                         logger.warning("Unknown ratelimit scope %s received. Maybe try updating?", scope)
                 elif response.status >= 300:
-                    raise NotImplementedError("Error handling")
+                    error = await response.json()
+                    if response.status == 400:
+                        raise BadRequestError(error, response)
+                    elif response.status == 401:
+                        raise UnauthorizedError(error, response)
+                    elif response.status == 403:
+                        raise ForbiddenError(error, response)
+                    elif response.status == 404:
+                        raise NotFoundError(error, response)
+                    elif response.status >= 500:
+                        raise InternalServerError(error, response)
+                    else:
+                        raise HTTPRequestError(error, response)
                 else:
                     # Should be in 0-200 range
                     return response
-
-        raise RateLimitFailedError(self.max_retries)
+        # This should always be set as it has to pass through the loop atleast once.
+        raise RateLimitingFailedError(self.max_retries, response) # type: ignore [reportUnboundVariable]
 
     async def ws_connect(self, url: str, **kwargs: Any) -> ClientWebSocketResponse:
         """Connects to a websocket.
