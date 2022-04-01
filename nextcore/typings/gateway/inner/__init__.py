@@ -21,7 +21,6 @@
 
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
     from .dispatch import *
     from .hello import HelloData

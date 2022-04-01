@@ -51,11 +51,11 @@ if TYPE_CHECKING:
 
     from nextcore.typings import (
         ClientGatewayPayload,
+        HelloData,
+        ReadyData,
         ServerGatewayDispatchPayload,
         ServerGatewayPayload,
-        ReadyData,
-        HelloData,
-        UpdatePresence
+        UpdatePresence,
     )
 
     from ..http import HTTPClient

@@ -20,5 +20,5 @@
 # DEALINGS IN THE SOFTWARE.
 
 from .gateway import *
-from .objects import *
 from .http import *
+from .objects import *

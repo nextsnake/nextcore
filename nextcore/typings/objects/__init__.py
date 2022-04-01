@@ -21,7 +21,6 @@
 
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
     from .activity import Activity
     from .activity_assets import ActivityAssets
@@ -49,7 +48,6 @@ if TYPE_CHECKING:
     from .status_type import StatusType
     from .unavailable_guild import UnavailableGuild
     from .update_presence import UpdatePresence
-    from .verification_level import VerificationLevel
     from .user import User
     from .verification_level import VerificationLevel
 
@@ -84,4 +82,3 @@ if TYPE_CHECKING:
         "User",
         "VerificationLevel",
     )
-
