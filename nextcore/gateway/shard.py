@@ -49,14 +49,14 @@ from .times_per import TimesPer
 if TYPE_CHECKING:
     from typing import Final, cast
 
-    from nextcore.typings.gateway.inner.dispatch.ready import ReadyData
-    from nextcore.typings.gateway.inner.hello import HelloData
-    from nextcore.typings.gateway.outer import (
+    from nextcore.typings import (
         ClientGatewayPayload,
         ServerGatewayDispatchPayload,
         ServerGatewayPayload,
+        ReadyData,
+        HelloData,
+        UpdatePresence
     )
-    from nextcore.typings.objects import UpdatePresence
 
     from ..http import HTTPClient
 
