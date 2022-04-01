@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Literal
 
-    verification_level = Literal[
+    VerificationLevel = Literal[
         0,  # None/unrestricted
         1,  # Low/Verified email
         2,  # Medium/Must be registered on Discord for longer than 5 minutes

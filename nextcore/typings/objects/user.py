@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import NotRequired
 
-    from .locale import locale as user_locale
+    from .locale import Locale
 
     class User(TypedDict):
         """A Discord user.
@@ -76,7 +76,7 @@ if TYPE_CHECKING:
         mfa_enabled: NotRequired[bool]
         banner: NotRequired[str]
         accent_color: NotRequired[str]
-        locale: NotRequired[user_locale]
+        locale: NotRequired[Locale]
         verified: NotRequired[bool]
         email: NotRequired[str]
         flags: NotRequired[int]

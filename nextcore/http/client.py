@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
 
-    from ..typings.http.get_gateway_bot import GetGatewayBot
+    from ..typings.http import GetGatewayBot
 
 logger = getLogger(__name__)
 

@@ -26,9 +26,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import TypedDict
 
-    from .permission_overwrite_type import (
-        permission_overwrite_type as PermissionOverwriteType,
-    )
+    from .permission_overwrite_type import PermissionOverwriteType
 
     class PermissionOverwrite(TypedDict):
         id: str

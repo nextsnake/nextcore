@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Literal
 
-    message_notifications_level = Literal[
+    MessageNotificationsLevel = Literal[
         0,  # All messages
         1,  # Only mentions
     ]

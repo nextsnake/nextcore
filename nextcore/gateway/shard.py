@@ -56,7 +56,7 @@ if TYPE_CHECKING:
         ServerGatewayDispatchPayload,
         ServerGatewayPayload,
     )
-    from nextcore.typings.objects.update_presence import UpdatePresence
+    from nextcore.typings.objects import UpdatePresence
 
     from ..http import HTTPClient
 

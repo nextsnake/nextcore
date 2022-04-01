@@ -27,18 +27,14 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     from .emoji import Emoji
-    from .explicit_content_filter_level import (
-        explicit_content_filter_level as ExplicitContentFilterLevel,
-    )
-    from .guild_feature import guild_feature as GuildFeature
+    from .explicit_content_filter_level import ExplicitContentFilterLevel
+    from .guild_feature import GuildFeature
     from .member import Member
-    from .message_notifications_level import (
-        message_notifications_level as MessageNotificationsLevel,
-    )
-    from .mfa_level import mfa_level as MFALevel
+    from .message_notifications_level import MessageNotificationsLevel
+    from .mfa_level import MFALevel
     from .role import Role
     from .unavailable_guild import UnavailableGuild
-    from .verification_level import verification_level as VerificationLevel
+    from .verification_level import VerificationLevel
     from .voice_state import VoiceState
 
     class Guild(UnavailableGuild):

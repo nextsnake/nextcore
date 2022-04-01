@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Literal
 
-    mfa_level = Literal[
+    MFALevel = Literal[
         0,  # Not enabled
         1,  # Elevated, 2fa required to do moderation actions
     ]

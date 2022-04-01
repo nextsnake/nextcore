@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Literal
 
-    permission_overwrite_type = Literal[
+    PermissionOverwriteType = Literal[
         0,  # Role
         1,  # Member
     ]

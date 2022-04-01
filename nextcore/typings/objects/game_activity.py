@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from .activity_party import ActivityParty
     from .activity_secrets import ActivitySecrets
 
-    class GameActivty(Activity):
+    class GameActivity(Activity):
         application_id: str
         """The application ID of the game."""
         details: str

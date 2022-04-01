@@ -26,4 +26,4 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Literal
 
-    explicit_content_filter_level = Literal[0, 1, 2]  # Disabled  # Members without roles  # All members
+    ExplicitContentFilterLevel = Literal[0, 1, 2]  # Disabled  # Members without roles  # All members

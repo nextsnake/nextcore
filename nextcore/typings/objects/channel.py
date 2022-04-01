@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import NotRequired
 
-    from .channel_type import channel_type as ChannelType
+    from .channel_type import ChannelType
     from .permission_overwrite import PermissionOverwrite
 
     class Channel(TypedDict):

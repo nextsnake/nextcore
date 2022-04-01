@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Literal
 
-    guild_feature = Literal[
+    GuildFeature = Literal[
         "ANIMATED_ICON",  # Guild has access to set a custom animated icon.
         "BANNER",  # Guild has access to set a custom banner.
         "COMMERCE",  # Guild has access to use commerce features. (create store channels)

@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Literal
 
-    channel_type = Literal[
+    ChannelType = Literal[
         0,  # Guild text channel
         1,  # DM
         2,  # Guild voice channel
