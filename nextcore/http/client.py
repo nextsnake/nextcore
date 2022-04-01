@@ -31,9 +31,17 @@ from aiohttp import ClientSession
 from .. import __version__ as nextcore_version
 from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
+from .errors import (
+    BadRequestError,
+    ForbiddenError,
+    HTTPRequestError,
+    InternalServerError,
+    NotFoundError,
+    RateLimitingFailedError,
+    UnauthorizedError,
+)
 from .global_lock import GlobalLock
 from .route import Route
-from .errors import BadRequestError, ForbiddenError, HTTPRequestError, InternalServerError, NotFoundError, RateLimitingFailedError, UnauthorizedError
 
 if TYPE_CHECKING:
     from typing import Any, Final
@@ -199,7 +207,7 @@ class HTTPClient:
                     # Should be in 0-200 range
                     return response
         # This should always be set as it has to pass through the loop atleast once.
-        raise RateLimitingFailedError(self.max_retries, response) # type: ignore [reportUnboundVariable]
+        raise RateLimitingFailedError(self.max_retries, response)  # type: ignore [reportUnboundVariable]
 
     async def ws_connect(self, url: str, **kwargs: Any) -> ClientWebSocketResponse:
         """Connects to a websocket.

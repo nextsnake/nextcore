@@ -29,7 +29,15 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     class ActivityParty(TypedDict):
+        """Typings for the `ActivityParty <https://discord.dev/topics/gateway#activity-object-activity-party>`__ object
+
+        Attributes
+        ----------
+        id: NotRequired[:class:`str`]
+            The party's ID.
+        size: NotRequired[tuple[:class:`int`, :class:`int`]]
+            The party's size. First int is the current size, second int is the max size.
+        """
+
         id: NotRequired[str]
-        """The party id"""
         size: NotRequired[tuple[int, int]]
-        """The party size. First int is current size, second is max size"""

@@ -27,5 +27,12 @@ if TYPE_CHECKING:
     from typing import TypedDict
 
     class HelloData(TypedDict):
+        """Typings for the `hello <https://discord.dev/topics/gateway#hello>`__ payload.
+
+        Attributes
+        ----------
+        heartbeat_interval: :class:`int`
+            The heartbeat interval in milliseconds. The initial heartbeat should be after :attr:`HelloData.heartbeat_interval` * :meth:`random.random` milliseconds.
+        """
+
         heartbeat_interval: int
-        """Interval in milliseconds between two heartbeats"""

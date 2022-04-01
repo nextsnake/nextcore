@@ -26,9 +26,8 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import TypeVar
+    from typing_extensions import Self
 
-    T = TypeVar("T")
 
 logger = getLogger(__name__)
 
@@ -68,7 +67,7 @@ class ExponentialBackoff:
         """What the next value of the backoff should be"""
         return self._current_time * self.base
 
-    def __aiter__(self: T) -> T:
+    def __aiter__(self) -> Self:
         return self
 
     async def __anext__(self) -> None:

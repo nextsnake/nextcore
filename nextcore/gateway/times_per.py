@@ -79,7 +79,7 @@ class TimesPer:
     @property
     def reset_at(self) -> float | None:
         """When the ratelimit will reset
-        
+
         This is a unix timestamp
         """
         reset_at = self._reset_at

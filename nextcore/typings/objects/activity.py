@@ -29,10 +29,10 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     from .activity_timestamps import ActivityTimestamps
-    from .activity_type import activity_type as ActivityType
+    from .activity_type import ActivityType
 
     class Activity(TypedDict):
-        """A Discord activity.
+        """Typings for the `Activity <https://discord.dev/topics/gateway#activity-object-activity-structure>`__ object.
 
         Attributes
         ----------

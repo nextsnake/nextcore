@@ -27,7 +27,15 @@ if TYPE_CHECKING:
     from typing import TypedDict
 
     class ActivityButton(TypedDict):
+        """A typing for the `ActivityButton <https://discord.dev/topics/gateway#activity-object-activity-buttons>` object.
+
+        Attributes
+        ----------
+        label: :class:`str`
+            The button's label.
+        url: :class:`str`
+            URL to open when the button is pressed.
+        """
+
         label: str
-        """Label for the button"""
         url: str
-        """URL to open when the button is clicked"""

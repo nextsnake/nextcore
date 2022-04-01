@@ -29,9 +29,21 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     class ActivityAssets(TypedDict):
+        """Typings for the `ActivityAssets <https://discord.dev/topics/gateway#activity-object-activity-assets>`__ object.
+
+        Attributes
+        ----------
+        large_image: :class:`str`
+            The large image asset id. This can be served from https://cdn.discordapp.com/app-assets/:attr`Application.id`/asset_id.png
+        large_text: :class:`str`
+            The large alt/hover text.
+        small_image: :class:`str`
+            The small image asset id. This can be served from https://cdn.discordapp.com/app-assets/:attr`Application.id`/asset_id.png
+        small_text: :class:`str`
+            The small alt/hover text.
+        """
+
         large_image: NotRequired[str]
         large_text: NotRequired[str]
-        """Alt text for :attr:`ActivityAssets.large_image`."""
         small_image: NotRequired[str]
         small_text: NotRequired[str]
-        """Alt text for :attr:`ActivityAssets.small_image`."""

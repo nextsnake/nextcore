@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Literal
 
-    activity_type = Literal[
+    ActivityType = Literal[
         0,  # Game
         1,  # Streaming
         2,  # Listening
