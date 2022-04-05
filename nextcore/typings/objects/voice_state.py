@@ -31,16 +31,47 @@ if TYPE_CHECKING:
     from .member import Member
 
     class VoiceState(TypedDict):
+        """A :class:`Member`s' voice state.
+
+        Attributes
+        ----------
+        guild_id: NotRequired[:class:`str`]
+            The guild ID this voice state is for.
+        channel_id: :class:`str` | :data:`None`
+            The ID of the voice channel this member is currently in.
+        user_id: :class:`str`
+            The :class:`User`s' ID this voice state is for.
+        member: NotRequired[:class:`Member`]
+            The :class:`Member` this voice state is for.
+        session_id: :class:`str`
+            The voice session ID for this member.
+        deaf: :class:`bool`
+            Whether this member is server deafened.
+        mute: :class:`bool`
+            Whether this member is server muted.
+        self_deaf: :class:`bool`
+            Whether this member has deafened themselves.
+        self_mute: :class:`bool`
+            Whether this member has muted themselves.
+        self_stream: NotRequired[:class:`bool`]
+            Whether this member is streaming.
+        self_video: :class:`bool`
+            Whether this member has turned on their webcam.
+        suppress: :class:`bool`
+            Muted by the bot. Doesn't seem to be used for bots.
+        request_to_speak_timestamp: :class:`str`
+            ISO8601 timestamp of when the user requested to speak in a stage channel.
+        """
         guild_id: NotRequired[str]
         channel_id: str | None
-        user_id: str  # The user ID this voice state is for
+        user_id: str
         member: NotRequired[Member]
         session_id: str
-        deaf: bool  # Server deafened
-        mute: bool  # Server muted
+        deaf: bool
+        mute: bool
         self_deaf: bool
         self_mute: bool
-        self_stream: NotRequired[bool]  # Go live
-        self_video: bool  # Web cam
-        suppress: bool  # Muted by the current user
+        self_stream: NotRequired[bool]
+        self_video: bool
+        suppress: bool
         request_to_speak_timestamp: str | None
