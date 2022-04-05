@@ -32,19 +32,32 @@ if TYPE_CHECKING:
     from .user import User
 
     class Emoji(TypedDict):
+        """A custom emoji.
+
+        Attributes
+        ----------
+        id: :class:`str` | :data:`None`
+            The emoji's ID.
+        name: :class:`str` | :data:`None`
+            The emoji's name. Can be :data:`None` in reactions.
+        roles: NotRequired[:class:`Role`]
+            Roles allowed to use this emoji. If this is not set, everyone can use it.
+        user: NotRequired[:class:`User`]
+            The user that created this emoji.
+        require_colons: NotRequired[:class:`bool`]
+            Whether this emoji must be wrapped in colons.
+        managed: NotRequired[:class:`bool`]
+            Whether this emoji is managed by an integration.
+        animated: NotRequired[:class:`bool`]
+            Whether this emoji is animated.
+        available: NotRequired[:class:`bool`]
+            Whether this emoji is available to use.
+        """
         id: str | None
-        """The emoji's ID"""
         name: str | None
-        """The emoji's name. Can be None in reactions"""
         roles: NotRequired[Role]
-        """Roles allowed to use this emoji. If this is not set, everyone can use it"""
         user: NotRequired[User]
-        """The user who created this emoji"""
         require_colons: NotRequired[bool]
-        """Whether this emoji must be wrapped in colons"""
         managed: NotRequired[bool]
-        """Whether this emoji is managed by an integration"""
         animated: NotRequired[bool]
-        """Whether this emoji is animated"""
         available: NotRequired[bool]
-        """Whether this emoji is available to use. This may be due to losing a nitro boost level."""

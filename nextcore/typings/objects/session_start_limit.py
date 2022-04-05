@@ -27,10 +27,20 @@ if TYPE_CHECKING:
     from typing import TypedDict
 
     class SessionStartLimit(TypedDict):
+        """Information about how much you can connect to the gateway.
+        
+        Attributes
+        ----------
+        total: :class:`int`
+            How many times total you can send a IDENTIFY payload per hour. If this limit is hit the bot token will get reset and the bot owner will get a system message.
+        remaining: :class:`int`
+            How many times you can send a IDENTIFY payload before you hit the limit. If this limit is hit the bot token will get reset and the bot owner will get a system message.
+        reset_after: :class:`int`
+            When the ratelimit resets in seconds.
+        max_concurrency: :class:`int`
+            How many concurrent IDENTIFY payloads can be sent to the gateway.
+        """
         total: int
-        """How many times total you can identify per hour"""
         remaining: int
-        """How many times can you identify before getting ratelimited"""
         reset_after: int
-        """When the ratelimit resets in seconds"""
         max_concurrency: int

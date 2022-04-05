@@ -31,24 +31,43 @@ if TYPE_CHECKING:
     from .role_tags import RoleTags
 
     class Role(TypedDict):
-        id: int
-        """The role's ID"""
+        """A role in a :class:`Guild`.
+
+        Attributes
+        ----------
+        id: :class:`str`
+            The ID of the role.
+        name: :class:`str`
+            The name of the role.
+        color: :class:`int`
+            The color of the role. 
+            The role color highest up in the hierarchy is the one displayed on clients.
+            If this is 0 it will not count towards a :class:`Member`'s color.
+        hoist: :class:`bool`
+            Whether the role is displayed separately in the member list.
+        icon: NotRequired[:class:`str` | :data:`None`]
+            The role's icon hash of the role.
+        unicode_emoji: NotRequired[:class:`str` | :data:`None`]
+            The role's icon emoji.
+        position: :class:`int`
+            The position in the list of roles. If two positions are equal, then the roles are sorted by id.
+        permissions: :class:`int`
+            The permissions for the role. This is a bitwise Permissions flag.
+        managed: :class:`bool`
+            Whether the role is managed by an integration.
+        mentionable: :class:`bool`
+            Whether the role is mentionable by everyone
+        tags: NotRequired[:class:`RoleTags`]
+            Info about the managed role.
+        """
+        id: str
         name: str
-        """The role's name"""
         color: int
-        """The role's color. If this is 0 it will not count towards a user's color"""
         hoist: bool
-        """Whether the role is hoisted in the member sidebar"""
         icon: NotRequired[str | None]
-        """The role's icon hash"""
         unicode_emoji: NotRequired[str | None]
-        """The role's unicode emoji, used as a role icon"""
         position: int
-        """The role's position in the list of roles"""
         permissions: str
-        """The role's permissions"""
         managed: bool
-        """Whether the role is managed by an integration"""
         mentionable: bool
-        """Whether the role can be mentioned by everyone"""
         tags: NotRequired[RoleTags]

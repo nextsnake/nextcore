@@ -31,25 +31,41 @@ if TYPE_CHECKING:
     from .user import User
 
     class Member(TypedDict):
-        user: NotRequired[User]
-        """The user that is a member of the guild."""
-        nick: NotRequired[str]
-        """The user's nickname in the guild. Not present if the user has no nickname."""
-        avatar: NotRequired[str]
-        """The user's avatar in the guild. Not present if the user has no guild spesific avatar."""
-        roles: list[str]
-        """The user's roles in the guild. This is a list of role IDs."""
+        """A member of a guild.
+        
+        Attributes
+        ----------
+        user: NotRequired[:class:`User`]
+            The user that is a member of the :class:`Guild`. This is provided seperately in `MESSAGE_CREATE` and `MESSAGE_UPDATE` events.
+        nick: NotRequired[:class:`str`]
+            The nickname of the user in this :class:`Guild`. Not present if the user has no nickname.
+        avatar: NotRequired[:class:`str`]
+            The avatar hash of this user's :class:`Guild` avatar. Not present if the user has no :class:`Guild` avatar.
+        roles: list[:class:`str`]
+            A list of :attr:`Role.id`'s that this member has.
         joined_at: str
-        """When the user joined the guild. This is a ISO8601 timestamp"""
+            When the user joined the guild. This is a ISO8601 timestamp.
+        premium_since: NotRequired[:class:`str` | :data:`None`]
+            When the user started boosting the guild. This is a ISO8601 timestamp.
+        deaf: :class:`bool`
+            Whether the user is server deafened in voice channels.
+        mute: :class:`bool`
+            Whether the user is server muted in voice channels.
+        pending: NotRequired[:class:`bool`]
+            Whether the user is pending verification. This will not be set in non GUILD_* events where the user has to finish verification.
+        permissions: :class:`str`
+            The members guild permissions. This is a bitwise Permission flag.
+        communication_disabled_until: NotRequired[:class:`str` | :data:`None`]
+            ISO8601 Timestamp of when the user's timeout ends. None or a time in the past if the user is not timed out.
+        """
+        user: NotRequired[User]
+        nick: NotRequired[str]
+        avatar: NotRequired[str]
+        roles: list[str]
+        joined_at: str
         premium_since: NotRequired[str | None]
-        """When the user started boosting the guild. This is a ISO8601 timestamp."""
         deaf: bool
-        """Whether the user is server deafened in voice channels."""
         mute: bool
-        """Whether the user is server muted in voice channels."""
         pending: NotRequired[bool]
-        """Whether the user is pending verification. This will not be set in non GUILD_* events where the user has to finish verification."""
         permissions: NotRequired[str]
-        """The user's permissions in the guild. This is a bitwise Permission flag"""
         communication_disabled_until: NotRequired[str | None]
-        """ISO8601 Timestamp of when the user's timeout ends. None or a time in the past if the user is not timed out."""

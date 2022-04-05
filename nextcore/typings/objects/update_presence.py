@@ -27,13 +27,23 @@ if TYPE_CHECKING:
     from typing import TypedDict
 
     from .activity import Activity
+    from .status_type import StatusType
 
     class UpdatePresence(TypedDict):
+        """A payload to update the bot's presence.
+        
+        Attributes
+        ----------
+        since: :class:`int` | :data:`None`
+            UNIX timestamp of when the client went idle.
+        activities: list[:class:`Activity`]
+            Activities the bot is currently doing.
+        status: :data:`StatusType`
+            The status of the bot.
+        afk: :class:`bool`
+            Whether the bot is currently AFK.
+        """
         since: int | None
-        """Unix timestamp of when the client went idle."""
         activities: list[Activity]
-        """List of activities the client is currently doing."""
-        status: str
-        """The user's current status."""
+        status: StatusType
         afk: bool
-        """Whether the user is currently AFK."""

@@ -29,9 +29,17 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     class RoleTags(TypedDict):
+        """Information about a managed role
+        
+        Attributes
+        ----------
+        bot_id: NotRequired[:class:`str`]
+            The ID of the bot that owns this role.
+        integration_id: NotRequired[:class:`str`]
+            The ID of the integration that owns this role.
+        premium_subscriber: NotRequired[:data:`None`]
+            Set if this is the booster role.
+        """
         bot_id: NotRequired[str]
-        """The bot's ID"""
         integration_id: NotRequired[str]
-        """The integration's ID"""
         premium_subscriber: NotRequired[None]
-        """If present this role is the booster role"""

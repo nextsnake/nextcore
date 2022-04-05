@@ -29,9 +29,17 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     class ActivitySecrets(TypedDict):
+        """Secret keys to join a users activity.
+        
+        Attributes
+        ----------
+        join: NotRequired[:class:`str`]
+            Hash for chat invites and ask to join.
+        spectate: NotRequired[:class:`str`]
+            Hash for spectate button.
+        match: NotRequired[:class:`str`]
+            Hash to differentiate different matches.
+        """
         join: NotRequired[str]
-        """Secret for joining the party"""
         spectate: NotRequired[str]
-        """Secret for spectating the game"""
         match: NotRequired[str]
-        """Secret for joining the match"""

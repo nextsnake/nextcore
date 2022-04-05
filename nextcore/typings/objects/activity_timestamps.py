@@ -29,7 +29,14 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     class ActivityTimestamps(TypedDict):
+        """Timestamps for an activity.
+        
+        Attributes
+        ----------
+        start: NotRequired[:class:`str`]
+            When the activity started. This is a unix timestamp
+        end: NotRequired[:class:`str`]
+            When the activity ends. This is a unix timestamp
+        """
         start: NotRequired[str]
-        """When the activity started. This is a unix timestamp"""
         end: NotRequired[str]
-        """When the activity ends. This is a unix timestamp"""
