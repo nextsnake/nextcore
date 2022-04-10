@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
     class ActivitySecrets(TypedDict):
         """Secret keys to join a users activity.
-        
+
         Attributes
         ----------
         join: NotRequired[:class:`str`]
@@ -40,6 +40,7 @@ if TYPE_CHECKING:
         match: NotRequired[:class:`str`]
             Hash to differentiate different matches.
         """
+
         join: NotRequired[str]
         spectate: NotRequired[str]
         match: NotRequired[str]

@@ -24,30 +24,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing_extensions import NotRequired
+    from typing import Literal
 
-    from .activity import Activity
-    from .activity_assets import ActivityAssets
-    from .activity_button import ActivityButton
-    from .activity_party import ActivityParty
-    from .activity_secrets import ActivitySecrets
-
-    class GameActivity(Activity):
-        application_id: str
-        """The application ID of the game."""
-        details: str
-        """What the player is currently doing."""
-        state: str | None
-        """The current party status."""
-        party: ActivityParty
-        """Information about the party."""
-        assets: ActivityAssets
-        """Asset IDs"""
-        secrets: ActivitySecrets
-        """Secrets for joining the party/game"""
-        instance: NotRequired[bool]
-        """Whether the activity is a instanced game session."""
-        flags: NotRequired[int]  # TODO: Is this actually required?
-        """Flags for the activity."""
-        buttons: list[ActivityButton] | list[str]
-        """A list of button labels if received, a list of buttons if sending"""
+    VideoQualityMode = Literal[
+        1,  # Auto, Discord chooses the quality for optimal performance
+        2,  # Full, 720p
+    ]

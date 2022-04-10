@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
     class RoleTags(TypedDict):
         """Information about a managed role
-        
+
         Attributes
         ----------
         bot_id: NotRequired[:class:`str`]
@@ -40,6 +40,7 @@ if TYPE_CHECKING:
         premium_subscriber: NotRequired[:data:`None`]
             Set if this is the booster role.
         """
+
         bot_id: NotRequired[str]
         integration_id: NotRequired[str]
         premium_subscriber: NotRequired[None]

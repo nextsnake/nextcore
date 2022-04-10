@@ -27,8 +27,8 @@ if TYPE_CHECKING:
     from typing import TypedDict
 
     class UnavailableGuild(TypedDict):
-        """A unavailible guild. 
-        
+        """A unavailible guild.
+
         .. note::
             This is a partial object of :class:`Guild`
 
@@ -39,5 +39,6 @@ if TYPE_CHECKING:
         unavailable: :class:`bool`
             Whether the guild is unavailable. This will always be :data:`True`
         """
+
         id: str
         unavailable: bool

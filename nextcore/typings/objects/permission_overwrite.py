@@ -29,11 +29,23 @@ if TYPE_CHECKING:
     from .permission_overwrite_type import PermissionOverwriteType
 
     class PermissionOverwrite(TypedDict):
+        """A permission overwrite for a channel.
+
+        If a permission is neither in the :attr`PermissionOverwrite.allow` nor the :attr`PermissionOverwrite.deny` set, it will use the global permissions.
+
+        Attributes
+        ----------
+        id: :class:`str`
+            The user or role ID this overwrite applies to.
+        type: :class:`PermissionOverwriteType`
+            The type of :attr:`PermissionOverwrite.id`.
+        allow: :class:`str`
+            The bitwise permission number for allowed permissions.
+        deny: :class:`str`
+            The bitwise permission number for denied permissions.
+        """
+
         id: str
-        """The user or role id this overwrite applies to"""
         type: PermissionOverwriteType
-        """What this overwrite applies to"""
         allow: str
-        """Permission bitset of allowed permissions"""
         deny: str
-        """Permission bitset of denied permissions"""

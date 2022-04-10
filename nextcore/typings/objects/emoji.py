@@ -53,6 +53,7 @@ if TYPE_CHECKING:
         available: NotRequired[:class:`bool`]
             Whether this emoji is available to use.
         """
+
         id: str | None
         name: str | None
         roles: NotRequired[Role]

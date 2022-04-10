@@ -24,24 +24,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import TypedDict
+    from typing import Literal
 
-    class SessionStartLimit(TypedDict):
-        """Information about how much you can connect to the gateway.
-
-        Attributes
-        ----------
-        total: :class:`int`
-            How many times total you can send a IDENTIFY payload per hour. If this limit is hit the bot token will get reset and the bot owner will get a system message.
-        remaining: :class:`int`
-            How many times you can send a IDENTIFY payload before you hit the limit. If this limit is hit the bot token will get reset and the bot owner will get a system message.
-        reset_after: :class:`int`
-            When the ratelimit resets in seconds.
-        max_concurrency: :class:`int`
-            How many concurrent IDENTIFY payloads can be sent to the gateway.
-        """
-
-        total: int
-        remaining: int
-        reset_after: int
-        max_concurrency: int
+    AutoArchiveDuration = Literal[
+        60,  # 1 hour
+        1440,  # 1 day
+        4320,  # 3 days
+        10080,  # 7 days
+    ]

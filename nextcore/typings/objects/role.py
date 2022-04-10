@@ -40,7 +40,7 @@ if TYPE_CHECKING:
         name: :class:`str`
             The name of the role.
         color: :class:`int`
-            The color of the role. 
+            The color of the role.
             The role color highest up in the hierarchy is the one displayed on clients.
             If this is 0 it will not count towards a :class:`Member`'s color.
         hoist: :class:`bool`
@@ -60,6 +60,7 @@ if TYPE_CHECKING:
         tags: NotRequired[:class:`RoleTags`]
             Info about the managed role.
         """
+
         id: str
         name: str
         color: int

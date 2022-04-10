@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
     class UpdatePresence(TypedDict):
         """A payload to update the bot's presence.
-        
+
         Attributes
         ----------
         since: :class:`int` | :data:`None`
@@ -43,6 +43,7 @@ if TYPE_CHECKING:
         afk: :class:`bool`
             Whether the bot is currently AFK.
         """
+
         since: int | None
         activities: list[Activity]
         status: StatusType

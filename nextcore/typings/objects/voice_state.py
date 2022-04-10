@@ -62,6 +62,7 @@ if TYPE_CHECKING:
         request_to_speak_timestamp: :class:`str`
             ISO8601 timestamp of when the user requested to speak in a stage channel.
         """
+
         guild_id: NotRequired[str]
         channel_id: str | None
         user_id: str

@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
     class ActivityTimestamps(TypedDict):
         """Timestamps for an activity.
-        
+
         Attributes
         ----------
         start: NotRequired[:class:`str`]
@@ -38,5 +38,6 @@ if TYPE_CHECKING:
         end: NotRequired[:class:`str`]
             When the activity ends. This is a unix timestamp
         """
+
         start: NotRequired[str]
         end: NotRequired[str]

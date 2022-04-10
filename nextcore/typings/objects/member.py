@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
     class Member(TypedDict):
         """A member of a guild.
-        
+
         Attributes
         ----------
         user: NotRequired[:class:`User`]
@@ -58,6 +58,7 @@ if TYPE_CHECKING:
         communication_disabled_until: NotRequired[:class:`str` | :data:`None`]
             ISO8601 Timestamp of when the user's timeout ends. None or a time in the past if the user is not timed out.
         """
+
         user: NotRequired[User]
         nick: NotRequired[str]
         avatar: NotRequired[str]
