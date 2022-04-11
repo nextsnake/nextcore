@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import TypedDict
+
     from typing_extensions import NotRequired
 
     from .user import User
@@ -46,5 +47,3 @@ if TYPE_CHECKING:
         creator: NotRequired[User]
         user_count: NotRequired[int]
         image: NotRequired[str | None]
-
-
