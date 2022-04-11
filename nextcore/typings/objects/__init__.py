@@ -33,7 +33,6 @@ if TYPE_CHECKING:
     from .channel_type import ChannelType
     from .emoji import Emoji
     from .explicit_content_filter_level import ExplicitContentFilterLevel
-    from .game_activity import GameActivity
     from .guild import Guild
     from .guild_feature import GuildFeature
     from .locale import Locale
@@ -63,7 +62,6 @@ if TYPE_CHECKING:
         "ChannelType",
         "Emoji",
         "ExplicitContentFilterLevel",
-        "GameActivity",
         "Guild",
         "GuildFeature",
         "Locale",

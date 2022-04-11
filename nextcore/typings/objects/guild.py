@@ -24,18 +24,29 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from typing import Literal
+
     from typing_extensions import NotRequired
 
+    from .channel import Channel
     from .emoji import Emoji
     from .explicit_content_filter_level import ExplicitContentFilterLevel
     from .guild_feature import GuildFeature
+    from .guild_scheduled_event import GuildScheduledEvent
+    from .locale import Locale
     from .member import Member
     from .message_notifications_level import MessageNotificationsLevel
     from .mfa_level import MFALevel
+    from .nsfw_level import NSFWLevel
+    from .premium_tier import PremiumTier
+    from .presence_update import PresenceUpdate
     from .role import Role
+    from .stage_instance import StageInstance
+    from .sticker import Sticker
     from .unavailable_guild import UnavailableGuild
     from .verification_level import VerificationLevel
     from .voice_state import VoiceState
+    from .welcome_screen import WelcomeScreen
 
     class Guild(UnavailableGuild):
         """A typing for a `guild <https://discord.dev/resources/guild>`__ object.
@@ -50,7 +61,7 @@ if TYPE_CHECKING:
             The hash of the guild's icon.
         icon_hash: NotRequired[:class:`str` | :data:`None`]
             The hash of the guild's icon.
-            
+
             .. note::
                 This is only present in the partial guild in the :class:`Template` object.
         splash: :class:`str` | :data:`None`
@@ -142,7 +153,7 @@ if TYPE_CHECKING:
                 This is only sent in the ``GUILD_CREATE`` event.
         members: list[:class:`Member`]
             Members in the guild.
-            
+
             .. note::
                 This is only sent in the ``GUILD_CREATE`` event.
         channels: list[:class:`Channel`]
@@ -159,7 +170,7 @@ if TYPE_CHECKING:
                 This is only sent in the ``GUILD_CREATE`` event.
         presences: list[:class:`PresenceUpdate`]
             The members' presences in the guild.
-            
+
             .. note::
                 This is only sent in the ``GUILD_CREATE`` event.
             .. note::
@@ -226,24 +237,26 @@ if TYPE_CHECKING:
         premium_progress_bar_enabled: :class:`bool`
             Whether the guild has the boost progress bar enabled. This is used by the Discord client.
         """
-        
-        id: str
+
         name: str
         icon: str | None
-        icon_hash: NotRequired[str]
+        icon_hash: NotRequired[str | None]
         splash: str | None
         discovery_splash: str | None
         owner: NotRequired[bool]
         owner_id: str
-        permissions: NotRequired[int]
+        permissions: NotRequired[str]
+        region: NotRequired[str | None]
         afk_channel_id: str | None
         afk_timeout: int
+        widget_enabled: NotRequired[bool]
+        widget_channel_id: NotRequired[str | None]
         verification_level: VerificationLevel
         default_message_notifications: MessageNotificationsLevel
         explicit_content_filter: ExplicitContentFilterLevel
-        roles: NotRequired[list[Role]]
-        emojis: NotRequired[list[Emoji]]
-        features: NotRequired[list[GuildFeature]]
+        roles: list[Role]
+        emojis: list[Emoji]
+        features: list[GuildFeature]
         mfa_level: MFALevel
         application_id: str | None
         system_channel_id: str | None
@@ -251,6 +264,29 @@ if TYPE_CHECKING:
         rules_channel_id: str | None
         joined_at: NotRequired[str]
         large: NotRequired[bool]
+        # TODO This is violating PEP-8, however it provides better typings. Worth it?
+        unavailable: NotRequired[Literal[False]]  # type: ignore [misc]
         member_count: NotRequired[int]
         voice_states: NotRequired[list[VoiceState]]
         members: NotRequired[list[Member]]
+        channels: NotRequired[list[Channel]]
+        threads: NotRequired[list[Channel]]
+        presences: NotRequired[list[PresenceUpdate]]
+        max_presences: NotRequired[int | None]
+        max_members: NotRequired[int]
+        vanity_url_code: str | None
+        description: str | None
+        banner: str | None
+        premium_tier: PremiumTier
+        premium_subscription_count: NotRequired[int]
+        preferred_locale: Locale
+        public_updates_channel_id: str | None
+        max_video_channel_users: NotRequired[int]
+        approximate_member_count: NotRequired[int]
+        approximate_presence_count: NotRequired[int]
+        welcome_screen: NotRequired[WelcomeScreen]
+        nsfw_level: NSFWLevel
+        stage_instances: NotRequired[list[StageInstance]]
+        stickers: NotRequired[list[Sticker]]
+        guild_scheduled_events: NotRequired[list[GuildScheduledEvent]]
+        premium_progress_bar_enabled: bool
