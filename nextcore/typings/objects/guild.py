@@ -38,55 +38,219 @@ if TYPE_CHECKING:
     from .voice_state import VoiceState
 
     class Guild(UnavailableGuild):
+        """A typing for a `guild <https://discord.dev/resources/guild>`__ object.
+
+        Attributes
+        ----------
+        id: :class:`str`
+            The guild's ID.
+        name: :class:`str`
+            The name of the guild.
+        icon: :class:`str` | :data:`None`
+            The hash of the guild's icon.
+        icon_hash: NotRequired[:class:`str` | :data:`None`]
+            The hash of the guild's icon.
+            
+            .. note::
+                This is only present in the partial guild in the :class:`Template` object.
+        splash: :class:`str` | :data:`None`
+            The hash of the guild's splash.
+        discovery_splash: :class:`str` | :data:`None`
+            The hash of the guild's discovery splash. This is only shown in the Discord client under the discovery tab.
+        owner: NotRequired[:class:`bool`]
+            If the current logged in user is the owner of the guild.
+
+            .. note::
+                This is only present when using OAuth2 to get the current user's guilds.
+        owner_id: :class:`str`
+            The ID of the guild owner.
+        permissions: NotRequired[:class:`int`]
+            The permissions of the current logged in user in the guild.
+
+            .. note::
+                This is only present when using OAuth2 to get the current user's guilds.
+        region: NotRequired[:class:`str` | :data:`None`]
+            The ID of the :class:`VoiceRegion` this guild uses.
+
+            .. deprecated::
+                Voice regions are per-channel now. See :attr:`Channel.rtc_region`
+        afk_channel_id: :class:`str` | :data:`None`
+            ID of a voice channel Where human members will be moved to when they are AFK in a voice channel.
+        afk_timeout: :class:`int`
+            The AFK timeout in seconds.
+
+            After a member being AFK in a voice channel for this amount of time, they will be moved to the AFK channel.
+
+            .. note::
+                If :attr:`Guild.afk_channel_id` is :data:`None`, this will disconnect the member from voice instead of moving them.
+        widget_enabled: NotRequired[:class:`bool`]
+            If the server widget is enabled.
+        widget_channel_id: NotRequired[:class:`str` | :data:`None`]
+            The ID of the channel the server widget will create a invite for. This is :data:`None` if it is set to no channel.
+
+            .. warn::
+                This might not be :data:`None` even though the widget is not enabled.
+        verification_level: :class:`VerificationLevel`
+            Verification level required to communicate in a guild.
+
+            If a user does not pass these requirements, :attr:`Member.pending` will be :data:`False` until they pass.
+        default_message_notifications: :class:`MessageNotificationsLevel`
+            The default message notifications level for the guild.
+        explicit_content_filter: :class:`ExplicitContentFilterLevel`
+            The explicit content filter level for the guild.
+
+            Attachments sent by human members that do not pass the filter will not be sent.
+        roles: list[:class:`Role`]
+            Roles in the guild.
+        emojis: list[:class:`Emoji`]
+            Custom emojis added to the guild.
+        features: list[:class:`GuildFeature`]
+            Enabled guild features.
+        mfa_level: :class:`MFALevel`
+            The MFA/2fa level for the guild.
+        application_id: :class:`str` | :data:`None`
+            The ID of the application that created the guild if it was created by a bot.
+        system_channel_id: :class:`str` | :data:`None`
+            The ID of the channel that is used for system messages.
+        system_channel_flags: :class:`int`
+            The bitwise flags for what should be sent to the system channel.
+        rules_channel_id: :class:`str` | :data:`None`
+            The ID of the text channel that is used for rules. In the Discord client, this channel will receive a special "rules" icon.
+
+            .. note::
+                This is only set for guilds with the :class:`COMMUNITY <GuildFeature>` feature.
+        joined_at: NotRequired[:class:`str`]
+            A ISO8601 timestamp of when the current user joined the guild.
+
+            .. note::
+                This is only sent in the ``GUILD_CREATE`` event.
+
+        large: NotRequired[:class:`bool`]
+            If the guild is considered large by discord
+
+            .. note::
+                This is only sent in the ``GUILD_CREATE`` event.
+        member_count: NotRequired[:class:`int`]
+            How many members are in the guild.
+
+            .. note::
+                This is only sent in the ``GUILD_CREATE`` event.
+        voice_states: list[:class:`VoiceState`]
+            Voice states of members in the guild.
+
+            .. note::
+                This is only sent in the ``GUILD_CREATE`` event.
+        members: list[:class:`Member`]
+            Members in the guild.
+            
+            .. note::
+                This is only sent in the ``GUILD_CREATE`` event.
+        channels: list[:class:`Channel`]
+            Channels in the guild.
+
+            .. note::
+                This is only sent in the ``GUILD_CREATE`` event.
+            .. note::
+                Threads are not included in this list. See :attr:`Guild.threads` for threads.
+        threads: list[:class:`Channel`]
+            Active threads in the guild that the bot can view.
+
+            .. note::
+                This is only sent in the ``GUILD_CREATE`` event.
+        presences: list[:class:`PresenceUpdate`]
+            The members' presences in the guild.
+            
+            .. note::
+                This is only sent in the ``GUILD_CREATE`` event.
+            .. note::
+                :attr:`PresenceUpdate.guild_id` will not be set. This should be inferred from :attr:`Guild.id`.
+            .. note::
+                If the server is :attr:`Guild.large`, offline members' presences are not sent.
+        max_presences: NotRequired[:class:`int` | :data:`None`]
+            How many members can have a presence at once.
+
+            .. note::
+                This always :data:`None` unless in the largest of guilds.
+        max_members: NotRequired[:class:`int`]
+            How many members can be in the guild before people get errors when trying to join.
+        vanity_url_code: :class:`str` | :data:`None`
+            A custom invite code for the guild. This code can be used as a normal invite.
+        description: :class:`str` | :data:`None`
+            The guild's description.
+
+            .. note::
+                This is locked behind the ``COMMUNITY`` feature.
+        banner: :class:`str` | :data:`None`
+            The guild's banner hash.
+        premium_tier: :class:`PremiumTier`
+            Which server boost level the guild is at.
+        premium_subscription_count: NotRequired[:class:`int`]
+            How many boosts the guild has.
+        preferred_locale: :class:`Locale`
+            The guild's preferred locale. This is used in server discovery and notices from discord. This will also be sent in :class:`Interaction` payloads.
+
+            The default is ``en-US``.
+        public_updates_channel_id: :class:`str` | :data:`None`
+            The ID of the channel that is used for community updates.
+
+            .. note::
+                This is locked behind the ``COMMUNITY`` feature.
+        max_video_channel_users: NotRequired[:class:`int`]
+            The maximum number of users allowed in a voice channel when someone is sending video (video / streaming).
+        approximate_member_count: NotRequired[:class:`int`]
+            The approximate number of members in the guild.
+
+            .. note::
+                This is only returned from the ``GET /guilds/{guild_id}`` endpoint when ``with_counts`` is set to :data:`True`.
+        approximate_presence_count: NotRequired[:class:`int`]
+            The approximate number of non-offline members in the guild.
+
+            .. note::
+                This is only returned from the ``GET /guilds/{guild_id}`` endpoint when ``with_counts`` is set to :data:`True`.
+        welcome_screen: NotRequired[:class:`WelcomeScreen`]
+            The welcome screen settings for the guild.
+        nsfw_level: :class:`NSFWLevel`
+            The guild's nsfw level.
+        stage_instances: NotRequired[list[:class:`StageInstance`]]
+            The guild's currently running stages.
+
+            .. note::
+                This is only sent in the ``GUILD_CREATE`` event.
+        stickers: NotRequired[list[:class:`Sticker`]]
+            Custom stickers uploaded to the guild
+        guild_scheduled_events: NotRequired[list[:class:`GuildScheduledEvent`]]
+            The guild's scheduled events.
+
+            .. note::
+                This is only sent in the ``GUILD_CREATE`` event.
+        premium_progress_bar_enabled: :class:`bool`
+            Whether the guild has the boost progress bar enabled. This is used by the Discord client.
+        """
+        
+        id: str
         name: str
-        """The guild's name."""
         icon: str | None
-        """The guild's icon hash."""
         icon_hash: NotRequired[str]
-        """The guild's icon hash, but only present when in the template object"""
         splash: str | None
-        """The guild's splash hash."""
         discovery_splash: str | None
-        """The guild's discovery splash hash."""
         owner: NotRequired[bool]
-        """Whether the current user is the guild owner."""
         owner_id: str
-        """The guild owner's ID."""
         permissions: NotRequired[int]
-        """The guild's permissions for the current user."""
         afk_channel_id: str | None
-        """The ID of the channel where members AFK in voice is moved."""
         afk_timeout: int
-        """The amount of time in seconds a user must be idle to be considered AFK."""
         verification_level: VerificationLevel
-        """The guild's verification level."""
         default_message_notifications: MessageNotificationsLevel
-        """The guild's default message notification level."""
         explicit_content_filter: ExplicitContentFilterLevel
-        """The guild's explicit content filter level."""
         roles: NotRequired[list[Role]]
-        """A list of guild roles."""
         emojis: NotRequired[list[Emoji]]
-        """A list of guild emojis."""
         features: NotRequired[list[GuildFeature]]
-        """A list of guild features."""
         mfa_level: MFALevel
-        """The guild's MFA level."""
         application_id: str | None
-        """The ID of the application that created the guild, if created by a bot."""
         system_channel_id: str | None
-        """The ID of the channel where guild notices such as welcome messages and boost events are sent."""
         system_channel_flags: int
-        """The bitwise value of the guild's system channel flags. Used for setting which messages are sent to the system channel."""
         rules_channel_id: str | None
-        """The ID of the channel where the guild's rules are posted."""
         joined_at: NotRequired[str]
-        """The time which the current user joined the guild. Only sent in GUILD_CREATE events."""
         large: NotRequired[bool]
-        """Whether the guild is larger than large_threshold provided in IDENTIFY. Only sent in GUILD_CREATE events."""
         member_count: NotRequired[int]
-        """The number of members in the guild. Only sent in GUILD_CREATE events."""
         voice_states: NotRequired[list[VoiceState]]
-        """A list of voice states in the guild. Only sent in GUILD_CREATE events."""
         members: NotRequired[list[Member]]
-        """A list of members in the guild. Only sent in GUILD_CREATE events."""
