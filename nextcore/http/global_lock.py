@@ -26,7 +26,7 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Final
+    from typing import Any
 
 logger = getLogger(__name__)
 
@@ -34,13 +34,20 @@ __all__ = ("GlobalLock",)
 
 
 class GlobalLock:
-    """Minified version of :class:`Bucket` to allow for no info at all."""
+    """Minified version of :class:`Bucket` to allow for no info at all.
+
+    Attributes
+    ----------
+    limit: :class:`int` | :data:`None`
+        .. warning::
+            Changing between a :class:`int` and :data:`None` after a use will cause this to break.
+        How many times this can be acquired per second.
+    """
 
     __slots__ = ("limit", "_remaining", "_reserved", "_active", "_pending_reset", "_pending")
 
-    def __init__(self, limit: int | None = None) -> None:
-        self.limit: Final[int | None] = limit
-        """How many times this can be acquired per second"""
+    def __init__(self, limit: int | None = 50) -> None:
+        self.limit: int | None = limit
         self._remaining: int | None = self.limit
         self._reserved: int = 0
         self._active: Event = Event()
@@ -52,6 +59,7 @@ class GlobalLock:
 
     async def __aenter__(self) -> None:
         if not self._active.is_set():
+            logger.debug("Waiting for global lock")
             await self._active.wait()
             await self.__aenter__()
 
@@ -59,7 +67,8 @@ class GlobalLock:
         if self.limit is None or self._remaining is None:
             self._reserved += 1
             return  # We have no info, lets just try and see if it works
-
+        
+        logger.debug("%s/%s left on ratelimit", self._remaining - self._reserved, self.limit)
         if self._remaining - self._reserved <= 0:
             # Ratelimit is full, wait until ready!
             logger.debug("Ratelimit is full, waiting for it to be ready")
@@ -73,6 +82,8 @@ class GlobalLock:
         if not self._pending_reset and self.limit is not None:
             self._pending_reset = True
 
+            logger.debug("Creating reset task")
+
             # Reset
             loop = get_running_loop()
             loop.call_later(1, self._reset)
@@ -82,6 +93,7 @@ class GlobalLock:
     async def __aexit__(self, *_: Any) -> None:
         self._reserved -= 1
         if self._remaining is not None:
+            logger.debug("Changing remaining to %s", self._remaining - 1)
             self._remaining -= 1
 
     def _reset(self) -> None:
@@ -98,9 +110,20 @@ class GlobalLock:
             self._pending.remove(future)
 
     def lock(self) -> None:
-        """Locks the GlobalLock meaning no further calls will go through unless :meth:`GlobalLock.unlock` is called"""
+        """Locks the GlobalLock meaning no further calls will go through unless :meth:`GlobalLock.unlock` is called
+
+        .. warning::
+            This cannot be used if :attr:`limit` is not :data:`None`
+        """
         self._active.clear()
 
     def unlock(self) -> None:
-        """Unlocks the GlobalLock meaning calls will go through again"""
+        """Unlocks the GlobalLock meaning calls will go through again
+
+        .. warning::
+            This cannot be used if :attr:`limit` is not :data:`None`
+        """
         self._active.set()
+
+    def __repr__(self) -> str:
+        return f"<GlobalLock limit={self.limit} remaining={self._remaining} reserved={self._reserved} blocking={not self._active.is_set()} pending={len(self._pending)}>"

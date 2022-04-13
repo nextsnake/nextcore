@@ -29,6 +29,7 @@ from aiohttp.helpers import get_running_loop
 from nextcore.gateway.times_per import TimesPer
 
 from ..common.dispatcher import Dispatcher
+from ..utils import extract_token_info
 from .shard import Shard
 
 if TYPE_CHECKING:

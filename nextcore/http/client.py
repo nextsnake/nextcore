@@ -40,7 +40,7 @@ from .errors import (
     RateLimitingFailedError,
     UnauthorizedError,
 )
-from .global_lock import GlobalLock
+from .ratelimit_storage import RatelimitStorage
 from .route import Route
 
 if TYPE_CHECKING:
@@ -78,10 +78,10 @@ class HTTPClient:
         "timeout",
         "default_headers",
         "max_retries",
+        "ratelimit_storages",
         "_buckets",
         "_discord_buckets",
         "_bucket_metadata",
-        "_global_lock",
         "_session",
     )
 
@@ -91,35 +91,30 @@ class HTTPClient:
         trust_local_time: bool = True,
         timeout: float = 60,
         max_ratelimit_retries: int = 10,
-        global_ratelimit: int | None = None,
     ):
         self.trust_local_time: bool = trust_local_time
-        """Whether to trust local time."""
         self.timeout: float = timeout
-        """The default request timeout in seconds."""
         self.default_headers: Final[dict[str, str]] = {
             "User-Agent": f"DiscordBot (https://github.com/nextsnake/nextcore, {nextcore_version})"
         }
-        """Headers attached by default to every request."""
         self.max_retries: int = max_ratelimit_retries
-        """How many times to attempt to retry a request."""
+        self.ratelimit_storages: dict[int, RatelimitStorage] = {}  # User ID -> RatelimitStorage
 
         # Internals
-        # Buckets
-        self._buckets: dict[str | int, Bucket] = {}  # Route.bucket -> Bucket
-        self._discord_buckets: dict[str, Bucket] = {}  # X-RateLimit-Bucket -> Bucket
-        self._bucket_metadata: dict[str, BucketMetadata] = {}  # Route.route -> BucketMetadata
-
-        self._global_lock: GlobalLock = GlobalLock(global_ratelimit)
         self._session: ClientSession | None = None
 
-    async def _request(self, route: Route, *, headers: dict[str, str] | None = None, **kwargs: Any) -> ClientResponse:
+    async def _request(
+        self, route: Route, ratelimit_key: int, *, headers: dict[str, str] | None = None, **kwargs: Any
+    ) -> ClientResponse:
         """Requests a route from the Discord API
 
         Parameters
         ----------
         route: :class:`Route`
             The route to request
+        ratelimit_key: :class:`int`
+            A ID used for differentiating ratelimits. This should be used when
+            A user/bot ID to use for ratelimiting.
         headers: :class:`dict[str, str]`
             Headers to mix with :attr:`HTTPClient.default_headers` to pass to :meth:`aiohttp.ClientSession.request`
         kwargs: :data:`typing.Any`
@@ -134,6 +129,13 @@ class HTTPClient:
         await self._ensure_session()
         assert self._session is not None, "Session was not set after HTTPClient._ensure_session()"
 
+        # Get the per user ratelimit storage
+        ratelimit_storage = self.ratelimit_storages.get(ratelimit_key)
+        if ratelimit_storage is None:
+            # None exists, create one
+            ratelimit_storage = RatelimitStorage()
+            self.ratelimit_storages[ratelimit_key] = ratelimit_storage
+
         # Ensure headers exists
         if headers is None:
             headers = {}
@@ -144,21 +146,23 @@ class HTTPClient:
         retries = max(self.max_retries + 1, 1)
 
         for _ in range(retries):
-            bucket = await self._get_bucket(route)
+            bucket = await self._get_bucket(route, ratelimit_storage)
             async with bucket.acquire():
                 if not route.ignore_global:
-                    async with self._global_lock:
+                    async with ratelimit_storage.global_lock:
                         logger.info("Requesting %s %s", route.method, route.path)
                         response = await self._session.request(
                             route.method, route.BASE_URL + route.path, headers=headers, timeout=self.timeout, **kwargs
                         )
                 else:
-                    logger.info("Requesting %s %s (non-global)", route.method, route.path)
+                    # Interactions are immune to global ratelimits, ignore them here.
+                    logger.info("Requesting (NO-GLOBAL) %s %s", route.method, route.path)
                     response = await self._session.request(
                         route.method, route.BASE_URL + route.path, headers=headers, timeout=self.timeout, **kwargs
                     )
+                await self._update_bucket(response, route, bucket, ratelimit_storage)
 
-                await self._update_bucket(response, route, bucket)
+                logger.debug("Response status: %s", response.status)
 
                 # Handle ratelimit errors
                 if response.status == 429:
@@ -169,22 +173,36 @@ class HTTPClient:
                         data = await response.json()
                         retry_after = data["retry_after"]
 
-                        logger.info("Global ratelimit hit. Retrying in %s seconds", retry_after)
+                        if ratelimit_storage.global_lock.limit is None:
+                            # User decided that they don't want to set a static global ratelimit (hopefully using large bot sharding, if not shame on you)
+                            logger.info(
+                                "Global ratelimit hit, but no static was set. Blame the user and move on. Retrying in %s seconds.",
+                                retry_after,
+                            )
+                        else:
+                            logger.warning(
+                                "Global ratelimit hit! This should usually not happen... Discord says to retry in %s, global: %s",
+                                retry_after,
+                                ratelimit_storage.global_lock,
+                            )
 
-                        self._global_lock.lock()
-
-                        loop = get_running_loop()
-                        # Unlock it
-                        logger.debug("Unlocking global!")
-                        loop.call_later(retry_after, self._global_lock.unlock)
+                        # Lock the global lock temporarily
+                        if ratelimit_storage.global_lock.limit is None:
+                            loop = get_running_loop()
+                            ratelimit_storage.global_lock.lock()
+                            loop.call_later(retry_after, ratelimit_storage.global_lock.unlock)
                     elif scope == "user":
                         # Failure in Bucket or clustering?
                         logger.warning(
-                            "Ratelimit exceeded on bucket %s. This should not happen unless you are running multiple bots on the same token.",
+                            "Ratelimit exceeded on bucket %s! Retry after: %s. Bucket state: %s",
                             route.bucket,
+                            response.headers["X-RateLimit-Retry-After"],
+                            bucket,
                         )
-                    elif scope == "resource":
-                        # Can't really be avoided. Shit happens.
+                    elif scope == "shared":
+                        # Resource is shared between multiple users.
+                        # This can't be avoided however it doesnt count towards your ban limit so nothing to do here.
+
                         logger.info("Ratelimit exceeded on bucket %s.", route.bucket)
                     else:
                         # Well shit... Lets try again and hope for the best.
@@ -237,7 +255,7 @@ class HTTPClient:
         if self._session is None:
             self._session = ClientSession()
 
-    async def _get_bucket(self, route: Route) -> Bucket:
+    async def _get_bucket(self, route: Route, ratelimit_storage: RatelimitStorage) -> Bucket:
         """Gets a bucket object for a route.
 
         Strategy:
@@ -249,28 +267,37 @@ class HTTPClient:
         ----------
         route: :class:`Route`
             The route to get the bucket for.
+        ratelimit_storage: :class:`RatelimitStorage`
+            The user's ratelimits.
         """
-        if (bucket := self._buckets.get(route.bucket)) is not None:
+        # TODO: Can this be written better?
+        bucket = await ratelimit_storage.get_bucket_by_nextcore_id(route.bucket)
+        if bucket is not None:
             # Bucket already exists
             return bucket
-        if (metadata := self._bucket_metadata.get(route.route)) is not None:
+
+        metadata = await ratelimit_storage.get_bucket_metadata(route.route)
+
+        if metadata is not None:
             # Create a new bucket with info from the metadata
             bucket = Bucket(metadata)
-            self._buckets[route.bucket] = bucket
+            await ratelimit_storage.store_bucket_by_nextcore_id(route.bucket, bucket)
             return bucket
 
         # Create a new bucket with no info
         # Create metadata
         metadata = BucketMetadata()
-        self._bucket_metadata[route.route] = metadata
+        await ratelimit_storage.store_metadata(route.route, metadata)
 
         # Create the bucket
         bucket = Bucket(metadata)
-        self._buckets[route.bucket] = bucket
+        await ratelimit_storage.store_bucket_by_nextcore_id(route.bucket, bucket)
 
         return bucket
 
-    async def _update_bucket(self, response: ClientResponse, route: Route, bucket: Bucket) -> None:
+    async def _update_bucket(
+        self, response: ClientResponse, route: Route, bucket: Bucket, ratelimit_storage: RatelimitStorage
+    ) -> None:
         """Updates the bucket and metadata from the info received from the API."""
         headers = response.headers
         try:
@@ -294,13 +321,18 @@ class HTTPClient:
         await bucket.update(remaining, reset_after, unlimited=False)
 
         # Update metadata
+        # TODO: This isnt very extensible. Maybe make a async .update function?
         bucket.metadata.limit = limit
         bucket.metadata.unlimited = False
 
         # Auto-link buckets based on bucket_hash
-        if (linked_bucket := self._discord_buckets.get(bucket_hash)) is not None:
-            self._buckets[route.bucket] = linked_bucket
-        self._discord_buckets[bucket_hash] = bucket
+        linked_bucket = await ratelimit_storage.get_bucket_by_discord_id(bucket_hash)
+        if linked_bucket is not None:
+            # TODO: Migrate pending requests to the linked bucket
+            await ratelimit_storage.store_bucket_by_nextcore_id(route.bucket, linked_bucket)
+        else:
+            # Automatically linking them
+            await ratelimit_storage.store_bucket_by_discord_id(bucket_hash, bucket)
 
     # Wrapper functions for requests
     # Wrapper functions
@@ -312,5 +344,7 @@ class HTTPClient:
             This endpoint requires a bot token.
         """
         route = Route("GET", "/gateway/bot")
-        r = await self._request(route)
+        # No ratelimit key needed as its unauthenticated. This will use up a bit of memory... oops
+        # TODO: Make this clearer via None?
+        r = await self._request(route, ratelimit_key=-1)
         return await r.json()  # type: ignore

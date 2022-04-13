@@ -19,10 +19,35 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+from __future__ import annotations
 
-from .asyncio_utils import *
-from .extract_token_info import *
-from .json import *
-from .time_utils import *
+from base64 import b64decode
 
-__all__ = ("json_loads", "json_dumps", "maybe_coro")
+from .time_utils import DISCORD_TOKEN_EPOCH
+
+
+def extract_token_info(token: str) -> tuple[int, int, str]:
+    """Extract metadata from a Discord token.
+
+    Parameters
+    ----------
+    token: :class:`str`
+        The Discord token to extract metadata from.
+
+    Returns
+    -------
+    tuple[:class:`int`, :class:`int`, :class:`str`]
+        A tuple containing the bots ID,
+        the UNIX timestamp of when token was created
+        and a cryptographic signature from Discord confirming this is a valid token.
+    """
+    token_info = token.split(".")
+
+    if len(token_info) != 3:
+        raise ValueError("Invalid token format")
+
+    bot_id = int(b64decode(token_info[0]).decode("utf-8"))
+    created_at = DISCORD_TOKEN_EPOCH + int(b64decode(token_info[1]).decode("utf-8"))
+    hmac_signature = token_info[2]
+
+    return bot_id, created_at, hmac_signature

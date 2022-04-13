@@ -19,10 +19,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+DISCORD_TOKEN_EPOCH = 1293840000
+DISCORD_EPOCH = 1420070400000
 
-from .asyncio_utils import *
-from .extract_token_info import *
-from .json import *
-from .time_utils import *
-
-__all__ = ("json_loads", "json_dumps", "maybe_coro")
+__all__ = ("DISCORD_TOKEN_EPOCH", "DISCORD_EPOCH")

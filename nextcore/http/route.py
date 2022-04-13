@@ -66,13 +66,13 @@ class Route:
         ],
         path: str,
         *,
-        use_webhook_global: bool = False,
+        ignore_global: bool = False,
         **parameters: str | int,
     ) -> None:
         self.method: str = method
         self.route: str = path
         self.path: str = path.format(**parameters)
-        self.ignore_global: bool = use_webhook_global
+        self.ignore_global: bool = ignore_global
 
         # Bucket
         guild_id: str | int | None = parameters.get("guild_id")
