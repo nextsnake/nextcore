@@ -32,100 +32,92 @@ logger = getLogger(__name__)
 
 __all__ = ("GlobalLock",)
 
-
 class GlobalLock:
-    """Minified version of :class:`Bucket` to allow for no info at all.
-
-    Attributes
-    ----------
-    limit: :class:`int` | :data:`None`
-        .. warning::
-            Changing between a :class:`int` and :data:`None` after a use will cause this to break.
-        How many times this can be acquired per second.
-    """
-
-    __slots__ = ("limit", "_remaining", "_reserved", "_active", "_pending_reset", "_pending")
-
     def __init__(self, limit: int | None = 50) -> None:
         self.limit: int | None = limit
-        self._remaining: int | None = self.limit
-        self._reserved: int = 0
-        self._active: Event = Event()
-        self._pending_reset: bool = False
-        self._pending: list[Future[None]] = []
 
-        # Set initial info
-        self._active.set()
+        # Limit is set
+        self._remaining: int | None = limit
+        self._pending: list[Future[None]] = []
+        self._reserved: int = 0
+        self._reset_pending: bool = False
+
+        # Limit is not set
+        self._unknown_lock: Event = Event()
+
+        # Initial set to allow by-default passing
+        self._unknown_lock.set()
+
+    def lock(self) -> None:
+        if self.limit is not None:
+            raise ValueError("Lock cannot be used while limit is not None")
+        self._unknown_lock.clear()
+    def unlock(self) -> None:
+        if self.limit is not None:
+            raise ValueError("Unock cannot be used while limit is not None")
+        self._unknown_lock.set()
 
     async def __aenter__(self) -> None:
-        if not self._active.is_set():
-            logger.debug("Waiting for global lock")
-            await self._active.wait()
-            await self.__aenter__()
-
-        # No data handling
-        if self.limit is None or self._remaining is None:
-            self._reserved += 1
-            return  # We have no info, lets just try and see if it works
+        # No limit set
+        if self.limit is None:
+            if not self._unknown_lock.is_set():
+                await self._unknown_lock.wait()
+                return await self.__aenter__()
+            return
         
-        logger.debug("%s/%s left on ratelimit", self._remaining - self._reserved, self.limit)
-        if self._remaining - self._reserved <= 0:
-            # Ratelimit is full, wait until ready!
-            logger.debug("Ratelimit is full, waiting for it to be ready")
+        # Limit set
+        
+        # Someone could technically modify _remaining to be out of sync with limit
+        assert self._remaining is not None, "Remaining is None but limit is not None"
 
+        if self._effective_remaining <= 0:
             future: Future[None] = Future()
             self._pending.append(future)
+            logger.debug("Used up this second, adding to pending queue")
             await future
 
         self._reserved += 1
 
-        if not self._pending_reset and self.limit is not None:
-            self._pending_reset = True
+    async def __aexit__(self, *_: Any) -> None:
+        # No limit set
+        if self.limit is None:
+            return
 
-            logger.debug("Creating reset task")
+        # Limit set
+        
+        # Someone could technically modify _remaining to be out of sync with limit
+        assert self._remaining is not None, "Remaining is None but limit is not None"
 
-            # Reset
+        self._reserved -= 1
+        self._remaining -= 1
+
+        # Reset
+        # Only start one reset task at once. If not, there would be a lot more tasks cleared than it should.
+        if not self._reset_pending:
+            self._reset_pending = True
+
+            # Reset the global. This will remove up to limit tasks from the pending queue and clear up remaining
             loop = get_running_loop()
             loop.call_later(1, self._reset)
 
-    async def __aexit__(self, *_: Any) -> None:
-        self._reserved -= 1
-        if self._remaining is not None:
-            logger.debug("Changing remaining to %s", self._remaining - 1)
-            # TODO: Return once bug is fixed
-            # assert self._remaining <= 0, "Remaining numbers are bugged, remaining was set to less than 0"
-            self._remaining -= 1
-
     def _reset(self) -> None:
-        """Resets the internal state letting :attr:`limit` free"""
-        assert self.limit is not None, "Limit was not set"
-        # Allow future resets
-        self._pending_reset = False
+        assert self._reset_pending, "Reset pending is False but reset is called"
+        assert self.limit is not None, "Reset was called but limit is None"
+        assert self._remaining is not None, "Remaining is None but limit is not None"
+
+        self._reset_pending = False
 
         self._remaining = self.limit
 
-        for i, future in enumerate(self._pending):
-            if i >= self.limit:
+        for future_id, future in enumerate(self._pending):
+            if future_id >= self.limit:
+                logger.debug("Reset done, %s pending left", len(self._pending))
                 return
-            logger.debug("Resetting %s", i)
+            logger.debug("Letting future %s through", future_id)
             future.set_result(None)
             self._pending.remove(future)
 
-    def lock(self) -> None:
-        """Locks the GlobalLock meaning no further calls will go through unless :meth:`GlobalLock.unlock` is called
-
-        .. warning::
-            This cannot be used if :attr:`limit` is not :data:`None`
-        """
-        self._active.clear()
-
-    def unlock(self) -> None:
-        """Unlocks the GlobalLock meaning calls will go through again
-
-        .. warning::
-            This cannot be used if :attr:`limit` is not :data:`None`
-        """
-        self._active.set()
-
-    def __repr__(self) -> str:
-        return f"<GlobalLock limit={self.limit} remaining={self._remaining} reserved={self._reserved} blocking={not self._active.is_set()} pending={len(self._pending)}>"
+    @property
+    def _effective_remaining(self) -> int:
+        assert self._remaining is not None, "Remaining is not set"
+        return self._remaining - self._reserved

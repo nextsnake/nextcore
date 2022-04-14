@@ -1,6 +1,7 @@
 from asyncio import TimeoutError as AsyncioTimeoutError, wait_for, create_task, sleep
 
 from pytest import mark, raises
+from logging import getLogger
 
 from nextcore.http.global_lock import GlobalLock
 from tests.utils import match_time
@@ -38,7 +39,7 @@ async def test_exceeds_limit():
 
 @mark.asyncio
 async def test_locking():
-    lock = GlobalLock()
+    lock = GlobalLock(None)
 
     async def use_lock():
         async with lock:
@@ -53,17 +54,23 @@ async def test_locking():
     await wait_for(use_lock(), timeout=0.1)
 
 @mark.asyncio
-@match_time(2, 0.1)
 async def test_exceeds_limit_concurrent():
+    logger = getLogger("testing")
     async def use_lock():
         async with lock:
             ...
 
-    lock = GlobalLock(limit=2)
+    lock = GlobalLock(limit=4)
 
-    for _ in range(4):
+    for i in range(9):
+        logger.debug("Created task %s", i)
         create_task(use_lock())
-    await sleep(0.5) # Switch context
-    await use_lock()
-    print(lock._pending)
+    await sleep(2.1) # No clue why .1 is needed here...
+    assert len(lock._pending) == 1, f"Expected 1 pending lock, got {len(lock._pending)}"
+
+    # Cancel the remaining task for a clean output
+    lock._pending[0].cancel()
+
+
+
 
