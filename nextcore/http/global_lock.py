@@ -88,24 +88,26 @@ class GlobalLock:
             loop = get_running_loop()
             loop.call_later(1, self._reset)
 
-            self._pending_reset = False
-
     async def __aexit__(self, *_: Any) -> None:
         self._reserved -= 1
         if self._remaining is not None:
             logger.debug("Changing remaining to %s", self._remaining - 1)
+            # TODO: Return once bug is fixed
+            # assert self._remaining <= 0, "Remaining numbers are bugged, remaining was set to less than 0"
             self._remaining -= 1
 
     def _reset(self) -> None:
         """Resets the internal state letting :attr:`limit` free"""
         assert self.limit is not None, "Limit was not set"
+        # Allow future resets
+        self._pending_reset = False
 
         self._remaining = self.limit
-        self._active.set()
 
         for i, future in enumerate(self._pending):
-            if i > self.limit:
+            if i >= self.limit:
                 return
+            logger.debug("Resetting %s", i)
             future.set_result(None)
             self._pending.remove(future)
 
