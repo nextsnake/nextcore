@@ -32,6 +32,7 @@ logger = getLogger(__name__)
 
 __all__ = ("GlobalLock",)
 
+
 class GlobalLock:
     def __init__(self, limit: int | None = 50) -> None:
         self.limit: int | None = limit
@@ -52,6 +53,7 @@ class GlobalLock:
         if self.limit is not None:
             raise ValueError("Lock cannot be used while limit is not None")
         self._unknown_lock.clear()
+
     def unlock(self) -> None:
         if self.limit is not None:
             raise ValueError("Unock cannot be used while limit is not None")
@@ -64,9 +66,9 @@ class GlobalLock:
                 await self._unknown_lock.wait()
                 return await self.__aenter__()
             return
-        
+
         # Limit set
-        
+
         # Someone could technically modify _remaining to be out of sync with limit
         assert self._remaining is not None, "Remaining is None but limit is not None"
 
@@ -84,7 +86,7 @@ class GlobalLock:
             return
 
         # Limit set
-        
+
         # Someone could technically modify _remaining to be out of sync with limit
         assert self._remaining is not None, "Remaining is None but limit is not None"
 
