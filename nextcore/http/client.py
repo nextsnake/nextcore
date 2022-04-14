@@ -35,7 +35,7 @@ from .bucket_metadata import BucketMetadata
 from .errors import (
     BadRequestError,
     ForbiddenError,
-    HTTPRequestError,
+    HTTPRequestStatusError,
     InternalServerError,
     NotFoundError,
     RateLimitingFailedError,
@@ -170,6 +170,11 @@ class HTTPClient:
 
                 # Handle ratelimit errors
                 if response.status == 429:
+                    # Cloudflare ban check
+                    if "via" not in response.headers:
+                        raise CloudflareBanError()
+
+
                     scope = response.headers["X-RateLimit-Scope"]
                     if scope == "global":
                         # Global ratelimit handling
@@ -224,7 +229,7 @@ class HTTPClient:
                     elif response.status >= 500:
                         raise InternalServerError(error, response)
                     else:
-                        raise HTTPRequestError(error, response)
+                        raise HTTPRequestStatusError(error, response)
                 else:
                     # Should be in 0-200 range
                     return response

@@ -29,20 +29,8 @@ if TYPE_CHECKING:
     from nextcore.typings.http.error import HTTPError as HTTPErrorTyping
 
 
-class HTTPError(Exception):
-    """A generic error for anything from this module."""
-
-    ...
-
-
-class UnexpectedError(HTTPError):
-    """An error for unexpected errors."""
-
-    ...
-
-
-class RateLimitingFailedError(UnexpectedError):
-    """When ratelimiting has failed more than max_retries times"""
+class RateLimitingFailedError(Exception):
+    """When ratelimiting has failed more than :attr:`HTTPClient.max_retries` times"""
 
     def __init__(self, max_retries: int, response: ClientResponse) -> None:
         self.max_retries: int = max_retries
@@ -52,7 +40,7 @@ class RateLimitingFailedError(UnexpectedError):
 
 
 # Expected errors
-class HTTPRequestError(HTTPError):
+class HTTPRequestStatusError(Exception):
     """A base error for receiving a status code the library doesn't expect."""
 
     def __init__(self, error: HTTPErrorTyping, response: ClientResponse) -> None:
@@ -65,31 +53,40 @@ class HTTPRequestError(HTTPError):
 
 
 # TODO: Can the docstrings be improved here?
-class BadRequestError(HTTPRequestError):
+class BadRequestError(HTTPRequestStatusError):
     """A 400 error."""
 
     ...
 
 
-class UnauthorizedError(HTTPRequestError):
+class UnauthorizedError(HTTPRequestStatusError):
     """A 401 error."""
 
     ...
 
 
-class ForbiddenError(HTTPRequestError):
+class ForbiddenError(HTTPRequestStatusError):
     """A 403 error."""
 
     ...
 
 
-class NotFoundError(HTTPRequestError):
+class NotFoundError(HTTPRequestStatusError):
     """A 404 error."""
 
     ...
 
 
-class InternalServerError(HTTPRequestError):
+class InternalServerError(HTTPRequestStatusError):
     """A 5xx error."""
 
     ...
+
+class CloudflareBanError(Exception):
+    """A error for when you get banned by cloudflare
+    
+    This happens due to getting too many ``401``, ``403`` or ``429`` responses from discord.
+    This will block your access to the API temporarily for an hour.
+
+    See the `documentation <https://discord.dev/topics/rate-limits#invalid-request-limit-aka-cloudflare-bans>`__ for more info.
+    """
