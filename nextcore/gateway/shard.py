@@ -279,6 +279,7 @@ class Shard:
         assert self._ws.closed is False, "Websocket is closed"
 
         self._logger.debug("Sent: %s", data)
+        self.dispatcher.dispatch("sent", data)
 
         await self._ws.send_json(data, dumps=json_dumps)
 
