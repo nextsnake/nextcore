@@ -1,5 +1,4 @@
-from asyncio import TimeoutError as AsyncioTimeoutError
-from asyncio import wait_for
+from asyncio import TimeoutError as AsyncioTimeoutError, wait_for, create_task, sleep
 
 from pytest import mark, raises
 
@@ -52,3 +51,19 @@ async def test_locking():
         await wait_for(use_lock(), timeout=0.1)
     lock.unlock()
     await wait_for(use_lock(), timeout=0.1)
+
+@mark.asyncio
+@match_time(2, 0.1)
+async def test_exceeds_limit_concurrent():
+    async def use_lock():
+        async with lock:
+            ...
+
+    lock = GlobalLock(limit=2)
+
+    for _ in range(4):
+        create_task(use_lock())
+    await sleep(0.5) # Switch context
+    await use_lock()
+    print(lock._pending)
+
