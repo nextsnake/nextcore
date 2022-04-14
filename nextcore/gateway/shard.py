@@ -25,6 +25,7 @@ from asyncio import Event, get_running_loop, sleep
 from logging import Logger, getLogger
 from random import random
 from sys import platform
+from time import time
 from typing import TYPE_CHECKING
 
 from aiohttp import ClientConnectorError, ClientWebSocketResponse, WSMsgType
@@ -141,6 +142,8 @@ class Shard:
         "_decompressor",
         "_logger",
         "_received_heartbeat_ack",
+        "_heartbeat_sent_at",
+        "_latency",
     )
     GATEWAY_URL: Final[str] = "wss://gateway.discord.gg?v=10&compress=zlib-stream"
     """The gateway URL to connect to"""
@@ -189,6 +192,10 @@ class Shard:
         self._decompressor: Decompressor = Decompressor()
         self._logger: Logger = getLogger(f"nextcore.gateway.shard.{self.shard_id}")
         self._received_heartbeat_ack: bool = True
+
+        # Latency
+        self._heartbeat_sent_at: float | None = None
+        self._latency: float | None = None # Not public as we use a property that errors when not connected
 
         # Register handlers
         # Raw
@@ -243,6 +250,19 @@ class Shard:
 
         loop = get_running_loop()
         loop.create_task(self._receive_loop())
+
+    @property
+    def latency(self) -> float:
+        """Time in seconds between a heartbeat being sent and discord acknowledging it.
+        
+        Raises
+        ------
+        :class:`RuntimeError`
+            Not connected to the gateway.
+        """
+        if self._latency is None:
+            raise RuntimeError("Not connected to the gateway.")
+        return self._latency
 
     async def _send(
         self, data: ClientGatewayPayload, *, respect_ratelimit: bool = True, wait_until_ready: bool = True
@@ -305,6 +325,9 @@ class Shard:
                 self._logger.debug("Disconnecting due to lack of heartbeats!")
                 return await self.connect()
             self._received_heartbeat_ack = False
+
+            # Set the heartbeat time for the latency calculation
+            self._heartbeat_sent_at = time()
 
             # Send the heartbeat
             await self._send(payload, respect_ratelimit=False, wait_until_ready=False)
@@ -386,6 +409,10 @@ class Shard:
     async def _handle_heartbeat_ack(self, data: ServerGatewayPayload) -> None:
         del data  # Unused
         self._received_heartbeat_ack = True
+
+        # Update the latency
+        assert self._heartbeat_sent_at is not None, "Received heartbeat ack without having sent a heartbeat"
+        self._latency = time() - self._heartbeat_sent_at
 
     async def _handle_reconnect(self, data: ServerGatewayPayload) -> None:
         del data  # Unused
