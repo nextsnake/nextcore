@@ -195,7 +195,7 @@ class Shard:
 
         # Latency
         self._heartbeat_sent_at: float | None = None
-        self._latency: float | None = None # Not public as we use a property that errors when not connected
+        self._latency: float | None = None  # Not public as we use a property that errors when not connected
 
         # Register handlers
         # Raw
@@ -254,7 +254,7 @@ class Shard:
     @property
     def latency(self) -> float:
         """Time in seconds between a heartbeat being sent and discord acknowledging it.
-        
+
         Raises
         ------
         :class:`RuntimeError`

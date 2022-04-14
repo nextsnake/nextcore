@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING
 from aiohttp import ClientSession
 
 from .. import __version__ as nextcore_version
+from ..common.dispatcher import Dispatcher
 from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
 from .errors import (
@@ -82,6 +83,7 @@ class HTTPClient:
         "_buckets",
         "_discord_buckets",
         "_bucket_metadata",
+        "dispatcher",
         "_session",
     )
 
@@ -99,6 +101,7 @@ class HTTPClient:
         }
         self.max_retries: int = max_ratelimit_retries
         self.ratelimit_storages: dict[int, RatelimitStorage] = {}  # User ID -> RatelimitStorage
+        self.dispatcher: Dispatcher = Dispatcher()
 
         # Internals
         self._session: ClientSession | None = None
@@ -163,6 +166,7 @@ class HTTPClient:
                 await self._update_bucket(response, route, bucket, ratelimit_storage)
 
                 logger.debug("Response status: %s", response.status)
+                self.dispatcher.dispatch("request_response", response)
 
                 # Handle ratelimit errors
                 if response.status == 429:
