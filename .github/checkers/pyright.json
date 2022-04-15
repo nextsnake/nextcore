@@ -1,0 +1,18 @@
+{
+    "problemMatcher": [
+        {
+            "owner": "pyright",
+            "pattern": [
+                {
+                    "regexp": "/home/runner/work/nextcore/nextcore/(.+):(\\d+):(\\d+) - (information|warning|error): (.+) \\((.+)\\)",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5,
+                    "code": 6
+                }
+            ]
+        }
+    ]
+}

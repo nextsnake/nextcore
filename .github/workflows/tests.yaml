@@ -65,6 +65,8 @@ jobs:
           node-version: '14'
       - name: Install pyright
         run: npm install -g pyright
+      - name: Enable the problem checker
+        run: echo "::add-matcher::.github/checkers/pyright.json"
       - name: Run pyright
         run: poetry run pyright nextcore/
   style-guide:
