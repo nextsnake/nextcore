@@ -77,8 +77,11 @@ jobs:
           python-version: "3.10"
       - name: Install poetry
         run: pip install poetry
-      - name: Add deploy key
-        run: echo ${{ secrets.DEPLOY_KEY }} > ~/.ssh/id_rsa
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.DEPLOY_KEY }}
+          if_key_exists: replace 
       - name: Install style-guide
         run: poetry add git+ssh://git@github.com/nextsnake/style-guide.git --dev
       - name: Install dependencies
