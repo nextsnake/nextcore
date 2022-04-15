@@ -67,3 +67,18 @@ jobs:
         run: npm install -g pyright
       - name: Run pyright
         run: poetry run pyright nextcore/
+  style-guide:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.10"
+      - name: Install poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Run pyright
+        run: poetry run task pylint_check
+
