@@ -174,7 +174,6 @@ class HTTPClient:
                     if "via" not in response.headers:
                         raise CloudflareBanError()
 
-
                     scope = response.headers["X-RateLimit-Scope"]
                     if scope == "global":
                         # Global ratelimit handling

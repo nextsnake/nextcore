@@ -82,9 +82,10 @@ class InternalServerError(HTTPRequestStatusError):
 
     ...
 
+
 class CloudflareBanError(Exception):
     """A error for when you get banned by cloudflare
-    
+
     This happens due to getting too many ``401``, ``403`` or ``429`` responses from discord.
     This will block your access to the API temporarily for an hour.
 
