@@ -77,10 +77,14 @@ jobs:
           python-version: "3.10"
       - name: Install poetry
         run: pip install poetry
+      - name: Add deploy key
+        run: echo ${{ secrets.DEPLOY_KEY }} > ~/.ssh/id_rsa
+      - name: Install style-guide
+        run: poetry add git+ssh://git@github.com/nextsnake/style-guide.git --dev
       - name: Install dependencies
         run: poetry install
       - name: Enable the problem checker
         run: echo "::add-matcher::pylint.json"
       - name: Run pyright
-        run: poetry run task pylint_check
+        run: poetry run "pylint -d all -e asyncio-best-practices,license,outdated-typing --load-plugins=nextstyle nextcore/"
 

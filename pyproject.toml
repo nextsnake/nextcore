@@ -27,7 +27,6 @@ pytest = "^6.2.5"
 taskipy = "^1.9.0"
 pytest-asyncio = "^0.18.1"
 pytest-mock = "^3.7.0"
-style-guide = {git = "https://github.com/nextsnake/style-guide"}
 
 [tool.poetry.extras]
 speed = ["ujson"]
@@ -35,7 +34,6 @@ speed = ["ujson"]
 [tool.taskipy.tasks]
 black_check = "black . --diff --check"
 isort_check = "isort . --check --diff"
-pylint_check = "pylint -d all -e asyncio-best-practices,license,outdated-typing --load-plugins=nextstyle nextcore/"
 tests = "pytest"
 black = "black ."
 isort = "isort ."
