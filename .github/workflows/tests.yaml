@@ -79,6 +79,8 @@ jobs:
         run: pip install poetry
       - name: Install dependencies
         run: poetry install
+      - name: Enable the problem checker
+        run: echo "::add-matcher::pylint.json"
       - name: Run pyright
         run: poetry run task pylint_check
 
