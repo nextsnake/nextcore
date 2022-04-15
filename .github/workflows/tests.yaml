@@ -89,6 +89,6 @@ jobs:
         run: poetry install
       - name: Enable the problem checker
         run: echo "::add-matcher::.github/checkers/pylint.json"
-      - name: Run pyright
-        run: poetry run "pylint -d all -e asyncio-best-practices,license,outdated-typing --load-plugins=nextstyle nextcore/"
+      - name: Run pylint
+        run: poetry run pylint -d all -e asyncio-best-practices,license,outdated-typing --load-plugins=nextstyle nextcore/
 
