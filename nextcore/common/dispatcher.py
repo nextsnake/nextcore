@@ -21,199 +21,222 @@
 
 from __future__ import annotations
 
-from asyncio import Future
-from asyncio import TimeoutError as AsyncioTimeoutError
-from asyncio import create_task, wait_for
+from asyncio import CancelledError, Future, create_task
 from collections import defaultdict
 from logging import getLogger
-from typing import TYPE_CHECKING
+from typing import (  # pylint: disable=outdated-typing-any
+    TYPE_CHECKING,
+    Generic,
+    Hashable,
+    TypeVar,
+    cast,
+    overload,
+)
 
 from ..utils import maybe_coro
 
+# Types
+EventNameT = TypeVar("EventNameT", bound=Hashable)
+
 if TYPE_CHECKING:
-    from typing import Any, Awaitable, Callable
+    from typing import (  # pylint: disable=outdated-typing-union
+        Any,
+        Awaitable,
+        Callable,
+        Union,
+    )
+
+    EventCallback = Callable[[*Any], Any]
+    GlobalEventCallback = Callable[[EventNameT, *Any], Any]
+
+    WaitForCheck = Callable[[*Any], Union[Awaitable[bool], bool]]
+    GlobalWaitForCheck = Callable[[EventNameT, *Any], Union[Awaitable[bool], bool]]
+
+    ExceptionHandler = Callable[[Exception], Any]
+    GlobalExceptionHandler = Callable[[EventNameT, Exception], Any]
 
 logger = getLogger(__name__)
 
 __all__ = ("Dispatcher",)
 
 
-class Dispatcher:
+class Dispatcher(Generic[EventNameT]):
     """A event dispatcher"""
 
-    __slots__ = (
-        "_exception_handlers",
-        "_listeners",
-        "_global_listeners",
-        "_wait_for_listeners",
-        "_wait_for_global_listeners",
-    )
+    def __init__(self):
+        self._event_handlers: defaultdict[EventNameT, list[EventCallback]] = defaultdict(list)
+        self._global_event_handlers: list[GlobalEventCallback[EventNameT]] = []
 
-    def __init__(self) -> None:
-        # Exception handler
-        self._exception_handlers: list[Callable[[Exception], Any]] = []
+        self._wait_for_handlers: dict[EventNameT, list[tuple[WaitForCheck, Future[tuple[Any, ...]]]]] = defaultdict(
+            list
+        )
+        self._global_wait_for_handlers: list[tuple[GlobalWaitForCheck[EventNameT], Future[tuple[Any, ...]]]] = []
 
-        self._listeners: defaultdict[Any, list[Callable[..., Any]]] = defaultdict(list)
-        self._global_listeners: list[Callable[[Any, *Any], Any]] = []
+        self._global_exception_handlers: list[GlobalExceptionHandler[EventNameT]] = []
+        self._exception_handlers: defaultdict[EventNameT, list[ExceptionHandler]] = defaultdict(list)
 
-        # Conditional listeners are listeners which can only be called once and that also has a check.
-        self._wait_for_listeners: defaultdict[
-            Any, list[tuple[Callable[..., Awaitable[bool] | bool], Future[list[Any]]]]
-        ] = defaultdict(list)
-        self._wait_for_global_listeners: list[
-            tuple[Callable[[Any, *Any], Awaitable[bool] | bool], Future[list[Any]]]
-        ] = []
+    # Registration
+    @overload
+    def add_listener(self, callback: GlobalEventCallback[EventNameT], event_name: None = None) -> None:
+        ...
 
-    def add_listener(self, callback: Callable[..., Any], event_name: Any = None) -> None:
-        """Adds a listener to the dispatcher.
+    @overload
+    def add_listener(self, callback: EventCallback, event_name: EventNameT) -> None:
+        ...
 
-        Parameters
-        ----------
-        callback: typing.Callable[..., :data:`typing.Any`]
-            The callback to be added.
-        event_name: :data:`typing.Any`
-            The event name to listen to. If :class:`None`, the callback will receive all events. Global listeners will also receive the event name as the first param.
-        """
-        logger.debug("Adding listener for event %s", event_name)
+    def add_listener(
+        self, callback: EventCallback | GlobalEventCallback[EventNameT], event_name: EventNameT | None = None
+    ) -> None:
         if event_name is None:
-            self._global_listeners.append(callback)
+            if TYPE_CHECKING:
+                callback = cast(GlobalEventCallback[EventNameT], callback)
+            self._global_event_handlers.append(callback)
         else:
-            self._listeners[event_name].append(callback)
+            if TYPE_CHECKING:
+                callback = cast(EventCallback, callback)
+            self._event_handlers[event_name].append(callback)
+
+    def remove_listener(
+        self, callback: EventCallback | GlobalEventCallback[EventNameT], event_name: EventNameT | None = None
+    ) -> None:
+        if event_name is None:
+            if TYPE_CHECKING:
+                callback = cast(GlobalEventCallback[EventNameT], callback)
+            try:
+                self._global_event_handlers.remove(callback)
+            except ValueError:
+                raise ValueError("Listener not registered globally.")
+        else:
+            if TYPE_CHECKING:
+                callback = cast(EventCallback, callback)
+            try:
+                self._event_handlers[event_name].remove(callback)
+            except ValueError:
+                raise ValueError(f"Listener not registered for event {event_name}")
+
+    def add_exception_handler(
+        self, callback: ExceptionHandler | GlobalExceptionHandler[EventNameT], event_name: EventNameT | None = None
+    ) -> None:
+        if event_name is None:
+            if TYPE_CHECKING:
+                callback = cast(GlobalExceptionHandler[EventNameT], callback)
+            self._global_exception_handlers.append(callback)
+        else:
+            if TYPE_CHECKING:
+                callback = cast(ExceptionHandler, callback)
+            self._exception_handlers[event_name].append(callback)
+
+    def remove_exception_handler(
+        self, callback: ExceptionHandler | GlobalExceptionHandler[EventNameT], event_name: EventNameT | None = None
+    ) -> None:
+        if event_name is None:
+            if TYPE_CHECKING:
+                callback = cast(GlobalExceptionHandler[EventNameT], callback)
+            try:
+                self._global_exception_handlers.remove(callback)
+            except ValueError:
+                raise ValueError("Exception handler not registered globally.")
+        else:
+            if TYPE_CHECKING:
+                callback = cast(ExceptionHandler, callback)
+            try:
+                self._exception_handlers[event_name].remove(callback)
+            except ValueError:
+                raise ValueError(f"Exception handler not registered for event {event_name}")
 
     async def wait_for(
-        self, check: Callable[..., Awaitable[bool] | bool], event_name: Any = None, *, timeout: float | None = None
-    ) -> list[Any]:
-        """Waits for an event to be dispatched and returns it if it matches a check.
-
-        Parameters
-        ----------
-        check: typing.Callable[..., typing.Awaitable[:class:`bool`] | :class:`bool`]
-            The check to check if it should return the event.
-        event_name: :data:`typing.Any`
-            The event name to wait for. If :class:`None`, the check will be called for all events. The check will receive the event name as the first param.
-        timeout: :class:`float` | :data:`None`
-            The timeout in seconds. If :class:`None`, there is no timeout.
-
-        Returns
-        -------
-        list[:data:`typing.Any`]
-            The event arguments.
-        """
-
-        future: Future[list[Any]] = Future()
-
+        self, check: WaitForCheck | GlobalWaitForCheck[EventNameT], event_name: EventNameT | None = None
+    ):
+        # TODO: I don't like this. Typings makes everything look awful.
         if event_name is None:
-            self._wait_for_global_listeners.append((check, future))
-        else:
-            self._wait_for_listeners[event_name].append((check, future))
-        try:
-            result: list[Any] = await wait_for(future, timeout)
-        except AsyncioTimeoutError:
-            # Timeout reached, remove the listener
-            if event_name is None:
-                self._wait_for_global_listeners.remove((check, future))
-            else:
-                self._wait_for_listeners[event_name].remove((check, future))
-            raise
+            if TYPE_CHECKING:
+                check = cast(GlobalWaitForCheck[EventNameT], check)
+            # Bug in pyright considering this is a string... TODO: Get this fixed
+            future: "Future[EventNameT, *Any]" = Future()  # type: ignore
 
-        # Success!
+            self._global_wait_for_handlers.append((check, future))
+        else:
+            if TYPE_CHECKING:
+                check = cast(WaitForCheck, check)
+            future: "Future[*Any]" = Future()  # pyright: ignore
+
+            self._wait_for_handlers[event_name].append((check, future))
+        try:
+            result = await future
+        except CancelledError:
+            # Cancelled, cleanup!
+            if event_name is None:
+                if TYPE_CHECKING:
+                    check = cast(GlobalWaitForCheck[EventNameT], check)
+                self._global_wait_for_handlers.remove((check, future))
+            else:
+                if TYPE_CHECKING:
+                    check = cast(WaitForCheck, check)
+                self._wait_for_handlers[event_name].remove((check, future))
+            # Properly cancel the task
+            raise
         return result
 
-    def remove_listener(self, callback: Callable[..., Any]) -> None:
-        """Removes a listener from the dispatcher.
-
-        Parameters
-        ----------
-        callback: Callable[..., :data:`typing.Any`]
-            The callback to be removed.
-
-        Raises
-        ------
-        :class:`ValueError`
-            The callback was not registered on this dispatcher.
-        """
-        for listeners in self._listeners.values():
-            if callback in listeners:
-                listeners.remove(callback)
-                return
-        if callback in self._global_listeners:
-            self._global_listeners.remove(callback)
-            return
-        raise ValueError("There is no such listener in this dispatcher")
-
-    def dispatch(self, event_name: Any, *event_args: Any) -> None:
-        """Dispatches an event to all listeners watching that event.
-
-        Parameters
-        ----------
-        event_name: :data:`typing.Any`
-            The event name to dispatch.
-        event_args: :data:`typing.Any`
-            The event arguments.
-        """
+    # Dispatching
+    async def dispatch(self, event_name: EventNameT, *args: Any) -> None:
+        """Dispatch event"""
         logger.debug("Dispatching event %s", event_name)
 
-        # Regular listeners
-        for listener in self._global_listeners:
-            # Global listeners
-            create_task(
-                self._dispatch_event_wrapper(listener, event_name, *event_args),
-                name=f"nextcord:Dispatch listener {event_name} (global)",
-            )
-        for listener in self._listeners.get(event_name, []):
-            # Per event listeners
-            create_task(
-                self._dispatch_event_wrapper(listener, *event_args), name=f"nextcord:Dispatch listener {event_name}"
-            )
+        # Event handlers
+        # Tasks are used here as some event handler/check might take a long time.
+        for handler in self._global_event_handlers:
+            create_task(self._run_global_event_handler(handler, event_name, *args))
+        for handler in self._event_handlers.get(event_name, []):
+            create_task(self._run_event_handler(handler, event_name, *args))
 
-        # Wait for listeners
-        for info in self._wait_for_global_listeners:
-            # Global wait for listeners
-            create_task(
-                self._dispatch_wait_for(*info, event_name, *event_args),
-                name=f"nextcord:Dispatch wait_for listener {event_name} (global)",
-            )
-        for info in self._wait_for_listeners.get(event_name, []):
-            # Per event wait for listeners
-            create_task(
-                self._dispatch_wait_for(*info, *event_args), name=f"nextcord:Dispatch wait_for listener {event_name}"
-            )
+        # Wait for handlers
+        for check, future in self._wait_for_handlers.get(event_name, []):
+            create_task(self._run_wait_for_handler(check, future, event_name, *args))
 
-    async def _dispatch_event_wrapper(self, listener: Callable[..., Any], *event_args: Any) -> None:
+    async def _run_event_handler(self, callback: EventCallback, event_name: EventNameT, *args: Any) -> None:
+        """Run event with exception handlers"""
         try:
-            await maybe_coro(listener, *event_args)
-        except Exception as e:
-            for exception_handler in self._exception_handlers:
+            await maybe_coro(callback, *args)
+        except Exception as exc:
+            if not (self._exception_handlers.get(event_name) or self._global_exception_handlers):
+                # No exception handlers for this event.
+                # Raise a default exception
+                logger.exception("Exception occured in event handler")
+                return
+            for handler in self._exception_handlers.get(event_name, []):
                 try:
-                    await maybe_coro(exception_handler, e)
-                except:
-                    logger.error("Exception handler failed", exc_info=True)
+                    await maybe_coro(handler, exc)
+                except Exception:
+                    logger.exception("Exception occured in exception handler")
 
-    async def _dispatch_wait_for(
-        self, check: Callable[..., Awaitable[bool] | bool], future: Future[list[Any]], event_name: Any, *event_args: Any
+    async def _run_global_event_handler(
+        self, callback: GlobalEventCallback[EventNameT], event_name: EventNameT, *args: Any
+    ) -> None:
+        """Run global event with exception handlers"""
+        try:
+            await maybe_coro(callback, *args)
+        except Exception as exc:
+            for handler in self._global_exception_handlers:
+                try:
+                    await maybe_coro(handler, event_name, exc)
+                except Exception:
+                    logger.exception("Exception occured in exception handler")
+
+    async def _run_wait_for_handler(
+        self,
+        check: WaitForCheck,
+        future: "Future[tuple[EventNameT, *Any]]", # pyright: ignore
+        event_name: EventNameT,
+        *args: Any
     ) -> None:
         try:
-            check_success = await maybe_coro(check)
+            result = await maybe_coro(check, *args)
         except:
-            logger.error("Exception in wait_for check", exc_info=True)
+            logger.exception("Exception occured in wait for check")
             return
-        if not check_success:
-            # Check failed, try again on next event.
+        if not result:
             return
 
-        # Check succeeded, resolve and remove the listener.
-        # Release future
-        future.set_result([event_name, *event_args])
-        logger.debug(future)
+        future.set_result(args)
 
-        # Remove listener
-        # TODO: Could this be simplified?
-        for info in self._wait_for_listeners.get(event_name, []):
-            if info[1] is future:
-                # 0th is the check, 1st is the future
-                self._wait_for_listeners[event_name].remove(info)
-                return
-        for info in self._wait_for_global_listeners:
-            if info[1] is future:
-                # 0th is the check, 1st is the future
-                self._wait_for_global_listeners.remove(info)
+        self._wait_for_handlers[event_name].remove((check, future))
