@@ -7,7 +7,7 @@ from pytest import mark, raises
 from nextcore.common.dispatcher import Dispatcher
 
 @mark.asyncio
-async def test_local_sync_listeners():
+async def test_local_sync_listeners() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
     
     got_response: Future[None] = Future()
@@ -27,7 +27,7 @@ async def test_local_sync_listeners():
         await wait_for(got_response, timeout=.1)
 
 @mark.asyncio
-async def test_global_sync_listeners():
+async def test_global_sync_listeners() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
     
     got_response: Future[None] = Future()
@@ -48,7 +48,7 @@ async def test_global_sync_listeners():
         await wait_for(got_response, timeout=.1)
 
 @mark.asyncio
-async def test_local_async_listeners():
+async def test_local_async_listeners() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
     
     got_response: Future[None] = Future()
@@ -73,7 +73,7 @@ async def test_global_async_listeners() -> None:
     
     got_response: Future[None] = Future()
 
-    async def sync_response_callback(event_name: str):
+    async def sync_response_callback(event_name: str) -> None:
         del event_name
         got_response.set_result(None)
 
