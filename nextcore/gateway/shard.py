@@ -173,9 +173,9 @@ class Shard:
 
         # Publics
         self.ready: Event = Event()
-        self.raw_dispatcher: Dispatcher = Dispatcher()
-        self.event_dispatcher: Dispatcher = Dispatcher()
-        self.dispatcher: Dispatcher = Dispatcher()
+        self.raw_dispatcher: Dispatcher[int] = Dispatcher()
+        self.event_dispatcher: Dispatcher[str] = Dispatcher()
+        self.dispatcher: Dispatcher[str] = Dispatcher()
 
         # Session related
         self.session_id: str | None = None
@@ -279,7 +279,7 @@ class Shard:
         assert self._ws.closed is False, "Websocket is closed"
 
         self._logger.debug("Sent: %s", data)
-        self.dispatcher.dispatch("sent", data)
+        await self.dispatcher.dispatch("sent", data)
 
         await self._ws.send_json(data, dumps=json_dumps)
 
@@ -363,13 +363,13 @@ class Shard:
         # Processing of the payload
         opcode = frozen_data["op"]
 
-        self.raw_dispatcher.dispatch(opcode, frozen_data)
+        await self.raw_dispatcher.dispatch(opcode, frozen_data)
 
         if opcode == GatewayOpcode.DISPATCH:
             # Received dispatch
             # We are just trusing discord to provide the correct data here.
             dispatch_data: ServerGatewayDispatchPayload = frozen_data  # type: ignore [assignment]
-            self.event_dispatcher.dispatch(dispatch_data["t"], dispatch_data["d"])
+            await self.event_dispatcher.dispatch(dispatch_data["t"], dispatch_data["d"])
 
     async def _on_disconnect(self, ws: ClientWebSocketResponse) -> None:
         self.ready.clear()
@@ -381,7 +381,7 @@ class Shard:
 
         self._logger.debug("Disconnected with code %s", close_code)
 
-        self.dispatcher.dispatch("disconnect", close_code)
+        await self.dispatcher.dispatch("disconnect", close_code)
 
     # Raw handlers
     # These should be prefixed by handle_ to avoid confusiuon with loop callbacks
@@ -506,24 +506,24 @@ class Shard:
             # Reconnect
             await self.connect()
         elif close_code == GatewayCloseCode.INVALID_SHARD:
-            self.dispatcher.dispatch("critical", InvalidShardCountError())
+            await self.dispatcher.dispatch("critical", InvalidShardCountError())
         elif close_code == GatewayCloseCode.SHARDING_REQUIRED:
             self._logger.critical(
                 "Received sharding required while sharding? Please make a issue on https://github.com/nextsnake/nextcore/issues"
             )
             # TODO: Should this be merged into the else block?
-            self.dispatcher.dispatch("critical", UnhandledCloseCodeError(close_code))
+            await self.dispatcher.dispatch("critical", UnhandledCloseCodeError(close_code))
         elif close_code == GatewayCloseCode.INVALID_API_VERSION:
             self._logger.critical("Received invalid api version. Please update nextcore!")
-            self.dispatcher.dispatch("critical", InvalidApiVersionError())
+            await self.dispatcher.dispatch("critical", InvalidApiVersionError())
         elif close_code == GatewayCloseCode.INVALID_INTENTS:
             self._logger.critical("Sent invalid intents. This should never happen!")
-            self.dispatcher.dispatch("critical", InvalidIntentsError())
+            await self.dispatcher.dispatch("critical", InvalidIntentsError())
         elif close_code == GatewayCloseCode.DISALLOWED_INTENTS:
             self._logger.critical("Sent disallowed intents. This should be enabled in the settings.")
-            self.dispatcher.dispatch("critical", DisallowedIntentsError())
+            await self.dispatcher.dispatch("critical", DisallowedIntentsError())
         else:
-            self.dispatcher.dispatch("critical", UnhandledCloseCodeError(close_code))
+            await self.dispatcher.dispatch("critical", UnhandledCloseCodeError(close_code))
             raise RuntimeError(f"Close code not handled: {close_code}")
 
     # Send wrappers

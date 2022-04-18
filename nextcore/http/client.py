@@ -40,6 +40,7 @@ from .errors import (
     NotFoundError,
     RateLimitingFailedError,
     UnauthorizedError,
+    CloudflareBanError
 )
 from .ratelimit_storage import RatelimitStorage
 from .route import Route
@@ -101,7 +102,7 @@ class HTTPClient:
         }
         self.max_retries: int = max_ratelimit_retries
         self.ratelimit_storages: dict[int, RatelimitStorage] = {}  # User ID -> RatelimitStorage
-        self.dispatcher: Dispatcher = Dispatcher()
+        self.dispatcher: Dispatcher[str] = Dispatcher()
 
         # Internals
         self._session: ClientSession | None = None
@@ -166,7 +167,7 @@ class HTTPClient:
                 await self._update_bucket(response, route, bucket, ratelimit_storage)
 
                 logger.debug("Response status: %s", response.status)
-                self.dispatcher.dispatch("request_response", response)
+                await self.dispatcher.dispatch("request_response", response)
 
                 # Handle ratelimit errors
                 if response.status == 429:

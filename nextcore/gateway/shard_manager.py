@@ -22,6 +22,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from logging import getLogger
 from typing import TYPE_CHECKING
 
 from aiohttp.helpers import get_running_loop
@@ -44,6 +45,8 @@ if TYPE_CHECKING:
     from ..http.client import HTTPClient
 
 __all__ = ("ShardManager",)
+
+logger = getLogger(__name__)
 
 
 class ShardManager:
@@ -125,8 +128,8 @@ class ShardManager:
         # Publics
         self.active_shards: list[Shard] = []
         self.pending_shards: list[Shard] = []
-        self.raw_dispatcher: Dispatcher = Dispatcher()
-        self.event_dispatcher: Dispatcher = Dispatcher()
+        self.raw_dispatcher: Dispatcher[int] = Dispatcher()
+        self.event_dispatcher: Dispatcher[str] = Dispatcher()
         self.max_concurrency: int | None = None
 
         # Privates
@@ -163,6 +166,8 @@ class ShardManager:
             shard.raw_dispatcher.add_listener(self._on_raw_shard_receive)
             shard.event_dispatcher.add_listener(self._on_shard_dispatch)
 
+            logger.debug("Added shard event listeners")
+
             self.active_shards.append(shard)
 
     async def _spawn_shard(self, shard_id: int, shard_count: int) -> Shard:
@@ -181,7 +186,9 @@ class ShardManager:
 
     # Handlers
     async def _on_raw_shard_receive(self, opcode: int, data: ServerGatewayPayload) -> None:
-        self.raw_dispatcher.dispatch(opcode, data)
+        logger.debug("Relaying raw event")
+        await self.raw_dispatcher.dispatch(opcode, data)
 
     async def _on_shard_dispatch(self, event_name: str, data: ServerGatewayDispatchPayload) -> None:
-        self.event_dispatcher.dispatch(event_name, data)
+        logger.debug("Relaying event")
+        await self.event_dispatcher.dispatch(event_name, data)

@@ -155,12 +155,16 @@ class Dispatcher(Generic[EventNameT]):
             future: "Future[EventNameT, *Any]" = Future()  # type: ignore
 
             self._global_wait_for_handlers.append((check, future))
+            logger.debug("Added _global_wait_for_handler")
+            logger.debug(self._global_wait_for_handlers)
         else:
             if TYPE_CHECKING:
                 check = cast(WaitForCheck, check)
             future: "Future[*Any]" = Future()  # pyright: ignore
 
             self._wait_for_handlers[event_name].append((check, future))
+            logger.debug("Added _wait_for_handlers")
+            logger.debug(self._wait_for_handlers)
         try:
             result = await future
         except CancelledError:
@@ -185,13 +189,19 @@ class Dispatcher(Generic[EventNameT]):
         # Event handlers
         # Tasks are used here as some event handler/check might take a long time.
         for handler in self._global_event_handlers:
+            logger.debug("Dispatching to a global handler")
             create_task(self._run_global_event_handler(handler, event_name, *args))
         for handler in self._event_handlers.get(event_name, []):
+            logger.debug("Dispatching to a local handler")
             create_task(self._run_event_handler(handler, event_name, *args))
 
         # Wait for handlers
         for check, future in self._wait_for_handlers.get(event_name, []):
+            logger.debug("Dispatching to a wait_for handler")
             create_task(self._run_wait_for_handler(check, future, event_name, *args))
+        for check, future in self._global_wait_for_handlers:
+            logger.debug("Dispatching to a global wait_for handler")
+            create_task(self._run_global_wait_for_handler(check, future, event_name, *args))
 
     async def _run_event_handler(self, callback: EventCallback, event_name: EventNameT, *args: Any) -> None:
         """Run event with exception handlers"""
@@ -208,15 +218,27 @@ class Dispatcher(Generic[EventNameT]):
                     await maybe_coro(handler, exc)
                 except Exception:
                     logger.exception("Exception occured in exception handler")
+            for handler in self._global_exception_handlers:
+                try:
+                    await maybe_coro(handler, event_name, exc)
+                except Exception:
+                    logger.exception("Exception occured in exception handler")
 
     async def _run_global_event_handler(
         self, callback: GlobalEventCallback[EventNameT], event_name: EventNameT, *args: Any
     ) -> None:
         """Run global event with exception handlers"""
         try:
-            await maybe_coro(callback, *args)
+            await maybe_coro(callback, event_name, *args)
+            logger.debug("Inside global event handler")
         except Exception as exc:
+            if len(self._global_exception_handlers) == 0:
+                # No exception handlers.
+                # Raise a default exception
+                logger.exception("Exception occured in global event handler")
+                return
             for handler in self._global_exception_handlers:
+                logger.debug("Calling exception handler")
                 try:
                     await maybe_coro(handler, event_name, exc)
                 except Exception:
@@ -225,7 +247,7 @@ class Dispatcher(Generic[EventNameT]):
     async def _run_wait_for_handler(
         self,
         check: WaitForCheck,
-        future: "Future[tuple[EventNameT, *Any]]", # pyright: ignore
+        future: "Future[tuple[*Any]]", # pyright: ignore
         event_name: EventNameT,
         *args: Any
     ) -> None:
@@ -240,3 +262,22 @@ class Dispatcher(Generic[EventNameT]):
         future.set_result(args)
 
         self._wait_for_handlers[event_name].remove((check, future))
+
+    async def _run_global_wait_for_handler(
+        self,
+        check: GlobalWaitForCheck[EventNameT],
+        future: "Future[tuple[EventNameT, *Any]]", # pyright: ignore
+        event_name: EventNameT,
+        *args: Any
+    ) -> None:
+        try:
+            result = await maybe_coro(check, event_name, *args)
+        except:
+            logger.exception("Exception occured in wait for check")
+            return
+        if not result:
+            return
+
+        future.set_result((event_name, *args))
+
+        self._global_wait_for_handlers.remove((check, future))
