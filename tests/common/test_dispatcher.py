@@ -1,6 +1,5 @@
 from asyncio import TimeoutError as AsyncioTimeoutError
-from asyncio import create_task, get_running_loop, sleep, wait_for, Future
-import logging
+from asyncio import create_task, get_running_loop, wait_for, Future
 
 from pytest import mark, raises
 
