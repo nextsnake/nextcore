@@ -1,12 +1,21 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from asyncio import TimeoutError, wait_for
 from time import time
 
+if TYPE_CHECKING:
+    from typing import Any, Callable
+    from typing_extensions import ParamSpec
 
-def match_time(estimated, max_offset):
+    P = ParamSpec("P")
+
+
+def match_time(estimated: float, max_offset: float):
     """Errror if the estimated time is off"""
 
-    def outer(func):
-        async def inner(*args, **kwargs):
+    def outer(func: Callable[P, Any]):
+        async def inner(*args: P.args, **kwargs: P.kwargs) -> None:
             start = time()
             try:
                 await wait_for(func(*args, **kwargs), timeout=estimated + max_offset)
