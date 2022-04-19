@@ -61,7 +61,20 @@ __all__ = ("Dispatcher",)
 
 
 class Dispatcher(Generic[EventNameT]):
-    """A event dispatcher"""
+    """A event dispatcher
+    
+    Example usage:
+
+    .. code-block:: python
+
+        dispatcher: Dispatcher[str] = Dispatcher()
+
+        @dispatcher.listen("join")
+        async def event_handler(username: str) -> None:
+            print(f"Welcome {username}")
+
+        await dispatcher.dispatch("join", "John")
+    """
 
     def __init__(self):
         self._event_handlers: defaultdict[EventNameT, list[EventCallback]] = defaultdict(list)
@@ -87,6 +100,16 @@ class Dispatcher(Generic[EventNameT]):
     def add_listener(
         self, callback: EventCallback | GlobalEventCallback[EventNameT], event_name: EventNameT | None = None
     ) -> None:
+        """Add a event listener.
+
+        Parameters
+        ----------
+        callback: :class:`EventCallback` | :class:`GlobalEventCallback`
+            The event callback to register.
+        event_name: :class:`EventNameT` | :data:`None`
+            The event name to listen to. If this is :data:`None`,
+            this is considered a global event and all events will be sent to the callback.
+        """
         if event_name is None:
             if TYPE_CHECKING:
                 callback = cast(GlobalEventCallback[EventNameT], callback)
@@ -99,6 +122,24 @@ class Dispatcher(Generic[EventNameT]):
     def remove_listener(
         self, callback: EventCallback | GlobalEventCallback[EventNameT], event_name: EventNameT | None = None
     ) -> None:
+        """Removes a event listener.
+
+        Parameters
+        ----------
+        callback: :class:`EventCallback` | :class:`GlobalEventCallback`
+            The event callback to remove.
+        event_name: :class:`EventNameT` | :data:`None`
+            The event name to remove. If this is :data:`None`, the listener is considered a global event.
+
+            .. warn::
+                If the event_name does not match the event name it was registered with,
+                the removal will fail with a :class:`ValueError` as the listener was not found.
+
+        Raises
+        ------
+        :class:`ValueError`
+            The callback was not registered to this event.
+        """
         if event_name is None:
             if TYPE_CHECKING:
                 callback = cast(GlobalEventCallback[EventNameT], callback)
