@@ -25,4 +25,4 @@ if TYPE_CHECKING:
     from .inner import *
     from .outer import *
 
-    __all__ = ("ReadyData", "HelloData", "ClientGatewayPayload", "ServerGatewayPayload", "ServerGatewayDispatchPayload")
+    __all__ = ("ReadyData", "ResumedData", "HelloData", "ClientGatewayPayload", "ServerGatewayPayload", "ServerGatewayDispatchPayload")

@@ -54,6 +54,7 @@ if TYPE_CHECKING:
         ClientGatewayPayload,
         HelloData,
         ReadyData,
+        ResumedData,
         ServerGatewayDispatchPayload,
         ServerGatewayPayload,
         UpdatePresence,
@@ -207,6 +208,7 @@ class Shard:
 
         # Events
         self.event_dispatcher.add_listener(self._handle_ready, "READY")
+        self.event_dispatcher.add_listener(self._handle_resumed, "RESUMED")
 
         # Disconnects
         self.dispatcher.add_listener(self._handle_disconnect, "disconnect")
@@ -447,6 +449,10 @@ class Shard:
     async def _handle_ready(self, data: ReadyData) -> None:
         # Save session id for resuming
         self.session_id = data["session_id"]
+        self.ready.set()
+
+    async def _handle_resumed(self, data: ResumedData) -> None:
+        del data # Unused
         self.ready.set()
 
     async def _handle_disconnect(self, close_code: int) -> None:

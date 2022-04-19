@@ -19,10 +19,16 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .ready import ReadyData
-    from .resumed import ResumedData
+    from typing import TypedDict
 
-    __all__ = ("ReadyData", "ResumedData")
+    class ResumedData(TypedDict):
+        """Inner data for the `RESUMED <https://discord.dev/topics/gateway#resumed>`__ event.
+
+        This is just a empty dict.
+        """
+        pass

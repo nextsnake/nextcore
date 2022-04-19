@@ -114,7 +114,7 @@ class Dispatcher(Generic[EventNameT]):
             except ValueError:
                 raise ValueError(f"Listener not registered for event {event_name}")
 
-    def add_exception_handler(
+    def add_error_handler(
         self, callback: ExceptionHandler | GlobalExceptionHandler[EventNameT], event_name: EventNameT | None = None
     ) -> None:
         if event_name is None:
@@ -126,7 +126,7 @@ class Dispatcher(Generic[EventNameT]):
                 callback = cast(ExceptionHandler, callback)
             self._exception_handlers[event_name].append(callback)
 
-    def remove_exception_handler(
+    def remove_error_handler(
         self, callback: ExceptionHandler | GlobalExceptionHandler[EventNameT], event_name: EventNameT | None = None
     ) -> None:
         if event_name is None:

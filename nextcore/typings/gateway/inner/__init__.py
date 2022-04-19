@@ -25,4 +25,4 @@ if TYPE_CHECKING:
     from .dispatch import *
     from .hello import HelloData
 
-    __all__ = ("ReadyData", "HelloData")
+    __all__ = ("ReadyData", "ResumedData", "HelloData")
