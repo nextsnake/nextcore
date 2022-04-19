@@ -9,7 +9,7 @@ from tests.utils import match_time
 
 @mark.asyncio
 @match_time(0.2, 0.1)
-async def test_consecutive():
+async def test_consecutive() -> None:
     metadata = BucketMetadata(limit=1)
     bucket = Bucket(metadata)
     await bucket.update(1, 0.1)
@@ -19,7 +19,7 @@ async def test_consecutive():
             await bucket.update(0, 0.1)
 
 
-async def use_bucket(bucket: Bucket):
+async def use_bucket(bucket: Bucket) -> None:
     async with bucket.acquire():
         # It needs a update to be reset.
         await bucket.update(0, 0.1)
@@ -27,7 +27,7 @@ async def use_bucket(bucket: Bucket):
 
 @mark.asyncio
 @match_time(0.2, 0.1)
-async def test_concurrently():
+async def test_concurrently() -> None:
     metadata = BucketMetadata(limit=1)
     bucket = Bucket(metadata)
 
@@ -39,7 +39,7 @@ async def test_concurrently():
 
 @mark.asyncio
 @match_time(0, 0.1)
-async def test_failure_no_info():
+async def test_failure_no_info() -> None:
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
 
@@ -50,7 +50,7 @@ async def test_failure_no_info():
 
 @mark.asyncio
 @match_time(0, 0.1)
-async def test_failure_initial_info():
+async def test_failure_initial_info() -> None:
     metadata = BucketMetadata(limit=1)
     bucket = Bucket(metadata)
 
@@ -63,7 +63,7 @@ async def test_failure_initial_info():
 
 @mark.asyncio
 @match_time(0, 0.1)
-async def test_unlimited():
+async def test_unlimited() -> None:
     metadata = BucketMetadata(limit=1)
     bucket = Bucket(metadata)
 
