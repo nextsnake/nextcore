@@ -1,0 +1,78 @@
+name: Lint
+on: [pull_request, push]
+jobs:
+  black:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.10"
+      - name: Install poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Run tests
+        run: poetry run task black_check
+  isort:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.10"
+      - name: Install poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Run tests
+        run: poetry run task isort_check
+  pyright:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.10"
+      - name: Install poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install -E speed
+      - uses: actions/setup-node@v2
+        name: Install node
+        with:
+          node-version: '14'
+      - name: Install pyright
+        run: npm install -g pyright
+      - name: Enable the problem checker
+        run: echo "::add-matcher::.github/checkers/pyright.json"
+      - name: Run pyright
+        run: poetry run pyright nextcore/
+  style-guide:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.10"
+      - name: Install poetry
+        run: pip install poetry
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.DEPLOY_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          if_key_exists: replace 
+      - name: Install style-guide
+        run: poetry add git+ssh://git@github.com/nextsnake/style-guide.git --dev
+      - name: Install dependencies
+        run: poetry install
+      - name: Enable the problem checker
+        run: echo "::add-matcher::.github/checkers/pylint.json"
+      - name: Run pylint
+        run: poetry run pylint -d all -e asyncio-best-practices,license,outdated-typing --load-plugins=nextstyle nextcore/
+
