@@ -261,9 +261,13 @@ class Shard:
         ------
         :class:`RuntimeError`
             Not connected to the gateway.
+        :class:`RuntimeError`
+            Not heartbeated yet.
         """
-        if self._latency is None:
+        if self._ws is None or self._ws.closed:
             raise RuntimeError("Not connected to the gateway.")
+        if self._latency is None:
+            raise RuntimeError("Not heartbeated yet.")
         return self._latency
 
     async def _send(
