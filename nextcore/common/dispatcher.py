@@ -245,11 +245,7 @@ class Dispatcher(Generic[EventNameT]):
                     logger.exception("Exception occured in exception handler")
 
     async def _run_wait_for_handler(
-        self,
-        check: WaitForCheck,
-        future: "Future[tuple[*Any]]", # pyright: ignore
-        event_name: EventNameT,
-        *args: Any
+        self, check: WaitForCheck, future: "Future[tuple[*Any]]", event_name: EventNameT, *args: Any  # pyright: ignore
     ) -> None:
         try:
             result = await maybe_coro(check, *args)
@@ -266,9 +262,9 @@ class Dispatcher(Generic[EventNameT]):
     async def _run_global_wait_for_handler(
         self,
         check: GlobalWaitForCheck[EventNameT],
-        future: "Future[tuple[EventNameT, *Any]]", # pyright: ignore
+        future: "Future[tuple[EventNameT, *Any]]",  # pyright: ignore
         event_name: EventNameT,
-        *args: Any
+        *args: Any,
     ) -> None:
         try:
             result = await maybe_coro(check, event_name, *args)

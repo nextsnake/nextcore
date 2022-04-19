@@ -34,13 +34,13 @@ from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
 from .errors import (
     BadRequestError,
+    CloudflareBanError,
     ForbiddenError,
     HTTPRequestStatusError,
     InternalServerError,
     NotFoundError,
     RateLimitingFailedError,
     UnauthorizedError,
-    CloudflareBanError
 )
 from .ratelimit_storage import RatelimitStorage
 from .route import Route

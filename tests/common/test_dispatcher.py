@@ -1,14 +1,16 @@
+from asyncio import Future
 from asyncio import TimeoutError as AsyncioTimeoutError
-from asyncio import create_task, get_running_loop, wait_for, Future
+from asyncio import create_task, get_running_loop, wait_for
 
 from pytest import mark, raises
 
 from nextcore.common.dispatcher import Dispatcher
 
+
 @mark.asyncio
 async def test_local_sync_listeners() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
-    
+
     got_response: Future[None] = Future()
 
     def sync_response_callback() -> None:
@@ -23,12 +25,13 @@ async def test_local_sync_listeners() -> None:
     await dispatcher.dispatch("test")
 
     with raises(AsyncioTimeoutError):
-        await wait_for(got_response, timeout=.1)
+        await wait_for(got_response, timeout=0.1)
+
 
 @mark.asyncio
 async def test_global_sync_listeners() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
-    
+
     got_response: Future[None] = Future()
 
     def sync_response_callback(event_name: str) -> None:
@@ -44,12 +47,13 @@ async def test_global_sync_listeners() -> None:
     await dispatcher.dispatch("test")
 
     with raises(AsyncioTimeoutError):
-        await wait_for(got_response, timeout=.1)
+        await wait_for(got_response, timeout=0.1)
+
 
 @mark.asyncio
 async def test_local_async_listeners() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
-    
+
     got_response: Future[None] = Future()
 
     async def sync_response_callback() -> None:
@@ -64,12 +68,13 @@ async def test_local_async_listeners() -> None:
     await dispatcher.dispatch("test")
 
     with raises(AsyncioTimeoutError):
-        await wait_for(got_response, timeout=.1)
+        await wait_for(got_response, timeout=0.1)
+
 
 @mark.asyncio
 async def test_global_async_listeners() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
-    
+
     got_response: Future[None] = Future()
 
     async def sync_response_callback(event_name: str) -> None:
@@ -85,13 +90,13 @@ async def test_global_async_listeners() -> None:
     await dispatcher.dispatch("test")
 
     with raises(AsyncioTimeoutError):
-        await wait_for(got_response, timeout=.1)
+        await wait_for(got_response, timeout=0.1)
 
 
 @mark.asyncio
 async def test_local_error_handler() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
-    
+
     got_response: Future[None] = Future()
 
     def error_causer() -> None:
@@ -111,12 +116,13 @@ async def test_local_error_handler() -> None:
     await dispatcher.dispatch("test")
 
     with raises(AsyncioTimeoutError):
-        await wait_for(got_response, timeout=.1)
+        await wait_for(got_response, timeout=0.1)
+
 
 @mark.asyncio
 async def test_global_error_handler() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
-    
+
     got_response: Future[None] = Future()
 
     def error_causer() -> None:
@@ -133,7 +139,7 @@ async def test_global_error_handler() -> None:
 
     # Delay the execution so wait_for gets time to run.
     # TODO: This workaround is bad.
-    loop.call_later(.01, create_task, dispatcher.dispatch("test"))
+    loop.call_later(0.01, create_task, dispatcher.dispatch("test"))
 
     await wait_for(got_response, timeout=1)
 
@@ -142,7 +148,8 @@ async def test_global_error_handler() -> None:
     loop.call_later(0.01, create_task, dispatcher.dispatch("test"))
 
     with raises(AsyncioTimeoutError):
-        await wait_for(got_response, timeout=.1)
+        await wait_for(got_response, timeout=0.1)
+
 
 def test_remove_nonexistant_listener() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
@@ -153,10 +160,11 @@ def test_remove_nonexistant_listener() -> None:
     with raises(ValueError):
         dispatcher.remove_listener(sync_callback, "test")
 
+
 @mark.asyncio
 async def test_local_wait_for_handler() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
-    
+
     loop = get_running_loop()
     loop.call_later(0.01, create_task, dispatcher.dispatch("test"))
     await wait_for(dispatcher.wait_for(lambda: True, "test"), timeout=0.1)
@@ -165,10 +173,11 @@ async def test_local_wait_for_handler() -> None:
     with raises(AsyncioTimeoutError):
         await wait_for(dispatcher.wait_for(lambda: False, "test"), timeout=0.1)
 
+
 @mark.asyncio
 async def test_global_wait_for_handler() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
-    
+
     loop = get_running_loop()
     loop.call_later(0.01, create_task, dispatcher.dispatch("test"))
     await wait_for(dispatcher.wait_for(lambda _: True), timeout=0.1)
@@ -176,4 +185,3 @@ async def test_global_wait_for_handler() -> None:
     loop.call_later(0.01, create_task, dispatcher.dispatch("test"))
     with raises(AsyncioTimeoutError):
         await wait_for(dispatcher.wait_for(lambda _: False), timeout=0.1)
-

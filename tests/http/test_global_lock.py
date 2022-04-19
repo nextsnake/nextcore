@@ -10,7 +10,7 @@ from tests.utils import match_time
 
 @mark.asyncio
 @match_time(0, 0.1)
-async def test_no_limit():
+async def test_no_limit() -> None:
     lock = GlobalLock()
 
     for _ in range(10):
@@ -20,7 +20,7 @@ async def test_no_limit():
 
 @mark.asyncio
 @match_time(0, 0.1)
-async def test_with_limit():
+async def test_with_limit() -> None:
     lock = GlobalLock(limit=2)
 
     for _ in range(2):
@@ -30,7 +30,7 @@ async def test_with_limit():
 
 @mark.asyncio
 @match_time(1, 0.1)
-async def test_exceeds_limit():
+async def test_exceeds_limit() -> None:
     lock = GlobalLock(limit=2)
 
     for _ in range(4):
@@ -39,7 +39,7 @@ async def test_exceeds_limit():
 
 
 @mark.asyncio
-async def test_locking():
+async def test_locking() -> None:
     lock = GlobalLock(None)
 
     async def use_lock():
@@ -56,7 +56,7 @@ async def test_locking():
 
 
 @mark.asyncio
-async def test_exceeds_limit_concurrent():
+async def test_exceeds_limit_concurrent() -> None:
     logger = getLogger("testing")
 
     async def use_lock():

@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from asyncio import TimeoutError, wait_for
 from time import time
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any, Callable
+
     from typing_extensions import ParamSpec
 
     P = ParamSpec("P")
