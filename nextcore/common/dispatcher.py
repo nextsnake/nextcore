@@ -102,6 +102,21 @@ class Dispatcher(Generic[EventNameT]):
     ) -> Callable[[EventCallback], EventCallback] | Callable[
         [GlobalEventCallback[EventNameT]], GlobalEventCallback[EventNameT]
     ]:
+        """Decorator to register a event listener.
+
+        Example usage:
+
+        .. code-block:: python
+            
+            @dispatcher.listen("join")
+            async def join_handler(username: str) -> None:
+                print(f"Welcome {username}")
+
+        Parameters
+        ----------
+        event_name: :class:`EventNameT` | :data:`None`
+            The event name to register the listener to. If this is :data:`None`, the listener is considered a global event.
+        """
         @overload
         def decorator(callback: EventCallback) -> EventCallback:
             ...
