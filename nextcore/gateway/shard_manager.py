@@ -30,7 +30,6 @@ from aiohttp.helpers import get_running_loop
 from nextcore.gateway.times_per import TimesPer
 
 from ..common.dispatcher import Dispatcher
-from ..utils import extract_token_info
 from .shard import Shard
 
 if TYPE_CHECKING:
@@ -146,7 +145,14 @@ class ShardManager:
 
         .. note::
             This will return once all shards are connected.
+
+        Raises
+        ------
+        :class:`RuntimeError`
+            Already connected.
         """
+        if self.active_shards:
+            raise RuntimeError("Already connected!")
         connection_info = await self.http_client.get_gateway_bot()
         session_start_limits = connection_info["session_start_limit"]
         self.max_concurrency = session_start_limits["max_concurrency"]
