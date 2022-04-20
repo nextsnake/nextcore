@@ -39,21 +39,28 @@ from ..utils import maybe_coro
 EventNameT = TypeVar("EventNameT", bound=Hashable)
 
 if TYPE_CHECKING:
-    from typing import (  # pylint: disable=outdated-typing-union
+    from typing import (  # pylint: disable=outdated-typing-tuple,outdated-typing-union
         Any,
         Awaitable,
         Callable,
+        Generic,
+        Tuple,
         Union,
     )
 
-    EventCallback = Callable[[*Any], Any]
-    GlobalEventCallback = Callable[[EventNameT, *Any], Any]
+    from typing_extensions import Unpack
 
-    WaitForCheck = Callable[[*Any], Union[Awaitable[bool], bool]]
-    GlobalWaitForCheck = Callable[[EventNameT, *Any], Union[Awaitable[bool], bool]]
+    VariadicTuple = Tuple[Any, ...]
+    WaitForTuple = Tuple[EventNameT, Unpack[VariadicTuple]]
+
+    EventCallback = Callable[[Unpack[VariadicTuple]], Any]
+    GlobalEventCallback = Callable[[EventNameT, Unpack[VariadicTuple]], Any]
+    WaitForCheck = Callable[[Unpack[VariadicTuple]], Union[Awaitable[bool], bool]]
+    GlobalWaitForCheck = Callable[[EventNameT, Unpack[VariadicTuple]], Union[Awaitable[bool], bool]]
 
     ExceptionHandler = Callable[[Exception], Any]
     GlobalExceptionHandler = Callable[[EventNameT, Exception], Any]
+
 
 logger = getLogger(__name__)
 
@@ -62,7 +69,7 @@ __all__ = ("Dispatcher",)
 
 class Dispatcher(Generic[EventNameT]):
     """A event dispatcher
-    
+
     Example usage:
 
     .. code-block:: python
@@ -105,7 +112,7 @@ class Dispatcher(Generic[EventNameT]):
         Example usage:
 
         .. code-block:: python
-            
+
             async def join_handler(username: str) -> None:
                 print(f"Welcome {username}")
 
@@ -136,7 +143,7 @@ class Dispatcher(Generic[EventNameT]):
         Example usage:
 
         .. code-block:: python
-            
+
             dispatcher.remove_listener(welcome_handler, "join")
 
         Parameters
@@ -219,7 +226,7 @@ class Dispatcher(Generic[EventNameT]):
             .. warning::
                 If the event_name does not match the event name it was registered with,
                 the removal will fail with a :class:`ValueError` as the listener was not found.
-        
+
         Raises
         ------
         :class:`ValueError`
@@ -240,15 +247,23 @@ class Dispatcher(Generic[EventNameT]):
             except ValueError:
                 raise ValueError(f"Exception handler not registered for event {event_name}")
 
+    @overload
+    async def wait_for(self, check: GlobalWaitForCheck[EventNameT]) -> WaitForTuple[EventNameT]:
+        ...
+
+    @overload
+    async def wait_for(self, check: WaitForCheck, event_name: EventNameT) -> tuple[Any, ...]:
+        ...
+
     async def wait_for(
         self, check: WaitForCheck | GlobalWaitForCheck[EventNameT], event_name: EventNameT | None = None
-    ):
+    ) -> WaitForTuple[EventNameT] | tuple[Any, ...]:
         """Wait for an event to occur.
 
         Example usage:
 
         .. code-block:: python
-            
+
             username = await dispatcher.wait_for(
                 lambda username: username.startswith("h"),
                 "join"
@@ -272,11 +287,11 @@ class Dispatcher(Generic[EventNameT]):
         """
         # TODO: Return type needs to be fixed
         # TODO: I don't like this. Typings makes everything look awful.
+        future: Future[tuple[Any, ...]] = Future()  # we lose the specifity of the type here (overriden warning)
+
         if event_name is None:
             if TYPE_CHECKING:
                 check = cast(GlobalWaitForCheck[EventNameT], check)
-            # Bug in pyright considering this is a string... TODO: Get this fixed
-            future: "Future[EventNameT, *Any]" = Future()  # type: ignore
 
             self._global_wait_for_handlers.append((check, future))
             logger.debug("Added _global_wait_for_handler")
@@ -284,11 +299,11 @@ class Dispatcher(Generic[EventNameT]):
         else:
             if TYPE_CHECKING:
                 check = cast(WaitForCheck, check)
-            future: "Future[*Any]" = Future()  # pyright: ignore
 
             self._wait_for_handlers[event_name].append((check, future))
             logger.debug("Added _wait_for_handlers")
             logger.debug(self._wait_for_handlers)
+
         try:
             result = await future
         except CancelledError:
@@ -296,11 +311,14 @@ class Dispatcher(Generic[EventNameT]):
             if event_name is None:
                 if TYPE_CHECKING:
                     check = cast(GlobalWaitForCheck[EventNameT], check)
+
                 self._global_wait_for_handlers.remove((check, future))
             else:
                 if TYPE_CHECKING:
                     check = cast(WaitForCheck, check)
+
                 self._wait_for_handlers[event_name].remove((check, future))
+
             # Properly cancel the task
             raise
         return result
@@ -308,7 +326,7 @@ class Dispatcher(Generic[EventNameT]):
     # Dispatching
     async def dispatch(self, event_name: EventNameT, *args: Any) -> None:
         """Dispatch a event
-        
+
         Example usage:
 
         .. code-block:: python
@@ -382,8 +400,12 @@ class Dispatcher(Generic[EventNameT]):
                 except Exception:
                     logger.exception("Exception occured in exception handler")
 
-    async def _run_wait_for_handler(
-        self, check: WaitForCheck, future: "Future[tuple[*Any]]", event_name: EventNameT, *args: Any  # pyright: ignore
+    async def _run_global_wait_for_handler(
+        self,
+        check: GlobalWaitForCheck[EventNameT],
+        future: Future[WaitForTuple[EventNameT]],
+        event_name: EventNameT,
+        *args: Any,
     ) -> None:
         try:
             result = await maybe_coro(check, *args)
@@ -395,12 +417,12 @@ class Dispatcher(Generic[EventNameT]):
 
         future.set_result(args)
 
-        self._wait_for_handlers[event_name].remove((check, future))
+        self._global_wait_for_handlers.remove((check, future))
 
-    async def _run_global_wait_for_handler(
+    async def _run_wait_for_handler(
         self,
-        check: GlobalWaitForCheck[EventNameT],
-        future: "Future[tuple[EventNameT, *Any]]",  # pyright: ignore
+        check: WaitForCheck,
+        future: Future[WaitForTuple[EventNameT]],
         event_name: EventNameT,
         *args: Any,
     ) -> None:
@@ -414,4 +436,4 @@ class Dispatcher(Generic[EventNameT]):
 
         future.set_result((event_name, *args))
 
-        self._global_wait_for_handlers.remove((check, future))
+        self._wait_for_handlers[event_name].remove((check, future))
