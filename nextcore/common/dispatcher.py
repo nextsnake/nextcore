@@ -62,7 +62,7 @@ __all__ = ("Dispatcher",)
 
 class Dispatcher(Generic[EventNameT]):
     """A event dispatcher
-    
+
     Example usage:
 
     .. code-block:: python
@@ -89,12 +89,13 @@ class Dispatcher(Generic[EventNameT]):
         self._exception_handlers: defaultdict[EventNameT, list[ExceptionHandler]] = defaultdict(list)
 
     # Registration
-    @overload
-    def add_listener(self, callback: GlobalEventCallback[EventNameT], event_name: None = None) -> None:
-        ...
 
     @overload
     def add_listener(self, callback: EventCallback, event_name: EventNameT) -> None:
+        ...
+
+    @overload
+    def add_listener(self, callback: GlobalEventCallback[EventNameT], event_name: None = None) -> None:
         ...
 
     def add_listener(
@@ -105,7 +106,7 @@ class Dispatcher(Generic[EventNameT]):
         Example usage:
 
         .. code-block:: python
-            
+
             async def join_handler(username: str) -> None:
                 print(f"Welcome {username}")
 
@@ -128,6 +129,14 @@ class Dispatcher(Generic[EventNameT]):
                 callback = cast(EventCallback, callback)
             self._event_handlers[event_name].append(callback)
 
+    @overload
+    def remove_listener(self, callback: EventCallback, event_name: EventNameT) -> None:
+        ...
+
+    @overload
+    def remove_listener(self, callback: GlobalEventCallback[EventNameT], event_name: None = None) -> None:
+        ...
+
     def remove_listener(
         self, callback: EventCallback | GlobalEventCallback[EventNameT], event_name: EventNameT | None = None
     ) -> None:
@@ -136,7 +145,7 @@ class Dispatcher(Generic[EventNameT]):
         Example usage:
 
         .. code-block:: python
-            
+
             dispatcher.remove_listener(welcome_handler, "join")
 
         Parameters
@@ -170,6 +179,14 @@ class Dispatcher(Generic[EventNameT]):
             except ValueError:
                 raise ValueError(f"Listener not registered for event {event_name}")
 
+    @overload
+    def add_error_handler(self, callback: ExceptionHandler, event_name: EventNameT) -> None:
+        ...
+
+    @overload
+    def add_error_handler(self, callback: GlobalExceptionHandler[EventNameT], event_name: None = None) -> None:
+        ...
+
     def add_error_handler(
         self, callback: ExceptionHandler | GlobalExceptionHandler[EventNameT], event_name: EventNameT | None = None
     ) -> None:
@@ -198,6 +215,14 @@ class Dispatcher(Generic[EventNameT]):
                 callback = cast(ExceptionHandler, callback)
             self._exception_handlers[event_name].append(callback)
 
+    @overload
+    def remove_error_handler(self, callback: ExceptionHandler, event_name: EventNameT) -> None:
+        ...
+
+    @overload
+    def remove_error_handler(self, callback: GlobalExceptionHandler[EventNameT], event_name: None = None) -> None:
+        ...
+
     def remove_error_handler(
         self, callback: ExceptionHandler | GlobalExceptionHandler[EventNameT], event_name: EventNameT | None = None
     ) -> None:
@@ -219,7 +244,7 @@ class Dispatcher(Generic[EventNameT]):
             .. warning::
                 If the event_name does not match the event name it was registered with,
                 the removal will fail with a :class:`ValueError` as the listener was not found.
-        
+
         Raises
         ------
         :class:`ValueError`
@@ -240,6 +265,14 @@ class Dispatcher(Generic[EventNameT]):
             except ValueError:
                 raise ValueError(f"Exception handler not registered for event {event_name}")
 
+    @overload
+    def dispatch(self, check: WaitForCheck, event_name: EventNameT) -> None:
+        ...
+
+    @overload
+    def dispatch(self, check: GlobalWaitForCheck[EventNameT], event_name: None) -> None:
+        ...
+
     async def wait_for(
         self, check: WaitForCheck | GlobalWaitForCheck[EventNameT], event_name: EventNameT | None = None
     ):
@@ -248,7 +281,7 @@ class Dispatcher(Generic[EventNameT]):
         Example usage:
 
         .. code-block:: python
-            
+
             username = await dispatcher.wait_for(
                 lambda username: username.startswith("h"),
                 "join"
@@ -308,7 +341,7 @@ class Dispatcher(Generic[EventNameT]):
     # Dispatching
     async def dispatch(self, event_name: EventNameT, *args: Any) -> None:
         """Dispatch a event
-        
+
         Example usage:
 
         .. code-block:: python
