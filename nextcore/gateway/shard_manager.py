@@ -35,12 +35,11 @@ from .shard import Shard
 if TYPE_CHECKING:
     from typing import Final
 
-    from nextcore.typings.gateway.outer import (
+    from nextcore.typings import (
         ServerGatewayDispatchPayload,
         ServerGatewayPayload,
+        UpdatePresence
     )
-    from nextcore.typings.objects.update_presence import UpdatePresence
-
     from ..http.client import HTTPClient
 
 __all__ = ("ShardManager",)
