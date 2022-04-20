@@ -310,11 +310,11 @@ class Dispatcher(Generic[EventNameT]):
                 raise ValueError(f"Exception handler not registered for event {event_name}")
 
     @overload
-    def dispatch(self, check: WaitForCheck, event_name: EventNameT) -> None:
+    def wait_for(self, check: WaitForCheck, event_name: EventNameT) -> None:
         ...
 
     @overload
-    def dispatch(self, check: GlobalWaitForCheck[EventNameT], event_name: None) -> None:
+    def wait_for(self, check: GlobalWaitForCheck[EventNameT], event_name: None = None) -> None:
         ...
 
     async def wait_for(
