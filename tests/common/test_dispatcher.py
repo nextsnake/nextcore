@@ -107,7 +107,7 @@ async def test_local_error_handler() -> None:
         got_response.set_result(None)
 
     dispatcher.add_listener(error_causer, "test")
-    dispatcher.add_exception_handler(error_handler, "test")
+    dispatcher.add_error_handler(error_handler, "test")
     await dispatcher.dispatch("test")
     await wait_for(got_response, timeout=1)
 
@@ -133,7 +133,7 @@ async def test_global_error_handler() -> None:
         got_response.set_result(None)
 
     dispatcher.add_listener(error_causer)
-    dispatcher.add_exception_handler(error_handler)
+    dispatcher.add_error_handler(error_handler)
 
     loop = get_running_loop()
 

@@ -31,4 +31,5 @@ if TYPE_CHECKING:
 
         This is just a empty dict.
         """
+
         pass

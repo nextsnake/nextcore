@@ -456,7 +456,7 @@ class Shard:
         self.ready.set()
 
     async def _handle_resumed(self, data: ResumedData) -> None:
-        del data # Unused
+        del data  # Unused
         self.ready.set()
 
     async def _handle_disconnect(self, close_code: int) -> None:
