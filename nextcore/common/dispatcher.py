@@ -70,7 +70,7 @@ class Dispatcher(Generic[EventNameT]):
         dispatcher: Dispatcher[str] = Dispatcher()
 
         @dispatcher.listen("join")
-        async def event_handler(username: str) -> None:
+        async def join_handler(username: str) -> None:
             print(f"Welcome {username}")
 
         await dispatcher.dispatch("join", "John")
@@ -102,6 +102,15 @@ class Dispatcher(Generic[EventNameT]):
     ) -> None:
         """Add a event listener.
 
+        Example usage:
+
+        .. code-block:: python
+            
+            async def join_handler(username: str) -> None:
+                print(f"Welcome {username}")
+
+            dispatcher.add_listener(welcome_handler, "join")
+
         Parameters
         ----------
         callback: :class:`EventCallback` | :class:`GlobalEventCallback`
@@ -124,6 +133,12 @@ class Dispatcher(Generic[EventNameT]):
     ) -> None:
         """Removes a event listener.
 
+        Example usage:
+
+        .. code-block:: python
+            
+            dispatcher.remove_listener(welcome_handler, "join")
+
         Parameters
         ----------
         callback: :class:`EventCallback` | :class:`GlobalEventCallback`
@@ -131,7 +146,7 @@ class Dispatcher(Generic[EventNameT]):
         event_name: :class:`EventNameT` | :data:`None`
             The event name to remove. If this is :data:`None`, the listener is considered a global event.
 
-            .. warn::
+            .. warning::
                 If the event_name does not match the event name it was registered with,
                 the removal will fail with a :class:`ValueError` as the listener was not found.
 
@@ -158,6 +173,22 @@ class Dispatcher(Generic[EventNameT]):
     def add_error_handler(
         self, callback: ExceptionHandler | GlobalExceptionHandler[EventNameT], event_name: EventNameT | None = None
     ) -> None:
+        """Add an error handler for listeners.
+
+        The callback will be called when an exception is raised in a listener.
+
+        .. note::
+            If no listener is registered, the error will be logged.
+
+        Example usage:
+
+        .. code-block:: python
+
+            async def error(exception: Exception) -> None:
+                print("Oops!")
+
+            dispatcher.add_error_handler(error_handler, "join")
+        """
         if event_name is None:
             if TYPE_CHECKING:
                 callback = cast(GlobalExceptionHandler[EventNameT], callback)
@@ -170,6 +201,30 @@ class Dispatcher(Generic[EventNameT]):
     def remove_error_handler(
         self, callback: ExceptionHandler | GlobalExceptionHandler[EventNameT], event_name: EventNameT | None = None
     ) -> None:
+        """Removes an error handler.
+
+        Example usage:
+
+        .. code-block:: python
+
+            dispatcher.remove_error_handler(error_handler, "join")
+
+        Parameters
+        ----------
+        callback: :class:`ExceptionHandler` | :class:`GlobalExceptionHandler`
+            The error handler to remove.
+        event_name: :class:`EventNameT` | :data:`None`
+            The event name to remove. If this is :data:`None`, the listener is considered a global event.
+
+            .. warning::
+                If the event_name does not match the event name it was registered with,
+                the removal will fail with a :class:`ValueError` as the listener was not found.
+        
+        Raises
+        ------
+        :class:`ValueError`
+            The callback was not registered to this event.
+        """
         if event_name is None:
             if TYPE_CHECKING:
                 callback = cast(GlobalExceptionHandler[EventNameT], callback)
@@ -188,6 +243,34 @@ class Dispatcher(Generic[EventNameT]):
     async def wait_for(
         self, check: WaitForCheck | GlobalWaitForCheck[EventNameT], event_name: EventNameT | None = None
     ):
+        """Wait for an event to occur.
+
+        Example usage:
+
+        .. code-block:: python
+            
+            username = await dispatcher.wait_for(
+                lambda username: username.startswith("h"),
+                "join"
+            )
+            print(f"{username}'s username starts with h")
+
+        Parameters
+        ----------
+        check: :class:`WaitForCheck` | :class:`GlobalWaitForCheck`
+            Check for it to return.
+        event_name: :class:`EventNameT` | :data:`None`
+            The event name to wait for. If this is :data:`None`,
+            it is considered global and will return when any event is received and include a :class:`EventNameT` as the first event argument.
+
+        Returns
+        -------
+        :class:`EventNameT`, * :data:`typing.Any`
+            The event name and the event arguments. This is only returned if the event is global.
+        * :data:`typing.Any`
+            The event arguments.
+        """
+        # TODO: Return type needs to be fixed
         # TODO: I don't like this. Typings makes everything look awful.
         if event_name is None:
             if TYPE_CHECKING:
@@ -224,7 +307,21 @@ class Dispatcher(Generic[EventNameT]):
 
     # Dispatching
     async def dispatch(self, event_name: EventNameT, *args: Any) -> None:
-        """Dispatch event"""
+        """Dispatch a event
+        
+        Example usage:
+
+        .. code-block:: python
+
+            dispatcher.dispatch("join", "John")
+
+        Parameters
+        ----------
+        event_name: :class:`EventNameT`
+            The event name to dispatch to.
+        args: :data:`typing.Any`
+            The event arguments. This will be passed to the listeners.
+        """
         logger.debug("Dispatching event %s", event_name)
 
         # Event handlers
