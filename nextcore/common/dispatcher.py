@@ -89,7 +89,20 @@ class Dispatcher(Generic[EventNameT]):
         self._exception_handlers: defaultdict[EventNameT, list[ExceptionHandler]] = defaultdict(list)
 
     # Registration
-
+    @overload
+    def listen(self, event_name: EventNameT) -> Callable[[EventCallback], EventCallback]:
+        ...
+    @overload
+    def listen(self, event_name: None) -> Callable[[GlobalEventCallback[EventNameT]], GlobalEventCallback[EventNameT]]:
+        ...
+    def listen(
+        self, event_name: EventNameT | None = None
+    ) -> Callable[[EventCallback | GlobalEventCallback[EventNameT]], EventCallback | GlobalEventCallback[EventNameT]]:
+        def decorator(callback: EventCallback | GlobalEventCallback[EventNameT]) -> EventCallback | GlobalEventCallback[EventNameT]:
+            # This is fine due to @overload's
+            self.add_listener(callback, event_name) # type: ignore
+            return callback
+        return decorator
     @overload
     def add_listener(self, callback: EventCallback, event_name: EventNameT) -> None:
         ...
