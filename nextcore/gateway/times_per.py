@@ -35,6 +35,15 @@ class TimesPer:
 
     .. note::
         This does not reserve when you call :meth:`TimesPer.wait`, for that use :class:`Bucket`
+
+    Example usage:
+    
+    .. code-block:: python
+        
+        times_per = TimesPer(10, 1)
+
+        await times_per.wait()
+
     Parameters
     ----------
     total: int
@@ -80,7 +89,12 @@ class TimesPer:
     def reset_at(self) -> float | None:
         """When the ratelimit will reset
 
-        This is a unix timestamp
+        Returns
+        -------
+        :class:`float`
+            Unix timestamp of when the ratelimit will reset.
+        :data:`None`
+            There is no reset scheduled.
         """
         reset_at = self._reset_at
         if reset_at is None or reset_at <= time():
@@ -96,7 +110,7 @@ class TimesPer:
         :class:`float`
             The number of seconds until the ratelimit will reset
         :data:`None`
-            The ratelimit is not pending reset
+            There is no reset scheduled.
         """
         reset_at = self.reset_at
         if reset_at is None:
