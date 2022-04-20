@@ -94,7 +94,7 @@ class Dispatcher(Generic[EventNameT]):
         ...
 
     @overload
-    def listen(self, event_name: None) -> Callable[[GlobalEventCallback[EventNameT]], GlobalEventCallback[EventNameT]]:
+    def listen(self, event_name: None = None) -> Callable[[GlobalEventCallback[EventNameT]], GlobalEventCallback[EventNameT]]:
         ...
 
     def listen(

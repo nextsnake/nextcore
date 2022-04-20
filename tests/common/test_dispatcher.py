@@ -92,6 +92,18 @@ async def test_global_async_listeners() -> None:
     with raises(AsyncioTimeoutError):
         await wait_for(got_response, timeout=0.1)
 
+@mark.asyncio
+async def test_listen() -> None:
+    dispatcher: Dispatcher[str] = Dispatcher()
+
+    got_response: Future[None] = Future()
+    
+    @dispatcher.listen("test")
+    async def sync_response_callback() -> None:
+        got_response.set_result(None)
+
+    await dispatcher.dispatch("test")
+    await wait_for(got_response, timeout=1)
 
 @mark.asyncio
 async def test_local_error_handler() -> None:
