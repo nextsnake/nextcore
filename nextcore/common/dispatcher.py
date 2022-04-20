@@ -50,13 +50,15 @@ if TYPE_CHECKING:
 
     from typing_extensions import Unpack
 
-    VariadicTuple = Tuple[Any, ...]
-    WaitForTuple = Tuple[EventNameT, Unpack[VariadicTuple]]
+    T = TypeVar("T")
 
-    EventCallback = Callable[[Unpack[VariadicTuple]], Any]
-    GlobalEventCallback = Callable[[EventNameT, Unpack[VariadicTuple]], Any]
-    WaitForCheck = Callable[[Unpack[VariadicTuple]], Union[Awaitable[bool], bool]]
-    GlobalWaitForCheck = Callable[[EventNameT, Unpack[VariadicTuple]], Union[Awaitable[bool], bool]]
+    Star = Tuple[T, ...]
+    WaitForTuple = Tuple[EventNameT, Unpack[Star[Any]]]
+
+    EventCallback = Callable[[Unpack[Star[Any]]], Any]
+    GlobalEventCallback = Callable[[EventNameT, Unpack[Star[Any]]], Any]
+    WaitForCheck = Callable[[Unpack[Star[Any]]], Union[Awaitable[bool], bool]]
+    GlobalWaitForCheck = Callable[[EventNameT, Unpack[Star[Any]]], Union[Awaitable[bool], bool]]
 
     ExceptionHandler = Callable[[Exception], Any]
     GlobalExceptionHandler = Callable[[EventNameT, Exception], Any]
