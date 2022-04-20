@@ -96,12 +96,13 @@ class Dispatcher(Generic[EventNameT]):
         self._exception_handlers: defaultdict[EventNameT, list[ExceptionHandler]] = defaultdict(list)
 
     # Registration
-    @overload
-    def add_listener(self, callback: GlobalEventCallback[EventNameT], event_name: None = None) -> None:
-        ...
 
     @overload
     def add_listener(self, callback: EventCallback, event_name: EventNameT) -> None:
+        ...
+
+    @overload
+    def add_listener(self, callback: GlobalEventCallback[EventNameT], event_name: None = None) -> None:
         ...
 
     def add_listener(
@@ -134,6 +135,14 @@ class Dispatcher(Generic[EventNameT]):
             if TYPE_CHECKING:
                 callback = cast(EventCallback, callback)
             self._event_handlers[event_name].append(callback)
+
+    @overload
+    def remove_listener(self, callback: EventCallback, event_name: EventNameT) -> None:
+        ...
+
+    @overload
+    def remove_listener(self, callback: GlobalEventCallback[EventNameT], event_name: None = None) -> None:
+        ...
 
     def remove_listener(
         self, callback: EventCallback | GlobalEventCallback[EventNameT], event_name: EventNameT | None = None
@@ -177,6 +186,14 @@ class Dispatcher(Generic[EventNameT]):
             except ValueError:
                 raise ValueError(f"Listener not registered for event {event_name}")
 
+    @overload
+    def add_error_handler(self, callback: ExceptionHandler, event_name: EventNameT) -> None:
+        ...
+
+    @overload
+    def add_error_handler(self, callback: GlobalExceptionHandler[EventNameT], event_name: None = None) -> None:
+        ...
+
     def add_error_handler(
         self, callback: ExceptionHandler | GlobalExceptionHandler[EventNameT], event_name: EventNameT | None = None
     ) -> None:
@@ -204,6 +221,14 @@ class Dispatcher(Generic[EventNameT]):
             if TYPE_CHECKING:
                 callback = cast(ExceptionHandler, callback)
             self._exception_handlers[event_name].append(callback)
+
+    @overload
+    def remove_error_handler(self, callback: ExceptionHandler, event_name: EventNameT) -> None:
+        ...
+
+    @overload
+    def remove_error_handler(self, callback: GlobalExceptionHandler[EventNameT], event_name: None = None) -> None:
+        ...
 
     def remove_error_handler(
         self, callback: ExceptionHandler | GlobalExceptionHandler[EventNameT], event_name: EventNameT | None = None
@@ -322,6 +347,14 @@ class Dispatcher(Generic[EventNameT]):
             # Properly cancel the task
             raise
         return result
+
+    @overload
+    def dispatch(self, check: WaitForCheck, event_name: EventNameT) -> None:
+        ...
+
+    @overload
+    def dispatch(self, check: GlobalWaitForCheck[EventNameT], event_name: None) -> None:
+        ...
 
     # Dispatching
     async def dispatch(self, event_name: EventNameT, *args: Any) -> None:
