@@ -354,7 +354,6 @@ class Dispatcher(Generic[EventNameT]):
         * :data:`typing.Any`
             The event arguments.
         """
-        # TODO: Return type needs to be fixed
         # TODO: I don't like this. Typings makes everything look awful.
         if event_name is None:
             if TYPE_CHECKING:
