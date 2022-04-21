@@ -34,6 +34,36 @@ __all__ = ("GlobalLock",)
 
 
 class GlobalLock:
+    """A ratelimiter that works towards a Discord global lock.
+
+    Example usage:
+
+    .. code-block:: python
+        
+        lock = GlobalLock(limit=50)
+
+        async with lock:
+            ...
+    
+    Parameters
+    ----------
+    limit: :class:`int`
+        The maximum number of requests that can be made per second.
+
+        .. warning::
+            If this is :data:`None`, the ratelimiter will try until .lock() is called.
+            This can be useful if your global limit is dynamic.
+
+            This can result in a temporary cloudflare ban (1h ban on all requests from your IP).
+
+    Attributes
+    ----------
+    limit: :class:`int`
+        The maximum number of requests that can be made per second.
+
+        .. warning::
+            This cannot be changed from :data:`None` to a value or from a value to :data:`None`.
+    """
     def __init__(self, limit: int | None = 50) -> None:
         self.limit: int | None = limit
 
@@ -50,13 +80,30 @@ class GlobalLock:
         self._unknown_lock.set()
 
     def lock(self) -> None:
+        """Locks the ratelimiter.
+
+        .. warning::
+            This will only work if :attr:`GlobalLock.limit` is :data:`None`.
+
+        Raises
+        ------
+        :class:`RuntimeError`
+            This method cannot be used if :attr:`GlobalLock.limit` is not :data:`None`.
+        """
         if self.limit is not None:
-            raise ValueError("Lock cannot be used while limit is not None")
+            raise RuntimeError("Lock cannot be used while limit is not None")
         self._unknown_lock.clear()
 
     def unlock(self) -> None:
-        if self.limit is not None:
-            raise ValueError("Unock cannot be used while limit is not None")
+        """Undoes the effect of :meth:`GlobalLock.lock`.
+
+        Raises
+        ------
+        :class:`RuntimeError`
+            :meth:`GlobalLock.lock` has to be called before this method.
+        """
+        if self._unknown_lock.is_set():
+            raise RuntimeError("Unlock cannot be used while the GlobalLock is not locked")
         self._unknown_lock.set()
 
     async def __aenter__(self) -> None:
