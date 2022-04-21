@@ -46,7 +46,7 @@ from .ratelimit_storage import RatelimitStorage
 from .route import Route
 
 if TYPE_CHECKING:
-    from typing import Any, Final
+    from typing import Any
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
 
@@ -69,10 +69,29 @@ class HTTPClient:
         The default request timeout in seconds.
     max_ratelimit_retries: :class:`int`
         How many times to attempt to retry a request after ratelimiting failed.
-    global_ratelimit: :class:`int`
-        The global ratelimit your bot has.
-        Unless you have contacted support about a raise, this will always be 50.
-        Leaving this as None will cause the ratelimiter to allow until a failure which is not ideal.
+
+    Attributes
+    ----------
+    trust_local_time: :class:`bool`
+        If this is enabled, the ratelimiter will use the local time instead of the discord provided time. This may improve your bot's speed slightly.
+
+        .. warning::
+            If your time is not correct, and this is set to :data:`True`, this may result in more ratelimits being hit.
+    timeout: :class:`float`
+        The default request timeout in seconds.
+    default_headers: dict[:class:`str`, :class:`str`]
+        The default headers to pass to every request.
+    max_retries: :class:`int`
+        How many times to attempt to retry a request after ratelimiting failed.
+
+        .. note::
+            This does not retry server errors.
+    ratelimit_storages: dict[:class:`int`, :class:`RatelimitStorage`]
+        Classes to store ratelimit information.
+
+        The key here is the ratelimit_key (often a user ID).
+    dispatcher: :class:`Dispatcher`
+        Events from the HTTPClient. See the :ref:`events<HTTPClient dispatcher>`
     """
 
     __slots__ = (
@@ -97,7 +116,7 @@ class HTTPClient:
     ):
         self.trust_local_time: bool = trust_local_time
         self.timeout: float = timeout
-        self.default_headers: Final[dict[str, str]] = {
+        self.default_headers: dict[str, str] = {
             "User-Agent": f"DiscordBot (https://github.com/nextsnake/nextcore, {nextcore_version})"
         }
         self.max_retries: int = max_ratelimit_retries
