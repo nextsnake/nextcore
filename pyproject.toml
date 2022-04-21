@@ -16,6 +16,7 @@ frozendict = "^2.3.0"
 types-frozendict = "^2.0.6" # Could we extend the version requirement
 typing-extensions = "^4.1.1" # Same as above
 orjson = {version = "^3.6.8", optional = true}
+types-orjson = {version = "^3.6.2", optional = true}
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.4.0"
@@ -30,7 +31,7 @@ pytest-mock = "^3.7.0"
 click = "8.0.4"
 
 [tool.poetry.extras]
-speed = ["orjson"]
+speed = ["orjson", "types-orjson"]
 
 [tool.taskipy.tasks]
 black_check = "black . --diff --check"

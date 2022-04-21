@@ -27,13 +27,16 @@ if TYPE_CHECKING:
     from typing import Any
 
 try:
-    from orjson import dumps, loads  # type: ignore
+    import orjson
 
     _has_orjson = True
+    loads = orjson.loads
 except ImportError:
-    from json import dumps, loads
+    import json
 
     _has_orjson = False
+    loads = json.loads
+
 
 __all__ = ("json_loads", "json_dumps")
 
@@ -59,6 +62,5 @@ def json_dumps(to_dump: Any) -> str:
     """
     if _has_orjson:
         # Seems like pyright has some issues with having two modules under the same name.
-        return dumps(to_dump).decode("utf-8")  # type: ignore
-    # MyPy issues...
-    return dumps(to_dump)  # type: ignore
+        return orjson.dumps(to_dump).decode("utf-8")
+    return json.dumps(to_dump)
