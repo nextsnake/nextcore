@@ -44,13 +44,20 @@ if TYPE_CHECKING:
         Awaitable,
         Callable,
         Union,
+        Tuple
     )
+    from typing_extensions import Unpack
 
-    EventCallback = Callable[[*Any], Any]
-    GlobalEventCallback = Callable[[EventNameT, *Any], Any]
+    T = TypeVar("T")
 
-    WaitForCheck = Callable[[*Any], Union[Awaitable[bool], bool]]
-    GlobalWaitForCheck = Callable[[EventNameT, *Any], Union[Awaitable[bool], bool]]
+    ManyT = Tuple[T, ...]
+
+    EventCallback = Callable[[Unpack[ManyT[Any]]], Any]
+    GlobalEventCallback = Callable[[EventNameT, Unpack[ManyT[Any]]], Any]
+
+    WaitForCheck = Callable[[Unpack[ManyT[Any]]], Union[Awaitable[bool], bool]]
+    GlobalWaitForCheck = Callable[[EventNameT, Unpack[ManyT[Any]]], Union[Awaitable[bool], bool]]
+    WaitForReturn = Union[Tuple[EventNameT, Unpack[ManyT[Any]]], Tuple[Unpack[ManyT[Any]]]]
 
     ExceptionHandler = Callable[[Exception], Any]
     GlobalExceptionHandler = Callable[[EventNameT, Exception], Any]
@@ -310,16 +317,16 @@ class Dispatcher(Generic[EventNameT]):
                 raise ValueError(f"Exception handler not registered for event {event_name}")
 
     @overload
-    def wait_for(self, check: WaitForCheck, event_name: EventNameT) -> None:
+    def wait_for(self, check: WaitForCheck, event_name: EventNameT) -> WaitForReturn[EventNameT]:
         ...
 
     @overload
-    def wait_for(self, check: GlobalWaitForCheck[EventNameT], event_name: None = None) -> None:
+    def wait_for(self, check: GlobalWaitForCheck[EventNameT], event_name: None = None) -> WaitForReturn[EventNameT]:
         ...
 
     async def wait_for(
         self, check: WaitForCheck | GlobalWaitForCheck[EventNameT], event_name: EventNameT | None = None
-    ):
+    ) -> WaitForReturn[EventNameT]:
         """Wait for an event to occur.
 
         Example usage:
