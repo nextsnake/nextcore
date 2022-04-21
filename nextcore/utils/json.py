@@ -30,26 +30,27 @@ try:
     import orjson
 
     _has_orjson = True
-    loads = orjson.loads
 except ImportError:
     import json
 
     _has_orjson = False
-    loads = json.loads
 
 
 __all__ = ("json_loads", "json_dumps")
 
 
-def json_loads(json: str) -> Any:
+def json_loads(data: str) -> Any:
     """Loads a json string into a python object.
 
     Parameters
     ----------
-    json: :class:`str`
+    data: :class:`str`
         The json string to load.
     """
-    return loads(json)
+    if _has_orjson:
+        return orjson.loads(data)
+    else:
+        return json.loads(data)
 
 
 def json_dumps(to_dump: Any) -> str:
