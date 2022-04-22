@@ -147,7 +147,7 @@ class ShardManager:
 
         Raises
         ------
-        :class:`RuntimeError`
+        :exc:`RuntimeError`
             Already connected.
         """
         if self.active_shards:

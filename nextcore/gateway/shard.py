@@ -259,9 +259,9 @@ class Shard:
 
         Raises
         ------
-        :class:`RuntimeError`
+        :exc:`RuntimeError`
             Not connected to the gateway.
-        :class:`RuntimeError`
+        :exc:`RuntimeError`
             Not heartbeated yet.
         """
         if self._ws is None or self._ws.closed:

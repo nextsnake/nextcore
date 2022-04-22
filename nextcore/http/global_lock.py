@@ -87,7 +87,7 @@ class GlobalLock:
 
         Raises
         ------
-        :class:`RuntimeError`
+        :exc:`RuntimeError`
             This method cannot be used if :attr:`GlobalLock.limit` is not :data:`None`.
         """
         if self.limit is not None:
@@ -99,7 +99,7 @@ class GlobalLock:
 
         Raises
         ------
-        :class:`RuntimeError`
+        :exc:`RuntimeError`
             :meth:`GlobalLock.lock` has to be called before this method.
         """
         if self._unknown_lock.is_set():
