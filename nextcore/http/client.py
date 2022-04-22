@@ -147,6 +147,24 @@ class HTTPClient:
         -------
         :class:`ClientResponse`
             The response from the request.
+
+        Raises
+        ------
+        :exc:`CloudflareBanError`
+            You have been temporarily banned from the Discord API for 1 hour due to too many requests.
+            See the `documentation <https://discord.dev/opics/rate-limits#invalid-request-limit-aka-cloudflare-bans>`__ for more information.
+        :exc:`BadRequestError`
+            The request data was invalid.
+        :exc:`UnauthorizedError`
+            No token was provided on a endpoint that requires a token.
+        :exc:`ForbiddenError`
+            The token was valid but you do not have permission to use do this.
+        :exc:`NotFoundError`
+            The endpoint you requested was not found or a route parameter was invalid.
+        :exc:`InternalServerError`
+            Discord is having issues. Try again later.
+        :exc:`HTTPRequestStatusError`
+            A non-200 status code was returned.
         """
         # Make a ClientSession if we don't have one
         await self._ensure_session()
