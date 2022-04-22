@@ -2,7 +2,7 @@ name: Lint
 on: [pull_request, push]
 jobs:
   black:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
@@ -16,7 +16,7 @@ jobs:
       - name: Run tests
         run: poetry run task black_check
   isort:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
@@ -30,7 +30,7 @@ jobs:
       - name: Run tests
         run: poetry run task isort_check
   pyright:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
@@ -52,7 +52,7 @@ jobs:
       - name: Run pyright
         run: poetry run pyright nextcore/
   style-guide:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
