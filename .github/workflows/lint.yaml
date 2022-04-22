@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v3
         with:
           python-version: "3.10"
       - name: Install poetry
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v3
         with:
           python-version: "3.10"
       - name: Install poetry
@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v3
         with:
           python-version: "3.10"
       - name: Install poetry
@@ -44,7 +44,7 @@ jobs:
       - uses: actions/setup-node@v2
         name: Install node
         with:
-          node-version: '14'
+          node-version: "14"
       - name: Install pyright
         run: npm install -g pyright
       - name: Enable the problem checker
@@ -56,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v3
         with:
           python-version: "3.10"
       - name: Install poetry
@@ -66,7 +66,7 @@ jobs:
         with:
           key: ${{ secrets.DEPLOY_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
-          if_key_exists: replace 
+          if_key_exists: replace
       - name: Install style-guide
         run: poetry add git+ssh://git@github.com/nextsnake/style-guide.git --dev
       - name: Install dependencies
@@ -75,4 +75,3 @@ jobs:
         run: echo "::add-matcher::.github/checkers/pylint.json"
       - name: Run pylint
         run: poetry run pylint -d all -e asyncio-best-practices,license,outdated-typing --load-plugins=nextstyle nextcore/
-
