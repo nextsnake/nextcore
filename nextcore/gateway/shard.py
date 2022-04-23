@@ -271,16 +271,15 @@ class Shard:
         return self._latency
 
     async def _send(
-        self, data: ClientGatewayPayload, *, respect_ratelimit: bool = True, wait_until_ready: bool = True
+        self, data: ClientGatewayPayload, wait_until_ready: bool = True
     ) -> None:
         if wait_until_ready:
             self._logger.debug("Waiting until ready")
             await self.ready.wait()
-        if respect_ratelimit:
-            # This pretty much only used for heartbeat as we allocate 3 spots in the ratelimit for it.
-            # This is made as we have to heartbeat to avoid a disconnect.
-            # This has a few downsides though. If discord changes the heartbeat interval or spams request heartbeats we would be instantly disconnected.
-            await self._send_ratelimit.wait()
+
+        # Take up a space in the ratelimit
+        await self._send_ratelimit.wait()
+
         assert self._ws is not None, "Websocket is not connected"
         assert self._ws.closed is False, "Websocket is closed"
 
@@ -316,6 +315,7 @@ class Shard:
 
         # Here we create our own reference to the current websocket as we override self._ws on reconnect so there may be a chance that it gets overriden before the loop exists
         # This prevents multiple heartbeat loops from running at the same time.
+        # This also allows us to bypass the ratelimit.
         ws = self._ws
 
         while not ws.closed:
@@ -337,7 +337,7 @@ class Shard:
             self._heartbeat_sent_at = time()
 
             # Send the heartbeat
-            await self._send(payload, respect_ratelimit=False, wait_until_ready=False)
+            await ws.send_json(payload, dumps=json_dumps)
             await sleep(heartbeat_interval)
 
     # Loop callbacks
