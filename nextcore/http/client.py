@@ -381,16 +381,26 @@ class HTTPClient:
             await ratelimit_storage.store_bucket_by_discord_id(bucket_hash, bucket)
 
     # Wrapper functions for requests
-    # Wrapper functions
-    async def get_gateway_bot(self) -> GetGatewayBot:
+    async def get_gateway_bot(self, ratelimit_key: int) -> GetGatewayBot:
         """Gets gateway connection information.
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`_
 
         .. note::
             This endpoint requires a bot token.
+
+        Parameters
+        ----------
+        ratelimit_key: :class:`int`
+            The hash of the bot's token or the user's refresh token. This is used for ratelimiting.
+
+        Returns
+        -------
+        :class:`GetGatewayBot`
+            The response from the API.
         """
         route = Route("GET", "/gateway/bot")
-        # No ratelimit key needed as its unauthenticated. This will use up a bit of memory... oops
-        # TODO: Make this clearer via None?
-        r = await self._request(route, ratelimit_key=-1)
+        r = await self._request(route, ratelimit_key=ratelimit_key)
+
+        # Type ignoring here as we trust the API
+        # TODO: Make this verify it
         return await r.json()  # type: ignore
