@@ -30,5 +30,5 @@ jobs:
           git add .
           git commit -m "Update from nextcore build"
           git remote add origin git@github.com:nextsnake/nextcore-docs.git
-          git push origin ${{ github.ref_name }} --force
+          git push -u origin ${{ github.ref_name }} --force
         working-directory: docs
