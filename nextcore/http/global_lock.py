@@ -55,18 +55,10 @@ class GlobalLock:
             This can be useful if your global limit is dynamic.
 
             This can result in a temporary cloudflare ban (1h ban on all requests from your IP).
-
-    Attributes
-    ----------
-    limit: :class:`int`
-        The maximum number of requests that can be made per second.
-
-        .. warning::
-            This cannot be changed from :data:`None` to a value or from a value to :data:`None`.
     """
 
     def __init__(self, limit: int | None = 50) -> None:
-        self.limit: int | None = limit
+        self._limit: int | None = limit
 
         # Limit is set
         self._remaining: int | None = limit
@@ -91,7 +83,7 @@ class GlobalLock:
         :exc:`RuntimeError`
             This method cannot be used if :attr:`GlobalLock.limit` is not :data:`None`.
         """
-        if self.limit is not None:
+        if self._limit is not None:
             raise RuntimeError("Lock cannot be used while limit is not None")
         self._unknown_lock.clear()
 
@@ -109,7 +101,7 @@ class GlobalLock:
 
     async def __aenter__(self) -> None:
         # No limit set
-        if self.limit is None:
+        if self._limit is None:
             if not self._unknown_lock.is_set():
                 await self._unknown_lock.wait()
                 return await self.__aenter__()
@@ -130,7 +122,7 @@ class GlobalLock:
 
     async def __aexit__(self, *_: Any) -> None:
         # No limit set
-        if self.limit is None:
+        if self._limit is None:
             return
 
         # Limit set
@@ -152,15 +144,15 @@ class GlobalLock:
 
     def _reset(self) -> None:
         assert self._reset_pending, "Reset pending is False but reset is called"
-        assert self.limit is not None, "Reset was called but limit is None"
+        assert self._limit is not None, "Reset was called but limit is None"
         assert self._remaining is not None, "Remaining is None but limit is not None"
 
         self._reset_pending = False
 
-        self._remaining = self.limit
+        self._remaining = self._limit
 
         for future_id, future in enumerate(self._pending):
-            if future_id >= self.limit:
+            if future_id >= self._limit:
                 logger.debug("Reset done, %s pending left", len(self._pending))
                 return
             logger.debug("Letting future %s through", future_id)
@@ -171,3 +163,29 @@ class GlobalLock:
     def _effective_remaining(self) -> int:
         assert self._remaining is not None, "Remaining is not set"
         return self._remaining - self._reserved
+
+    @property
+    def limit(self) -> int | None:
+        """How many requests can be made per second.
+
+        Raises
+        ------
+        :exc:`ValueError`
+            Limit cannot be switched between :data:`None` and not :data:`None`
+        :exc:`ValueError`
+            Limit cannot be switched between not :data:`None` and :data:`None`
+        :exc:`ValueError`
+            Limit has to be greater than 0
+        """
+        return self._limit
+    @limit.setter
+    def limit(self, value: int | None) -> None:
+        if self.limit is None and value is not None:
+            raise ValueError("Cannot switch limit between None and not None")
+        if self.limit is not None and value is None:
+            raise ValueError("Cannot switch limit between not None and None")
+        if value is not None and value <= 0:
+            raise ValueError("Limit must be greater than 0")
+
+
+        self._limit = value
