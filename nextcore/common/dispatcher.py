@@ -70,6 +70,17 @@ __all__ = ("Dispatcher",)
 class Dispatcher(Generic[EventNameT]):
     """A event dispatcher
 
+    A event dispatcher has 2 different ways to listen to events.
+    - Event handlers
+    - Wait for
+
+    Event handlers are callbacks that are called when an event is dispatched.
+
+    Wait for is a way to wait for an event to be dispatched inside a async function. They are temporary listeners that gets removed once the event is dispatched.
+
+    There is also "global" events. This makes all handlers get every event.
+    This will also provide a :class:`EventNameT` parameter to the handler (and check if you are using :meth:`Dispatcher.wait_for`).
+
     Example usage:
 
     .. code-block:: python
