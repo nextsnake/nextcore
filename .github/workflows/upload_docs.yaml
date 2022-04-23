@@ -27,6 +27,7 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub actions"
           git init
+          git branch -M ${{ github.ref_name }}
           git add .
           git commit -m "Update from nextcore build"
           git remote add origin git@github.com:nextsnake/nextcore-docs.git
