@@ -1,0 +1,35 @@
+name: Upload docs
+on: [push]
+jobs:
+  black:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Install poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Change dir to docs
+        run: cd docs
+      - name: Build docs
+        run: poetry run make html
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.DOCS_DEPLOY_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          if_key_exists: replace
+      - name: Change into build dir
+        run: cd _build/html
+      - name: Create a git repo
+        run: git init
+      - name: Commit
+        run: git add . && git commit -m "Update from nextcore build"
+      - name: Add origin
+        run: git remote add origin git@github.com:nextsnake/nextcore-docs.git
+      - name: Push
+        run: git push origin ${{ github.ref_name }}
