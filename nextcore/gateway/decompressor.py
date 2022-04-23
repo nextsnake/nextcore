@@ -40,12 +40,17 @@ class Decompressor:
 
     def decompress(self, data: bytes) -> bytes | None:
         """
-        Decompress data
+        Decompress zlib data.
 
-        Returns:
-            bytes | None: decompressed data. None if the payload is incomplete
-        Raise:
-            ValueError: if the data is not compressed
+        Returns
+        -------
+        :class:`bytes` | :data:`None`:
+            The decompressed data. This is :data:`None` if this is a partial payload.
+
+        Raises
+        ------
+        :exc:`ValueError`:
+            This is not zlib compressed data. The data could also be corrupted.
         """
         self._buffer.extend(data)
 
