@@ -39,12 +39,12 @@ class GlobalLock:
     Example usage:
 
     .. code-block:: python
-        
+
         lock = GlobalLock(limit=50)
 
         async with lock:
             ...
-    
+
     Parameters
     ----------
     limit: :class:`int`
@@ -64,6 +64,7 @@ class GlobalLock:
         .. warning::
             This cannot be changed from :data:`None` to a value or from a value to :data:`None`.
     """
+
     def __init__(self, limit: int | None = 50) -> None:
         self.limit: int | None = limit
 

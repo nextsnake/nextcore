@@ -38,8 +38,9 @@ if TYPE_CHECKING:
     from nextcore.typings import (
         ServerGatewayDispatchPayload,
         ServerGatewayPayload,
-        UpdatePresence
+        UpdatePresence,
     )
+
     from ..http.client import HTTPClient
 
 __all__ = ("ShardManager",)

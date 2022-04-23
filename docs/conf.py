@@ -28,7 +28,13 @@ author = "nextcore developers"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx.ext.intersphinx", "sphinx.ext.autosectionlabel", "sphinxext.opengraph"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.autosectionlabel",
+    "sphinxext.opengraph",
+]
 autodoc_typehints = "description"
 
 # Add any paths that contain templates here, relative to this directory.

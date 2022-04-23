@@ -22,6 +22,6 @@
 __version__ = "1.0.0a"
 __all__ = ("__version__",)
 
+from .common import *
 from .gateway import *
 from .http import *
-from .common import *

@@ -19,10 +19,11 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-# pyright: reportUnusedImport=false
-from .client import HTTPClient
 from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
+
+# pyright: reportUnusedImport=false
+from .client import HTTPClient
 from .errors import *
 from .global_lock import GlobalLock
 from .pop_event import PopEvent
