@@ -37,9 +37,9 @@ class TimesPer:
         This does not reserve when you call :meth:`TimesPer.wait`, for that use :class:`Bucket`
 
     Example usage:
-    
+
     .. code-block:: python
-        
+
         times_per = TimesPer(10, 1)
 
         await times_per.wait()

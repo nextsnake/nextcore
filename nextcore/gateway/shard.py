@@ -270,9 +270,7 @@ class Shard:
             raise RuntimeError("Not heartbeated yet.")
         return self._latency
 
-    async def _send(
-        self, data: ClientGatewayPayload, wait_until_ready: bool = True
-    ) -> None:
+    async def _send(self, data: ClientGatewayPayload, wait_until_ready: bool = True) -> None:
         if wait_until_ready:
             self._logger.debug("Waiting until ready")
             await self.ready.wait()

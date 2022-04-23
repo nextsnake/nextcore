@@ -43,9 +43,10 @@ if TYPE_CHECKING:
         Any,
         Awaitable,
         Callable,
+        Tuple,
         Union,
-        Tuple
     )
+
     from typing_extensions import Unpack
 
     T = TypeVar("T")
@@ -61,6 +62,7 @@ if TYPE_CHECKING:
 
     ExceptionHandler = Callable[[Exception], Any]
     GlobalExceptionHandler = Callable[[EventNameT, Exception], Any]
+
 
 logger = getLogger(__name__)
 
@@ -112,7 +114,9 @@ class Dispatcher(Generic[EventNameT]):
         ...
 
     @overload
-    def listen(self, event_name: None = None) -> Callable[[GlobalEventCallback[EventNameT]], GlobalEventCallback[EventNameT]]:
+    def listen(
+        self, event_name: None = None
+    ) -> Callable[[GlobalEventCallback[EventNameT]], GlobalEventCallback[EventNameT]]:
         ...
 
     def listen(
@@ -125,7 +129,7 @@ class Dispatcher(Generic[EventNameT]):
         Example usage:
 
         .. code-block:: python
-            
+
             @dispatcher.listen("join")
             async def join_handler(username: str) -> None:
                 print(f"Welcome {username}")
@@ -135,6 +139,7 @@ class Dispatcher(Generic[EventNameT]):
         event_name: :class:`EventNameT` | :data:`None`
             The event name to register the listener to. If this is :data:`None`, the listener is considered a global event.
         """
+
         @overload
         def decorator(callback: EventCallback) -> EventCallback:
             ...
@@ -366,11 +371,12 @@ class Dispatcher(Generic[EventNameT]):
             The event arguments.
         """
         # TODO: I don't like this. Typings makes everything look awful.
+        # we lose the specificity here as we cannot have the same var with different types
+        future: Future[ManyT[Any]] = Future()
+
         if event_name is None:
             if TYPE_CHECKING:
                 check = cast(GlobalWaitForCheck[EventNameT], check)
-            # Bug in pyright considering this is a string... TODO: Get this fixed
-            future: "Future[EventNameT, *Any]" = Future()  # type: ignore
 
             self._global_wait_for_handlers.append((check, future))
             logger.debug("Added _global_wait_for_handler")
@@ -378,7 +384,6 @@ class Dispatcher(Generic[EventNameT]):
         else:
             if TYPE_CHECKING:
                 check = cast(WaitForCheck, check)
-            future: "Future[*Any]" = Future()  # pyright: ignore
 
             self._wait_for_handlers[event_name].append((check, future))
             logger.debug("Added _wait_for_handlers")
@@ -477,7 +482,7 @@ class Dispatcher(Generic[EventNameT]):
                     logger.exception("Exception occured in exception handler")
 
     async def _run_wait_for_handler(
-        self, check: WaitForCheck, future: "Future[tuple[*Any]]", event_name: EventNameT, *args: Any  # pyright: ignore
+        self, check: WaitForCheck, future: Future[ManyT[T]], event_name: EventNameT, *args: T
     ) -> None:
         try:
             result = await maybe_coro(check, *args)
@@ -494,9 +499,9 @@ class Dispatcher(Generic[EventNameT]):
     async def _run_global_wait_for_handler(
         self,
         check: GlobalWaitForCheck[EventNameT],
-        future: "Future[tuple[EventNameT, *Any]]",  # pyright: ignore
+        future: Future[tuple[EventNameT, Unpack[ManyT[T]]]],
         event_name: EventNameT,
-        *args: Any,
+        *args: T,
     ) -> None:
         try:
             result = await maybe_coro(check, event_name, *args)
