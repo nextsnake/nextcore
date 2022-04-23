@@ -13,8 +13,6 @@ jobs:
         run: pip install poetry
       - name: Install dependencies
         run: poetry install
-      - name: Change dir to docs
-        run: cd docs
       - name: Build docs
         run: poetry run make html
         working-directory: docs
