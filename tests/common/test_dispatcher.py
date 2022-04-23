@@ -137,7 +137,8 @@ async def test_global_error_handler() -> None:
 
     got_response: Future[None] = Future()
 
-    def error_causer() -> None:
+    def error_causer(event_name: str) -> None:
+        del event_name # Not used
         raise RuntimeError("Dummy error")
 
     def error_handler(event_name: str, exception: Exception) -> None:
