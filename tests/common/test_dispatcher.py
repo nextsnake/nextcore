@@ -165,10 +165,10 @@ async def test_global_error_handler() -> None:
     with raises(AsyncioTimeoutError):
         await wait_for(got_response, timeout=0.1)
 
+
 @mark.asyncio
 async def test_global_default_error_handler(caplog) -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
-
 
     errored: Future[None] = Future()
 

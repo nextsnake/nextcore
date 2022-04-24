@@ -178,6 +178,7 @@ class GlobalLock:
             Limit has to be greater than 0
         """
         return self._limit
+
     @limit.setter
     def limit(self, value: int | None) -> None:
         if self.limit is None and value is not None:
@@ -186,6 +187,5 @@ class GlobalLock:
             raise ValueError("Cannot switch limit between not None and None")
         if value is not None and value <= 0:
             raise ValueError("Limit must be greater than 0")
-
 
         self._limit = value

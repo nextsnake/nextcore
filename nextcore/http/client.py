@@ -279,7 +279,7 @@ class HTTPClient:
         Example usage:
 
         .. code-block:: python
-            
+
             ws = await http_client.ws_connect("wss://gateway.discord.gg")
 
 
@@ -393,9 +393,9 @@ class HTTPClient:
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`_
 
         Example usage:
-        
+
         .. code-block:: python
-            
+
             bot_info = await http_client.get_gateway_bot(token, hash(token))
 
         .. note::

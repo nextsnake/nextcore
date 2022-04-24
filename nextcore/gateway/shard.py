@@ -31,8 +31,8 @@ from typing import TYPE_CHECKING
 from aiohttp import ClientConnectorError, ClientWebSocketResponse, WSMsgType
 from frozendict import frozendict
 
-from ..common.dispatcher import Dispatcher
 from ..common import json_dumps, json_loads
+from ..common.dispatcher import Dispatcher
 from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .errors import (
@@ -48,7 +48,7 @@ from .opcodes import GatewayOpcode
 from .times_per import TimesPer
 
 if TYPE_CHECKING:
-    from typing import Final, cast, Literal
+    from typing import Final, Literal, cast
 
     from nextcore.typings import (
         ClientGatewayPayload,

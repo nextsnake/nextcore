@@ -1,5 +1,7 @@
 from pytest import mark
+
 from nextcore.common import maybe_coro
+
 
 @mark.asyncio
 async def test_sync_maybe_coro():
