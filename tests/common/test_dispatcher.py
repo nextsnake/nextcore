@@ -165,6 +165,31 @@ async def test_global_error_handler() -> None:
     with raises(AsyncioTimeoutError):
         await wait_for(got_response, timeout=0.1)
 
+@mark.asyncio
+async def test_global_default_error_handler(caplog) -> None:
+    dispatcher: Dispatcher[str] = Dispatcher()
+
+
+    errored: Future[None] = Future()
+
+    def error_causer(event_name: str) -> None:
+        del event_name  # Not used
+        errored.set_result(None)
+        raise RuntimeError("Dummy error")
+
+    dispatcher.add_listener(error_causer)
+
+    loop = get_running_loop()
+
+    # Delay the execution so wait_for gets time to run.
+    # TODO: This workaround is bad.
+    loop.call_later(0.01, create_task, dispatcher.dispatch("test"))
+
+    await wait_for(errored, timeout=1)
+
+    error_count = len([record for record in caplog.records if record.levelname == "ERROR"])
+    assert error_count == 1
+
 
 def test_remove_nonexistant_listener() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
