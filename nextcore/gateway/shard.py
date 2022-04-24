@@ -568,9 +568,14 @@ class Shard:
 
         .. note::
             See the `documentation <https://discord.dev/topics/gateway#resume>`__
+
+        Raises
+        ------
+        :exc:`RuntimeError`
+            Session id or sequence number is not set.
         """
         if self.session_id is None or self.session_sequence_number is None:
-            raise ValueError("Session id or sequence number is not set")
+            raise RuntimeError("Session id or sequence number is not set")
 
         payload: ClientGatewayPayload = {
             "op": GatewayOpcode.RESUME.value,
