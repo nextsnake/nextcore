@@ -26,6 +26,8 @@ __all__ = (
     "DisallowedIntentsError",
     "InvalidTokenError",
     "InvalidApiVersionError",
+    "InvalidShardCountError",
+    "UnhandledCloseCodeError",
 )
 
 

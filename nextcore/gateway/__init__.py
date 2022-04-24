@@ -22,11 +22,20 @@
 from .decompressor import Decompressor
 from .shard import Shard
 from .shard_manager import ShardManager
-from .times_per import TimesPer
+from .opcodes import GatewayOpcode
+from .errors import *
 
 __all__ = (
     "ShardManager",
     "Shard",
-    "TimesPer",
     "Decompressor",
+    "GatewayOpcode",
+    "ReconnectCheckFailedError",
+    "DisconnectError",
+    "InvalidIntentsError",
+    "DisallowedIntentsError",
+    "InvalidTokenError",
+    "InvalidApiVersionError",
+    "InvalidShardCountError",
+    "UnhandledCloseCodeError",
 )

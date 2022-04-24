@@ -26,8 +26,8 @@ HTTP
     :members:
 
 
-Errors
-------
+HTTP Errors
+-----------
 .. autoexception:: nextcore.http.RateLimitingFailedError
     :members:
 
