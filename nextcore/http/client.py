@@ -276,6 +276,13 @@ class HTTPClient:
     async def ws_connect(self, url: str, **kwargs: Any) -> ClientWebSocketResponse:
         """Connects to a websocket.
 
+        Example usage:
+
+        .. code-block:: python
+            
+            ws = await http_client.ws_connect("wss://gateway.discord.gg")
+
+
         Parameters
         ----------
         url: :class:`str`
@@ -384,6 +391,12 @@ class HTTPClient:
     async def get_gateway_bot(self, ratelimit_key: int) -> GetGatewayBot:
         """Gets gateway connection information.
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`_
+
+        Example usage:
+        
+        .. code-block:: python
+            
+            bot_info = await http_client.get_gateway_bot(hash(token))
 
         .. note::
             This endpoint requires a bot token.
