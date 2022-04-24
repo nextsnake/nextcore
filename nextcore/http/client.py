@@ -388,7 +388,7 @@ class HTTPClient:
             await ratelimit_storage.store_bucket_by_discord_id(bucket_hash, bucket)
 
     # Wrapper functions for requests
-    async def get_gateway_bot(self, ratelimit_key: int) -> GetGatewayBot:
+    async def get_gateway_bot(self, token: str, ratelimit_key: int) -> GetGatewayBot:
         """Gets gateway connection information.
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`_
 
@@ -396,13 +396,15 @@ class HTTPClient:
         
         .. code-block:: python
             
-            bot_info = await http_client.get_gateway_bot(hash(token))
+            bot_info = await http_client.get_gateway_bot(token, hash(token))
 
         .. note::
             This endpoint requires a bot token.
 
         Parameters
         ----------
+        token: :class:`str`
+            The bot token.
         ratelimit_key: :class:`int`
             The hash of the bot's token or the user's refresh token. This is used for ratelimiting.
 
@@ -412,7 +414,7 @@ class HTTPClient:
             The response from the API.
         """
         route = Route("GET", "/gateway/bot")
-        r = await self._request(route, ratelimit_key=ratelimit_key)
+        r = await self._request(route, ratelimit_key=ratelimit_key, headers={"Authorization": "Bot " + token})
 
         # Type ignoring here as we trust the API
         # TODO: Make this verify it
