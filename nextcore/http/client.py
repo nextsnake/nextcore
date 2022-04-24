@@ -46,7 +46,7 @@ from .ratelimit_storage import RatelimitStorage
 from .route import Route
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Literal
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
 
@@ -121,7 +121,7 @@ class HTTPClient:
         }
         self.max_retries: int = max_ratelimit_retries
         self.ratelimit_storages: dict[int, RatelimitStorage] = {}  # User ID -> RatelimitStorage
-        self.dispatcher: Dispatcher[str] = Dispatcher()
+        self.dispatcher: Dispatcher[Literal["request_response"]] = Dispatcher()
 
         # Internals
         self._session: ClientSession | None = None

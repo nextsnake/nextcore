@@ -48,7 +48,7 @@ from .opcodes import GatewayOpcode
 from .times_per import TimesPer
 
 if TYPE_CHECKING:
-    from typing import Final, cast
+    from typing import Final, cast, Literal
 
     from nextcore.typings import (
         ClientGatewayPayload,
@@ -176,7 +176,7 @@ class Shard:
         self.ready: Event = Event()
         self.raw_dispatcher: Dispatcher[int] = Dispatcher()
         self.event_dispatcher: Dispatcher[str] = Dispatcher()
-        self.dispatcher: Dispatcher[str] = Dispatcher()
+        self.dispatcher: Dispatcher[Literal["disconnect", "sent", "critical"]] = Dispatcher()
 
         # Session related
         self.session_id: str | None = None
@@ -191,7 +191,7 @@ class Shard:
         self._send_ratelimit = TimesPer(60 - 3, 120)
         self._ws: ClientWebSocketResponse | None = None
         self._decompressor: Decompressor = Decompressor()
-        self._logger: Logger = getLogger(f"nextcore.gateway.shard.{self.shard_id}")
+        self._logger: Logger = getLogger(f"{__name__}{self.shard_id}")
         self._received_heartbeat_ack: bool = True
 
         # Latency
