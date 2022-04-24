@@ -62,6 +62,5 @@ def json_dumps(to_dump: Any) -> str:
         The python object to dump.
     """
     if _has_orjson:
-        # Seems like pyright has some issues with having two modules under the same name.
         return orjson.dumps(to_dump).decode("utf-8")
     return json.dumps(to_dump)

@@ -64,7 +64,6 @@ exclude = ["tests/"]
 python_version = "3.8"
 strict = true
 exclude = ["tests/"]
-warn_unused_ignores = false # Theres some issues in pyright that we have to ignore
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
