@@ -1,3 +1,4 @@
+from __future__ import annotations
 from asyncio import Future
 from asyncio import TimeoutError as AsyncioTimeoutError
 from asyncio import create_task, get_running_loop, wait_for
@@ -8,107 +9,69 @@ from nextcore.common.dispatcher import Dispatcher
 
 
 @mark.asyncio
-async def test_local_sync_listeners() -> None:
+@mark.parametrize("event_name", [None, "test"])
+@mark.parametrize("func_sync", [True, False])
+async def test_listeners(event_name: str | None, func_sync: bool) -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
 
     got_response: Future[None] = Future()
 
-    def sync_response_callback() -> None:
+    def sync_response_callback(event: str | None = None) -> None:
+        if event_name is None:
+            assert event is not None
+        else:
+            assert event is None
         got_response.set_result(None)
 
-    dispatcher.add_listener(sync_response_callback, "test")
+    async def async_response_callback(event: str | None = None) -> None:
+        sync_response_callback(event)
+
+    if func_sync:
+        callback = sync_response_callback
+    else:
+        callback = async_response_callback
+
+    dispatcher.add_listener(callback, event_name)
     await dispatcher.dispatch("test")
     await wait_for(got_response, timeout=1)
 
     got_response = Future()
-    dispatcher.remove_listener(sync_response_callback, "test")
+    dispatcher.remove_listener(callback, event_name)
     await dispatcher.dispatch("test")
 
     with raises(AsyncioTimeoutError):
         await wait_for(got_response, timeout=0.1)
 
-
 @mark.asyncio
-async def test_global_sync_listeners() -> None:
+@mark.parametrize("event_name", [None, "test"])
+@mark.parametrize("func_sync", [True, False])
+async def test_listen(event_name: str | None, func_sync: bool) -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
 
     got_response: Future[None] = Future()
 
-    def sync_response_callback(event_name: str) -> None:
-        del event_name
+    def response_callback(event: str | None = None) -> None:
+        if event_name is None:
+            assert event is not None
+        else:
+            assert event is None
         got_response.set_result(None)
-
-    dispatcher.add_listener(sync_response_callback)
-    await dispatcher.dispatch("test")
-    await wait_for(got_response, timeout=1)
-
-    got_response = Future()
-    dispatcher.remove_listener(sync_response_callback)
-    await dispatcher.dispatch("test")
-
-    with raises(AsyncioTimeoutError):
-        await wait_for(got_response, timeout=0.1)
-
-
-@mark.asyncio
-async def test_local_async_listeners() -> None:
-    dispatcher: Dispatcher[str] = Dispatcher()
-
-    got_response: Future[None] = Future()
-
-    async def sync_response_callback() -> None:
-        got_response.set_result(None)
-
-    dispatcher.add_listener(sync_response_callback, "test")
-    await dispatcher.dispatch("test")
-    await wait_for(got_response, timeout=1)
-
-    got_response = Future()
-    dispatcher.remove_listener(sync_response_callback, "test")
-    await dispatcher.dispatch("test")
-
-    with raises(AsyncioTimeoutError):
-        await wait_for(got_response, timeout=0.1)
-
-
-@mark.asyncio
-async def test_global_async_listeners() -> None:
-    dispatcher: Dispatcher[str] = Dispatcher()
-
-    got_response: Future[None] = Future()
-
-    async def sync_response_callback(event_name: str) -> None:
-        del event_name
-        got_response.set_result(None)
-
-    dispatcher.add_listener(sync_response_callback)
-    await dispatcher.dispatch("test")
-    await wait_for(got_response, timeout=1)
-
-    got_response = Future()
-    dispatcher.remove_listener(sync_response_callback)
-    await dispatcher.dispatch("test")
-
-    with raises(AsyncioTimeoutError):
-        await wait_for(got_response, timeout=0.1)
-
-
-@mark.asyncio
-async def test_listen() -> None:
-    dispatcher: Dispatcher[str] = Dispatcher()
-
-    got_response: Future[None] = Future()
-
-    @dispatcher.listen("test")
-    async def sync_response_callback() -> None:
-        got_response.set_result(None)
+    
+    if func_sync:
+        @dispatcher.listen(event_name)
+        def sync_response_callback(event_name: str | None = None) -> None:
+            response_callback(event_name)
+    else:
+        @dispatcher.listen(event_name)
+        async def async_response_callback(event_name: str | None = None) -> None:
+            response_callback(event_name)
 
     await dispatcher.dispatch("test")
     await wait_for(got_response, timeout=1)
 
 
 @mark.asyncio
-async def test_local_error_handler() -> None:
+async def test_error_handler() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
 
     got_response: Future[None] = Future()
