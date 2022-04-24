@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from asyncio import Future
 from asyncio import TimeoutError as AsyncioTimeoutError
 from asyncio import create_task, get_running_loop, wait_for
@@ -42,6 +43,7 @@ async def test_listeners(event_name: str | None, func_sync: bool) -> None:
     with raises(AsyncioTimeoutError):
         await wait_for(got_response, timeout=0.1)
 
+
 @mark.asyncio
 @mark.parametrize("event_name", [None, "test"])
 @mark.parametrize("func_sync", [True, False])
@@ -56,12 +58,15 @@ async def test_listen(event_name: str | None, func_sync: bool) -> None:
         else:
             assert event is None
         got_response.set_result(None)
-    
+
     if func_sync:
+
         @dispatcher.listen(event_name)
         def sync_response_callback(event_name: str | None = None) -> None:
             response_callback(event_name)
+
     else:
+
         @dispatcher.listen(event_name)
         async def async_response_callback(event_name: str | None = None) -> None:
             response_callback(event_name)

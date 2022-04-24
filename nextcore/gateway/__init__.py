@@ -20,10 +20,10 @@
 # DEALINGS IN THE SOFTWARE.
 
 from .decompressor import Decompressor
+from .errors import *
+from .opcodes import GatewayOpcode
 from .shard import Shard
 from .shard_manager import ShardManager
-from .opcodes import GatewayOpcode
-from .errors import *
 
 __all__ = (
     "ShardManager",
