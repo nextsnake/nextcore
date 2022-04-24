@@ -1,15 +1,5 @@
 from pytest import mark
-
-from nextcore.utils import *
-
-
-def test_loads():
-    assert json_loads('{"a": 1}') == {"a": 1}
-
-
-def test_dumps():
-    assert json_dumps({"a": 1}) in ['{"a":1}', '{"a": 1}']
-
+from nextcore.common import maybe_coro
 
 @mark.asyncio
 async def test_sync_maybe_coro():

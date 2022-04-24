@@ -20,5 +20,7 @@
 # DEALINGS IN THE SOFTWARE.
 
 from .dispatcher import Dispatcher
+from .json import *
+from .maybe_coro import *
 
-__all__ = ("Dispatcher",)
+__all__ = ("Dispatcher", "json_loads", "json_dumps", "maybe_coro")

@@ -33,7 +33,7 @@ from typing import (  # pylint: disable=outdated-typing-any
     overload,
 )
 
-from ..utils import maybe_coro
+from .maybe_coro import maybe_coro
 
 # Types
 EventNameT = TypeVar("EventNameT", bound=Hashable)
