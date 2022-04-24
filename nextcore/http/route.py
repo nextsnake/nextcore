@@ -78,5 +78,8 @@ class Route:
         guild_id: str | int | None = parameters.get("guild_id")
         channel_id: str | int | None = parameters.get("channel_id")
         webhook_id: str | int | None = parameters.get("webhook_id")
+        
+        self.bucket: str | int = f"{guild_id}{channel_id}{webhook_id}{path}"
 
-        self.bucket: str = f"{guild_id}{channel_id}{webhook_id}{path}"
+        if __debug__:
+            self.bucket = hash(self.bucket)
