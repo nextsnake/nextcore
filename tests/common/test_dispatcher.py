@@ -3,10 +3,14 @@ from __future__ import annotations
 from asyncio import Future
 from asyncio import TimeoutError as AsyncioTimeoutError
 from asyncio import create_task, get_running_loop, wait_for
+from typing import TYPE_CHECKING
 
 from pytest import mark, raises
 
 from nextcore.common.dispatcher import Dispatcher
+
+if TYPE_CHECKING:
+    from typing import Any
 
 
 @mark.asyncio
@@ -76,7 +80,8 @@ async def test_listen(event_name: str | None, func_sync: bool) -> None:
 
 
 @mark.asyncio
-async def test_error_handler() -> None:
+@mark.parametrize("event_name", [None, "test"])
+async def test_error_handler(event_name: str | None) -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
 
     got_response: Future[None] = Future()
@@ -84,12 +89,17 @@ async def test_error_handler() -> None:
     def error_causer() -> None:
         raise RuntimeError("Dummy error")
 
-    def error_handler(exception: Exception) -> None:
-        del exception
+    def error_handler(*args: Any) -> None:
+        if event_name is None:
+            assert isinstance(args[0], str), "Event name was not passed to error handler"
+            assert isinstance(args[1], RuntimeError), "Error was not passed to error handler"
+        else:
+            assert isinstance(args[0], RuntimeError), "Error was not passed to error handler"
+
         got_response.set_result(None)
 
     dispatcher.add_listener(error_causer, "test")
-    dispatcher.add_error_handler(error_handler, "test")
+    dispatcher.add_error_handler(error_handler, event_name)
     await dispatcher.dispatch("test")
     await wait_for(got_response, timeout=1)
 
@@ -102,50 +112,21 @@ async def test_error_handler() -> None:
 
 
 @mark.asyncio
-async def test_global_error_handler() -> None:
-    dispatcher: Dispatcher[str] = Dispatcher()
-
-    got_response: Future[None] = Future()
-
-    def error_causer(event_name: str) -> None:
-        del event_name  # Not used
-        raise RuntimeError("Dummy error")
-
-    def error_handler(event_name: str, exception: Exception) -> None:
-        del event_name, exception
-        got_response.set_result(None)
-
-    dispatcher.add_listener(error_causer)
-    dispatcher.add_error_handler(error_handler)
-
-    loop = get_running_loop()
-
-    # Delay the execution so wait_for gets time to run.
-    # TODO: This workaround is bad.
-    loop.call_later(0.01, create_task, dispatcher.dispatch("test"))
-
-    await wait_for(got_response, timeout=1)
-
-    got_response = Future()
-    dispatcher.remove_listener(error_causer)
-    loop.call_later(0.01, create_task, dispatcher.dispatch("test"))
-
-    with raises(AsyncioTimeoutError):
-        await wait_for(got_response, timeout=0.1)
-
-
-@mark.asyncio
-async def test_global_default_error_handler(caplog) -> None:
+@mark.parametrize("event_name", [None, "test"])
+async def test_default_error_handler(caplog, event_name: str | None) -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
 
     errored: Future[None] = Future()
 
-    def error_causer(event_name: str) -> None:
-        del event_name  # Not used
+    def error_causer(event: str | None = None) -> None:
+        if event_name is None:
+            assert event is not None
+        else:
+            assert event is None
         errored.set_result(None)
         raise RuntimeError("Dummy error")
 
-    dispatcher.add_listener(error_causer)
+    dispatcher.add_listener(error_causer, event_name)
 
     loop = get_running_loop()
 
@@ -170,26 +151,32 @@ def test_remove_nonexistant_listener() -> None:
 
 
 @mark.asyncio
-async def test_local_wait_for_handler() -> None:
+@mark.parametrize("event_name", [None, "test"])
+async def test_wait_for_handler(event_name: str | None, caplog) -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
+
+    def event_name_check(event: str | None) -> None:
+        if event_name is None:
+            assert event is not None
+        else:
+            assert event is None
+
+    def true_callback(event: str | None = None) -> bool:
+        event_name_check(event)
+        return True
+
+    def false_callback(event: str | None = None) -> bool:
+        event_name_check(event)
+        return False
 
     loop = get_running_loop()
     loop.call_later(0.01, create_task, dispatcher.dispatch("test"))
-    await wait_for(dispatcher.wait_for(lambda: True, "test"), timeout=0.1)
+    await wait_for(dispatcher.wait_for(true_callback, event_name), timeout=0.1)
 
     loop.call_later(0.01, create_task, dispatcher.dispatch("test"))
     with raises(AsyncioTimeoutError):
-        await wait_for(dispatcher.wait_for(lambda: False, "test"), timeout=0.1)
+        await wait_for(dispatcher.wait_for(false_callback, event_name), timeout=0.1)
 
-
-@mark.asyncio
-async def test_global_wait_for_handler() -> None:
-    dispatcher: Dispatcher[str] = Dispatcher()
-
-    loop = get_running_loop()
-    loop.call_later(0.01, create_task, dispatcher.dispatch("test"))
-    await wait_for(dispatcher.wait_for(lambda _: True), timeout=0.1)
-
-    loop.call_later(0.01, create_task, dispatcher.dispatch("test"))
-    with raises(AsyncioTimeoutError):
-        await wait_for(dispatcher.wait_for(lambda _: False), timeout=0.1)
+    # Check for logging errors.
+    error_count = len([record for record in caplog.records if record.levelname == "ERROR"])
+    assert error_count == 0, "Logged errors where present"
