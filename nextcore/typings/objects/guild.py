@@ -99,7 +99,7 @@ if TYPE_CHECKING:
         widget_channel_id: NotRequired[:class:`str` | :data:`None`]
             The ID of the channel the server widget will create a invite for. This is :data:`None` if it is set to no channel.
 
-            .. warn::
+            .. warning::
                 This might not be :data:`None` even though the widget is not enabled.
         verification_level: :class:`VerificationLevel`
             Verification level required to communicate in a guild.

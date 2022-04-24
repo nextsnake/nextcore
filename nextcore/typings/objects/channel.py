@@ -156,7 +156,7 @@ if TYPE_CHECKING:
 
             .. note::
                 This is only applicable to text, forum and news channels.
-            .. warn::
+            .. warning::
                 This is only used by the client! The API does not use this as a default
         permissions: NotRequired[:class:`str`]
             The permission the user who called the :class:`Interaction` has.
