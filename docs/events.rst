@@ -1,10 +1,13 @@
+.. currentmodule:: nextcore
+
+
 Events
 ======
-This is a document showing you the arguments from the different instances of :class:`Dispatcher <nextcore.common.Dispatcher>` in the library.
+This is a document showing you the arguments from the different instances of :class:`Dispatcher <common.Dispatcher>` in the library.
 
 Raw Dispatcher
 --------------
-Can be found on :attr:`ShardManadger.raw_dispatcher <nextcore.gateway.ShardManager.raw_dispatcher>` and :attr:`Shard.raw_dispatcher <nextcore.gateway.Shard.raw_dispatcher>`.
+Can be found on :attr:`ShardManadger.raw_dispatcher <gateway.ShardManager.raw_dispatcher>` and :attr:`Shard.raw_dispatcher <gateway.Shard.raw_dispatcher>`.
 These are the raw dispatchers that just relay raw events from the discord websocket (the gateway).
 
 The event name here is the gateway `opcode <https://discord.dev/docs/topics/gateway#gateway-opcodes>`__.
@@ -19,7 +22,7 @@ Example usage:
 
 Event Dispatcher
 ----------------
-Can be found on :attr:`ShardManadger.event_dispatcher <nextcore.gateway.ShardManager.event_dispatcher>` and :attr:`Shard.event_dispatcher <nextcore.gateway.Shard.event_dispatcher>`.
+Can be found on :attr:`ShardManadger.event_dispatcher <gateway.ShardManager.event_dispatcher>` and :attr:`Shard.event_dispatcher <gateway.Shard.event_dispatcher>`.
 These dispatchers dispatch the data inside the ``d`` key of a :attr:`GatewayOpcode.DISPATCH` event.
 
 The event name is the Dispatch `event name <https://discord.dev/topics/gateway#commands-and-events-gateway-events>`__.
@@ -34,7 +37,7 @@ Example usage:
 
 Shard dispatcher
 ----------------
-Can be found on :attr:`Shard.dispatcher <nextcore.gateway.Shard.dispatcher>`.
+Can be found on :attr:`Shard.dispatcher <gateway.Shard.dispatcher>`.
 A dispatcher for shard changes that is not a event sent by Discord.
 
 The event name is a :class:`str` representing the event name.
@@ -53,7 +56,7 @@ Example usage:
 
 HTTPClient dispatcher
 ---------------------
-Can be found on :attr:`HTTPClient.dispatcher <nextcore.http.HTTPClient.dispatcher>`.
+Can be found on :attr:`HTTPClient.dispatcher <http.HTTPClient.dispatcher>`.
 
 The event name is a :class:`str` representing the event name.
 
