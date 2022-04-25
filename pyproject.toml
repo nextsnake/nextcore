@@ -31,6 +31,7 @@ pytest-mock = "^3.7.0"
 click = "8.0.4"
 pre-commit = "^2.18.1"
 sphinxext-opengraph = "^0.6.3"
+slotscheck = "^0.14.0"
 
 [tool.poetry.extras]
 speed = ["orjson", "types-orjson"]

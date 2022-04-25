@@ -75,3 +75,18 @@ jobs:
         run: echo "::add-matcher::.github/checkers/pylint.json"
       - name: Run pylint
         run: poetry run pylint -d all -e asyncio-best-practices,license,outdated-typing --load-plugins=nextstyle nextcore/
+  slots-check:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Install poetry
+        run: pip install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Run slotscheck
+        run: poetry run slotscheck nextcore/
+
