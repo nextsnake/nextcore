@@ -34,3 +34,11 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+  - repo: local
+    hooks:
+      - id: slotscheck
+        name: slotscheck
+        entry: slotscheck nextcore/
+        language: system
+        pass_filenames: false
+        always_run: true
