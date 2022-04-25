@@ -95,6 +95,6 @@ Example usage:
 
 .. code-block:: python
 
-    @client.dispatcher.listen("request_response")
+    @http_client.dispatcher.listen("request_response")
     async def on_request_response(response: aiohttp.ClientResponse):
         print(f"Status code: {response.status}")
