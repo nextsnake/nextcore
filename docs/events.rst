@@ -42,6 +42,33 @@ A dispatcher for shard changes that is not a event sent by Discord.
 
 The event name is a :class:`str` representing the event name.
 
+disconnect
+^^^^^^^^^^
+Whenever Discord disconnects us from the discord gateway.
+
+.. note::
+   This does not dispatch closes made by the :class:`gateway.Shard` itself.
+
+Example usage:
+
+.. code-block:: python
+
+   @shard.listen("disconnect")
+   async def on_disconnect(close_code: int):
+      print(f"Disconnected with close code {close_code}")
+
+sent
+^^^^
+Whenever we send a message to Discord over the websocket.
+
+Example usage:
+
+.. code-block:: python
+
+   @shard.listen("sent")
+   async def on_sent(data: dict):
+      print(f"Sent {data}")
+
 critical
 ^^^^^^^^
 Whenever a critical event happens, this event is dispatched. The first argument will be a :class:`Exception` object of what happened.
