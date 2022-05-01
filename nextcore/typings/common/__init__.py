@@ -19,31 +19,6 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .application import *
-from .audit_log import *
-from .channel import *
-from .common import *
-from .team import *
+from .snowflake import Snowflake
 
-__all__ = (
-    "Application",
-    "Snowflake",
-    "Team",
-    "TeamMember",
-    "TeamPermission",
-    "MembershipState",
-    "AuditLog",
-    "AuditLogEntry",
-    "AuditLogChange",
-    "AuditLogChangeKey",
-    "OptionalAuditEntryInfo",
-    "AuditLogEvent",
-    "Channel",
-    "ChannelType",
-    "VideoQualityMode",
-    "Overwrite",
-    "AutoArchiveDuration",
-    "ThreadMetadata",
-    "Overwrite",
-    "ThreadMember",
-)
+__all__ = ("Snowflake",)

@@ -8,8 +8,11 @@ Welcome to Nextcore's documentation!
    http
    gateway
    common
+   typings
+
 
    events
+
 
 Quickstart
 ==========

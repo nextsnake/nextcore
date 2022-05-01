@@ -19,31 +19,33 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .application import *
-from .audit_log import *
-from .channel import *
-from .common import *
-from .team import *
+from __future__ import annotations
 
-__all__ = (
-    "Application",
-    "Snowflake",
-    "Team",
-    "TeamMember",
-    "TeamPermission",
-    "MembershipState",
-    "AuditLog",
-    "AuditLogEntry",
-    "AuditLogChange",
-    "AuditLogChangeKey",
-    "OptionalAuditEntryInfo",
-    "AuditLogEvent",
-    "Channel",
-    "ChannelType",
-    "VideoQualityMode",
-    "Overwrite",
-    "AutoArchiveDuration",
-    "ThreadMetadata",
-    "Overwrite",
-    "ThreadMember",
-)
+from typing import TYPE_CHECKING, TypedDict
+
+if TYPE_CHECKING:
+    from typing import Any
+
+    from typing_extensions import NotRequired
+
+    from .audit_log_change_key import AuditLogChangeKey
+
+__all__ = ("AuditLogChange",)
+
+
+class AuditLogChange(TypedDict):
+    """A audit log change.
+
+    Attributes
+    ----------
+    new_value: :data:`typing.Any`
+        The new value.
+    old_value: :data:`typing.Any`
+        The old value.
+    key: :class:`AuditLogEvent`
+        The event type. See a list of `events <https://discord.dev/resources/audit-log#audit-log-entry-object-audit-log-events>`__.
+    """
+
+    new_value: NotRequired[Any]
+    old_value: NotRequired[Any]
+    key: AuditLogChangeKey

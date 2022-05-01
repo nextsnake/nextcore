@@ -19,31 +19,26 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .application import *
-from .audit_log import *
-from .channel import *
-from .common import *
-from .team import *
+from __future__ import annotations
 
-__all__ = (
-    "Application",
-    "Snowflake",
-    "Team",
-    "TeamMember",
-    "TeamPermission",
-    "MembershipState",
-    "AuditLog",
-    "AuditLogEntry",
-    "AuditLogChange",
-    "AuditLogChangeKey",
-    "OptionalAuditEntryInfo",
-    "AuditLogEvent",
-    "Channel",
-    "ChannelType",
-    "VideoQualityMode",
-    "Overwrite",
-    "AutoArchiveDuration",
-    "ThreadMetadata",
-    "Overwrite",
-    "ThreadMember",
-)
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+# Not documented here due to Sphinx.
+# This is documented manually in the docs/typings.rst file.
+ChannelType: TypeAlias = Literal[
+    0,  # a text channel within a server
+    1,  # a direct message between users
+    2,  # a voice channel within a server
+    3,  # a direct message between multiple users
+    4,  # an organizational category that contains up to 50 channels
+    5,  # a channel that users can follow and crosspost into their own server
+    10,  # a temporary sub-channel within a GUILD_NEWS channel
+    11,  # a temporary sub-channel within a GUILD_TEXT channel
+    12,  # a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
+    13,  # a voice channel for hosting events with an audience
+    14,  # the channel in a hub containing the listed servers
+    15,  # (still in development) a channel that can only contain threads
+]

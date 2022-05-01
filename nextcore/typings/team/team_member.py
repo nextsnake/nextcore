@@ -19,31 +19,32 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .application import *
-from .audit_log import *
-from .channel import *
-from .common import *
-from .team import *
+from __future__ import annotations
 
-__all__ = (
-    "Application",
-    "Snowflake",
-    "Team",
-    "TeamMember",
-    "TeamPermission",
-    "MembershipState",
-    "AuditLog",
-    "AuditLogEntry",
-    "AuditLogChange",
-    "AuditLogChangeKey",
-    "OptionalAuditEntryInfo",
-    "AuditLogEvent",
-    "Channel",
-    "ChannelType",
-    "VideoQualityMode",
-    "Overwrite",
-    "AutoArchiveDuration",
-    "ThreadMetadata",
-    "Overwrite",
-    "ThreadMember",
-)
+from typing import TYPE_CHECKING, TypedDict
+
+if TYPE_CHECKING:
+    from ...common.snowflake import Snowflake
+    from .membership_state import MembershipState
+    from .team_permission import TeamPermission
+
+__all__ = ("TeamMember",)
+
+
+class TeamMember(TypedDict):
+    """A `Team <https://discord.dev/topics/teams#data-models-team-object>`__ object.
+
+    Attributes
+    ----------
+    membership_state: :class:`MembershipState`
+        The membership state of the user in the :class:`Team`.
+    permissions: list[:class:`TeamPermission`]
+        The permissions of the user in the :class:`Team`.
+    team_id: :class:`Snowflake`
+        The ID of the :class:`Team` this :class:`TeamMember` is a member of.
+    """
+
+    membership_state: MembershipState
+    permissions: list[TeamPermission]
+    team_id: Snowflake
+    user: TeamPartialUser  # TODO: Make TeamPartialUser

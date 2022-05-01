@@ -19,31 +19,29 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .application import *
-from .audit_log import *
-from .channel import *
-from .common import *
-from .team import *
+from __future__ import annotations
 
-__all__ = (
-    "Application",
-    "Snowflake",
-    "Team",
-    "TeamMember",
-    "TeamPermission",
-    "MembershipState",
-    "AuditLog",
-    "AuditLogEntry",
-    "AuditLogChange",
-    "AuditLogChangeKey",
-    "OptionalAuditEntryInfo",
-    "AuditLogEvent",
-    "Channel",
-    "ChannelType",
-    "VideoQualityMode",
-    "Overwrite",
-    "AutoArchiveDuration",
-    "ThreadMetadata",
-    "Overwrite",
-    "ThreadMember",
-)
+from typing import TypedDict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...common.snowflake import Snowflake
+    from typing_extensions import NotRequired
+
+class ThreadMember(TypedDict):
+    """A `Thread Member <https://discord.dev/resources/channel#thread-member-object-thread-member-structure>`__ object.
+
+    Attributes
+    ----------
+    id: :class:`Snowflake`
+        The ID of the thread.
+    user_id: :class:`Snowflake`
+        The ID of the member in the thread.
+    join_timestamp: :class:`str`
+        A ISO 8601 datetime string of when the member joined the thread.
+    flags: :class:`int`
+        Bitwise flags. No information is available in the docs. Currently used for notifications.
+    """
+    id: NotRequired[Snowflake]
+    user_id: NotRequired[Snowflake]
+    join_timestamp: str
+    flags: int
