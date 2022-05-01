@@ -672,3 +672,8 @@ Thread
 
 .. autoclass:: ThreadMember
     :members:
+
+Emoji
+-----
+.. autoclass:: Emoji
+    :members:
