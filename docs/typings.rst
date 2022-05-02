@@ -774,3 +774,17 @@ Guild
           All messages
         - ``1``
           Only mentions
+
+.. class:: GuildNSFWLevel
+
+   A `Guild NSFW Level <https://discord.dev/resources/guild#guild-object-guild-nsfw-level>`__ :data:`typing.Literal`.
+
+   Possible values:
+        - ``0``
+          Default
+        - ``1``
+          Explicit
+        - ``2``
+          Safe
+        - ``3``
+          Age restricted

@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from .guild_feature import GuildFeature
     from .premium_tier import PremiumTier
     from .default_message_notification_level import DefaultMessageNotificationLevel
+    from .guild_nsfw_level import GuildNSFWLevel
 
 
 class Guild(TypedDict):
@@ -81,7 +82,7 @@ class Guild(TypedDict):
         The ID of the channel that you get invited to via the widget. If this is :data:`None`, you cannot join the guild via the widget.
     verification_level: :class:`VerificationLevel`
         The guild's verification level for members to talk.
-    default_message_notifications: :class:`NotificationLevel`
+    default_message_notifications: :class:`DefaultMessageNotificationLevel`
         The default notification level for new :class:`Members <GuildMember>`
     explicit_content_filter: :class:`ExplicitContentFilterLevel`
         The level of filter that the guild has for message attachments.
@@ -175,7 +176,7 @@ class Guild(TypedDict):
             This can only be set if the guild has the ``COMMUNITY`` feature.
         .. note::
             This is only sent when using the ``Get invite`` endpoint.
-    nsfw_level: :class:`NSFWLevel`
+    nsfw_level: :class:`GuildNSFWLevel`
         The guild's nsfw level.
     stage_instances: NotRequired[list[:class:`StageInstance`]]
         The active stages in the guild.
@@ -234,7 +235,7 @@ class Guild(TypedDict):
     approximate_member_count: NotRequired[int]
     approximate_presence_count: NotRequired[int]
     welcome_screen: NotRequired[WelcomeScreen]  # TODO: Implement WelcomeScreen
-    nsfw_level: GuildNSFWLevel  # TODO: Implement GuildNSFWLevel
+    nsfw_level: GuildNSFWLevel
     stage_instances: NotRequired[list[StageInstance]]  # TODO: Implement StageInstance
     stickers: NotRequired[list[Sticker]]  # TODO: Implement Sticker
     guild_scheduled_events: NotRequired[list[GuildScheduledEvent]]  # TODO: Implement GuildScheduledEvent
