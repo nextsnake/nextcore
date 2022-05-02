@@ -19,39 +19,16 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .application import *
-from .audit_log import *
-from .channel import *
-from .common import *
-from .emoji import *
-from .guild import *
-from .team import *
+from __future__ import annotations
 
-__all__ = (
-    "Application",
-    "Snowflake",
-    "Team",
-    "TeamMember",
-    "TeamPermission",
-    "MembershipState",
-    "AuditLog",
-    "AuditLogEntry",
-    "AuditLogChange",
-    "AuditLogChangeKey",
-    "OptionalAuditEntryInfo",
-    "AuditLogEvent",
-    "Channel",
-    "ChannelType",
-    "VideoQualityMode",
-    "Overwrite",
-    "AutoArchiveDuration",
-    "ThreadMetadata",
-    "Overwrite",
-    "ThreadMember",
-    "Emoji",
-    "Guild",
-    "VerificationLevel",
-    "PremiumTier",
-    "GuildFeature",
-    "DefaultMessageNotificationLevel",
-)
+from typing import Literal, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+# Not documented here due to Sphinx.
+# This is documented manually in the docs/typings.rst file.
+DefaultMessageNotificationLevel: TypeAlias = Literal[
+    0, # All messages
+    1, # Only mentions
+]

@@ -23,7 +23,14 @@ from .audit_log import AuditLog
 from .audit_log_change import AuditLogChange
 from .audit_log_change_key import AuditLogChangeKey
 from .audit_log_entry import AuditLogEntry
-from .optional_audit_entry_info import OptionalAuditEntryInfo
 from .audit_log_event import AuditLogEvent
+from .optional_audit_entry_info import OptionalAuditEntryInfo
 
-__all__ = ("AuditLog", "AuditLogEntry", "AuditLogChange", "AuditLogChangeKey", "OptionalAuditEntryInfo", "AuditLogEvent")
+__all__ = (
+    "AuditLog",
+    "AuditLogEntry",
+    "AuditLogChange",
+    "AuditLogChangeKey",
+    "OptionalAuditEntryInfo",
+    "AuditLogEvent",
+)

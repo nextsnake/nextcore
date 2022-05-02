@@ -19,39 +19,21 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .application import *
-from .audit_log import *
-from .channel import *
-from .common import *
-from .emoji import *
-from .guild import *
-from .team import *
+from __future__ import annotations
 
-__all__ = (
-    "Application",
-    "Snowflake",
-    "Team",
-    "TeamMember",
-    "TeamPermission",
-    "MembershipState",
-    "AuditLog",
-    "AuditLogEntry",
-    "AuditLogChange",
-    "AuditLogChangeKey",
-    "OptionalAuditEntryInfo",
-    "AuditLogEvent",
-    "Channel",
-    "ChannelType",
-    "VideoQualityMode",
-    "Overwrite",
-    "AutoArchiveDuration",
-    "ThreadMetadata",
-    "Overwrite",
-    "ThreadMember",
-    "Emoji",
-    "Guild",
-    "VerificationLevel",
-    "PremiumTier",
-    "GuildFeature",
-    "DefaultMessageNotificationLevel",
-)
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+__all__ = ("VerificationLevel",)
+
+# Not documented here due to Sphinx.
+# This is documented manually in the docs/typings.rst file.
+VerificationLevel: TypeAlias = Literal[
+    0,  # None
+    1,  # Must have a verified email
+    2,  # Must be registered on Discord for longer than 5 minutes
+    3,  # Must be a member of this guild for longer than 10 minutes
+    4,  # Must have a verified phone number
+]

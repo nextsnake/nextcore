@@ -159,7 +159,7 @@ Audit log
 
 .. class:: AuditLogChangeKey
     
-    A `audit log change key <https://discord.com/developers/docs/resources/audit-log#audit-log-change-object-audit-log-change-key>`__ literal.
+    A `audit log change key <https://discord.dev/resources/audit-log#audit-log-change-object-audit-log-change-key>`__ literal.
 
     Possible values
         - ``afk_channel_id``
@@ -613,7 +613,7 @@ Channel
 
 .. class:: ChannelType
     
-    A :class:`typing.Literal` representing the type of a :class:`Channel`.
+    A :data:`typing.Literal` representing the type of a :class:`Channel`.
     
     Possible values:
         - ``0``
@@ -677,3 +677,100 @@ Emoji
 -----
 .. autoclass:: Emoji
     :members:
+
+Guild
+-----
+.. autoclass:: Guild
+    :members:
+
+.. class:: VerificationLevel
+    
+    A `Verification Level <https://discord.dev/resources/guild#guild-object-verification-level>`__ :data:`typing.Literal`.
+
+    Possible values:
+        - ``0``
+          None
+        - ``1``
+          Must have a verified email.
+        - ``2``
+          Must be registered on Discord for longer than 5 minutes.
+        - ``3``
+          Must be a member of this guild for more than 10 minutes.
+        - ``4``
+          Must have a verified phone number.
+
+.. class:: PremiumTier
+    
+    A `Premium Tier <https://discord.dev/resources/guild#guild-object-premium-tier>`__ :data:`typing.Literal`.
+
+    Possible values:
+        - ``0``
+          None
+        - ``1``
+          Tier 1
+        - ``2``
+          Tier 2
+        - ``3``
+          Tier 3
+
+.. class:: GuildFeature
+    
+    A `Guild Feature <https://discord.dev/resources/guild#guild-object-guild-features>`__ :data:`typing.Literal`.
+
+    Possible values:
+        - ``ANIMATED_BANNER``
+          Guild has access to set an animated guild banner image
+        - ``ANIMATED_ICON``
+          Guild has access to set an animated guild icon
+        - ``BANNER``
+          Guild has access to set a guild banner image
+        - ``COMMERCE``
+          Guild has access to use commerce features (i.e. create store channels)
+        - ``COMMUNITY``
+          Guild can enable welcome screen, Membership Screening, stage channels and discovery, and receives community updates
+        - ``DISCOVERABLE``
+          Guild is able to be discovered in the directory
+        - ``FEATURABLE``
+          Guild is able to be featured in the directory
+        - ``INVITE_SPLASH``
+          Guild has access to set an invite splash background
+        - ``MEMBER_VERIFICATION_GATE_ENABLED``
+          Guild has enabled Membership Screening
+        - ``MONETIZATION_ENABLED``
+          Guild has enabled monetization
+        - ``MORE_STICKERS``
+          Guild has increased custom sticker slots
+        - ``NEWS``
+          Guild has access to create news channels
+        - ``PARTNERED``
+          Guild is partnered
+        - ``PREVIEW_ENABLED``
+          Guild can be previewed before joining via Membership Screening or the directory
+        - ``PRIVATE_THREADS``
+          Guild has access to create private threads
+        - ``ROLE_ICONS``
+          Guild is able to set role icons
+        - ``SEVEN_DAY_THREAD_ARCHIVE``
+          Guild has access to the seven day archive time for threads
+        - ``THREE_DAY_THREAD_ARCHIVE``
+          Guild has access to the three day archive time for threads
+        - ``TICKETED_EVENTS_ENABLED``
+          Guild has enabled ticketed events
+        - ``VANITY_URL``
+          Guild has access to set a vanity URL
+        - ``VERIFIED``
+          Guild is verified
+        - ``VIP_REGIONS``
+          Guild has access to set 384kbps bitrate in voice (previously VIP voice servers)
+        - ``WELCOME_SCREEN_ENABLED``
+          Guild has enabled the welcome screen
+
+.. class:: DefaultNotitificationLevel
+
+    A `Default Notification Level <https://discord.dev/resources/guild#guild-object-default-message-notification-level>`__ :data:`typing.Literal`.
+
+    Possible values:
+        - ``0``
+          All messages
+        - ``1``
+          Only mentions

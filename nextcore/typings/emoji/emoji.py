@@ -21,13 +21,15 @@
 
 from __future__ import annotations
 
-from typing import TypedDict, TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
-    from ..common import Snowflake
     from typing_extensions import NotRequired
 
-__all__ = ("Emoji", )
+    from ..common import Snowflake
+
+__all__ = ("Emoji",)
+
 
 class Emoji(TypedDict):
     """A `Emoji <https://discord.dev/resources/emoji#emoji-object-emoji-structure>`__ object.
@@ -55,7 +57,7 @@ class Emoji(TypedDict):
     Example standard emoji:
 
     .. code-block:: json
-        
+
         {
             "id": null,
             "name": "🔥"
@@ -96,10 +98,11 @@ class Emoji(TypedDict):
 
         This may be :data:`False` for when a emoji is no longer usable due to loosing a boost tier.
     """
+
     id: Snowflake | None
     name: str | None
     roles: NotRequired[list[Snowflake]]
-    user: NotRequired[User] # TODO: Implement User
+    user: NotRequired[User]  # TODO: Implement User
     require_colons: NotRequired[bool]
     managed: NotRequired[bool]
     animated: NotRequired[bool]

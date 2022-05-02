@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from ..common import Snowflake
     from .channel_type import ChannelType
     from .overwrite import Overwrite
-    from .thread import AutoArchiveDuration, ThreadMetadata, ThreadMember
+    from .thread import AutoArchiveDuration, ThreadMember, ThreadMetadata
     from .video_quality_mode import VideoQualityMode
 
 __all__ = ("Channel",)

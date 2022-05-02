@@ -19,39 +19,10 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .application import *
-from .audit_log import *
-from .channel import *
-from .common import *
-from .emoji import *
-from .guild import *
-from .team import *
+from .guild import Guild
+from .verification_level import VerificationLevel
+from .premium_tier import PremiumTier
+from .guild_feature import GuildFeature
+from .default_message_notification_level import DefaultMessageNotificationLevel
 
-__all__ = (
-    "Application",
-    "Snowflake",
-    "Team",
-    "TeamMember",
-    "TeamPermission",
-    "MembershipState",
-    "AuditLog",
-    "AuditLogEntry",
-    "AuditLogChange",
-    "AuditLogChangeKey",
-    "OptionalAuditEntryInfo",
-    "AuditLogEvent",
-    "Channel",
-    "ChannelType",
-    "VideoQualityMode",
-    "Overwrite",
-    "AutoArchiveDuration",
-    "ThreadMetadata",
-    "Overwrite",
-    "ThreadMember",
-    "Emoji",
-    "Guild",
-    "VerificationLevel",
-    "PremiumTier",
-    "GuildFeature",
-    "DefaultMessageNotificationLevel",
-)
+__all__ = ("Guild", "VerificationLevel", "PremiumTier", "GuildFeature", "DefaultMessageNotificationLevel")

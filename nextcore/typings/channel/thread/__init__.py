@@ -20,7 +20,7 @@
 # DEALINGS IN THE SOFTWARE.
 
 from .auto_archive_duration import AutoArchiveDuration
-from .thread_metadata import ThreadMetadata
 from .thread_member import ThreadMember
+from .thread_metadata import ThreadMetadata
 
 __all__ = ("AutoArchiveDuration", "ThreadMetadata", "ThreadMember")

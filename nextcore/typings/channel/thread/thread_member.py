@@ -21,11 +21,13 @@
 
 from __future__ import annotations
 
-from typing import TypedDict, TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
-    from ...common.snowflake import Snowflake
     from typing_extensions import NotRequired
+
+    from ...common.snowflake import Snowflake
+
 
 class ThreadMember(TypedDict):
     """A `Thread Member <https://discord.dev/resources/channel#thread-member-object-thread-member-structure>`__ object.
@@ -41,6 +43,7 @@ class ThreadMember(TypedDict):
     flags: :class:`int`
         Bitwise flags. No information is available in the docs. Currently used for notifications.
     """
+
     id: NotRequired[Snowflake]
     user_id: NotRequired[Snowflake]
     join_timestamp: str
