@@ -35,6 +35,8 @@ if TYPE_CHECKING:
     from .mfa_level import MFALevel
     from .premium_tier import PremiumTier
     from .verification_level import VerificationLevel
+    from .role import Role
+    from .explicit_content_filter_level import ExplicitContentFilterLevel
 
 
 class Guild(TypedDict):
@@ -205,11 +207,11 @@ class Guild(TypedDict):
     widget_channel_id: NotRequired[Snowflake | None]
     verification_level: VerificationLevel
     default_message_notifications: DefaultMessageNotificationLevel
-    explicit_content_filter: ExplicitContentFilterLevel  # TODO: Implement ExplicitContentFilterLevel
-    roles: list[Role]  # TODO: Implement Role
+    explicit_content_filter: ExplicitContentFilterLevel
+    roles: list[Role]
     emojis: list[Emoji]
     features: list[GuildFeature]
-    mfa_level: MFALevel  # TODO: Implement MFALevel
+    mfa_level: MFALevel
     application_id: Snowflake | None
     system_channel_id: Snowflake | None
     system_channel_flags: int

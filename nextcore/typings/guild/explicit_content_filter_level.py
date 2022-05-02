@@ -19,25 +19,19 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .default_message_notification_level import DefaultMessageNotificationLevel
-from .guild import Guild
-from .guild_feature import GuildFeature
-from .guild_nsfw_level import GuildNSFWLevel
-from .mfa_level import MFALevel
-from .premium_tier import PremiumTier
-from .verification_level import VerificationLevel
-from .role import *
-from .explicit_content_filter_level import ExplicitContentFilterLevel
+from __future__ import annotations
 
-__all__ = (
-    "Guild",
-    "VerificationLevel",
-    "PremiumTier",
-    "GuildFeature",
-    "DefaultMessageNotificationLevel",
-    "GuildNSFWLevel",
-    "MFALevel",
-    "Role",
-    "RoleTags",
-    "ExplicitContentFilterLevel",
-)
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+__all__ = ("ExplicitContentFilterLevel",)
+
+# Not documented here due to Sphinx.
+# This is documented manually in the docs/typings.rst file.
+ExplicitContentFilterLevel: TypeAlias = Literal[
+    0,  # Media will not be scanned.
+    1,  # Media from members without a role will be scanned
+    2,  # Media from all members will be scanned
+]
