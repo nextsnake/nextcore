@@ -19,44 +19,29 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .application import *
-from .audit_log import *
-from .channel import *
-from .common import *
-from .emoji import *
-from .guild import *
-from .team import *
+from __future__ import annotations
 
-__all__ = (
-    "Application",
-    "Snowflake",
-    "Team",
-    "TeamMember",
-    "TeamPermission",
-    "MembershipState",
-    "AuditLog",
-    "AuditLogEntry",
-    "AuditLogChange",
-    "AuditLogChangeKey",
-    "OptionalAuditEntryInfo",
-    "AuditLogEvent",
-    "Channel",
-    "ChannelType",
-    "VideoQualityMode",
-    "Overwrite",
-    "AutoArchiveDuration",
-    "ThreadMetadata",
-    "Overwrite",
-    "ThreadMember",
-    "Emoji",
-    "Guild",
-    "VerificationLevel",
-    "PremiumTier",
-    "GuildFeature",
-    "DefaultMessageNotificationLevel",
-    "GuildNSFWLevel",
-    "MFALevel",
-    "Locale",
-    "Role",
-    "RoleTags",
-)
+from typing import TYPE_CHECKING, TypedDict
+
+if TYPE_CHECKING:
+    from ...common import Snowflake
+
+    from typing_extensions import NotRequired
+
+__all__ = ("RoleTags",)
+
+class RoleTags(TypedDict):
+    """A `Role tags <https://discord.dev/topics/permissions#role-object-role-tags-structure>`__ object.
+
+    Attributes
+    ----------
+    bot_id: NotRequired[:class:`Snowflake`]
+        The ID of the bot this role belongs to.
+    integration_id: NotRequired[:class:`Snowflake`]
+        The ID of the integration this role belongs to.
+    premium_subscriber: NotRequired[:class:`bool`]
+        Whether this role is the :class:`Guild`'s premium subscriber role.
+    """
+    bot_id: NotRequired[Snowflake]
+    integration_id: NotRequired[Snowflake]
+    premium_subscriber: NotRequired[None]

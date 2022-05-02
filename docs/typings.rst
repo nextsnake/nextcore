@@ -864,3 +864,9 @@ Guild
          Chinese, Taiwan
        - ``ko``
          Korean
+
+.. autoclass:: Role
+    :members:
+
+.. autoclass:: RoleTags
+    :members:

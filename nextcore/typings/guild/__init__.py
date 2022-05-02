@@ -26,6 +26,7 @@ from .guild_nsfw_level import GuildNSFWLevel
 from .mfa_level import MFALevel
 from .premium_tier import PremiumTier
 from .verification_level import VerificationLevel
+from .role import *
 
 __all__ = (
     "Guild",
@@ -35,4 +36,6 @@ __all__ = (
     "DefaultMessageNotificationLevel",
     "GuildNSFWLevel",
     "MFALevel",
+    "Role",
+    "RoleTags",
 )
