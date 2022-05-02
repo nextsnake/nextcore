@@ -870,3 +870,14 @@ Guild
 
 .. autoclass:: RoleTags
     :members:
+.. class:: ExplicitContentFilterLevel
+
+    A `Explicit Content Filter Level <https://discord.dev/resources/guild#guild-object-explicit-content-filter-level>`__ :data:`typing.Literal`.
+
+    Possible values:
+        - ``0``
+          Disabled
+        - ``1``
+          Scan media from members without roles
+        - ``2``
+          Scan media from all members
