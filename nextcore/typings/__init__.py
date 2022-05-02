@@ -56,4 +56,5 @@ __all__ = (
     "DefaultMessageNotificationLevel",
     "GuildNSFWLevel",
     "MFALevel",
+    "Locale",
 )

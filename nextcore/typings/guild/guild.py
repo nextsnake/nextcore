@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     from ..channel import Channel
-    from ..common import Snowflake
+    from ..common import Snowflake, Locale
     from ..emoji import Emoji
     from .default_message_notification_level import DefaultMessageNotificationLevel
     from .guild_feature import GuildFeature
@@ -230,7 +230,7 @@ class Guild(TypedDict):
     banner: str | None
     premium_tier: PremiumTier
     premium_subscription_count: NotRequired[int]
-    preferred_locale: Locale  # TODO: Implement Locale
+    preferred_locale: Locale
     public_updates_channel_id: Snowflake | None
     max_video_channel_users: NotRequired[int]
     approximate_member_count: NotRequired[int]

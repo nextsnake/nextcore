@@ -798,3 +798,69 @@ Guild
           Guild has no MFA/2FA requirement for moderation actions
         - ``1``
           Guild has a 2FA requirement for moderation actions
+
+.. class:: Locale
+
+   A `Locale <https://discord.dev/reference#locales>`__ :data:`typing.Literal`.
+
+   Possible values:
+       - ``da``
+         Danish
+       - ``de``
+         German
+       - ``en-GB``
+         English, UK
+       - ``en-US``
+         English, US
+       - ``es-ES``
+         Spanish
+       - ``fr``
+         French
+       - ``hr``
+         Croatian
+       - ``it``
+         Italian
+       - ``lt``
+         Lithuanian
+       - ``hu``
+         Hungarian
+       - ``nl``
+         Dutch
+       - ``no``
+         Norwegian
+       - ``pl``
+         Polish
+       - ``pt-BR``
+         Portuguese, Brazilian
+       - ``ro``
+         Romanian, Romania
+       - ``fi``
+         Finnish
+       - ``sv-SE``
+         Swedish
+       - ``vi``
+         Vietnamese
+       - ``tr``
+         Turkish
+       - ``cs``
+         Czech
+       - ``el``
+         Greek
+       - ``bg``
+         Bulgarian
+       - ``ru``
+         Russian
+       - ``uk``
+         Ukrainian
+       - ``hi``
+         Hindi
+       - ``th``
+         Thai
+       - ``zh-CN``
+         Chinese, China
+       - ``ja``
+         Japanese
+       - ``zh-TW``
+         Chinese, Taiwan
+       - ``ko``
+         Korean
