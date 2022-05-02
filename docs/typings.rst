@@ -788,3 +788,13 @@ Guild
           Safe
         - ``3``
           Age restricted
+
+.. class:: MFALevel
+
+   A `MFA Level <https://discord.dev/resources/guild#guild-object-mfa-level>`__ :data:`typing.Literal`.
+
+   Possible values:
+        - ``0``
+          Guild has no MFA/2FA requirement for moderation actions
+        - ``1``
+          Guild has a 2FA requirement for moderation actions

@@ -26,6 +26,8 @@ from typing import TYPE_CHECKING, NewType
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+__all__ = ("Snowflake",)
+
 # Not documented here due to Sphinx.
 # This is documented manually in the docs/typings.rst file.
 Snowflake: TypeAlias = NewType("Snowflake", str)

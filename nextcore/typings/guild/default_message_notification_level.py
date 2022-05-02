@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -29,6 +29,6 @@ if TYPE_CHECKING:
 # Not documented here due to Sphinx.
 # This is documented manually in the docs/typings.rst file.
 DefaultMessageNotificationLevel: TypeAlias = Literal[
-    0, # All messages
-    1, # Only mentions
+    0,  # All messages
+    1,  # Only mentions
 ]

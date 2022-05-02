@@ -26,13 +26,11 @@ from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-__all__ = ("GuildNSFWLevel",)
+__all__ = ("MFALevel",)
 
 # Not documented here due to Sphinx.
 # This is documented manually in the docs/typings.rst file.
-GuildNSFWLevel: TypeAlias = Literal[
-    0,  # Default
-    1,  # Explicit
-    2,  # Safe
-    3,  # Age restricted
+MFALevel: TypeAlias = Literal[
+    0,  # Guild has no MFA/2FA requirement for moderation actions
+    1,  # Guild has a 2FA requirement for moderation actions
 ]

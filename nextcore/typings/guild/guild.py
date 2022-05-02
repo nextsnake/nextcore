@@ -29,11 +29,12 @@ if TYPE_CHECKING:
     from ..channel import Channel
     from ..common import Snowflake
     from ..emoji import Emoji
-    from .verification_level import VerificationLevel
-    from .guild_feature import GuildFeature
-    from .premium_tier import PremiumTier
     from .default_message_notification_level import DefaultMessageNotificationLevel
+    from .guild_feature import GuildFeature
     from .guild_nsfw_level import GuildNSFWLevel
+    from .mfa_level import MFALevel
+    from .premium_tier import PremiumTier
+    from .verification_level import VerificationLevel
 
 
 class Guild(TypedDict):
