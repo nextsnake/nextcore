@@ -60,4 +60,7 @@ __all__ = (
     "Role",
     "RoleTags",
     "ExplicitContentFilterLevel",
+    "UnavailableGuild",
+    "GuildPreview",
+    "GuildMember",
 )

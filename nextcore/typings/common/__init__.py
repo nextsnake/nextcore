@@ -19,7 +19,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .snowflake import Snowflake
 from .locale import Locale
+from .snowflake import Snowflake
 
 __all__ = ("Snowflake", "Locale")

@@ -27,17 +27,18 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     from ..channel import Channel
-    from ..common import Snowflake, Locale
+    from ..common import Locale, Snowflake
     from ..emoji import Emoji
     from .default_message_notification_level import DefaultMessageNotificationLevel
+    from .explicit_content_filter_level import ExplicitContentFilterLevel
     from .guild_feature import GuildFeature
     from .guild_nsfw_level import GuildNSFWLevel
     from .mfa_level import MFALevel
     from .premium_tier import PremiumTier
-    from .verification_level import VerificationLevel
     from .role import Role
-    from .explicit_content_filter_level import ExplicitContentFilterLevel
+    from .verification_level import VerificationLevel
 
+__all__ = ("Guild",)
 
 class Guild(TypedDict):
     """A `Guild <https://discord.dev/resources/guild#guild-object-guild-structure>`__ object.

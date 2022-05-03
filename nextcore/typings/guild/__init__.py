@@ -20,14 +20,17 @@
 # DEALINGS IN THE SOFTWARE.
 
 from .default_message_notification_level import DefaultMessageNotificationLevel
+from .explicit_content_filter_level import ExplicitContentFilterLevel
 from .guild import Guild
 from .guild_feature import GuildFeature
 from .guild_nsfw_level import GuildNSFWLevel
 from .mfa_level import MFALevel
 from .premium_tier import PremiumTier
-from .verification_level import VerificationLevel
 from .role import *
-from .explicit_content_filter_level import ExplicitContentFilterLevel
+from .unavailable_guild import UnavailableGuild
+from .verification_level import VerificationLevel
+from .guild_preview import GuildPreview
+from .guild_member import GuildMember
 
 __all__ = (
     "Guild",
@@ -40,4 +43,7 @@ __all__ = (
     "Role",
     "RoleTags",
     "ExplicitContentFilterLevel",
+    "UnavailableGuild",
+    "GuildPreview",
+    "GuildMember",
 )

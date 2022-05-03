@@ -77,8 +77,8 @@ class OptionalAuditEntryInfo(TypedDict):
         The type of overwritten entity.
 
         Possible values
-            0. :class:`Role`
-            1. :class:`Member`
+            - ``0`` :class:`Role`
+            - ``1`` :class:`GuildMember`
     """
 
     channel_id: NotRequired[Snowflake]

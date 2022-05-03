@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -29,34 +29,34 @@ if TYPE_CHECKING:
 __all__ = ("Locale",)
 
 Locale: TypeAlias = Literal[
-	"da",  # Danish
-	"de",  # German
-	"en-GB",  # English, UK
-	"en-US",  # English, US
-	"es-ES",  # Spanish
-	"fr",  # French
-	"hr",  # Croatian
-	"it",  # Italian
-	"lt",  # Lithuanian
-	"hu",  # Hungarian
-	"nl",  # Dutch
-	"no",  # Norwegian
-	"pl",  # Polish
-	"pt-BR",  # Portuguese, Brazilian
-	"ro",  # Romanian, Romania
-	"fi",  # Finnish
-	"sv-SE",  # Swedish
-	"vi",  # Vietnamese
-	"tr",  # Turkish
-	"cs",  # Czech
-	"el",  # Greek
-	"bg",  # Bulgarian
-	"ru",  # Russian
-	"uk",  # Ukrainian
-	"hi",  # Hindi
-	"th",  # Thai
-	"zh-CN",  # Chinese, China
-	"ja",  # Japanese
-	"zh-TW",  # Chinese, Taiwan
-	"ko",  # Korean
+    "da",  # Danish
+    "de",  # German
+    "en-GB",  # English, UK
+    "en-US",  # English, US
+    "es-ES",  # Spanish
+    "fr",  # French
+    "hr",  # Croatian
+    "it",  # Italian
+    "lt",  # Lithuanian
+    "hu",  # Hungarian
+    "nl",  # Dutch
+    "no",  # Norwegian
+    "pl",  # Polish
+    "pt-BR",  # Portuguese, Brazilian
+    "ro",  # Romanian, Romania
+    "fi",  # Finnish
+    "sv-SE",  # Swedish
+    "vi",  # Vietnamese
+    "tr",  # Turkish
+    "cs",  # Czech
+    "el",  # Greek
+    "bg",  # Bulgarian
+    "ru",  # Russian
+    "uk",  # Ukrainian
+    "hi",  # Hindi
+    "th",  # Thai
+    "zh-CN",  # Chinese, China
+    "ja",  # Japanese
+    "zh-TW",  # Chinese, Taiwan
+    "ko",  # Korean
 ]

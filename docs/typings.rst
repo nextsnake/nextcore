@@ -881,3 +881,12 @@ Guild
           Scan media from members without roles
         - ``2``
           Scan media from all members
+
+.. autoclass:: UnavailableGuild
+    :members:
+
+.. autoclass:: GuildPreview
+    :members:
+
+.. autoclass:: GuildMember
+    :members:

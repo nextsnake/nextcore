@@ -24,12 +24,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
+    from typing_extensions import NotRequired
+
     from ...common import Snowflake
     from .role_tags import RoleTags
 
-    from typing_extensions import NotRequired
-
 __all__ = ("RoleTags",)
+
 
 class Role(TypedDict):
     """A `Role <https://discord.dev/topics/permissions#role-object-role-structure>`__ object
@@ -69,6 +70,7 @@ class Role(TypedDict):
     tags: NotRequired[:class:`RoleTags`]
         Metadata about the role.
     """
+
     id: Snowflake
     name: str
     color: int
@@ -80,4 +82,3 @@ class Role(TypedDict):
     managed: bool
     mentionable: bool
     tags: NotRequired[RoleTags]
-

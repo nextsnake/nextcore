@@ -24,26 +24,21 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
-    from typing_extensions import NotRequired
+    from typing import Literal
 
-    from ...common import Snowflake
-
-__all__ = ("RoleTags",)
+__all__ = ("UnavailableGuild",)
 
 
-class RoleTags(TypedDict):
-    """A `Role tags <https://discord.dev/topics/permissions#role-object-role-tags-structure>`__ object.
+class UnavailableGuild(TypedDict):
+    """A `Unavailable Guild <https://discord.dev/resources/guild#unavailable-guild-object>`__ object.
 
     Attributes
     ----------
-    bot_id: NotRequired[:class:`Snowflake`]
-        The ID of the bot this role belongs to.
-    integration_id: NotRequired[:class:`Snowflake`]
-        The ID of the integration this role belongs to.
-    premium_subscriber: NotRequired[:class:`bool`]
-        Whether this role is the :class:`Guild`'s premium subscriber role.
+    id: :class:`Snowflake`
+        The guild's ID.
+    unavailable: typing.Literal[:data:`True`]
+        If the guild is unavailable. This is always :data:`True`.
     """
 
-    bot_id: NotRequired[Snowflake]
-    integration_id: NotRequired[Snowflake]
-    premium_subscriber: NotRequired[None]
+    id: int
+    unavailable: Literal[True]
