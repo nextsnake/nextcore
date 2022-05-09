@@ -137,10 +137,10 @@ class RatelimitStorage:
         self._bucket_metadata[bucket_route] = metadata
 
     # Garbage collection
-    def _cleanup_buckets(self, phase: Literal["start", "end"], info: dict[str, int]) -> None:
+    def _cleanup_buckets(self, phase: Literal["start", "stop"], info: dict[str, int]) -> None:
         del info  # Unused
 
-        if phase == "end":
+        if phase == "stop":
             # No need to clean up buckets after the gc is done.
             return
         logger.debug("Cleaning up buckets")
