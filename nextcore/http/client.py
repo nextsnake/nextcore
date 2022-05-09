@@ -49,7 +49,6 @@ if TYPE_CHECKING:
     from typing import Any, Literal
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
-    
     from discord_typings import GetGatewayBotData
 
 logger = getLogger(__name__)

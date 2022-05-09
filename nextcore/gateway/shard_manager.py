@@ -33,9 +33,9 @@ from ..common.dispatcher import Dispatcher
 from .shard import Shard
 
 if TYPE_CHECKING:
-    from typing import Final
+    from typing import Any, Final
 
-    from discord_typings import DispatchEvent, GatewayEvent
+    from discord_typings import GatewayEvent
     from discord_typings.gateway import UpdatePresenceData
 
     from ..http.client import HTTPClient
@@ -77,9 +77,9 @@ class ShardManager:
         The initial presence the bot should connect with.
     active_shards: list[:class:`Shard`]
         A list of all shards that are currently connected.
-    raw_dispatcher: :class:`Dispatcher<nextcore.common.Dispatcher>`
+    raw_dispatcher: :class:`Dispatcher <nextcore.common.Dispatcher>`
         A dispatcher with raw payloads sent by discord. The event name is the opcode, and the value is the raw data.
-    event_dispatcher: :class:`Dispatcher<nextcore.common.Dispatcher>`
+    event_dispatcher: :class:`Dispatcher <nextcore.common.Dispatcher>`
         A dispatcher for DISPATCH events sent by discord. The event name is the event name, and the value is the inner payload.
     max_concurrency: :class:`int`
         The maximum amount of concurrent IDENTIFY's the bot can make.
@@ -141,7 +141,7 @@ class ShardManager:
         """Connect all the shards to the gateway.
 
         .. note::
-            This will return once all shards are connected.
+            This will return once all shard have started connecting.
 
         Raises
         ------
@@ -192,6 +192,6 @@ class ShardManager:
         logger.debug("Relaying raw event")
         await self.raw_dispatcher.dispatch(opcode, data)
 
-    async def _on_shard_dispatch(self, event_name: str, data: DispatchEvent) -> None:
+    async def _on_shard_dispatch(self, event_name: str, data: Any) -> None:
         logger.debug("Relaying event")
         await self.event_dispatcher.dispatch(event_name, data)
