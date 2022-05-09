@@ -193,7 +193,7 @@ class Shard:
         self._send_ratelimit = TimesPer(60 - 3, 120)
         self._ws: ClientWebSocketResponse | None = None
         self._decompressor: Decompressor = Decompressor()
-        self._logger: Logger = getLogger(f"{__name__}{self.shard_id}")
+        self._logger: Logger = getLogger(f"{__name__}.{self.shard_id}")
         self._received_heartbeat_ack: bool = True
 
         # Latency
