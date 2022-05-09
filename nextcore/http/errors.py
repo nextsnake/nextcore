@@ -58,31 +58,21 @@ class HTTPRequestStatusError(Exception):
 class BadRequestError(HTTPRequestStatusError):
     """A 400 error."""
 
-    ...
-
 
 class UnauthorizedError(HTTPRequestStatusError):
     """A 401 error."""
-
-    ...
 
 
 class ForbiddenError(HTTPRequestStatusError):
     """A 403 error."""
 
-    ...
-
 
 class NotFoundError(HTTPRequestStatusError):
     """A 404 error."""
 
-    ...
-
 
 class InternalServerError(HTTPRequestStatusError):
     """A 5xx error."""
-
-    ...
 
 
 class CloudflareBanError(Exception):

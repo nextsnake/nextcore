@@ -22,8 +22,8 @@
 from __future__ import annotations
 
 import gc
-from typing import TYPE_CHECKING
 from logging import getLogger
+from typing import TYPE_CHECKING
 from weakref import WeakValueDictionary
 
 from .global_lock import GlobalLock
@@ -37,6 +37,7 @@ if TYPE_CHECKING:
 logger = getLogger(__name__)
 
 __all__ = ("RatelimitStorage",)
+
 
 class RatelimitStorage:
     """Storage for ratelimits for a user.
@@ -58,7 +59,9 @@ class RatelimitStorage:
     def __init__(self):
         self._nextcore_buckets: dict[str | int, Bucket] = {}
         self._discord_buckets: WeakValueDictionary[str, Bucket] = WeakValueDictionary()
-        self._bucket_metadata: dict[str, BucketMetadata] = {} # This will never get cleared however it improves performance so I think not deleting it is fine
+        self._bucket_metadata: dict[
+            str, BucketMetadata
+        ] = {}  # This will never get cleared however it improves performance so I think not deleting it is fine
         self.global_lock = GlobalLock()
 
         # Register a garbage collection callback
@@ -144,7 +147,7 @@ class RatelimitStorage:
             # No need to clean up buckets after the gc is done.
             return
         logger.debug("Cleaning up buckets")
-        
+
         # We are copying it due to the size changing during the loop
         for bucket_id, bucket in self._nextcore_buckets.copy().items():
             if not bucket.dirty:
@@ -156,4 +159,3 @@ class RatelimitStorage:
         """Cleanup the object"""
         # Remove the garbage collection callback
         gc.callbacks.remove(self._cleanup_buckets)
-

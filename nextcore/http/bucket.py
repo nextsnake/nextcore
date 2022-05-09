@@ -52,7 +52,15 @@ class Bucket:
         The metadata for the bucket.
     """
 
-    __slots__ = ("metadata", "_remaining", "_reserved", "_pending", "_pending_reset", "_fetched_ratelimit_info", "__weakref__")
+    __slots__ = (
+        "metadata",
+        "_remaining",
+        "_reserved",
+        "_pending",
+        "_pending_reset",
+        "_fetched_ratelimit_info",
+        "__weakref__",
+    )
 
     def __init__(self, metadata: BucketMetadata):
         self.metadata: BucketMetadata = metadata
