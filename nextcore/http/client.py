@@ -99,9 +99,6 @@ class HTTPClient:
         "default_headers",
         "max_retries",
         "ratelimit_storages",
-        "_buckets",
-        "_discord_buckets",
-        "_bucket_metadata",
         "dispatcher",
         "_session",
     )

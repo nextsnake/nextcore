@@ -21,19 +21,30 @@
 
 from __future__ import annotations
 
+import gc
 from typing import TYPE_CHECKING
+from logging import getLogger
+from weakref import WeakValueDictionary
 
 from .global_lock import GlobalLock
 
 if TYPE_CHECKING:
+    from typing import Literal
+
     from .bucket import Bucket
     from .bucket_metadata import BucketMetadata
 
+logger = getLogger(__name__)
+
+__all__ = ("RatelimitStorage",)
 
 class RatelimitStorage:
     """Storage for ratelimits for a user.
 
     One of these should be created for each user.
+
+    .. note::
+        This will register a gc callback to clean up the buckets.
 
     Attributes
     ----------
@@ -46,9 +57,12 @@ class RatelimitStorage:
 
     def __init__(self):
         self._nextcore_buckets: dict[str | int, Bucket] = {}
-        self._discord_buckets: dict[str, Bucket] = {}
-        self._bucket_metadata: dict[str, BucketMetadata] = {}
+        self._discord_buckets: WeakValueDictionary[str, Bucket] = WeakValueDictionary()
+        self._bucket_metadata: dict[str, BucketMetadata] = {} # This will never get cleared however it improves performance so I think not deleting it is fine
         self.global_lock = GlobalLock()
+
+        # Register a garbage collection callback
+        gc.callbacks.append(self._cleanup_buckets)
 
     # These are async and not just public dicts because we want to support custom implementations that use asyncio.
     # This does introduce some overhead, but it's not too bad.
@@ -121,3 +135,25 @@ class RatelimitStorage:
             The metadata to store.
         """
         self._bucket_metadata[bucket_route] = metadata
+
+    # Garbage collection
+    def _cleanup_buckets(self, phase: Literal["start", "end"], info: dict[str, int]) -> None:
+        del info  # Unused
+
+        if phase == "end":
+            # No need to clean up buckets after the gc is done.
+            return
+        logger.debug("Cleaning up buckets")
+        
+        # We are copying it due to the size changing during the loop
+        for bucket_id, bucket in self._nextcore_buckets.copy().items():
+            if not bucket.dirty:
+                logger.debug("Cleaning up bucket %s", bucket_id)
+                # Delete the main reference. Other references like RatelimitStorage._discord_buckets should get cleaned up automatically as it is a weakref.
+                del self._nextcore_buckets[bucket_id]
+
+    def __del__(self):
+        """Cleanup the object"""
+        # Remove the garbage collection callback
+        gc.callbacks.remove(self._cleanup_buckets)
+

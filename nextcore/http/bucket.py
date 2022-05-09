@@ -52,7 +52,7 @@ class Bucket:
         The metadata for the bucket.
     """
 
-    __slots__ = ("metadata", "_remaining", "_reserved", "_pending", "_pending_reset", "_fetched_ratelimit_info")
+    __slots__ = ("metadata", "_remaining", "_reserved", "_pending", "_pending_reset", "_fetched_ratelimit_info", "__weakref__")
 
     def __init__(self, metadata: BucketMetadata):
         self.metadata: BucketMetadata = metadata
@@ -190,3 +190,21 @@ class Bucket:
         for session in self._pending[:limit]:
             session.pending_future.set_result(None)
             self._pending.remove(session)
+
+    @property
+    def dirty(self) -> bool:
+        """Whether the bucket is currently any different from a clean bucket created from a :class:`BucketMetadata`."""
+        if self._pending:
+            # Requests are pending! Deleting the bucket would cause issues.
+            logger.debug("Bucket is dirty due to pending requests.")
+            return True
+        if self.metadata.unlimited:
+            # Returning early as the rest of the checks is irrelevant.
+            logger.debug("Bucket is clean due to being unlimited.")
+            return False
+        if self._remaining != self.metadata.limit:
+            # Remaining is different from the metadata
+            logger.debug("Bucket is dirty due to remaining being different from limit.")
+            return True
+        logger.debug("Bucket is clean due to all checks passing.")
+        return False
