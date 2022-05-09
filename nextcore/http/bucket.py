@@ -206,6 +206,10 @@ class Bucket:
             # Requests are pending! Deleting the bucket would cause issues.
             logger.debug("Bucket is dirty due to pending requests.")
             return True
+        if self._reserved:
+            # Requests are reserved! Deleting the bucket would cause issues.
+            logger.debug("Bucket is dirty due to reserved requests.")
+            return True
         if self.metadata.unlimited:
             # Returning early as the rest of the checks is irrelevant.
             logger.debug("Bucket is clean due to being unlimited.")
