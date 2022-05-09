@@ -35,11 +35,8 @@ from .shard import Shard
 if TYPE_CHECKING:
     from typing import Final
 
-    from nextcore.typings import (
-        ServerGatewayDispatchPayload,
-        ServerGatewayPayload,
-        UpdatePresence,
-    )
+    from discord_typings import DispatchEvent, GatewayEvent
+    from discord_typings.gateway import UpdatePresenceData
 
     from ..http.client import HTTPClient
 
@@ -63,7 +60,7 @@ class ShardManager:
         The amount of shards the bot should spawn. If this is not set, the bot will automatically decide and keep the shard count up to date.
     shard_ids: list[:class:`int`] | :data:`None`
         The shard ids the bot should spawn. If this is not set, the bot will use all shard ids possible with the :attr:`ShardManager.shard_count`. This requires :attr:`ShardManager.shard_count` to be set.
-    presence: :class:`UpdatePresence`
+    presence: `UpdatePresence <https://discord.dev/topics/gateway#update-presence>`__
         The initial presence the bot should connect with.
 
     Attributes
@@ -76,7 +73,7 @@ class ShardManager:
         The amount of shards the bot should spawn. If this is not set, the bot will automatically decide and keep the shard count up to date.
     shard_ids: list[:class:`int`] | :data:`None`
         The shard ids the bot should spawn. If this is not set, the bot will use all shard ids possible with the :attr:`ShardManager.shard_count`. This requires :attr:`ShardManager.shard_count` to be set.
-    presence: :class:`UpdatePresence`
+    presence: `UpdatePresence <https://discord.dev/topics/gateway#update-presence>`__
         The initial presence the bot should connect with.
     active_shards: list[:class:`Shard`]
         A list of all shards that are currently connected.
@@ -114,7 +111,7 @@ class ShardManager:
         *,
         shard_count: int | None = None,
         shard_ids: list[int] | None = None,
-        presence: UpdatePresence | None = None,
+        presence: UpdatePresenceData | None = None,
     ) -> None:
         # User's params
         self.token: str = token
@@ -122,7 +119,7 @@ class ShardManager:
         self.http_client: HTTPClient = http_client  # TODO: Should this be privated?
         self.shard_count: Final[int | None] = shard_count
         self.shard_ids: Final[list[int] | None] = shard_ids
-        self.presence: UpdatePresence | None = presence
+        self.presence: UpdatePresenceData | None = presence
 
         # Publics
         self.active_shards: list[Shard] = []
@@ -191,10 +188,10 @@ class ShardManager:
         return shard
 
     # Handlers
-    async def _on_raw_shard_receive(self, opcode: int, data: ServerGatewayPayload) -> None:
+    async def _on_raw_shard_receive(self, opcode: int, data: GatewayEvent) -> None:
         logger.debug("Relaying raw event")
         await self.raw_dispatcher.dispatch(opcode, data)
 
-    async def _on_shard_dispatch(self, event_name: str, data: ServerGatewayDispatchPayload) -> None:
+    async def _on_shard_dispatch(self, event_name: str, data: DispatchEvent) -> None:
         logger.debug("Relaying event")
         await self.event_dispatcher.dispatch(event_name, data)

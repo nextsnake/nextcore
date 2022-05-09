@@ -49,8 +49,8 @@ if TYPE_CHECKING:
     from typing import Any, Literal
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
-
-    from ..typings.http import GetGatewayBot
+    
+    from discord_typings import GetGatewayBotData
 
 logger = getLogger(__name__)
 
@@ -388,7 +388,7 @@ class HTTPClient:
             await ratelimit_storage.store_bucket_by_discord_id(bucket_hash, bucket)
 
     # Wrapper functions for requests
-    async def get_gateway_bot(self, token: str, ratelimit_key: int) -> GetGatewayBot:
+    async def get_gateway_bot(self, token: str, ratelimit_key: int) -> GetGatewayBotData:
         """Gets gateway connection information.
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`_
 
@@ -410,12 +410,11 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`GetGatewayBot`
+        `GetGatewayBot <https://discord.dev/topics/gateway#get-gateway-bot>`__
             The response from the API.
         """
         route = Route("GET", "/gateway/bot")
         r = await self._request(route, ratelimit_key=ratelimit_key, headers={"Authorization": "Bot " + token})
 
-        # Type ignoring here as we trust the API
-        # TODO: Make this verify it
-        return await r.json()  # type: ignore
+        # TODO: Make this verify the payload from discord?
+        return await r.json()

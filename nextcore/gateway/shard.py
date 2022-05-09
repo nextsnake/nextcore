@@ -48,17 +48,19 @@ from .opcodes import GatewayOpcode
 from .times_per import TimesPer
 
 if TYPE_CHECKING:
-    from typing import Final, Literal, cast
+    from typing import Any, Final, Literal
 
-    from nextcore.typings import (
-        ClientGatewayPayload,
-        HelloData,
-        ReadyData,
-        ResumedData,
-        ServerGatewayDispatchPayload,
-        ServerGatewayPayload,
-        UpdatePresence,
+    from discord_typings import (
+        DispatchEvent,
+        GatewayEvent,
+        HeartbeatCommand,
+        HelloEvent,
+        IdentifyCommand,
+        InvalidSessionEvent,
+        ReconnectEvent,
+        ResumeCommand,
     )
+    from discord_typings.gateway import ReadyData, UpdatePresenceData
 
     from ..http import HTTPClient
 
@@ -82,7 +84,7 @@ class Shard:
         The ratelimiter for IDENTIFYing the bot.
     http_client: :class:`HTTPClient<nextcore.http.HTTPClient>`
         HTTP client used to connect to Discord's gateway.
-    presence: :class:`UpdatePresence`
+    presence: `UpdatePresence <https://discord.dev/topics/gateway#update-presence>`__
         The initial presence info to send when connecting.
     large_threshold: :class:`int`
         A value between 50 and 250 that determines how many members a guild needs for the gateway to stop sending offline members in the guild member list.
@@ -99,7 +101,7 @@ class Shard:
         The intents to connect with.
     token: :class:`str`
         The bot's token to connect with. If this is changed, the session will be invalidated.
-    presence: :class:`UpdatePresence`
+    presence: `UpdatePresence <https://discord.dev/topics/gateway#update-presence>`__
         The initial presence info to send when connecting.
     large_threshold: :class:`int`
         A value between 50 and 250 that determines how many members a guild needs for the gateway to stop sending offline members in the guild member list.
@@ -158,7 +160,7 @@ class Shard:
         identify_ratelimiter: TimesPer,
         http_client: HTTPClient,
         *,
-        presence: UpdatePresence | None = None,
+        presence: UpdatePresenceData | None = None,
         large_threshold: int | None = None,
         library_name: str = "nextcore",
     ) -> None:
@@ -168,7 +170,7 @@ class Shard:
         self.intents: int = intents
         self.token: str = token
         self.http_client: HTTPClient = http_client  # TODO: Should this be private?
-        self.presence: UpdatePresence | None = presence
+        self.presence: UpdatePresenceData | None = presence
         self.large_threshold: int | None = large_threshold
         self.library_name: str = library_name
 
@@ -270,12 +272,16 @@ class Shard:
             raise RuntimeError("Not heartbeated yet.")
         return self._latency
 
-    async def _send(self, data: ClientGatewayPayload, wait_until_ready: bool = True) -> None:
+    async def _send(
+        self, data: Any, wait_until_ready: bool = True
+    ) -> None:  # TODO: A command union is not implemented in discord_typings yet.
         if wait_until_ready:
             self._logger.debug("Waiting until ready")
             await self.ready.wait()
 
         # Take up a space in the ratelimit
+        # Yes there is a small chance that we would get disconnected here due to fluctuating latency,
+        # however this is basically unavoidable.
         await self._send_ratelimit.wait()
 
         assert self._ws is not None, "Websocket is not connected"
@@ -317,7 +323,7 @@ class Shard:
         ws = self._ws
 
         while not ws.closed:
-            payload: ClientGatewayPayload = {
+            payload: HeartbeatCommand = {
                 "op": GatewayOpcode.HEARTBEAT.value,
                 "d": self.session_sequence_number,
             }
@@ -362,17 +368,18 @@ class Shard:
 
         # We are going to trust discord to provide us with the correct data here.
         # If it doesn't we have bigger issues
-        frozen_data: ServerGatewayPayload = frozendict(data)  # type: ignore [assignment]
+        frozen_data: DispatchEvent = frozendict(data)  # type: ignore [assignment]
 
         # Processing of the payload
         opcode = frozen_data["op"]
 
         await self.raw_dispatcher.dispatch(opcode, frozen_data)
 
-        if opcode == GatewayOpcode.DISPATCH:
+        # NOTE: .value is not needed here, however pyright seems to complain if it's not here.
+        if opcode == GatewayOpcode.DISPATCH.value:
             # Received dispatch
             # We are just trusing discord to provide the correct data here.
-            dispatch_data: ServerGatewayDispatchPayload = frozen_data  # type: ignore [assignment]
+            dispatch_data: DispatchEvent = frozen_data  # type: ignore [assignment]
             await self.event_dispatcher.dispatch(dispatch_data["t"], dispatch_data["d"])
 
     async def _on_disconnect(self, ws: ClientWebSocketResponse) -> None:
@@ -389,15 +396,8 @@ class Shard:
 
     # Raw handlers
     # These should be prefixed by handle_ to avoid confusiuon with loop callbacks
-    async def _handle_hello(self, data: ServerGatewayPayload) -> None:
-        # ReadyData only exists while type checking hence the check here.
-        # Please note that you may get a warning that the else block is unreachable. This is a bug and you should report it to your linter.
-        if TYPE_CHECKING:
-            inner = cast(HelloData, data["d"])
-        else:
-            inner = data["d"]
-
-        heartbeat_interval = inner["heartbeat_interval"] / 1000  # Convert from ms to seconds
+    async def _handle_hello(self, data: HelloEvent) -> None:
+        heartbeat_interval = data["d"]["heartbeat_interval"] / 1000  # Convert from ms to seconds
 
         # Discord requires us to wait a random amount up to heartbeat_interval.
         jitter = random()
@@ -411,7 +411,7 @@ class Shard:
         loop = get_running_loop()
         loop.create_task(self._heartbeat_loop(heartbeat_interval))
 
-    async def _handle_heartbeat_ack(self, data: ServerGatewayPayload) -> None:
+    async def _handle_heartbeat_ack(self, data: GatewayEvent) -> None:
         del data  # Unused
         self._received_heartbeat_ack = True
 
@@ -419,12 +419,12 @@ class Shard:
         assert self._heartbeat_sent_at is not None, "Received heartbeat ack without having sent a heartbeat"
         self._latency = time() - self._heartbeat_sent_at
 
-    async def _handle_reconnect(self, data: ServerGatewayPayload) -> None:
+    async def _handle_reconnect(self, data: ReconnectEvent) -> None:
         del data  # Unused
         self._logger.debug("Reconnecting due to gateway going away")
         await self.connect()
 
-    async def _handle_invalid_session(self, data: ServerGatewayPayload) -> None:
+    async def _handle_invalid_session(self, data: InvalidSessionEvent) -> None:
         del data  # Unused
         self._logger.debug("Invalid session! Creating a new one")
 
@@ -444,8 +444,8 @@ class Shard:
 
             await self.identify()
 
-    async def _handle_dispatch(self, data: ServerGatewayDispatchPayload) -> None:
-        # Save sequence number for reconnection
+    async def _handle_dispatch(self, data: DispatchEvent) -> None:
+        # Save sequence number for resuming.
         self.session_sequence_number = data["s"]
 
     async def _handle_ready(self, data: ReadyData) -> None:
@@ -453,7 +453,7 @@ class Shard:
         self.session_id = data["session_id"]
         self.ready.set()
 
-    async def _handle_resumed(self, data: ResumedData) -> None:
+    async def _handle_resumed(self, data: dict[Any, Any]) -> None:  # TODO: This is not implemented in discord_typings.
         del data  # Unused
         self.ready.set()
 
@@ -541,7 +541,7 @@ class Shard:
         .. note::
             See the `documentation <https://discord.dev/topics/gateway#identify>`__
         """
-        payload: ClientGatewayPayload = {
+        payload: IdentifyCommand = {
             "op": GatewayOpcode.IDENTIFY.value,
             "d": {
                 "token": self.token,
@@ -557,7 +557,7 @@ class Shard:
         }
         # Not required parameters can't be set to anything for
         if self.large_threshold is not None:
-            payload["d"]["large_thereshold"] = self.large_threshold
+            payload["d"]["large_threshold"] = self.large_threshold
         if self.presence is not None:
             payload["d"]["presence"] = self.presence
 
@@ -577,7 +577,7 @@ class Shard:
         if self.session_id is None or self.session_sequence_number is None:
             raise RuntimeError("Session id or sequence number is not set")
 
-        payload: ClientGatewayPayload = {
+        payload: ResumeCommand = {
             "op": GatewayOpcode.RESUME.value,
             "d": {
                 "token": self.token,
