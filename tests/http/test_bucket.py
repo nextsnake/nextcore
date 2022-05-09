@@ -74,12 +74,14 @@ async def test_unlimited() -> None:
         async with bucket.acquire():
             ...
 
+
 # Dirty tests
 def test_clean_bucket_is_not_dirty() -> None:
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
 
     assert not bucket.dirty, "Bucket was dirty on a clean bucket."
+
 
 @mark.asyncio
 async def test_dirty_bucket_reserved() -> None:
@@ -88,7 +90,8 @@ async def test_dirty_bucket_reserved() -> None:
 
     async with bucket.acquire():
         assert bucket.dirty, "Bucket was not dirty on a bucket that was reserved"
-    
+
+
 @mark.asyncio
 async def test_dirty_remaining_used() -> None:
     metadata = BucketMetadata(limit=1)

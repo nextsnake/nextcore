@@ -1,7 +1,10 @@
 import gc
-from nextcore.http.ratelimit_storage import RatelimitStorage
-from nextcore.http import Bucket, BucketMetadata
+
 from pytest import mark
+
+from nextcore.http import Bucket, BucketMetadata
+from nextcore.http.ratelimit_storage import RatelimitStorage
+
 
 @mark.asyncio
 async def test_does_gc_collect_unused_buckets() -> None:
@@ -14,6 +17,7 @@ async def test_does_gc_collect_unused_buckets() -> None:
     gc.collect()
 
     assert await storage.get_bucket_by_nextcore_id(1) is None, "Bucket was not collected"
+
 
 @mark.asyncio
 async def test_does_not_collect_dirty_buckets() -> None:

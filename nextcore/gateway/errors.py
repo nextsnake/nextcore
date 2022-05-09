@@ -34,8 +34,6 @@ __all__ = (
 class ReconnectCheckFailedError(Exception):
     """Error for when auto reconnect is set to False and the shard needs to IDENTIFY"""
 
-    __slots__ = ()
-
     def __init__(self) -> None:
         super().__init__('Reconnect check failed. This shard should be considered "dead".')
 
