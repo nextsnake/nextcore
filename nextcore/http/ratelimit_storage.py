@@ -56,7 +56,7 @@ class RatelimitStorage:
 
     __slots__ = ("_nextcore_buckets", "_discord_buckets", "_bucket_metadata", "global_lock")
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._nextcore_buckets: dict[str | int, Bucket] = {}
         self._discord_buckets: WeakValueDictionary[str, Bucket] = WeakValueDictionary()
         self._bucket_metadata: dict[
@@ -155,7 +155,7 @@ class RatelimitStorage:
                 # Delete the main reference. Other references like RatelimitStorage._discord_buckets should get cleaned up automatically as it is a weakref.
                 del self._nextcore_buckets[bucket_id]
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Cleanup the object"""
         # Remove the garbage collection callback
         gc.callbacks.remove(self._cleanup_buckets)

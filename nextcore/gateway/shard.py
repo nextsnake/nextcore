@@ -230,7 +230,8 @@ class Shard:
             await self._ws.close(code=999)
 
         # Retry connection
-        async for _ in ExponentialBackoff(0.5, 2, 10):
+        # TODO: Weird mypy bug?
+        async for _ in ExponentialBackoff(0.5, 2, 10): # type: ignore [attr-defined]
             try:
                 self._ws = await self._http_client.ws_connect(Shard.GATEWAY_URL)
                 break
@@ -303,10 +304,11 @@ class Shard:
 
         async for message in ws:
             # Aiohttp is not typing this? This should probably be fixed in aiohttp?
-            message_type: WSMsgType = message.type  # type: ignore [reportUnknownMemberType]
+            # Or is this a pyright bug?
+            message_type: WSMsgType = message.type  # pyright: ignore [reportUnknownMemberType]
             if message_type is WSMsgType.BINARY:
                 # Same issue as above here.
-                message_data: bytes = message.data  # type: ignore [reportUnknownMemberType]
+                message_data: bytes = message.data  # pyright: ignore [reportUnknownMemberType]
                 await self._on_raw_receive(message_data)
 
         # Generally having the exit condition outside is more consistent that having it inside.
@@ -379,7 +381,7 @@ class Shard:
         if opcode == GatewayOpcode.DISPATCH.value:
             # Received dispatch
             # We are just trusing discord to provide the correct data here.
-            dispatch_data: DispatchEvent = frozen_data  # type: ignore [assignment]
+            dispatch_data: DispatchEvent = frozen_data
             await self.event_dispatcher.dispatch(dispatch_data["t"], dispatch_data["d"])
 
     async def _on_disconnect(self, ws: ClientWebSocketResponse) -> None:
@@ -434,7 +436,7 @@ class Shard:
         if self.should_reconnect:
             assert self._ws is not None, "_ws is not set?"
             if self._ws.closed:
-                self._ws = await self.http_client.ws_connect(Shard.GATEWAY_URL)
+                self._ws = await self._http_client.ws_connect(Shard.GATEWAY_URL)
 
             # Discord expects us to wait for up to 5s before resuming?
             jitter = random()

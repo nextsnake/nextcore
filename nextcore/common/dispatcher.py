@@ -47,7 +47,7 @@ if TYPE_CHECKING:
         Union,
     )
 
-    from typing_extensions import Unpack
+    from typing_extensions import Unpack, reveal_type
 
     T = TypeVar("T")
 
@@ -58,7 +58,8 @@ if TYPE_CHECKING:
 
     WaitForCheck = Callable[[Unpack[ManyT[Any]]], Union[Awaitable[bool], bool]]
     GlobalWaitForCheck = Callable[[EventNameT, Unpack[ManyT[Any]]], Union[Awaitable[bool], bool]]
-    WaitForReturn = Union[Tuple[EventNameT, Unpack[ManyT[Any]]], Tuple[Unpack[ManyT[Any]]]]
+    WaitForReturn = Tuple[Unpack[ManyT[Any]]]
+    GlobalWaitForReturn = Tuple[EventNameT, Unpack[ManyT[Any]]]
 
     ExceptionHandler = Callable[[Exception], Any]
     GlobalExceptionHandler = Callable[[EventNameT, Exception], Any]
@@ -96,7 +97,7 @@ class Dispatcher(Generic[EventNameT]):
         await dispatcher.dispatch("join", "John")
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._event_handlers: defaultdict[EventNameT, list[EventCallback]] = defaultdict(list)
         self._global_event_handlers: list[GlobalEventCallback[EventNameT]] = []
 
@@ -333,16 +334,16 @@ class Dispatcher(Generic[EventNameT]):
                 raise ValueError(f"Exception handler not registered for event {event_name}")
 
     @overload
-    def wait_for(self, check: WaitForCheck, event_name: EventNameT) -> WaitForReturn[EventNameT]:
+    async def wait_for(self, check: WaitForCheck, event_name: EventNameT) -> WaitForReturn:
         ...
 
     @overload
-    def wait_for(self, check: GlobalWaitForCheck[EventNameT], event_name: None = None) -> WaitForReturn[EventNameT]:
+    async def wait_for(self, check: GlobalWaitForCheck[EventNameT], event_name: None = None) -> GlobalWaitForReturn[EventNameT]:
         ...
 
     async def wait_for(
         self, check: WaitForCheck | GlobalWaitForCheck[EventNameT], event_name: EventNameT | None = None
-    ) -> WaitForReturn[EventNameT]:
+    ) -> WaitForReturn | GlobalWaitForReturn[EventNameT]:
         """Wait for an event to occur.
 
         Example usage:
@@ -402,7 +403,9 @@ class Dispatcher(Generic[EventNameT]):
                 self._wait_for_handlers[event_name].remove((check, future))
             # Properly cancel the task
             raise
-        return result
+        # See comment at the top of the function
+        # Kind of strange how pyright doesn't report a warning here...
+        return result # type: ignore [return-value]
 
     # Dispatching
     async def dispatch(self, event_name: EventNameT, *args: Any) -> None:
@@ -510,7 +513,8 @@ class Dispatcher(Generic[EventNameT]):
             return
         if not result:
             return
-
-        future.set_result((event_name, *args))
+        
+        # TODO: MyPy bug?
+        future.set_result((event_name, *args)) # mypy: ignore [arg-type]
 
         self._global_wait_for_handlers.remove((check, future))

@@ -267,7 +267,7 @@ class HTTPClient:
                     # Should be in 0-200 range
                     return response
         # This should always be set as it has to pass through the loop atleast once.
-        raise RateLimitingFailedError(self.max_retries, response)  # type: ignore [reportUnboundVariable]
+        raise RateLimitingFailedError(self.max_retries, response)  # pyright: ignore [reportUnboundVariable]
 
     async def ws_connect(self, url: str, **kwargs: Any) -> ClientWebSocketResponse:
         """Connects to a websocket.
@@ -413,4 +413,4 @@ class HTTPClient:
         r = await self._request(route, ratelimit_key=ratelimit_key, headers={"Authorization": "Bot " + token})
 
         # TODO: Make this verify the payload from discord?
-        return await r.json()
+        return await r.json() # type: ignore [no-any-return]
