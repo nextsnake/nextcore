@@ -88,7 +88,6 @@ class ShardManager:
     __slots__ = (
         "token",
         "intents",
-        "http_client",
         "shard_count",
         "shard_ids",
         "presence",
@@ -100,6 +99,7 @@ class ShardManager:
         "_active_shard_count",
         "_pending_shard_count",
         "_identify_ratelimits",
+        "_http_client",
     )
 
     # TODO: Fix typehints in the docstring for shard_ids
@@ -116,7 +116,6 @@ class ShardManager:
         # User's params
         self.token: str = token
         self.intents: int = intents
-        self.http_client: HTTPClient = http_client  # TODO: Should this be privated?
         self.shard_count: Final[int | None] = shard_count
         self.shard_ids: Final[list[int] | None] = shard_ids
         self.presence: UpdatePresenceData | None = presence
@@ -132,6 +131,7 @@ class ShardManager:
         self._active_shard_count: int | None = self.shard_count
         self._pending_shard_count: int | None = None
         self._identify_ratelimits: defaultdict[int, TimesPer] = defaultdict(lambda: TimesPer(1, 5))
+        self._http_client: HTTPClient = http_client  # TODO: Should this be privated?
 
         # Checks
         if shard_count is None and shard_ids is not None:
@@ -150,7 +150,7 @@ class ShardManager:
         """
         if self.active_shards:
             raise RuntimeError("Already connected!")
-        connection_info = await self.http_client.get_gateway_bot(self.token, hash(self.token))
+        connection_info = await self._http_client.get_gateway_bot(self.token, hash(self.token))
         session_start_limits = connection_info["session_start_limit"]
         self.max_concurrency = session_start_limits["max_concurrency"]
 
@@ -178,7 +178,7 @@ class ShardManager:
         ratelimiter = self._identify_ratelimits[shard_id % self.max_concurrency]
 
         shard = Shard(
-            shard_id, shard_count, self.intents, self.token, ratelimiter, self.http_client, presence=self.presence
+            shard_id, shard_count, self.intents, self.token, ratelimiter, self._http_client, presence=self.presence
         )
 
         # Here we lazy connect the shard. This gives us a bit more speed when connecting large sets of shards.
