@@ -29,11 +29,11 @@ if TYPE_CHECKING:
 try:
     import orjson
 
-    _has_orjson = True
+    _has_orjson: bool = True
 except ImportError:
     import json
 
-    _has_orjson = False
+    _has_orjson: bool = False
 
 
 __all__ = ("json_loads", "json_dumps")
