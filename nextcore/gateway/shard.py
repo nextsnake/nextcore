@@ -128,7 +128,6 @@ class Shard:
         "shard_count",
         "intents",
         "token",
-        "http_client",
         "presence",
         "large_threshold",
         "library_name",
@@ -145,6 +144,7 @@ class Shard:
         "_decompressor",
         "_logger",
         "_received_heartbeat_ack",
+        "_http_client",
         "_heartbeat_sent_at",
         "_latency",
     )
@@ -169,7 +169,6 @@ class Shard:
         self.shard_count: Final[int] = shard_count
         self.intents: int = intents
         self.token: str = token
-        self.http_client: HTTPClient = http_client  # TODO: Should this be private?
         self.presence: UpdatePresenceData | None = presence
         self.large_threshold: int | None = large_threshold
         self.library_name: str = library_name
@@ -195,6 +194,7 @@ class Shard:
         self._decompressor: Decompressor = Decompressor()
         self._logger: Logger = getLogger(f"{__name__}.{self.shard_id}")
         self._received_heartbeat_ack: bool = True
+        self._http_client: HTTPClient = http_client  # TODO: Should this be private?
 
         # Latency
         self._heartbeat_sent_at: float | None = None
@@ -232,7 +232,7 @@ class Shard:
         # Retry connection
         async for _ in ExponentialBackoff(0.5, 2, 10):
             try:
-                self._ws = await self.http_client.ws_connect(Shard.GATEWAY_URL)
+                self._ws = await self._http_client.ws_connect(Shard.GATEWAY_URL)
                 break
             except ClientConnectorError:
                 self._logger.error("Failed to connect to gateway? Check your internet connection.")
