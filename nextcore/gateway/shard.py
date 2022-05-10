@@ -148,7 +148,7 @@ class Shard:
         "_heartbeat_sent_at",
         "_latency",
     )
-    GATEWAY_URL: Final[str] = "wss://gateway.discord.gg?v=10&compress=zlib-stream"
+    GATEWAY_URL: Final[str] = "wss://gateway.discord.gg?v=9&compress=zlib-stream"
     """The gateway URL to connect to"""
 
     def __init__(
