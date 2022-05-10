@@ -25,7 +25,6 @@ from .bucket_metadata import BucketMetadata
 from .client import HTTPClient
 from .errors import *
 from .global_lock import GlobalLock
-from .pop_event import PopEvent
 from .ratelimit_storage import RatelimitStorage
 from .request_session import RequestSession
 from .route import Route
