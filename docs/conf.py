@@ -34,7 +34,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.autosectionlabel",
     "sphinxext.opengraph",
-    "sphinx_inline_tabs"
+    "sphinx_inline_tabs",
 ]
 autodoc_typehints = "description"
 
