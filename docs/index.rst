@@ -14,7 +14,22 @@ Welcome to Nextcore's documentation!
 
 Quickstart
 ==========
-Basic "ping pong" example:
+First, you need to install the library.
+
+.. tab:: Pip
+
+   .. code-block:: shell 
+
+      pip install nextcore
+
+.. tab:: Poetry
+
+   .. code-block:: shell
+
+      poetry add nextcore
+
+Basic ping-pong example
+------------------------
 
 .. literalinclude:: ../examples/ping_pong.py
    :language: python
