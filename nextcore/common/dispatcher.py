@@ -47,7 +47,7 @@ if TYPE_CHECKING:
         Union,
     )
 
-    from typing_extensions import Unpack, reveal_type
+    from typing_extensions import Unpack
 
     T = TypeVar("T")
 
