@@ -67,7 +67,8 @@ class ExponentialBackoff:
         """What the next value of the backoff should be"""
         return self._current_time * self.base
 
-    def __aiter__(self) -> Self:
+    # TODO: MyPy does not support typing_extensions.Self yet?
+    def __aiter__(self) -> Self:  # type: ignore [valid-type]
         return self
 
     async def __anext__(self) -> None:

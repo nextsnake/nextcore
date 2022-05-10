@@ -338,7 +338,9 @@ class Dispatcher(Generic[EventNameT]):
         ...
 
     @overload
-    async def wait_for(self, check: GlobalWaitForCheck[EventNameT], event_name: None = None) -> GlobalWaitForReturn[EventNameT]:
+    async def wait_for(
+        self, check: GlobalWaitForCheck[EventNameT], event_name: None = None
+    ) -> GlobalWaitForReturn[EventNameT]:
         ...
 
     async def wait_for(
@@ -405,7 +407,7 @@ class Dispatcher(Generic[EventNameT]):
             raise
         # See comment at the top of the function
         # Kind of strange how pyright doesn't report a warning here...
-        return result # type: ignore [return-value]
+        return result  # type: ignore [return-value]
 
     # Dispatching
     async def dispatch(self, event_name: EventNameT, *args: Any) -> None:
@@ -513,8 +515,8 @@ class Dispatcher(Generic[EventNameT]):
             return
         if not result:
             return
-        
+
         # TODO: MyPy bug?
-        future.set_result((event_name, *args)) # mypy: ignore [arg-type]
+        future.set_result((event_name, *args))  # mypy: ignore [arg-type]
 
         self._global_wait_for_handlers.remove((check, future))

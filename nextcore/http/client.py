@@ -413,4 +413,4 @@ class HTTPClient:
         r = await self._request(route, ratelimit_key=ratelimit_key, headers={"Authorization": "Bot " + token})
 
         # TODO: Make this verify the payload from discord?
-        return await r.json() # type: ignore [no-any-return]
+        return await r.json()  # type: ignore [no-any-return]

@@ -231,7 +231,7 @@ class Shard:
 
         # Retry connection
         # TODO: Weird mypy bug?
-        async for _ in ExponentialBackoff(0.5, 2, 10): # type: ignore [attr-defined]
+        async for _ in ExponentialBackoff(0.5, 2, 10):  # type: ignore [attr-defined]
             try:
                 self._ws = await self._http_client.ws_connect(Shard.GATEWAY_URL)
                 break
