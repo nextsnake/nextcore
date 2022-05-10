@@ -30,7 +30,9 @@ First, you need to install the library.
 
 Basic ping-pong example
 ------------------------
+This will respond with ``pong`` every time someone sends ``ping`` in chat.
 
 .. literalinclude:: ../examples/ping_pong.py
+   :lines: 28-
    :language: python
 
