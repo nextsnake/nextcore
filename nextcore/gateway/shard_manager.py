@@ -150,7 +150,7 @@ class ShardManager:
         """
         if self.active_shards:
             raise RuntimeError("Already connected!")
-        connection_info = await self._http_client.get_gateway_bot(self.token, hash(self.token))
+        connection_info = await self._http_client.get_gateway_bot(self.token)
         session_start_limits = connection_info["session_start_limit"]
         self.max_concurrency = session_start_limits["max_concurrency"]
 

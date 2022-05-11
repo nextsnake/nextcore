@@ -116,14 +116,14 @@ class HTTPClient:
             "User-Agent": f"DiscordBot (https://github.com/nextsnake/nextcore, {nextcore_version})"
         }
         self.max_retries: int = max_ratelimit_retries
-        self.ratelimit_storages: dict[int, RatelimitStorage] = {}  # User ID -> RatelimitStorage
+        self.ratelimit_storages: dict[str | None, RatelimitStorage] = {}  # User ID -> RatelimitStorage
         self.dispatcher: Dispatcher[Literal["request_response"]] = Dispatcher()
 
         # Internals
         self._session: ClientSession | None = None
 
     async def _request(
-        self, route: Route, ratelimit_key: int, *, headers: dict[str, str] | None = None, **kwargs: Any
+        self, route: Route, ratelimit_key: str | None, *, headers: dict[str, str] | None = None, **kwargs: Any
     ) -> ClientResponse:
         """Requests a route from the Discord API
 
@@ -131,9 +131,12 @@ class HTTPClient:
         ----------
         route: :class:`Route`
             The route to request
-        ratelimit_key: :class:`int`
-            A ID used for differentiating ratelimits. This should be used when
-            A user/bot ID to use for ratelimiting.
+        ratelimit_key: :class:`str` | :data:`None`
+            A ID used for differentiating ratelimits.
+            This should be a bot or oauth2 token.
+
+            .. note::
+                This should be :data:`None` for unauthenticated routes or webhooks (does not include modifying the webhook via a bot).
         headers: :class:`dict[str, str]`
             Headers to mix with :attr:`HTTPClient.default_headers` to pass to :meth:`aiohttp.ClientSession.request`
         kwargs: :data:`typing.Any`
@@ -384,7 +387,7 @@ class HTTPClient:
             await ratelimit_storage.store_bucket_by_discord_id(bucket_hash, bucket)
 
     # Wrapper functions for requests
-    async def get_gateway_bot(self, token: str, ratelimit_key: int) -> GetGatewayBotData:
+    async def get_gateway_bot(self, token: str) -> GetGatewayBotData:
         """Gets gateway connection information.
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`_
 
@@ -401,8 +404,6 @@ class HTTPClient:
         ----------
         token: :class:`str`
             The bot token.
-        ratelimit_key: :class:`int`
-            The hash of the bot's token or the user's refresh token. This is used for ratelimiting.
 
         Returns
         -------
@@ -410,7 +411,7 @@ class HTTPClient:
             The response from the API.
         """
         route = Route("GET", "/gateway/bot")
-        r = await self._request(route, ratelimit_key=ratelimit_key, headers={"Authorization": "Bot " + token})
+        r = await self._request(route, ratelimit_key=token, headers={"Authorization": "Bot " + token})
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
