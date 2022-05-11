@@ -19,9 +19,6 @@ HTTP
 .. autoclass:: nextcore.http.GlobalLock
     :members:
 
-.. autoclass:: nextcore.http.PopEvent
-    :members:
-
 .. autoclass:: nextcore.http.RequestSession
     :members:
 
