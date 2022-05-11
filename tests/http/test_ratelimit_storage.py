@@ -4,6 +4,7 @@ from pytest import mark
 
 from nextcore.http import Bucket, BucketMetadata
 from nextcore.http.ratelimit_storage import RatelimitStorage
+import sys
 
 
 # Garbage collection
@@ -33,6 +34,19 @@ async def test_does_not_collect_dirty_buckets() -> None:
     gc.collect()
 
     assert await storage.get_bucket_by_nextcore_id(1) is not None, "Bucket should not be collected"
+
+@mark.asyncio
+async def test_cleans_up_gc_hook() -> None:
+    storage = RatelimitStorage()
+    
+    before_callbacks_length = len(gc.callbacks)
+
+    # Run the garbage collector
+    await storage.close()
+    
+    # Check that the hook was removed
+    print(gc.callbacks)
+    assert len(gc.callbacks) == before_callbacks_length - 1, "Hook was not removed"
 
 
 # Getting and storing buckets
