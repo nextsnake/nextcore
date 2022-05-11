@@ -21,7 +21,7 @@
 
 from asyncio.futures import Future
 
-__slots__ = ("RequestSession",)
+__all__ = ("RequestSession",)
 
 
 class RequestSession:
