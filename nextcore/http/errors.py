@@ -43,13 +43,34 @@ class RateLimitingFailedError(Exception):
 
 # Expected errors
 class HTTPRequestStatusError(Exception):
-    """A base error for receiving a status code the library doesn't expect."""
+    """A base error for receiving a status code the library doesn't expect.
+    
+    Parameters
+    ----------
+    error: :class:`HTTPErrorTyping`
+        The error json from the body.
+    response: :class:`ClientResponse`
+        The response to the request.
+
+    Attributes
+    ----------
+    response: :class:`ClientResponse`
+        The response to the request.
+    error_code: :class:`int`
+        The error code.
+    message: :class:`str`
+        The error message.
+    error: :class:`HTTPErrorTyping`
+        The error json from the body.
+    """
 
     def __init__(self, error: HTTPErrorTyping, response: ClientResponse) -> None:
         self.response: ClientResponse = response
 
         self.error_code: int = error["code"]
         self.message: str = error["message"]
+
+        self.error: HTTPErrorTyping = error
 
         super().__init__(f"({self.error_code}) {self.message}")
 
