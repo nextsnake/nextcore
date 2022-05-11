@@ -25,7 +25,17 @@ __slots__ = ("RequestSession",)
 
 
 class RequestSession:
-    """A metadata class about a pending request. This is used by :class:`Bucket`"""
+    """A metadata class about a pending request. This is used by :class:`Bucket`
+    
+    Attributes
+    ----------
+    unlimited: :class:`bool`
+        If this request was made when the bucket was unlimited.
+
+        This exists to make sure that there is no bad state when switching between unlimited and limited.
+    pending_future: :class:`asyncio.Future`
+        The future that when set will execute the request.
+    """
 
     __slots__ = ("pending_future", "unlimited")
 
