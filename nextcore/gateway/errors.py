@@ -82,7 +82,18 @@ class InvalidShardCountError(DisconnectError):
 
 
 class UnhandledCloseCodeError(DisconnectError):
-    """The close code provided is unknown to the library and as such it cannot be handled properly."""
+    """The close code provided is unknown to the library and as such it cannot be handled properly.
+    
+    Parameters
+    ----------
+    code: :class:`int`
+        The close code.
+
+    Attributes
+    ----------
+    code: :class:`int`
+        The close code.
+    """
 
     def __init__(self, code: int) -> None:
         self.code: int = code
