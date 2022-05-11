@@ -38,9 +38,9 @@ class Route:
         The HTTP method of the route
     path: :class:`str`
         The path of the route. This can include python formatting strings ({var_here}) from kwargs
-    use_webhook_global: :class:`bool`
-        Whether or not the route uses the webhook global
-    **parameters: :class:`str` | :class:`int`
+    ignore_global: :class:`bool`
+        If this route bypasses the global ratelimit.
+    parameters: :class:`str` | :class:`int`
         The parameters of the route. These will be used to format the path.
         If `guild_id` `channel_id` or `webhook_id` is in the parameters,
         they will be used to change the major parameters of the route.
