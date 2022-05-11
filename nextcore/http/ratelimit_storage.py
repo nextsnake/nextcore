@@ -154,8 +154,19 @@ class RatelimitStorage:
                 logger.debug("Cleaning up bucket %s", bucket_id)
                 # Delete the main reference. Other references like RatelimitStorage._discord_buckets should get cleaned up automatically as it is a weakref.
                 del self._nextcore_buckets[bucket_id]
-
-    def __del__(self) -> None:
-        """Cleanup the object"""
+    async def close(self) -> None:
+        """Clean up before deletion.
+        
+        .. warning::
+            If this is not called before you delete this or it goes out of scope, you will get a memory leak.
+        """
         # Remove the garbage collection callback
         gc.callbacks.remove(self._cleanup_buckets)
+
+        # Clear up the buckets
+        self._nextcore_buckets.clear()
+        self._discord_buckets.clear()
+
+        # Clear up the metadata
+        self._bucket_metadata.clear()
+
