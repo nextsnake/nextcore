@@ -49,7 +49,8 @@ if TYPE_CHECKING:
     from typing import Any, Literal
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
-    from discord_typings import GetGatewayBotData, GetGatewayData
+    from discord_typings import GetGatewayBotData, GetGatewayData, AuditLogData
+    from discord_typings.resources.audit_log import AuditLogEvents
 
 logger = getLogger(__name__)
 
@@ -437,7 +438,66 @@ class HTTPClient:
                 A list of fields are available in the documentation.
         """
         route = Route("GET", "/gateway/bot")
-        r = await self._request(route, ratelimit_key=token, headers={"Authorization": "Bot " + token})
+        r = await self._request(route, ratelimit_key=token, headers={"Authorization": f"Bot {token}"})
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+    
+    # Audit log
+    async def get_guild_audit_log(self, token: str, guild_id: int, *, user_id: int | None = None, action_type: AuditLogEvents | None = None, before: int | None = None, limit: int = 50) -> AuditLogData:
+        """Gets the guild audit log.
+        See the `documentation <https://discord.dev/resources/audit-log#get-guild-audit-log>`__
+
+        .. note::
+            This requires the ``VIEW_AUDIT_LOG`` permission.
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The guild to query the audit log for.
+        user_id: :class:`int` | :data:`None`
+            The user to filter the audit log by.
+
+            This will be the user that did the action if present, if not it will be the user that got actioned.
+
+            If this is :data:`None` this will not filter.
+        action_type: :class:`AuditLogEvents` | :data:`None`
+            The action type to filter the audit log by.
+            
+            If this is :data:`None` this will not filter.
+        before: :class:`int` | :data:`None`
+            Get entries before this entry.
+
+            .. note::
+                This does not have to be a valid entry id. 
+        limit: :class:`int`
+            The amount of entries to get.
+
+            This has a minimum of 1 and a maximum of 100.
+
+        Returns
+        -------
+        :class:`AuditLogData`
+            The guild audit log.
+
+            .. hint::
+                A list of fields are available in the documentation.
+        """
+        route = Route("GET", f"/guilds/{guild_id}/audit-logs", guild_id=guild_id)
+        params = {
+            "limit": limit,
+        }
+
+        # They are NotRequired but can't be None.
+        # This converts None to NotRequired
+        if user_id is not None:
+            params["user_id"] = user_id
+        if action_type is not None:
+            params["action_type"] = action_type
+        if before is not None:
+            params["before"] = before
+
+        r = await self._request(route, ratelimit_key=token, params=params, headers={"Authorization": f"Bot {token}"})
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
