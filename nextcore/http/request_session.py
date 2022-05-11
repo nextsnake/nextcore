@@ -31,6 +31,8 @@ class RequestSession:
     ----------
     unlimited: :class:`bool`
         If this request was made when the bucket was unlimited.
+
+        This exists to make sure that there is no bad state when switching between unlimited and limited.
     
     Attributes
     ----------
@@ -46,6 +48,4 @@ class RequestSession:
 
     def __init__(self, unlimited: bool):
         self.pending_future: Future[None] = Future()
-        """When waiting for ratelimits, this future will be waited for to be set. Set this to get the request to execute."""
         self.unlimited: bool = unlimited
-        """If this request was made when the request was unlimited."""
