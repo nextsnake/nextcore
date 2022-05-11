@@ -97,8 +97,10 @@ class TimesPer:
             There is no reset scheduled.
         """
         reset_at = self._reset_at
+
         if reset_at is None or reset_at <= time():
             return None
+
         return self._reset_at
 
     @property
@@ -113,8 +115,10 @@ class TimesPer:
             There is no reset scheduled.
         """
         reset_at = self.reset_at
+
         if reset_at is None:
             return None
+
         return time() - reset_at
 
     def __repr__(self) -> str:
