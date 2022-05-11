@@ -122,7 +122,7 @@ class RatelimitStorage:
 
         Parameters
         ----------
-        bucket_id: :class:`str`
+        bucket_route: :class:`str`
             The bucket route.
         """
         return self._bucket_metadata.get(bucket_route)
@@ -132,9 +132,9 @@ class RatelimitStorage:
 
         Parameters
         ----------
-        bucket_id: :class:`str`
+        bucket_route: :class:`str`
             The bucket route.
-        bucket_metadata: :class:`BucketMetadata`
+        metadata: :class:`BucketMetadata`
             The metadata to store.
         """
         self._bucket_metadata[bucket_route] = metadata
