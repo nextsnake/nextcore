@@ -26,6 +26,11 @@ __all__ = ("RequestSession",)
 
 class RequestSession:
     """A metadata class about a pending request. This is used by :class:`Bucket`
+
+    Parameters
+    ----------
+    unlimited: :class:`bool`
+        If this request was made when the bucket was unlimited.
     
     Attributes
     ----------
