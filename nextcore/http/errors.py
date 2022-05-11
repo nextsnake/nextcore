@@ -32,7 +32,75 @@ if TYPE_CHECKING:
 
 
 class RateLimitingFailedError(Exception):
-    """When ratelimiting has failed more than :attr:`HTTPClient.max_retries` times"""
+    """When ratelimiting has failed more than :attr:`HTTPClient.max_retries` times
+
+    .. hint::
+        This can be due to a un-syncronized clock.
+
+        You can change :attr:`HTTPClient.trust_local_time` to :data:`False` to disable using your local clock,
+        or you could sync your clock.
+
+        .. tab:: Ubuntu
+            
+            You can check if your clock is synchronized by running the following command:
+            
+            .. code-block:: bash
+
+                timedatectl
+
+            If it is synchronized, it will show "System clock synchronized: yes" and "NTP service: running"
+
+            If the system clock is not synchronized but the ntp service is running you will have to wait a few minutes for it to sync.
+
+            To enable the ntp service run the following command:
+
+            .. code-block:: bash
+
+                sudo timedatectl set-ntp on
+
+            This will automatically sync the system clock every once in a while.
+        
+        .. tab:: Arch
+
+            You can check if your clock is synchronized by running the following command:
+            
+            .. code-block:: bash
+
+                timedatectl
+
+            If it is synchronized, it will show "System clock synchronized: yes" and "NTP service: running"
+
+            If the system clock is not synchronized but the ntp service is running you will have to wait a few minutes for it to sync.
+
+            To enable the ntp service run the following command:
+
+            .. code-block:: bash
+
+                sudo timedatectl set-ntp on
+
+            This will automatically sync the system clock every once in a while.
+
+        .. tab:: Windows
+
+            This can be turned on by going to ``Settings -> Time & language -> Date & time`` and turning on ``Set time automatically``.
+            
+           
+
+    
+    Parameters
+    ----------
+    max_retries: :class:`int`
+        How many retries the request used that failed.
+    response: :class:`aiohttp.ClientResponse`
+        The response to the last request that failed.
+
+    Attributes
+    ----------
+    max_retries: :class:`int`
+        How many retries the request used that failed.
+    response: :class:`aiohttp.ClientResponse`
+        The response to the last request that failed.
+    """
 
     def __init__(self, max_retries: int, response: ClientResponse) -> None:
         self.max_retries: int = max_retries
