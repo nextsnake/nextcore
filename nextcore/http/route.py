@@ -103,5 +103,5 @@ class Route:
 
         self.bucket: str | int = f"{guild_id}{channel_id}{webhook_id}{path}"
 
-        if __debug__:
+        if not __debug__:
             self.bucket = hash(self.bucket)
