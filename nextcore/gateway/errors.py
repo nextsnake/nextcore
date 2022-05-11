@@ -77,7 +77,8 @@ class InvalidShardCountError(DisconnectError):
 
     def __init__(self) -> None:
         super().__init__(
-            "The shard count provided is invalid. This can be due to specifying a shard_id larger than shard_count or that the bot needs more shards to connect."
+            "The shard count provided is invalid."
+            "This can be due to specifying a shard_id larger than shard_count or that the bot needs more shards to connect."
         )
 
 
