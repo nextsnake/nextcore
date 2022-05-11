@@ -44,7 +44,7 @@ from .errors import (
     UnhandledCloseCodeError,
 )
 from .exponential_backoff import ExponentialBackoff
-from .opcodes import GatewayOpcode
+from .op_code import GatewayOpcode
 from .times_per import TimesPer
 
 if TYPE_CHECKING:

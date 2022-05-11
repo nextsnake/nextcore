@@ -21,7 +21,7 @@
 
 from .decompressor import Decompressor
 from .errors import *
-from .opcodes import GatewayOpcode
+from .op_code import GatewayOpcode
 from .shard import Shard
 from .shard_manager import ShardManager
 
