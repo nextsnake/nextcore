@@ -356,9 +356,10 @@ class Shard:
         try:
             raw_data = self._decompressor.decompress(compressed_data)
         except ValueError as e:
+            self._logger.error("Failed to decompress message", exc_info=e)
+
             # Data is corrupted. Zlib requires context which we now do not have, so no future messages would be understood.
             # The best bet we have is to reconnect.
-            self._logger.error("Failed to decompress message", exc_info=e)
             await self.connect()
             return
         if raw_data is None:
