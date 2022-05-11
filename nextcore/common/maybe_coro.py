@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from inspect import isawaitable
+from asyncio import iscoroutine
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -49,7 +49,7 @@ async def maybe_coro(coro: Callable[..., Any], *args: Any, **kwargs: Any) -> Any
     """
     result = coro(*args, **kwargs)
 
-    if isawaitable(result):
+    if iscoroutine(result):
         # coro was a async function
         return await result
 
