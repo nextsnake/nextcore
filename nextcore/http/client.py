@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     from typing import Any, Literal
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
-    from discord_typings import GetGatewayBotData, GetGatewayData, AuditLogData
+    from discord_typings import GetGatewayBotData, GetGatewayData, AuditLogData, ChannelData
     from discord_typings.resources.audit_log import AuditLogEvents
 
 logger = getLogger(__name__)
@@ -498,6 +498,30 @@ class HTTPClient:
             params["before"] = before
 
         r = await self._request(route, ratelimit_key=token, params=params, headers={"Authorization": f"Bot {token}"})
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # Channel
+    async def get_channel(self, token: str, channel_id: int) -> ChannelData:
+        """Gets a channel by ID.
+        See the `documentation <https://discord.dev/resources/channels#get-channel>`__
+
+        Parameters
+        ----------
+        channel_id: :class:`int`
+            The channel ID to get.
+
+        Returns
+        -------
+        :class:`ChannelData`
+            The channel.
+
+            .. hint::
+                A list of fields are available in the documentation.
+        """
+        route = Route("GET", f"/channels/{channel_id}", channel_id=channel_id)
+        r = await self._request(route, ratelimit_key=token, headers={"Authorization": f"Bot {token}"})
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
