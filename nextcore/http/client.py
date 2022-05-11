@@ -387,15 +387,38 @@ class HTTPClient:
             await ratelimit_storage.store_bucket_by_discord_id(bucket_hash, bucket)
 
     # Wrapper functions for requests
+    async def get_gateway(self) -> GetGateway:
+        """Gets gateway connection info.
+        See the `documentation <https://discord.dev/topics/gateway#get-gateway>`__ for more info.
+
+        Example usage:
+
+        .. code-block:: python
+            
+            gateway_info = await http_client.get_gateway()
+
+        Returns
+        -------
+        :class:`dict`
+            The gateway info.
+
+            .. hint::
+                A list of fields are available in the documentation.
+        """
+        route = Route("GET", "/gateway", ignore_global=True)
+        r = await self._request(route, ratelimit_key=None)
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
     async def get_gateway_bot(self, token: str) -> GetGatewayBotData:
         """Gets gateway connection information.
-        See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`_
+        See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`__
 
         Example usage:
 
         .. code-block:: python
 
-            bot_info = await http_client.get_gateway_bot(token, hash(token))
+            bot_info = await http_client.get_gateway_bot(token)
 
         .. note::
             This endpoint requires a bot token.
@@ -407,8 +430,11 @@ class HTTPClient:
 
         Returns
         -------
-        `GetGatewayBot <https://discord.dev/topics/gateway#get-gateway-bot>`__
-            The response from the API.
+        :class:`dict`
+            Gateway connection info.
+
+            .. hint::
+                A list of fields are available in the documentation.
         """
         route = Route("GET", "/gateway/bot")
         r = await self._request(route, ratelimit_key=token, headers={"Authorization": "Bot " + token})
