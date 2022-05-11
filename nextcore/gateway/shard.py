@@ -200,7 +200,10 @@ class Shard:
         self._heartbeat_sent_at: float | None = None
         self._latency: float | None = None  # Not public as we use a property that errors when not connected
 
-        # Register handlers
+        # Register the listeners
+        self._register_event_listeners()
+
+    def _register_event_listeners(self) -> None:
         # Raw
         self.raw_dispatcher.add_listener(self._handle_hello, GatewayOpcode.HELLO)
         self.raw_dispatcher.add_listener(self._handle_heartbeat_ack, GatewayOpcode.HEARTBEAT_ACK)
@@ -212,8 +215,9 @@ class Shard:
         self.event_dispatcher.add_listener(self._handle_ready, "READY")
         self.event_dispatcher.add_listener(self._handle_resumed, "RESUMED")
 
-        # Disconnects
+        # Custom
         self.dispatcher.add_listener(self._handle_disconnect, "disconnect")
+ 
 
     async def connect(self) -> None:
         """Connect to the gateway.
