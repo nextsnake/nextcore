@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     from typing import Any, Literal
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
-    from discord_typings import GetGatewayBotData
+    from discord_typings import GetGatewayBotData, GetGatewayData
 
 logger = getLogger(__name__)
 
@@ -387,7 +387,7 @@ class HTTPClient:
             await ratelimit_storage.store_bucket_by_discord_id(bucket_hash, bucket)
 
     # Wrapper functions for requests
-    async def get_gateway(self) -> GetGateway:
+    async def get_gateway(self) -> GetGatewayData:
         """Gets gateway connection info.
         See the `documentation <https://discord.dev/topics/gateway#get-gateway>`__ for more info.
 
