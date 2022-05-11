@@ -444,7 +444,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
     
     # Audit log
-    async def get_guild_audit_log(self, token: str, guild_id: int, *, user_id: int | None = None, action_type: AuditLogEvents | None = None, before: int | None = None, limit: int = 50) -> AuditLogData:
+    async def get_guild_audit_log(self, token: str, guild_id: str | int, *, user_id: int | None = None, action_type: AuditLogEvents | None = None, before: int | None = None, limit: int = 50) -> AuditLogData:
         """Gets the guild audit log.
         See the `documentation <https://discord.dev/resources/audit-log#get-guild-audit-log>`__
 
@@ -503,7 +503,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     # Channel
-    async def get_channel(self, token: str, channel_id: int) -> ChannelData:
+    async def get_channel(self, token: str, channel_id: str | int) -> ChannelData:
         """Gets a channel by ID.
         See the `documentation <https://discord.dev/resources/channels#get-channel>`__
 
