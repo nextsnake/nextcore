@@ -63,7 +63,7 @@ class Route:
     bucket: :class:`str` | :class:`int`
         The ratelimit bucket this fits in.
 
-        This is created from :attr:`Route.guild_id`, :attr:`Route.channel_id`, :attr:`Route.webhook_id` and :attr:`Route.path`
+        This is created from :attr:`Route.guild_id`, :attr:`Route.channel_id`, :attr:`Route.webhook_id`, :attr:`Bucket.method` and :attr:`Route.path`
 
         .. note::
             This will be :class:`int` if :data:`__debug__` is :data:`True`
@@ -101,7 +101,7 @@ class Route:
         channel_id: str | int | None = parameters.get("channel_id")
         webhook_id: str | int | None = parameters.get("webhook_id")
 
-        self.bucket: str | int = f"{guild_id}{channel_id}{webhook_id}{path}"
+        self.bucket: str | int = f"{guild_id}{channel_id}{webhook_id}{method}{path}"
 
         if not __debug__:
             self.bucket = hash(self.bucket)
