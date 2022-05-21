@@ -22,6 +22,9 @@ HTTP
 .. autoclass:: nextcore.http.RequestSession
     :members:
 
+.. autoclass:: nextcore.http.File
+    :members:
+
 
 HTTP Errors
 -----------

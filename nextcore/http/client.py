@@ -24,12 +24,12 @@ from __future__ import annotations
 from asyncio import get_running_loop
 from logging import getLogger
 from time import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
-from aiohttp import ClientSession
+from aiohttp import ClientSession, FormData
 
 from .. import __version__ as nextcore_version
-from ..common.dispatcher import Dispatcher
+from ..common import Dispatcher, Undefined, UndefinedType, json_dumps
 from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
 from .errors import (
@@ -46,11 +46,25 @@ from .ratelimit_storage import RatelimitStorage
 from .route import Route
 
 if TYPE_CHECKING:
-    from typing import Any, Literal
+    from typing import Any, Iterable, Literal
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
-    from discord_typings import GetGatewayBotData, GetGatewayData, AuditLogData, ChannelData
+    from discord_typings import (
+        AllowedMentionsData,
+        AttachmentData,
+        AuditLogData,
+        ChannelData,
+        EmbedData,
+        GetGatewayBotData,
+        GetGatewayData,
+        MessageData,
+        MessageReferenceData,
+        ThreadChannelData,
+        ActionRowData
+    )
     from discord_typings.resources.audit_log import AuditLogEvents
+
+    from .file import File
 
 logger = getLogger(__name__)
 
@@ -395,7 +409,7 @@ class HTTPClient:
         Example usage:
 
         .. code-block:: python
-            
+
             gateway_info = await http_client.get_gateway()
 
         Returns
@@ -411,6 +425,7 @@ class HTTPClient:
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
+
     async def get_gateway_bot(self, token: str) -> GetGatewayBotData:
         """Gets gateway connection information.
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`__
@@ -442,9 +457,18 @@ class HTTPClient:
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
-    
+
     # Audit log
-    async def get_guild_audit_log(self, token: str, guild_id: str | int, *, user_id: int | None = None, action_type: AuditLogEvents | None = None, before: int | None = None, limit: int = 50) -> AuditLogData:
+    async def get_guild_audit_log(
+        self,
+        token: str,
+        guild_id: str | int,
+        *,
+        user_id: int | None = None,
+        action_type: AuditLogEvents | None = None,
+        before: int | None = None,
+        limit: int = 50,
+    ) -> AuditLogData:
         """Gets the guild audit log.
         See the `documentation <https://discord.dev/resources/audit-log#get-guild-audit-log>`__
 
@@ -463,13 +487,13 @@ class HTTPClient:
             If this is :data:`None` this will not filter.
         action_type: :class:`AuditLogEvents` | :data:`None`
             The action type to filter the audit log by.
-            
+
             If this is :data:`None` this will not filter.
         before: :class:`int` | :data:`None`
             Get entries before this entry.
 
             .. note::
-                This does not have to be a valid entry id. 
+                This does not have to be a valid entry id.
         limit: :class:`int`
             The amount of entries to get.
 
@@ -484,7 +508,7 @@ class HTTPClient:
                 A list of fields are available in the documentation.
         """
         route = Route("GET", f"/guilds/{guild_id}/audit-logs", guild_id=guild_id)
-        params = {
+        params = {  # TODO: Use a typehint
             "limit": limit,
         }
 
@@ -520,8 +544,549 @@ class HTTPClient:
             .. hint::
                 A list of fields are available in the documentation.
         """
-        route = Route("GET", f"/channels/{channel_id}", channel_id=channel_id)
+        route = Route("GET", "/channels/{channel_id}", channel_id=channel_id)
         r = await self._request(route, ratelimit_key=token, headers={"Authorization": f"Bot {token}"})
 
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # These 3 requests are 1 route but are split up for convinience
+    async def modify_group_dm(
+        self,
+        bearer: str,
+        channel_id: str | int,
+        *,
+        name: str | UndefinedType = Undefined,
+        icon: str | None | UndefinedType = Undefined,
+        reason: str | UndefinedType = Undefined,
+    ) -> ChannelData:
+        """Modifies the group dm.
+
+        See the `docoumentation <https://discord.dev/resources/channel#modify-channel>`__
+
+        .. warning::
+            This shares ratelimits with :attr:`HTTPClient.modify_guild_channel` and :attr:`HTTPClient.modify_thread`.
+
+        Parameters
+        ----------
+        bearer: :class:`str`
+            A OAuth2 bearer token
+        channel_id: :class:`str` | :class:`int`
+            The id of the group dm channel to update
+        name: :class:`str` | :class:`UndefinedType`
+            The name of the group dm.
+
+            .. note::
+                This has to be between 1 to 100 characters long.
+        icon: :class:`str` | :class:`UndefinedType`
+            A base64 encoded image of what to change the group dm icon to.
+        reason: :class:`str` | :class:`UndefinedType`
+            A reason for the audit log.
+
+            .. note::
+                This has to be between 1 and 512 characters
+        """
+        route = Route("PATCH", "/channels/{channel_id}", channel_id=channel_id)
+        payload = {}  # TODO: Use a typehint for payload
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if not isinstance(name, UndefinedType):
+            payload["name"] = name
+
+        if not isinstance(icon, UndefinedType):
+            payload["icon"] = icon
+
+        headers = {"Authorization": f"Bearer {bearer}"}
+
+        if not isinstance(reason, UndefinedType):
+            headers["reason"] = reason
+
+        r = await self._request(route, ratelimit_key=bearer, headers=headers, json=payload)
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def modify_guild_channel(
+        self,
+        token: str,
+        channel_id: str | int,
+        *,
+        name: str | UndefinedType = Undefined,
+        channel_type: Literal[0, 5] | UndefinedType = Undefined,
+        position: int | None | UndefinedType = Undefined,
+        topic: str | None | UndefinedType = Undefined,
+        nsfw: bool | None | UndefinedType = Undefined,
+        rate_limit_per_user: int | None | UndefinedType = Undefined,
+        bitrate: int | None | UndefinedType = Undefined,
+        user_limit: int | None | UndefinedType = Undefined,
+        permission_overwrites: list[dict[Any, Any]] | None | UndefinedType = Undefined,  # TODO: implement a partial
+        parent_id: int | str | UndefinedType = Undefined,
+        rtc_region: str | None | UndefinedType = Undefined,
+        video_quality_mode: Literal[1, 2] | None | UndefinedType = Undefined,  # TODO: Implement VideoQualityMode
+        default_auto_archive_duration: Literal[60, 1440, 4320, 10080] | None | UndefinedType = Undefined,
+        reason: str | UndefinedType = Undefined,
+    ) -> ChannelData:
+        """Modifies a guild channel.
+
+        See the `docoumentation <https://discord.dev/resources/channel#modify-channel>`__
+
+
+        .. warning::
+            This shares ratelimits with :attr:`HTTPClient.modify_group_dm` and :attr:`HTTPClient.modify_thread`.
+
+        Parameters
+        ----------
+        token: :class:`str`
+            A bot token.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to update.
+        name: :class:`str` | :class:`UndefinedType`
+            The name of the channel.
+        channel_type: Literal[0, 5] | :class:`UndefinedType`
+            The type of the channel.
+
+            .. note::
+                This is named ``type`` in the API, however to not overwrite the type function in python this is changed here.
+        position: :class:`int` | :data:`None` | :class:`UndefinedType`
+            The position of the channel.
+
+            .. note::
+                If this is set to :data:`None` it will default to ``0``.
+        topic: :class:`str` | :data:`None` | :class:`UndefinedType`
+            The channel topic.
+        nsfw: :class:`bool` | :data:`None` | :class:`UndefinedType`
+            Whether the channel marked as age restricted.
+
+            .. note::
+                If this is set to :data:`None` it will default to :data:`False`.
+        rate_limit_per_user: :class:`int` | :data:`None` | :class:`UndefinedType`
+            How many seconds a user has to wait before sending another message or create a thread.
+
+            Bots, as well as users with the ``manage_messages`` or ``manage_channel`` are unaffected
+            A member can send one message and create one thread per period.
+
+            .. note::
+                This has to be between 0-21600 seconds.
+        bitrate: :class:`int` | :data:`None` | :class:`UndefinedType`
+            The bitrate of the channel in bits per second.
+
+            .. note::
+                This only works for stage / voice channels.
+            .. note::
+                This has to be between 8000-96000 for guilds without the ``VIP_REGIONS`` feature.
+
+                For guilds with the ``VIP_REGIONS`` feature this has to be between 8000-128000.
+        user_limit: :class:`int` | :data:`None` | :class:`UndefinedType`
+            The maximum amount of users that can be in a voice channel at a time.
+        permission_overwrites: list[:class:`discord_typings.PartialPermissionOverwriteData`] | :data:`None` | :class:`UndefinedType`
+            The permission overwrites for the channel.
+
+            .. note::
+                If this is set to :data:`None` it will default to an empty list.
+        parent_id: :class:`int` | :class:`str` | :class:`UndefinedType`
+            The id of the parent channel.
+
+            This can be a text channel for threads or a category channel.
+        rtc_region: :class:`str` | :data:`None` | :class:`UndefinedType`
+            The voice region of the channel.
+
+            .. note::
+                If this is :data:`None` it is automatic. Every time someone joins a empty channel, the closest region will be used.
+        video_quality_mode: Literal[1, 2] | :data:`None` | :class:`UndefinedType`
+            The video quality mode of the channel.
+
+            .. note::
+                If this is :data:`None` it will not be present in the Guild payload.
+
+                This is rougly the same as setting it to ``1``.
+        default_auto_archive_duration: Literal[60, 1440, 4320, 10080] | :data:`None` | :class:`UndefinedType`
+            The default auto archive duration for threads created in this channel.
+
+            .. note::
+                If this is :data:`None` it will not be present in the Guild payload.
+
+                The client treats this as it being set to 24 hours however this may change without notice.
+        reason: :class:`str` | :class:`UndefinedType`
+            The reason to put in the audit log.
+        """
+
+        route = Route("PATCH", "/channels/{channel_id}", channel_id=channel_id)
+        payload = {}  # TODO: Use a typehint for payload
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if not isinstance(name, UndefinedType):
+            payload["name"] = name
+        if not isinstance(channel_type, UndefinedType):
+            payload["type"] = channel_type
+        if not isinstance(position, UndefinedType):
+            payload["position"] = position
+        if not isinstance(topic, UndefinedType):
+            payload["topic"] = topic
+        if not isinstance(nsfw, UndefinedType):
+            payload["nsfw"] = nsfw
+        if not isinstance(rate_limit_per_user, UndefinedType):
+            payload["rate_limit_per_user"] = rate_limit_per_user
+        if not isinstance(bitrate, UndefinedType):
+            payload["bitrate"] = bitrate
+        if not isinstance(user_limit, UndefinedType):
+            payload["user_limit"] = user_limit
+        if not isinstance(permission_overwrites, UndefinedType):
+            payload["permission_overwrites"] = permission_overwrites
+        if not isinstance(parent_id, UndefinedType):
+            payload["parent_id"] = parent_id
+        if not isinstance(rtc_region, UndefinedType):
+            payload["rtc_region"] = rtc_region
+        if not isinstance(video_quality_mode, UndefinedType):
+            payload["video_quality_mode"] = video_quality_mode
+        if not isinstance(default_auto_archive_duration, UndefinedType):
+            payload["default_auto_archive_duration"] = default_auto_archive_duration
+
+        headers = {"Authorization": f"Bot {token}"}
+
+        if not isinstance(reason, UndefinedType):
+            headers["reason"] = reason
+
+        r = await self._request(route, ratelimit_key=token, headers=headers, json=payload)
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def modify_thread(
+        self,
+        token: str,
+        thread_id: int | str,
+        *,
+        name: str | UndefinedType = Undefined,
+        archived: bool | UndefinedType = Undefined,
+        auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = Undefined,
+        locked: bool | UndefinedType = Undefined,
+        invitable: bool | UndefinedType = Undefined,
+        rate_limit_per_user: int | UndefinedType = Undefined,
+        reason: str | UndefinedType = Undefined,
+    ) -> ThreadChannelData:
+        """Modifies a thread.
+
+        See the `docoumentation <https://discord.dev/resources/channel#modify-channel>`__
+
+        .. warning::
+            This shares ratelimits with :attr:`HTTPClient.modify_group_dm` and :attr:`HTTPClient.modify_guild_channel`.
+
+        Parameters
+        ----------
+        token: :class:`str`
+            A bot token.
+        thread_id: :class:`str` | :class:`int`
+            The id of the thread to update.
+        name: :class:`str` | :class:`UndefinedType`
+            The name of the thread.
+        archived: :class:`bool` | :class:`UndefinedType`
+            Whether the thread is archived.
+        auto_archive_duration: Literal[60, 1440, 4320, 10080] | :class:`UndefinedType`
+            How long in minutes to automatically archive the thread after recent activity
+        locked: :class:`bool` | :class:`UndefinedType`
+            Whether the thread can only be un-archived by members with the ``manage_threads`` permission.
+        invitable: :class:`bool` | :class:`UndefinedType`
+            Whether members without the ``manage_threads`` permission can invite members without the ``manage_channels`` permission to the thread.
+        rate_limit_per_user: :class:`int` | :data:`None` | :class:`UndefinedType`
+            The duration in seconds that a user must wait before sending another message to the thread.
+
+            Bots, as well as users with the ``manage_messages`` or ``manage_channel`` are unaffected
+
+            .. note::
+                This has to be between 0-21600 seconds.
+        reason: :class:`str` | :class:`UndefinedType`
+            The reason to put in the audit log.
+        """
+
+        route = Route("PATCH", "/channels/{channel_id}", channel_id=thread_id)
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if not isinstance(name, UndefinedType):
+            payload["name"] = name
+        if not isinstance(archived, UndefinedType):
+            payload["archived"] = archived
+        if not isinstance(auto_archive_duration, UndefinedType):
+            payload["auto_archive_duration"] = auto_archive_duration
+        if not isinstance(locked, UndefinedType):
+            payload["locked"] = locked
+        if not isinstance(invitable, UndefinedType):
+            payload["invitable"] = invitable
+        if not isinstance(rate_limit_per_user, UndefinedType):
+            payload["rate_limit_per_user"] = rate_limit_per_user
+
+        headers = {"Authorization": f"Bot {token}"}
+
+        if not isinstance(reason, UndefinedType):
+            headers["reason"] = reason
+
+        r = await self._request(route, ratelimit_key=token, headers=headers, json=payload)
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def delete_channel(self, auth_prefix: Literal["Bot", "Bearer"], auth: str, channel_id: int | str) -> None:
+        """Deletes a channel.
+
+        Parameters
+        ----------
+        auth_prefix: Literal["Bot" | "Bearer"]
+            The authentication prefix.
+        auth: :class:`str`
+            The authentication token. This should not include the prefix.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to delete.
+        """
+
+        route = Route("DELETE", "/channels/{channel_id}", channel_id=channel_id)
+        headers = {f"Authorization": f"{auth_prefix} {auth}"}
+
+        await self._request(route, headers=headers, ratelimit_key=auth)
+
+    @overload
+    async def get_channel_messages(
+        self, token: str, channel_id: int | str, *, around: int, limit: int | UndefinedType
+    ) -> list[MessageData]:
+        ...
+
+    @overload
+    async def get_channel_messages(
+        self, token: str, channel_id: int | str, *, before: int, limit: int | UndefinedType
+    ) -> list[MessageData]:
+        ...
+
+    @overload
+    async def get_channel_messages(
+        self, token: str, channel_id: int | str, *, after: int, limit: int | UndefinedType
+    ) -> list[MessageData]:
+        ...
+
+    async def get_channel_messages(
+        self,
+        token: str,
+        channel_id: int | str,
+        *,
+        around: int | UndefinedType = Undefined,
+        before: int | UndefinedType = Undefined,
+        after: int | UndefinedType = Undefined,
+        limit: int | UndefinedType = Undefined,
+    ) -> list[MessageData]:
+        """Gets messages from a channel.
+
+        See the `documentation <https://discord.dev/resources/channel#get-channel-messages>`__
+
+        .. note::
+            This requires the ``view_channel`` permission..
+
+        .. note::
+            If the ``read_message_history`` permission is not given, this will return an empty list.
+
+        Parameters
+        ----------
+        token: :class:`str`
+            A bot token.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to get messages from.
+        around: :class:`int` | :class:`UndefinedType`
+            The id of the message to get messages around.
+
+            .. note::
+                This does not have to be a valid message id.
+        before: :class:`int` | :class:`UndefinedType`
+            The id of the message to get messages before.
+
+            .. note::
+                This does not have to be a valid message id.
+        after: :class:`int` | :class:`UndefinedType`
+            The id of the message to get messages after.
+
+            .. note::
+                This does not have to be a valid message id.
+        limit: :class:`int`
+            The number of messages to get.
+
+            .. note::
+                This has to be between 1-100.
+            .. note::
+                If this is not provided it will default to ``50``.
+        """
+
+        route = Route("GET", "/channels/{channel_id}/messages", channel_id=channel_id)
+        headers = {"Authorization": f"Bot {token}"}
+
+        params = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+
+        if not isinstance(around, UndefinedType):
+            params["around"] = around
+        if not isinstance(before, UndefinedType):
+            params["before"] = before
+        if not isinstance(after, UndefinedType):
+            params["after"] = after
+        if not isinstance(limit, UndefinedType):
+            params["limit"] = limit
+
+        r = await self._request(route, ratelimit_key=token, headers=headers, params=params)
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def create_message(
+        self,
+        token: str,
+        channel_id: int | str,
+        *,
+        content: str | UndefinedType = Undefined,
+        tts: bool | UndefinedType = Undefined,
+        embeds: list[EmbedData] | UndefinedType = Undefined,
+        allowed_mentions: AllowedMentionsData | UndefinedType = Undefined,
+        message_reference: MessageReferenceData | UndefinedType = Undefined,
+        componenets: list[ActionRowData] | UndefinedType = Undefined,
+        sticker_ids: list[int] | UndefinedType = Undefined,
+        files: Iterable[File] | UndefinedType = Undefined,
+        attachments: list[AttachmentData] | UndefinedType = Undefined,  # TODO: Partial
+        flags: int | UndefinedType = Undefined,
+    ) -> MessageData:
+        """Creates a message in a channel.
+
+        See the `documentation <https://discord.dev/resources/channel#create-message>`__
+
+        .. note::
+            This requires the ``view_channel`` and ``send_messages`` permission.
+
+        Parameters
+        ----------
+        token: :class:`str`
+            A bot token.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to create a message in.
+        content: :class:`str` | :class:`UndefinedType`
+            The content of the message.
+        tts: :class:`bool`
+            Whether the ``content`` should be spoken out by the Discord client upon send.
+
+            .. note::
+                This will still set ``Message.tts`` to :data:`True` even if ``content`` is not provided.
+        embeds: list[:class:`discord_typings.EmbedData`] | :class:`UndefinedType`
+            The embeds to send with the message.
+
+            .. hint::
+                The fields are in the `Embed <https://discord.dev/resources/channel#embed-object>`__ documentation.
+
+            .. note::
+                There is a maximum 6,000 character limit across all embeds.
+
+                See the `embed limits documentation <https://discord.dev/resources/channel#embed-object-embed-limits>`__ for more info.
+        allowed_mentions: :class:`discord_typings.AllowedMentionsData` | :class:`UndefinedType`
+            The allowed mentions for the message.
+        message_reference: :class:`discord_typings.MessageReferenceData` | :class:`UndefinedType`
+            The message to reply to.
+        componenets: list[:class:`discord_typings.ActionRowData`] | :class:`UndefinedType`
+            The components to send with the message.
+        sticker_ids: list[:class:`int`] | :class:`UndefinedType`
+            A list of sticker ids to attach to the message.
+
+            .. note::
+                This has a max of 3 stickers.
+        files: :class:`Iterable[:class:`discord_typings.File`]` | :class:`UndefinedType`
+            The files to send with the message.
+        attachments: list[:class:`discord_typings.CreateMessagePartialAttachmentData`] | :class:`UndefinedType`
+            Metadata about the ``files`` parameter.
+
+            .. note::
+                This only includes the ``filename`` and ``description`` fields.
+        flags: :class:`int` | :class:`UndefinedType`
+            Bitwise flags to send with the message.
+
+            .. note::
+                Only the ``SUPRESS_EMBEDS`` flag can be set.
+
+        Returns
+        -------
+        :class:`discord_typings.MessageData`
+            The message that was sent.
+        """
+        route = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
+        headers = {"Authorization": f"Bot {token}"}
+
+        # We use payload_json here as the format is more strictly defined than form data.
+        # This means we don't have to manually format the data.
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if not isinstance(content, UndefinedType):
+            payload["content"] = content
+        if not isinstance(tts, UndefinedType):
+            payload["tts"] = tts
+        if not isinstance(embeds, UndefinedType):
+            payload["embeds"] = embeds
+        if not isinstance(allowed_mentions, UndefinedType):
+            payload["allowed_mentions"] = allowed_mentions
+        if not isinstance(message_reference, UndefinedType):
+            payload["message_reference"] = message_reference
+        if not isinstance(componenets, UndefinedType):
+            payload["componenets"] = componenets
+        if not isinstance(sticker_ids, UndefinedType):
+            payload["sticker_ids"] = sticker_ids
+        if not isinstance(attachments, UndefinedType):
+            payload["attachments"] = attachments
+        if not isinstance(flags, UndefinedType):
+            payload["flags"] = flags
+
+        # Create a form data response as files cannot be uploaded via json.
+        form = FormData()
+        form.add_field("payload_json", json_dumps(payload))
+
+        # Add files
+        if not isinstance(files, UndefinedType):
+            for file_id, file in enumerate(files):
+                # Content type seems to have no effect here.
+                form.add_field(f"file[{file_id}]", file.contents, filename=file.name)
+
+        r = await self._request(
+            route,
+            ratelimit_key=token,
+            headers=headers,
+            data=form,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def crosspost_message(self, token: str, channel_id: int | str, message_id: int | str) -> MessageData:
+        """Crossposts a message from another channel.
+
+        See the `documentation <https://discord.dev/resources/channel#crosspost-message>`__
+
+        .. note::
+            This requires the ``send_messages`` permission when trying to crosspost a message sent by the current user.
+
+            If not this requires the ``manage_messages`` permission.
+
+        Parameters
+        ----------
+        token: :class:`str`
+            A bot token.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to crosspost the message to.
+        message_id: :class:`str` | :class:`int`
+            The id of the message to crosspost.
+
+        Returns
+        -------
+        :class:`discord_typings.MessageData`
+            The message that was crossposted.
+        """
+        route = Route("POST", "/channels/{channel_id}/messages/{message_id}/crosspost", channel_id=channel_id, message_id=message_id)
+        headers = {"Authorization": f"Bot {token}"}
+
+        r = await self._request(route, ratelimit_key=token, headers=headers)
+        
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]

@@ -19,31 +19,19 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .bucket import Bucket
-from .bucket_metadata import BucketMetadata
-from .client import HTTPClient
-from .errors import *
-from .file import File
-from .global_lock import GlobalLock
-from .ratelimit_storage import RatelimitStorage
-from .request_session import RequestSession
-from .route import Route
+from __future__ import annotations
 
-__all__ = (
-    "Bucket",
-    "BucketMetadata",
-    "HTTPClient",
-    "RateLimitingFailedError",
-    "HTTPRequestStatusError",
-    "BadRequestError",
-    "UnauthorizedError",
-    "ForbiddenError",
-    "NotFoundError",
-    "InternalServerError",
-    "CloudflareBanError",
-    "GlobalLock",
-    "RatelimitStorage",
-    "RequestSession",
-    "Route",
-    "File",
-)
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Final
+
+__all__ = ("Undefined", "UndefinedType")
+
+
+class UndefinedType:
+    def __repr__(self) -> str:
+        return "Undefined"
+
+
+Undefined: Final[UndefinedType] = UndefinedType()

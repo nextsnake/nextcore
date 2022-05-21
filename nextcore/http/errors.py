@@ -41,9 +41,9 @@ class RateLimitingFailedError(Exception):
         or you could sync your clock.
 
         .. tab:: Ubuntu
-            
+
             You can check if your clock is synchronized by running the following command:
-            
+
             .. code-block:: bash
 
                 timedatectl
@@ -59,11 +59,11 @@ class RateLimitingFailedError(Exception):
                 sudo timedatectl set-ntp on
 
             This will automatically sync the system clock every once in a while.
-        
+
         .. tab:: Arch
 
             You can check if your clock is synchronized by running the following command:
-            
+
             .. code-block:: bash
 
                 timedatectl
@@ -83,10 +83,10 @@ class RateLimitingFailedError(Exception):
         .. tab:: Windows
 
             This can be turned on by going to ``Settings -> Time & language -> Date & time`` and turning on ``Set time automatically``.
-            
-           
 
-    
+
+
+
     Parameters
     ----------
     max_retries: :class:`int`
@@ -112,7 +112,7 @@ class RateLimitingFailedError(Exception):
 # Expected errors
 class HTTPRequestStatusError(Exception):
     """A base error for receiving a status code the library doesn't expect.
-    
+
     Parameters
     ----------
     error: :class:`HTTPErrorTyping`

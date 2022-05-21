@@ -84,7 +84,7 @@ class InvalidShardCountError(DisconnectError):
 
 class UnhandledCloseCodeError(DisconnectError):
     """The close code provided is unknown to the library and as such it cannot be handled properly.
-    
+
     Parameters
     ----------
     code: :class:`int`

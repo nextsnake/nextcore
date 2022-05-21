@@ -33,7 +33,7 @@ class RequestSession:
         If this request was made when the bucket was unlimited.
 
         This exists to make sure that there is no bad state when switching between unlimited and limited.
-    
+
     Attributes
     ----------
     unlimited: :class:`bool`

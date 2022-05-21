@@ -217,7 +217,6 @@ class Shard:
 
         # Custom
         self.dispatcher.add_listener(self._handle_disconnect, "disconnect")
- 
 
     async def connect(self) -> None:
         """Connect to the gateway.
