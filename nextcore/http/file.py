@@ -55,6 +55,6 @@ class File:
 
     __slots__ = ("name", "contents")
 
-    def __init__(self, name: str, contents: str):
+    def __init__(self, name: str, contents: str | bytes | bytearray | BinaryIO | TextIO):
         self.name: Final[str] = name
         self.contents: Final[str | bytes | bytearray | BinaryIO | TextIO] = contents
