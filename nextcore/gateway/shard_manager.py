@@ -163,7 +163,7 @@ class ShardManager:
             shard_ids = self.shard_ids
 
         for shard_id in shard_ids:
-            shard = await self._spawn_shard(shard_id, self._active_shard_count)
+            shard = self._spawn_shard(shard_id, self._active_shard_count)
 
             # Register event listeners
             shard.raw_dispatcher.add_listener(self._on_raw_shard_receive)
@@ -173,7 +173,7 @@ class ShardManager:
 
             self.active_shards.append(shard)
 
-    async def _spawn_shard(self, shard_id: int, shard_count: int) -> Shard:
+    def _spawn_shard(self, shard_id: int, shard_count: int) -> Shard:
         assert self.max_concurrency is not None, "max_concurrency is not set. This is set in connect"
         ratelimiter = self._identify_ratelimits[shard_id % self.max_concurrency]
 
