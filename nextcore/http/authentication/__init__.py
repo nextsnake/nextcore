@@ -19,35 +19,8 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .authentication import *
-from .bucket import Bucket
-from .bucket_metadata import BucketMetadata
-from .client import HTTPClient
-from .errors import *
-from .file import File
-from .global_lock import GlobalLock
-from .ratelimit_storage import RatelimitStorage
-from .request_session import RequestSession
-from .route import Route
+from .base import BaseAuthentication
+from .bearer import BearerAuthentication
+from .bot import BotAuthentication
 
-__all__ = (
-    "Bucket",
-    "BucketMetadata",
-    "HTTPClient",
-    "RateLimitingFailedError",
-    "HTTPRequestStatusError",
-    "BadRequestError",
-    "UnauthorizedError",
-    "ForbiddenError",
-    "NotFoundError",
-    "InternalServerError",
-    "CloudflareBanError",
-    "GlobalLock",
-    "RatelimitStorage",
-    "RequestSession",
-    "Route",
-    "File",
-    "BaseAuthentication",
-    "BotAuthentication",
-    "BearerAuthentication",
-)
+__all__ = ("BaseAuthentication", "BotAuthentication", "BearerAuthentication")

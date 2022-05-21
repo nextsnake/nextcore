@@ -19,35 +19,37 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from .authentication import *
-from .bucket import Bucket
-from .bucket_metadata import BucketMetadata
-from .client import HTTPClient
-from .errors import *
-from .file import File
-from .global_lock import GlobalLock
-from .ratelimit_storage import RatelimitStorage
-from .request_session import RequestSession
-from .route import Route
+from __future__ import annotations
 
-__all__ = (
-    "Bucket",
-    "BucketMetadata",
-    "HTTPClient",
-    "RateLimitingFailedError",
-    "HTTPRequestStatusError",
-    "BadRequestError",
-    "UnauthorizedError",
-    "ForbiddenError",
-    "NotFoundError",
-    "InternalServerError",
-    "CloudflareBanError",
-    "GlobalLock",
-    "RatelimitStorage",
-    "RequestSession",
-    "Route",
-    "File",
-    "BaseAuthentication",
-    "BotAuthentication",
-    "BearerAuthentication",
-)
+from typing import TYPE_CHECKING
+
+from .base import BaseAuthentication
+
+if TYPE_CHECKING:
+    from typing import Literal
+
+__all__ = ("BotAuthentication",)
+
+
+class BotAuthentication(BaseAuthentication):
+    """A wrapper around bot token authentication.
+
+    Parameters
+    ----------
+    token: :class:`str`
+        The bot token.
+
+    Attributes
+    ----------
+    prefix: Literal["Bot"]
+        The prefix of the token.
+    token: :class:`str`
+        The bot token
+    """
+
+    __slots__: tuple[str, ...] = ()
+
+    def __init__(self, token: str):
+        self.prefix: Literal["Bot"] = "Bot"
+        self.token: str = token
+        self.rate_limit_key: str = f"{self.prefix} {self.token}"

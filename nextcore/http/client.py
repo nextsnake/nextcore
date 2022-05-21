@@ -50,6 +50,7 @@ if TYPE_CHECKING:
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
     from discord_typings import (
+        ActionRowData,
         AllowedMentionsData,
         AttachmentData,
         AuditLogData,
@@ -60,10 +61,10 @@ if TYPE_CHECKING:
         MessageData,
         MessageReferenceData,
         ThreadChannelData,
-        ActionRowData
     )
     from discord_typings.resources.audit_log import AuditLogEvents
 
+    from .authentication import BearerAuthentication, BotAuthentication
     from .file import File
 
 logger = getLogger(__name__)
@@ -426,7 +427,7 @@ class HTTPClient:
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-    async def get_gateway_bot(self, token: str) -> GetGatewayBotData:
+    async def get_gateway_bot(self, authentication: BotAuthentication) -> GetGatewayBotData:
         """Gets gateway connection information.
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`__
 
@@ -441,8 +442,8 @@ class HTTPClient:
 
         Parameters
         ----------
-        token: :class:`str`
-            The bot token.
+        authentication: :class:`BotAuthentication`
+            Authentication info.
 
         Returns
         -------
@@ -453,7 +454,9 @@ class HTTPClient:
                 A list of fields are available in the documentation.
         """
         route = Route("GET", "/gateway/bot")
-        r = await self._request(route, ratelimit_key=token, headers={"Authorization": f"Bot {token}"})
+        r = await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -461,7 +464,7 @@ class HTTPClient:
     # Audit log
     async def get_guild_audit_log(
         self,
-        token: str,
+        authentication: BotAuthentication,
         guild_id: str | int,
         *,
         user_id: int | None = None,
@@ -477,6 +480,8 @@ class HTTPClient:
 
         Parameters
         ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
         guild_id: :class:`int`
             The guild to query the audit log for.
         user_id: :class:`int` | :data:`None`
@@ -521,18 +526,25 @@ class HTTPClient:
         if before is not None:
             params["before"] = before
 
-        r = await self._request(route, ratelimit_key=token, params=params, headers={"Authorization": f"Bot {token}"})
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            params=params,
+            headers={"Authorization": str(authentication)},
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     # Channel
-    async def get_channel(self, token: str, channel_id: str | int) -> ChannelData:
+    async def get_channel(self, authentication: BotAuthentication, channel_id: str | int) -> ChannelData:
         """Gets a channel by ID.
         See the `documentation <https://discord.dev/resources/channels#get-channel>`__
 
         Parameters
         ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
         channel_id: :class:`int`
             The channel ID to get.
 
@@ -545,7 +557,9 @@ class HTTPClient:
                 A list of fields are available in the documentation.
         """
         route = Route("GET", "/channels/{channel_id}", channel_id=channel_id)
-        r = await self._request(route, ratelimit_key=token, headers={"Authorization": f"Bot {token}"})
+        r = await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -553,7 +567,7 @@ class HTTPClient:
     # These 3 requests are 1 route but are split up for convinience
     async def modify_group_dm(
         self,
-        bearer: str,
+        authentication: BearerAuthentication,
         channel_id: str | int,
         *,
         name: str | UndefinedType = Undefined,
@@ -569,8 +583,8 @@ class HTTPClient:
 
         Parameters
         ----------
-        bearer: :class:`str`
-            A OAuth2 bearer token
+        authentication: :class:`BearerAuthentication`
+            Authentication info.
         channel_id: :class:`str` | :class:`int`
             The id of the group dm channel to update
         name: :class:`str` | :class:`UndefinedType`
@@ -597,19 +611,19 @@ class HTTPClient:
         if not isinstance(icon, UndefinedType):
             payload["icon"] = icon
 
-        headers = {"Authorization": f"Bearer {bearer}"}
+        headers = {"Authorization": str(authentication)}
 
         if not isinstance(reason, UndefinedType):
             headers["reason"] = reason
 
-        r = await self._request(route, ratelimit_key=bearer, headers=headers, json=payload)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def modify_guild_channel(
         self,
-        token: str,
+        authentication: BearerAuthentication,
         channel_id: str | int,
         *,
         name: str | UndefinedType = Undefined,
@@ -637,8 +651,8 @@ class HTTPClient:
 
         Parameters
         ----------
-        token: :class:`str`
-            A bot token.
+        authentication: :class:`BotAuthentication`
+            Authentication info.
         channel_id: :class:`str` | :class:`int`
             The id of the channel to update.
         name: :class:`str` | :class:`UndefinedType`
@@ -743,19 +757,19 @@ class HTTPClient:
         if not isinstance(default_auto_archive_duration, UndefinedType):
             payload["default_auto_archive_duration"] = default_auto_archive_duration
 
-        headers = {"Authorization": f"Bot {token}"}
+        headers = {"Authorization": str(authentication)}
 
         if not isinstance(reason, UndefinedType):
             headers["reason"] = reason
 
-        r = await self._request(route, ratelimit_key=token, headers=headers, json=payload)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def modify_thread(
         self,
-        token: str,
+        authentication: BotAuthentication,
         thread_id: int | str,
         *,
         name: str | UndefinedType = Undefined,
@@ -775,8 +789,8 @@ class HTTPClient:
 
         Parameters
         ----------
-        token: :class:`str`
-            A bot token.
+        authentication: :class:`BotAuthentication`
+            Authentication info.
         thread_id: :class:`str` | :class:`int`
             The id of the thread to update.
         name: :class:`str` | :class:`UndefinedType`
@@ -818,55 +832,55 @@ class HTTPClient:
         if not isinstance(rate_limit_per_user, UndefinedType):
             payload["rate_limit_per_user"] = rate_limit_per_user
 
-        headers = {"Authorization": f"Bot {token}"}
+        headers = {"Authorization": str(authentication)}
 
         if not isinstance(reason, UndefinedType):
             headers["reason"] = reason
 
-        r = await self._request(route, ratelimit_key=token, headers=headers, json=payload)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-    async def delete_channel(self, auth_prefix: Literal["Bot", "Bearer"], auth: str, channel_id: int | str) -> None:
+    async def delete_channel(
+        self, authentication: BotAuthentication | BearerAuthentication, channel_id: int | str
+    ) -> None:
         """Deletes a channel.
 
         Parameters
         ----------
-        auth_prefix: Literal["Bot" | "Bearer"]
-            The authentication prefix.
-        auth: :class:`str`
-            The authentication token. This should not include the prefix.
+        authentication: :class:`BotAuthentication` | :class:`BearerAuthentication`
+            Authentication info.
         channel_id: :class:`str` | :class:`int`
             The id of the channel to delete.
         """
 
         route = Route("DELETE", "/channels/{channel_id}", channel_id=channel_id)
-        headers = {f"Authorization": f"{auth_prefix} {auth}"}
+        headers = {"Authorization": str(authentication)}
 
-        await self._request(route, headers=headers, ratelimit_key=auth)
+        await self._request(route, headers=headers, ratelimit_key=authentication.rate_limit_key)
 
     @overload
     async def get_channel_messages(
-        self, token: str, channel_id: int | str, *, around: int, limit: int | UndefinedType
+        self, authentication: BotAuthentication, channel_id: int | str, *, around: int, limit: int | UndefinedType
     ) -> list[MessageData]:
         ...
 
     @overload
     async def get_channel_messages(
-        self, token: str, channel_id: int | str, *, before: int, limit: int | UndefinedType
+        self, authentication: BotAuthentication, channel_id: int | str, *, before: int, limit: int | UndefinedType
     ) -> list[MessageData]:
         ...
 
     @overload
     async def get_channel_messages(
-        self, token: str, channel_id: int | str, *, after: int, limit: int | UndefinedType
+        self, authentication: BotAuthentication, channel_id: int | str, *, after: int, limit: int | UndefinedType
     ) -> list[MessageData]:
         ...
 
     async def get_channel_messages(
         self,
-        token: str,
+        authentication: BotAuthentication,
         channel_id: int | str,
         *,
         around: int | UndefinedType = Undefined,
@@ -886,8 +900,8 @@ class HTTPClient:
 
         Parameters
         ----------
-        token: :class:`str`
-            A bot token.
+        authentication: :class:`BotAuthentication`
+            Authentication info.
         channel_id: :class:`str` | :class:`int`
             The id of the channel to get messages from.
         around: :class:`int` | :class:`UndefinedType`
@@ -915,7 +929,7 @@ class HTTPClient:
         """
 
         route = Route("GET", "/channels/{channel_id}/messages", channel_id=channel_id)
-        headers = {"Authorization": f"Bot {token}"}
+        headers = {"Authorization": str(authentication)}
 
         params = {}
 
@@ -931,14 +945,14 @@ class HTTPClient:
         if not isinstance(limit, UndefinedType):
             params["limit"] = limit
 
-        r = await self._request(route, ratelimit_key=token, headers=headers, params=params)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, params=params)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def create_message(
         self,
-        token: str,
+        authentication: BotAuthentication,
         channel_id: int | str,
         *,
         content: str | UndefinedType = Undefined,
@@ -961,8 +975,8 @@ class HTTPClient:
 
         Parameters
         ----------
-        token: :class:`str`
-            A bot token.
+        authentication: :class:`BotAuthentication`
+            Authentication info.
         channel_id: :class:`str` | :class:`int`
             The id of the channel to create a message in.
         content: :class:`str` | :class:`UndefinedType`
@@ -1012,7 +1026,7 @@ class HTTPClient:
             The message that was sent.
         """
         route = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
-        headers = {"Authorization": f"Bot {token}"}
+        headers = {"Authorization": str(authentication)}
 
         # We use payload_json here as the format is more strictly defined than form data.
         # This means we don't have to manually format the data.
@@ -1051,7 +1065,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=token,
+            ratelimit_key=authentication.rate_limit_key,
             headers=headers,
             data=form,
         )
@@ -1059,7 +1073,9 @@ class HTTPClient:
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-    async def crosspost_message(self, token: str, channel_id: int | str, message_id: int | str) -> MessageData:
+    async def crosspost_message(
+        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str
+    ) -> MessageData:
         """Crossposts a message from another channel.
 
         See the `documentation <https://discord.dev/resources/channel#crosspost-message>`__
@@ -1071,8 +1087,8 @@ class HTTPClient:
 
         Parameters
         ----------
-        token: :class:`str`
-            A bot token.
+        authentication: :class:`BotAuthentication`
+            Authentication info.
         channel_id: :class:`str` | :class:`int`
             The id of the channel to crosspost the message to.
         message_id: :class:`str` | :class:`int`
@@ -1083,10 +1099,15 @@ class HTTPClient:
         :class:`discord_typings.MessageData`
             The message that was crossposted.
         """
-        route = Route("POST", "/channels/{channel_id}/messages/{message_id}/crosspost", channel_id=channel_id, message_id=message_id)
-        headers = {"Authorization": f"Bot {token}"}
+        route = Route(
+            "POST",
+            "/channels/{channel_id}/messages/{message_id}/crosspost",
+            channel_id=channel_id,
+            message_id=message_id,
+        )
+        headers = {"Authorization": str(authentication)}
 
-        r = await self._request(route, ratelimit_key=token, headers=headers)
-        
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]

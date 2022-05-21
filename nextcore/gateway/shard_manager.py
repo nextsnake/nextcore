@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from discord_typings import GatewayEvent
     from discord_typings.gateway import UpdatePresenceData
 
-    from ..http.client import HTTPClient
+    from ..http import BotAuthentication, HTTPClient
 
 __all__ = ("ShardManager",)
 
@@ -50,8 +50,8 @@ class ShardManager:
 
     Parameters
     ----------
-    token: :class:`str`
-        The bot's token
+    authentication: :class:`BotAuthentication`
+        Authentication info.
     intents: :class:`int`
         The intents the bot should connect with. See the `documentation <https://discord.dev/topics/gateway#gateway-intents>`__.
     http_client: :class:`HTTPClient<nextcore.http.HTTPClient>`
@@ -86,7 +86,7 @@ class ShardManager:
     """
 
     __slots__ = (
-        "token",
+        "authentication",
         "intents",
         "shard_count",
         "shard_ids",
@@ -105,7 +105,7 @@ class ShardManager:
     # TODO: Fix typehints in the docstring for shard_ids
     def __init__(
         self,
-        token: str,
+        authentication: BotAuthentication,
         intents: int,
         http_client: HTTPClient,
         *,
@@ -114,7 +114,7 @@ class ShardManager:
         presence: UpdatePresenceData | None = None,
     ) -> None:
         # User's params
-        self.token: str = token
+        self.authentication: BotAuthentication = authentication
         self.intents: int = intents
         self.shard_count: Final[int | None] = shard_count
         self.shard_ids: Final[list[int] | None] = shard_ids
@@ -131,7 +131,7 @@ class ShardManager:
         self._active_shard_count: int | None = self.shard_count
         self._pending_shard_count: int | None = None
         self._identify_ratelimits: defaultdict[int, TimesPer] = defaultdict(lambda: TimesPer(1, 5))
-        self._http_client: HTTPClient = http_client  # TODO: Should this be privated?
+        self._http_client: HTTPClient = http_client
 
         # Checks
         if shard_count is None and shard_ids is not None:
@@ -150,7 +150,7 @@ class ShardManager:
         """
         if self.active_shards:
             raise RuntimeError("Already connected!")
-        connection_info = await self._http_client.get_gateway_bot(self.token)
+        connection_info = await self._http_client.get_gateway_bot(self.authentication)
         session_start_limits = connection_info["session_start_limit"]
         self.max_concurrency = session_start_limits["max_concurrency"]
 
@@ -178,7 +178,13 @@ class ShardManager:
         ratelimiter = self._identify_ratelimits[shard_id % self.max_concurrency]
 
         shard = Shard(
-            shard_id, shard_count, self.intents, self.token, ratelimiter, self._http_client, presence=self.presence
+            shard_id,
+            shard_count,
+            self.intents,
+            self.authentication.token,
+            ratelimiter,
+            self._http_client,
+            presence=self.presence,
         )
 
         # Here we lazy connect the shard. This gives us a bit more speed when connecting large sets of shards.
