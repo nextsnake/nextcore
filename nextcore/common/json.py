@@ -49,8 +49,7 @@ def json_loads(data: str) -> Any:
     """
     if _has_orjson:
         return orjson.loads(data)
-    else:
-        return json.loads(data)
+    return json.loads(data)
 
 
 def json_dumps(to_dump: Any) -> str:
