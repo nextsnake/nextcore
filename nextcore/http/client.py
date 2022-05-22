@@ -25,6 +25,7 @@ from asyncio import get_running_loop
 from logging import getLogger
 from time import time
 from typing import TYPE_CHECKING, overload
+from urllib.parse import quote
 
 from aiohttp import ClientSession, FormData
 
@@ -61,6 +62,7 @@ if TYPE_CHECKING:
         MessageData,
         MessageReferenceData,
         ThreadChannelData,
+        UserData,
     )
     from discord_typings.resources.audit_log import AuditLogEvents
 
@@ -935,7 +937,6 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-
         if not isinstance(around, UndefinedType):
             params["around"] = around
         if not isinstance(before, UndefinedType):
@@ -1111,3 +1112,230 @@ class HTTPClient:
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
+
+    async def create_reaction(
+        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str
+    ) -> None:
+        """Creates a reaction to a message.
+
+        See the `documentation <https://discord.dev/resources/channel#create-reaction>`__
+
+        .. note::
+            This requires the ``read_message_history`` permission.
+
+            This also requires the ``add_reactions`` permission if noone else has reacted to the message with this emoji.
+
+        Parameters
+        ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel where the message is located.
+        message_id: :class:`str` | :class:`int`
+            The id of the message to add a reaction to.
+        emoji: :class:`str`
+            The emoji to add to the message.
+
+            This is either a unicode emoji or a custom emoji in the format ``name:id``.
+        """
+        route = Route(
+            "PUT",
+            "/channels/{channel_id}/messages/{message_id}/reactions/{emoji}/@me",
+            channel_id=channel_id,
+            message_id=message_id,
+            emoji=quote(emoji),
+        )
+        headers = {"Authorization": str(authentication)}
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+    async def delete_own_reaction(
+        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str
+    ) -> None:
+        """Deletes a reaction from a message.
+
+        See the `documentation <https://discord.dev/resources/channel#delete-own-reaction>`__
+
+        Parameters
+        ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel where the message is located.
+        message_id: :class:`str` | :class:`int`
+            The id of the message to remove a reaction from.
+        emoji: :class:`str`
+            The emoji to remove from the message.
+
+            This is either a unicode emoji or a custom emoji in the format ``name:id``.
+        """
+        route = Route(
+            "DELETE",
+            "/channels/{channel_id}/messages/{message_id}/reactions/{emoji}/@me",
+            channel_id=channel_id,
+            message_id=message_id,
+            emoji=quote(emoji),
+        )
+        headers = {"Authorization": str(authentication)}
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+    async def delete_user_reaction(
+        self,
+        authentication: BotAuthentication,
+        channel_id: int | str,
+        message_id: int | str,
+        emoji: str,
+        user_id: int | str,
+    ) -> None:
+        """Deletes a reaction from a message from another user.
+
+        See the `documentation <https://discord.dev/resources/channel#delete-user-reaction>`__
+
+        .. note::
+            This requires the ``manage_messages`` permission.
+
+        .. note::
+            This does not error when attempting to remove a reaction that does not exist.
+
+        Parameters
+        ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel where the message is located.
+        message_id: :class:`str` | :class:`int`
+            The id of the message to remove a reaction from.
+        emoji: :class:`str`
+            The emoji to remove from the message.
+
+            This is either a unicode emoji or a custom emoji in the format ``name:id``.
+        user_id: :class:`str` | :class:`int`
+            The id of the user to remove the reaction from.
+        """
+        route = Route(
+            "DELETE",
+            "/channels/{channel_id}/messages/{message_id}/reactions/{emoji}/{user_id}",
+            channel_id=channel_id,
+            message_id=message_id,
+            emoji=quote(emoji),
+            user_id=user_id,
+        )
+        headers = {"Authorization": str(authentication)}
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+    async def get_reactions(
+        self,
+        authentication: BotAuthentication,
+        channel_id: int | str,
+        message_id: int | str,
+        emoji: str,
+        *,
+        after: str | int | UndefinedType = Undefined,
+        limit: int | UndefinedType = Undefined,
+    ) -> list[UserData]:
+        """Gets the reactions to a message.
+
+        See the `documentation <https://discord.dev/resources/channel#get-reactions>`__
+
+        .. note::
+            This requires the ``read_message_history`` permission.
+
+        Parameters
+        ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel where the message is located.
+        message_id: :class:`str` | :class:`int`
+            The id of the message to get the reactions from.
+
+        Returns
+        -------
+        list[:class:`UserData`]
+            The users that has reacted with this emoji.
+        """
+        route = Route(
+            "GET",
+            "/channels/{channel_id}/messages/{message_id}/reactions/{emoji}",
+            channel_id=channel_id,
+            message_id=message_id,
+            emoji=quote(emoji),
+        )
+        headers = {"Authorization": str(authentication)}
+
+        params = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if after is not Undefined:
+            params["after"] = after
+        if limit is not Undefined:
+            params["limit"] = limit
+
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, params=params)
+
+        return await r.json()
+
+    async def delete_all_reactions(self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str) -> None:
+        """Deletes all reactions from a message.
+
+        See the `documentation <https://discord.dev/resources/channel#delete-all-reactions>`__
+
+        .. note::
+            This requires the ``manage_messages`` permission.
+
+        .. note::
+            This will cause a ``MESSAGE_REACTION_REMOVE_ALL`` dispatch event.
+
+        Parameters
+        ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel where the message is located.
+        message_id: :class:`str` | :class:`int`
+            The id of the message to remove all reactions from.
+        """
+        route = Route(
+            "DELETE", "/channels/{channel_id}/messages/{message_id}/reactions", channel_id=channel_id, message_id=message_id
+        )
+        headers = {"Authorization": str(authentication)}
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+    async def delete_all_reactions_for_emoji(self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str) -> None:
+        """Deletes all reactions from a message with a specific emoji.
+
+        See the `documentation <https://discord.dev/resources/channel#delete-all-reactions-for-emoji>`__
+
+        .. note::
+            This requires the ``manage_messages`` permission.
+
+        .. note::
+            This will cause a ``MESSAGE_REACTION_REMOVE_EMOJI`` dispatch event.
+
+        Parameters
+        ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel where the message is located.
+        message_id: :class:`str` | :class:`int`
+            The id of the message to remove all reactions from.
+        emoji: :class:`str`
+            The emoji to remove from the message.
+
+            This is either a unicode emoji or a custom emoji in the format ``name:id``.
+        """
+        route = Route(
+            "DELETE",
+            "/channels/{channel_id}/messages/{message_id}/reactions/{emoji}",
+            channel_id=channel_id,
+            message_id=message_id,
+            emoji=quote(emoji),
+        )
+        headers = {"Authorization": str(authentication)}
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
