@@ -1269,16 +1269,18 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if after is not Undefined:
+        if not isinstance(after, UndefinedType):
             params["after"] = after
-        if limit is not Undefined:
+        if not isinstance(limit, UndefinedType):
             params["limit"] = limit
 
         r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, params=params)
 
         return await r.json()
 
-    async def delete_all_reactions(self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str) -> None:
+    async def delete_all_reactions(
+        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str
+    ) -> None:
         """Deletes all reactions from a message.
 
         See the `documentation <https://discord.dev/resources/channel#delete-all-reactions>`__
@@ -1299,13 +1301,18 @@ class HTTPClient:
             The id of the message to remove all reactions from.
         """
         route = Route(
-            "DELETE", "/channels/{channel_id}/messages/{message_id}/reactions", channel_id=channel_id, message_id=message_id
+            "DELETE",
+            "/channels/{channel_id}/messages/{message_id}/reactions",
+            channel_id=channel_id,
+            message_id=message_id,
         )
         headers = {"Authorization": str(authentication)}
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
 
-    async def delete_all_reactions_for_emoji(self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str) -> None:
+    async def delete_all_reactions_for_emoji(
+        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str
+    ) -> None:
         """Deletes all reactions from a message with a specific emoji.
 
         See the `documentation <https://discord.dev/resources/channel#delete-all-reactions-for-emoji>`__
@@ -1339,3 +1346,105 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+    async def edit_message(
+        self,
+        authentication: BotAuthentication,
+        channel_id: int | str,
+        message_id: int | str,
+        *,
+        content: str | None | UndefinedType = Undefined,
+        embeds: list[EmbedData] | None | UndefinedType = Undefined,
+        flags: int | None | UndefinedType = Undefined,
+        allowed_mentions: AllowedMentionsData | None | UndefinedType = Undefined,
+        components: list[ActionRowData] | None | UndefinedType = Undefined,
+        files: list[File] | None | UndefinedType = Undefined,
+        attachments: list[AttachmentData] | None | UndefinedType = Undefined,  # TODO: Partial
+    ) -> MessageData:
+        """Edits a message.
+
+        See the `documentation <https://discord.dev/resources/channel#edit-message>`__
+
+        .. note::
+            This requires the ``manage_messages`` permission.
+
+        Parameters
+        ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel where the message is located.
+        message_id: :class:`str` | :class:`int`
+            The id of the message to edit.
+        content: :class:`str` | :class:`None` | :class:`UndefinedType`
+            The new content of the message.
+
+            .. note::
+                If this is set to ``None``, there will be no message contents.
+
+            .. note::
+                Adding/removing mentions will not affect mentions.
+        embeds: :class:`list[:class:`EmbedData`]` | :data:`None` | :class:`UndefinedType`
+            The new embeds of the message.
+
+            This overwrites the previous embeds
+        flags: :class:`int` | :class:`None` | :class:`UndefinedType`
+            The new flags of the message.
+
+            .. warning::
+                Only the ``SUPPRESS_EMBEDS`` flag can be set. Trying to set other flags will be ignored.
+        allowed_mentions: :class:`AllowedMentionsData` | :class:`None` | :class:`UndefinedType`
+            The new allowed mentions of the message.
+
+            .. note::
+                Setting this to ``None`` will make it use the default allowed mentions.
+        components: :class:`list[:class:`ActionRowData`]` | :class:`None` | :class:`UndefinedType`
+            The new components of the message.
+        files: list[:class:`File`] | :class:`None` | :class:`UndefinedType`
+            The new files of the message.
+        attachments: list[:class:`AttachmentData`] | :class:`None` | :class:`UndefinedType`
+            The new attachments of the message.
+
+            .. warning::
+                This has to include previous and current attachments or they will be removed.
+
+        Returns
+        -------
+        :class:`MessageData`
+            The edited message.
+        """
+        route = Route(
+            "PATCH", "/channels/{channel_id}/messages/{message_id}", channel_id=channel_id, message_id=message_id
+        )
+
+        headers = {"Authorization": str(authentication)}
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if not isinstance(content, UndefinedType):
+            payload["content"] = content
+        if not isinstance(embeds, UndefinedType):
+            payload["embeds"] = embeds
+        if not isinstance(flags, UndefinedType):
+            payload["flags"] = flags
+        if not isinstance(allowed_mentions, UndefinedType):
+            payload["allowed_mentions"] = allowed_mentions
+        if not isinstance(components, UndefinedType):
+            payload["components"] = components
+        if not isinstance(attachments, UndefinedType):
+            payload["attachments"] = attachments
+
+        # This is a special case where we need to send the files as a multipart form
+        form = FormData()
+        if not isinstance(files, UndefinedType):
+            if files is None:
+                raise NotImplementedError("What is this even supposed to do?")
+            for file in files:
+                form.add_field("file", file.contents, filename=file.name)
+
+        form.add_field("payload_json", json_dumps(payload))
+
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, data=form)
+
+        return await r.json()
