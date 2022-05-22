@@ -1,6 +1,20 @@
 Gateway
 =======
 
+Gateway quickstart
+------------------
+
+Basic ping-pong example
+************************
+This will respond with ``pong`` every time someone sends ``ping`` in chat.
+
+.. literalinclude:: ../examples/gateway/ping_pong.py
+   :lines: 28-
+   :language: python
+
+
+Gateway reference
+-----------------
 .. autoclass:: nextcore.gateway.ShardManager
    :members:
 

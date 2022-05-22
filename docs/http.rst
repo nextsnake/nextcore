@@ -1,6 +1,8 @@
 HTTP
 ====
 
+HTTP reference
+-------------
 .. autoclass:: nextcore.http.HTTPClient
     :members:
 
@@ -26,7 +28,7 @@ HTTP
     :members:
 
 
-HTTP Errors
+HTTP errors
 -----------
 .. autoexception:: nextcore.http.RateLimitingFailedError
     :members:

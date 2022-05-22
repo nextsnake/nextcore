@@ -29,36 +29,29 @@ import asyncio
 from os import environ
 
 from nextcore.gateway import ShardManager
-from nextcore.http import HTTPClient, Route
+from nextcore.http import HTTPClient, BotAuthentication
+from discord_typings import MessageData
 
 # Constants
-TOKEN = environ["TOKEN"]
-INTENTS = 33280  # Guild messages and message content intents.
+AUTHENTICATION = BotAuthentication(environ["TOKEN"])
 
-# Create a ratelimit_key
-RATELIMIT_KEY = hash(TOKEN)
+# Intents are a way to select what intents Discord should send to you.
+# For a list of intents see https://discord.dev/topics/gateway#gateway-intents
+INTENTS = 1 << 9 | 1 << 15  # Guild messages and message content intents.
+
 
 # Create a HTTPClient and a ShardManager.
 # A ShardManager is just a neat wrapper around Shard objects.
 http_client = HTTPClient()
-shard_manager = ShardManager(environ["TOKEN"], INTENTS, http_client)
+shard_manager = ShardManager(AUTHENTICATION, INTENTS, http_client)
 
 
 @shard_manager.event_dispatcher.listen("MESSAGE_CREATE")
-async def on_message(message):  # TODO: discord_typings doesnt have message create event yet
-    # This receives the raw message data.
+async def on_message(message: MessageData):
+    # This function will be called every time a message is sent.
     if message["content"] == "ping":
-        # Create a endpoint object. This is used for calculating the ratelimit.
-        # The second argument will be run .format on with the kwargs from Route.
-        # If you specify guild_id, channel_id or webhook_id, this will be used to calculate the ratelimit.
-        route = Route("POST", "/channels/{channel_id}/messages", channel_id=message["channel_id"])
-        await http_client._request(
-            route,
-            json={"content": "pong"},
-            ratelimit_key=RATELIMIT_KEY,
-            headers={"Authorization": f"Bot {TOKEN}"},
-        )  # TODO: Move to a wrapper function
-
+        # Send a pong message to respond.
+        await http_client.create_message(AUTHENTICATION, message["channel_id"], content="pong")
 
 async def main():
     # This should return once all shards have started to connect.
