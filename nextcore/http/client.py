@@ -1448,3 +1448,102 @@ class HTTPClient:
         r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, data=form)
 
         return await r.json()
+
+    async def delete_message(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        message_id: str | int,
+        *,
+        reason: str | UndefinedType = Undefined
+    ) -> None:
+        """Deletes a message.
+
+        See the `documentation <https://discord.dev/resources/channel#delete-message>`__
+
+        .. note::
+            This requires the ``manage_messages`` permission.
+
+        .. note::
+            This will cause a ``MESSAGE_DELETE`` dispatch event.
+
+        Parameters
+        ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel where the message is located.
+        message_id: :class:`str` | :class:`int`
+            The id of the message to delete.
+        reason: :class:`str` | :class:`UndefinedType`
+            The reason for deleting the message.
+
+            .. note::
+                If this is set to ``Undefined``, there will be no reason.
+        """
+        route = Route(
+            "DELETE", "/channels/{channel_id}/messages/{message_id}", channel_id=channel_id, message_id=message_id
+        )
+        headers = {"Authorization": str(authentication)}
+
+        if not isinstance(reason, UndefinedType):
+            headers["X-Audit-Log-Reason"] = reason
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+    
+    async def bulk_delete_messages(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        messages: list[str] | list[int] | list[str | int],
+        *,
+        reason: str | UndefinedType = Undefined
+    ) -> None:
+        """Deletes multiple messages.
+
+        See the `documentation <https://discord.dev/resources/channel#delete-message>`__
+
+        .. note::
+            This requires the ``manage_messages`` permission.
+
+        .. note::
+            This will cause a ``MESSAGE_DELETE_BULK`` dispatch event.
+
+        .. warning::
+            This will not delete messages older than two weeks.
+
+            If any of the messages provided are older than 2 weeks this will error.
+
+        Parameters
+        ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel where the message is located.
+        messages: :class:`list[:class:`str` | :class:`int`]`
+            The ids of the messages to delete.
+
+            .. note::
+                This has to be between 2 and 100 messages.
+
+                Invalid messages still count towards the limit.
+        reason: :class:`str` | :class:`UndefinedType`
+            The reason for deleting the message.
+
+            .. note::
+                If this is set to ``Undefined``, there will be no reason.
+        """
+        route = Route(
+            "POST", "/channels/{channel_id}/messages/bulk-delete", channel_id=channel_id
+        )
+        headers = {"Authorization": str(authentication)}
+
+        if not isinstance(reason, UndefinedType):
+            headers["X-Audit-Log-Reason"] = reason
+
+        await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json={"messages": messages}
+        )
