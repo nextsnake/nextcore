@@ -71,7 +71,7 @@ class Route:
 
     __slots__ = ("method", "route", "path", "ignore_global", "bucket")
 
-    BASE_URL: ClassVar[str] = "https://discord.com/api/v9"
+    BASE_URL: ClassVar[str] = "https://discord.com/api/v10"
 
     def __init__(
         self,
