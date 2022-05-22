@@ -1455,7 +1455,7 @@ class HTTPClient:
         channel_id: str | int,
         message_id: str | int,
         *,
-        reason: str | UndefinedType = Undefined
+        reason: str | UndefinedType = Undefined,
     ) -> None:
         """Deletes a message.
 
@@ -1490,14 +1490,14 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
-    
+
     async def bulk_delete_messages(
         self,
         authentication: BotAuthentication,
         channel_id: str | int,
         messages: list[str] | list[int] | list[str | int],
         *,
-        reason: str | UndefinedType = Undefined
+        reason: str | UndefinedType = Undefined,
     ) -> None:
         """Deletes multiple messages.
 
@@ -1533,17 +1533,12 @@ class HTTPClient:
             .. note::
                 If this is set to ``Undefined``, there will be no reason.
         """
-        route = Route(
-            "POST", "/channels/{channel_id}/messages/bulk-delete", channel_id=channel_id
-        )
+        route = Route("POST", "/channels/{channel_id}/messages/bulk-delete", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
         if not isinstance(reason, UndefinedType):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route,
-            ratelimit_key=authentication.rate_limit_key,
-            headers=headers,
-            json={"messages": messages}
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, json={"messages": messages}
         )

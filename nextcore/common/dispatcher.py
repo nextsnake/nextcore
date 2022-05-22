@@ -24,14 +24,7 @@ from __future__ import annotations
 from asyncio import CancelledError, Future, create_task
 from collections import defaultdict
 from logging import getLogger
-from typing import (  # pylint: disable=outdated-typing-any
-    TYPE_CHECKING,
-    Generic,
-    Hashable,
-    TypeVar,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Generic, Hashable, TypeVar, cast, overload
 
 from .maybe_coro import maybe_coro
 
@@ -39,13 +32,9 @@ from .maybe_coro import maybe_coro
 EventNameT = TypeVar("EventNameT", bound=Hashable)
 
 if TYPE_CHECKING:
-    from typing import (  # pylint: disable=outdated-typing-union
-        Any,
-        Awaitable,
-        Callable,
-        Tuple,
-        Union,
-    )
+    from typing import Tuple  # pylint: disable=outdated-typing-tuple
+    from typing import Union  # pylint: disable=outdated-typing-union
+    from typing import Any, Awaitable, Callable
 
     from typing_extensions import Unpack
 
