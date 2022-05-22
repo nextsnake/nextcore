@@ -28,9 +28,10 @@ This will respond with "pong" every time someone sends "ping" in the chat.
 import asyncio
 from os import environ
 
-from nextcore.gateway import ShardManager
-from nextcore.http import HTTPClient, BotAuthentication
 from discord_typings import MessageData
+
+from nextcore.gateway import ShardManager
+from nextcore.http import BotAuthentication, HTTPClient
 
 # Constants
 AUTHENTICATION = BotAuthentication(environ["TOKEN"])
@@ -52,6 +53,7 @@ async def on_message(message: MessageData):
     if message["content"] == "ping":
         # Send a pong message to respond.
         await http_client.create_message(AUTHENTICATION, message["channel_id"], content="pong")
+
 
 async def main():
     # This should return once all shards have started to connect.

@@ -19,6 +19,8 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+"""Common utility functions for the library"""
+
 from .dispatcher import Dispatcher
 from .json import *
 from .maybe_coro import *

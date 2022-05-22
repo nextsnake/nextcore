@@ -19,6 +19,12 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+"""Do requests to Discord over the HTTP API.
+
+This module includes a HTTP client that handles rate limits for you,
+and gives you convinient methods around the API.
+"""
+
 from .authentication import *
 from .bucket import Bucket
 from .bucket_metadata import BucketMetadata

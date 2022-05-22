@@ -19,6 +19,11 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+"""Wrapper around the Discord bot gateway
+
+This module allows you to receive events from Discord.
+"""
+
 from .decompressor import Decompressor
 from .errors import *
 from .op_code import GatewayOpcode

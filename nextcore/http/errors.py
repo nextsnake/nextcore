@@ -26,6 +26,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from aiohttp import ClientResponse
 
+
 class RateLimitingFailedError(Exception):
     """When ratelimiting has failed more than :attr:`HTTPClient.max_retries` times
 
