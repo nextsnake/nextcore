@@ -26,11 +26,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from aiohttp import ClientResponse
 
-    from nextcore.typings.http.error import (
-        HTTPError as HTTPErrorTyping,  # TODO: This doesn't exist in discord_typings yet?
-    )
-
-
 class RateLimitingFailedError(Exception):
     """When ratelimiting has failed more than :attr:`HTTPClient.max_retries` times
 
