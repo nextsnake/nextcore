@@ -27,3 +27,8 @@ First, you need to install the library.
    .. code-block:: shell
 
       poetry add nextcore
+
+The documentation will now split into different pages depending on what functionality you need.
+
+- :ref:`http` Sending requests to discord.
+- :ref:`gateway` Receiving events from discord.
