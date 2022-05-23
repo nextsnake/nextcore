@@ -59,6 +59,7 @@ if TYPE_CHECKING:
         EmbedData,
         GetGatewayBotData,
         GetGatewayData,
+        InviteMetadata,
         MessageData,
         MessageReferenceData,
         ThreadChannelData,
@@ -1280,7 +1281,8 @@ class HTTPClient:
 
         r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, params=params)
 
-        return await r.json()
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
 
     async def delete_all_reactions(
         self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str
@@ -1451,7 +1453,8 @@ class HTTPClient:
 
         r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, data=form)
 
-        return await r.json()
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
 
     async def delete_message(
         self,
@@ -1623,3 +1626,33 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+
+    async def get_channel_invites(
+        self, authentication: BotAuthentication, channel_id: str | int
+    ) -> list[InviteMetadata]:
+        """Gets the invites for a channel.
+
+        See the `documentation <https://discord.dev/resources/channel#get-channel-invites>`__
+
+        .. note::
+            This requires the ``manage_channels`` permission.
+
+        Parameters
+        ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to get invites for.
+
+        Returns
+        -------
+        list[:class:`InviteMetadata`]
+            The invites for the channel.
+        """
+        route = Route("GET", "/channels/{channel_id}/invites", channel_id=channel_id)
+        headers = {"Authorization": str(authentication)}
+
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
