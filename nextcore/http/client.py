@@ -879,12 +879,10 @@ class HTTPClient:
         self, authentication: BotAuthentication, channel_id: int | str, *, after: int, limit: int | UndefinedType
     ) -> list[MessageData]:
         ...
-    @overload
-    async def get_channel_messages(
-        self, authentication: BotAuthentication, channel_id: int | str
-    ) -> list[MessageData]:
-        ...
 
+    @overload
+    async def get_channel_messages(self, authentication: BotAuthentication, channel_id: int | str) -> list[MessageData]:
+        ...
 
     async def get_channel_messages(
         self,
@@ -1492,6 +1490,8 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
         if not isinstance(reason, UndefinedType):
             headers["X-Audit-Log-Reason"] = reason
 
@@ -1542,9 +1542,79 @@ class HTTPClient:
         route = Route("POST", "/channels/{channel_id}/messages/bulk-delete", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
         if not isinstance(reason, UndefinedType):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
             route, ratelimit_key=authentication.rate_limit_key, headers=headers, json={"messages": messages}
         )
+
+    async def edit_channel_permissions(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        target_type: Literal[0, 1],
+        target_id: str | int,
+        *,
+        allow: str | None | UndefinedType = Undefined,
+        deny: str | None | UndefinedType = Undefined,
+        reason: str | UndefinedType = Undefined,
+    ) -> None:
+        """Edits the permissions of a channel.
+
+        See the `documentation <https://discord.dev/resources/channel#edit-channel-permissions>`__
+
+        Parameters
+        ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to edit.
+        target_type: :class:`int`
+            The type of the target.
+
+            0: Role
+            1: User
+        target_id: :class:`str` | :class:`int`
+            The id of the target to edit permissions for.
+        allow: :class:`str` | :class:`None` | :class:`UndefinedType`
+            A bitwise flag of permissions to allow.
+
+            .. note::
+                If this is set to :data:`None`, it will default to ``0``.
+        deny: :class:`str` | :class:`None` | :class:`UndefinedType`
+            A bitwise flag of permissions to allow.
+
+            .. note::
+                If this is set to :data:`None`, it will default to ``0``.
+        reason: :class:`str` | :class:`UndefinedType`
+            The reason to show in audit log
+
+            .. note::
+                If this is set to ``Undefined``, there will be no reason.
+        """
+        route = Route(
+            "PUT",
+            "/channels/{channel_id}/permissions/{target_id}",
+            channel_id=channel_id,
+            target_id=target_id,
+        )
+        headers = {"Authorization": str(authentication)}
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if not isinstance(allow, UndefinedType):
+            payload["allow"] = allow
+        if not isinstance(deny, UndefinedType):
+            payload["deny"] = deny
+
+        payload["type"] = target_type
+
+        if not isinstance(reason, UndefinedType):
+            headers["X-Audit-Log-Reason"] = reason
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
