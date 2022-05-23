@@ -1829,6 +1829,9 @@ class HTTPClient:
 
         Read the `documentation <https://discord.com/developers/docs/resources/channel#follow-news-channel>`__
 
+        .. note::
+            This requires the ``manage_webhooks`` permission.
+
         Parameters
         -----------
         authentication: :class:`BotAuthentication`
