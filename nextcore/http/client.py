@@ -1566,6 +1566,11 @@ class HTTPClient:
 
         See the `documentation <https://discord.dev/resources/channel#edit-channel-permissions>`__
 
+        .. note::
+            This requires the ``manage_roles`` permission.
+
+            This also requires the permissions you want to grant/deny unless your bot has a ``manage_roles`` overwrite.
+
         Parameters
         ----------
         authentication: :class:`BotAuthentication`
