@@ -24,9 +24,9 @@ jobs:
           if_key_exists: replace
       - name: Push code
         run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub actions"
           git init
+          git config user.email "actions@github.com"
+          git config user.name "GitHub actions"
           git add .
           git commit -m "Update from nextcore build"
           git branch -M ${{ github.ref_name }}
