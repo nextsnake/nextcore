@@ -879,6 +879,12 @@ class HTTPClient:
         self, authentication: BotAuthentication, channel_id: int | str, *, after: int, limit: int | UndefinedType
     ) -> list[MessageData]:
         ...
+    @overload
+    async def get_channel_messages(
+        self, authentication: BotAuthentication, channel_id: int | str
+    ) -> list[MessageData]:
+        ...
+
 
     async def get_channel_messages(
         self,
