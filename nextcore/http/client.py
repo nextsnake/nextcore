@@ -65,6 +65,7 @@ if TYPE_CHECKING:
         MessageReferenceData,
         ThreadChannelData,
         UserData,
+        FollowedChannelData
     )
     from discord_typings.resources.audit_log import AuditLogEvents
 
@@ -1822,3 +1823,31 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+    async def follow_news_channel(self, authentication: BotAuthentication, channel_id: str | int, webhook_channel_id: str | int) -> FollowedChannelData:
+        """Follows a news channel.
+
+        Read the `documentation <https://discord.com/developers/docs/resources/channel#follow-news-channel>`__
+
+        Parameters
+        -----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to follow.
+        webhook_channel_id: :class:`str` | :class:`int`
+            The id of the channel to receive posts to.
+
+        Returns
+        -------
+        :class:`FollowedChannelData`
+            The followed channel data.
+        """
+        route = Route("POST", "/channels/{channel_id}/followers", channel_id=channel_id)
+        headers = {"Authorization": str(authentication)}
+        payload = {"webhook_channel_id": webhook_channel_id}
+
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
