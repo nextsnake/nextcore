@@ -59,6 +59,7 @@ if TYPE_CHECKING:
         EmbedData,
         GetGatewayBotData,
         GetGatewayData,
+        InviteData,
         InviteMetadata,
         MessageData,
         MessageReferenceData,
@@ -1656,3 +1657,156 @@ class HTTPClient:
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
+
+    @overload
+    async def create_channel_invite(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        *,
+        max_age: int | UndefinedType = Undefined,
+        max_uses: int | UndefinedType = Undefined,
+        temporary: bool | UndefinedType = Undefined,
+        unique: bool | UndefinedType = Undefined,
+        target_type: Literal[0],
+        target_user_id: str | int,
+        target_application_id: UndefinedType = Undefined,
+    ) -> InviteData:
+        ...
+
+    @overload
+    async def create_channel_invite(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        *,
+        max_age: int | UndefinedType = Undefined,
+        max_uses: int | UndefinedType = Undefined,
+        temporary: bool | UndefinedType = Undefined,
+        unique: bool | UndefinedType = Undefined,
+        target_type: Literal[1],
+        target_user_id: UndefinedType = Undefined,
+        target_application_id: str | int,
+    ) -> InviteData:
+        ...
+
+    @overload
+    async def create_channel_invite(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        *,
+        max_age: int | UndefinedType = Undefined,
+        max_uses: int | UndefinedType = Undefined,
+        temporary: bool | UndefinedType = Undefined,
+        unique: bool | UndefinedType = Undefined,
+        target_type: UndefinedType = Undefined,
+        target_user_id: UndefinedType = Undefined,
+        target_application_id: UndefinedType = Undefined,
+    ) -> InviteData:
+        ...
+
+    async def create_channel_invite(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        *,
+        max_age: int | UndefinedType = Undefined,
+        max_uses: int | UndefinedType = Undefined,
+        temporary: bool | UndefinedType = Undefined,
+        unique: bool | UndefinedType = Undefined,
+        target_type: Literal[0, 1] | UndefinedType = Undefined,
+        target_user_id: str | int | UndefinedType = Undefined,
+        target_application_id: str | int | UndefinedType = Undefined,
+    ) -> InviteData:
+        """Creates an invite for a channel.
+
+        Read the `documentation <https://discord.com/developers/docs/resources/channel#create-channel-invite>`__
+
+        Parameters
+        -----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to create an invite for.
+        max_age: :class:`int` | :class:`UndefinedType`
+            How long the invite should last.
+
+            .. note::
+                This has to be between 0 and 604800 seconds. (7 days)
+
+                Setting this to ``0`` will make it never expire.
+        max_uses: :class:`int` | :class:`UndefinedType`
+            How many times the invite can be used before getting deleted.
+        temporary: :class:`bool` | :class:`UndefinedType`
+            Whether the invite grants temporary membership.
+
+            This will kick members if they havent got a role when logging off.
+        unique: :class:`bool` | :class:`UndefinedType`
+            Whether discord will make a new invite regardless of existing invites.
+        target_type: :class:`int` | :class:`UndefinedType`
+            The type of the target.
+
+            0: A user's stream
+            1: ``EMBEDDED`` Activity
+        target_user_id: :class:`str` | :class:`int` | :class:`UndefinedType`
+            The id of the user streaming to invite to.
+
+            .. note::
+                This can only be set if ``target_type`` is ``0``.
+        target_application_id: :class:`str` | :class:`int` | :class:`UndefinedType`
+            The id of the ``EMBEDDED`` activity to play.
+
+            .. note::
+                This can only be set if ``target_type`` is ``1``.
+
+        Returns
+        -------
+        :class:`InviteData`
+            The invite data.
+        """
+        route = Route("POST", "/channels/{channel_id}/invites", channel_id=channel_id)
+        headers = {"Authorization": str(authentication)}
+
+        payload = {}
+
+        if not isinstance(max_age, UndefinedType):
+            payload["max_age"] = max_age
+        if not isinstance(max_uses, UndefinedType):
+            payload["max_uses"] = max_uses
+        if not isinstance(temporary, UndefinedType):
+            payload["temporary"] = temporary
+        if not isinstance(unique, UndefinedType):
+            payload["unique"] = unique
+        if not isinstance(target_type, UndefinedType):
+            payload["target_type"] = target_type
+        if not isinstance(target_user_id, UndefinedType):
+            payload["target_user_id"] = target_user_id
+        if not isinstance(target_application_id, UndefinedType):
+            payload["target_application_id"] = target_application_id
+
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def delete_channel_permission(
+        self, authentication: BotAuthentication, channel_id: str | int, target_id: str | int
+    ) -> None:
+        """Deletes a channel permission.
+
+        Read the `documentation <https://discord.com/developers/docs/resources/channel#delete-channel-permission>`__
+
+        Parameters
+        -----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to delete the permission from.
+        target_id: :class:`str` | :class:`int`
+            The id of the user or role to delete the permission from.
+        """
+        route = Route("DELETE", "/channels/{channel_id}/permissions/{target_id}", channel_id=channel_id, target_id=target_id)
+        headers = {"Authorization": str(authentication)}
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
