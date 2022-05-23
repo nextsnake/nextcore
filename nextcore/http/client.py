@@ -57,6 +57,7 @@ if TYPE_CHECKING:
         AuditLogData,
         ChannelData,
         EmbedData,
+        FollowedChannelData,
         GetGatewayBotData,
         GetGatewayData,
         InviteData,
@@ -65,7 +66,6 @@ if TYPE_CHECKING:
         MessageReferenceData,
         ThreadChannelData,
         UserData,
-        FollowedChannelData
     )
     from discord_typings.resources.audit_log import AuditLogEvents
 
@@ -1824,7 +1824,9 @@ class HTTPClient:
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
 
-    async def follow_news_channel(self, authentication: BotAuthentication, channel_id: str | int, webhook_channel_id: str | int) -> FollowedChannelData:
+    async def follow_news_channel(
+        self, authentication: BotAuthentication, channel_id: str | int, webhook_channel_id: str | int
+    ) -> FollowedChannelData:
         """Follows a news channel.
 
         Read the `documentation <https://discord.com/developers/docs/resources/channel#follow-news-channel>`__
@@ -1854,3 +1856,90 @@ class HTTPClient:
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
+
+    async def trigger_typing_indicator(self, authentication: BotAuthentication, channel_id: str | int) -> None:
+        """Triggers a typing indicator.
+
+        Read the `documentation <https://discord.com/developers/docs/resources/channel#trigger-typing-indicator>`__
+
+        Parameters
+        -----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to trigger the typing indicator on.
+        """
+        route = Route("POST", "/channels/{channel_id}/typing", channel_id=channel_id)
+        headers = {"Authorization": str(authentication)}
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+    async def get_pinned_messages(self, authentication: BotAuthentication, channel_id: str | int) -> list[MessageData]:
+        """Gets the pinned messages of a channel.
+
+        Read the `documentation <https://discord.com/developers/docs/resources/channel#get-pinned-messages>`__
+
+        .. note::
+            This requires the ``read_messages`` permission.
+
+        Parameters
+        -----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to get the pinned messages of.
+
+        Returns
+        -------
+        list[:class:`discord_typings.MessageData`]
+            The pinned messages.
+        """
+        route = Route("GET", "/channels/{channel_id}/pins", channel_id=channel_id)
+        headers = {"Authorization": str(authentication)}
+
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def pin_message(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        message_id: str | int,
+        *,
+        reason: str | UndefinedType = Undefined,
+    ) -> None:
+        """Pins a message.
+
+        Read the `documentation <https://discord.com/developers/docs/resources/channel#pin-message>`__
+
+        .. note::
+            This requires the ``manage_messages`` permission.
+
+        .. warning::
+            This will fail if there is ``50`` or more messages pinned.
+
+        Parameters
+        -----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to pin the message in.
+        message_id: :class:`str` | :class:`int`
+            The id of the message to pin.
+        reason: :class:`str` | :class:`UndefinedType`
+            The reason to put in the audit log.
+
+            .. note::
+                This has to be between 1 and 512 characters.
+        """
+        route = Route("PUT", "/channels/{channel_id}/pins/{message_id}", channel_id=channel_id, message_id=message_id)
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if not isinstance(reason, UndefinedType):
+            headers["X-Audit-Log-Reason"] = reason
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
