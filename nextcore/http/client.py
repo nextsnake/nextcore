@@ -1791,7 +1791,12 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_channel_permission(
-        self, authentication: BotAuthentication, channel_id: str | int, target_id: str | int
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        target_id: str | int,
+        *,
+        reason: str | UndefinedType = Undefined,
     ) -> None:
         """Deletes a channel permission.
 
@@ -1806,7 +1811,14 @@ class HTTPClient:
         target_id: :class:`str` | :class:`int`
             The id of the user or role to delete the permission from.
         """
-        route = Route("DELETE", "/channels/{channel_id}/permissions/{target_id}", channel_id=channel_id, target_id=target_id)
+        route = Route(
+            "DELETE", "/channels/{channel_id}/permissions/{target_id}", channel_id=channel_id, target_id=target_id
+        )
         headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if not isinstance(reason, UndefinedType):
+            headers["X-Audit-Log-Reason"] = reason
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
