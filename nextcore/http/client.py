@@ -2147,3 +2147,22 @@ class HTTPClient:
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
+
+    # TODO: Add start thread in forum channel here!
+
+    async def join_thread(self, authentication: BotAuthentication, channel_id: str | int) -> None:
+        """Joins a thread.
+
+        Read the `documentation <https://discord.dev/resources/channel#join-thread>`__
+
+        Parameters
+        -----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The thread to join.
+        """
+        route = Route("PUT", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
+        headers = {"Authorization": str(authentication)}
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
