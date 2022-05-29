@@ -1722,7 +1722,7 @@ class HTTPClient:
     ) -> InviteData:
         """Creates an invite for a channel.
 
-        Read the `documentation <https://discord.com/developers/docs/resources/channel#create-channel-invite>`__
+        Read the `documentation <https://discord.dev/resources/channel#create-channel-invite>`__
 
         Parameters
         -----------
@@ -1801,7 +1801,7 @@ class HTTPClient:
     ) -> None:
         """Deletes a channel permission.
 
-        Read the `documentation <https://discord.com/developers/docs/resources/channel#delete-channel-permission>`__
+        Read the `documentation <https://discord.dev/resources/channel#delete-channel-permission>`__
 
         Parameters
         -----------
@@ -1829,7 +1829,7 @@ class HTTPClient:
     ) -> FollowedChannelData:
         """Follows a news channel.
 
-        Read the `documentation <https://discord.com/developers/docs/resources/channel#follow-news-channel>`__
+        Read the `documentation <https://discord.dev/resources/channel#follow-news-channel>`__
 
         .. note::
             This requires the ``manage_webhooks`` permission.
@@ -1860,7 +1860,7 @@ class HTTPClient:
     async def trigger_typing_indicator(self, authentication: BotAuthentication, channel_id: str | int) -> None:
         """Triggers a typing indicator.
 
-        Read the `documentation <https://discord.com/developers/docs/resources/channel#trigger-typing-indicator>`__
+        Read the `documentation <https://discord.dev/resources/channel#trigger-typing-indicator>`__
 
         Parameters
         -----------
@@ -1877,7 +1877,7 @@ class HTTPClient:
     async def get_pinned_messages(self, authentication: BotAuthentication, channel_id: str | int) -> list[MessageData]:
         """Gets the pinned messages of a channel.
 
-        Read the `documentation <https://discord.com/developers/docs/resources/channel#get-pinned-messages>`__
+        Read the `documentation <https://discord.dev/resources/channel#get-pinned-messages>`__
 
         .. note::
             This requires the ``read_messages`` permission.
@@ -1912,7 +1912,7 @@ class HTTPClient:
     ) -> None:
         """Pins a message.
 
-        Read the `documentation <https://discord.com/developers/docs/resources/channel#pin-message>`__
+        Read the `documentation <https://discord.dev/resources/channel#pin-message>`__
 
         .. note::
             This requires the ``manage_messages`` permission.
@@ -1943,3 +1943,207 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+    async def unpin_message(
+        self, authentication: BotAuthentication, channel_id: str | int, message_id: str | int
+    ) -> None:
+        """Unpins a message.
+
+        Read the `documentation <https://discord.dev/resources/channel#unpin-message>`__
+
+        .. note::
+            This requires the ``manage_messages`` permission.
+
+        Parameters
+        -----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to unpin the message in.
+        message_id: :class:`str` | :class:`int`
+            The id of the message to unpin.
+        """
+        route = Route(
+            "DELETE", "/channels/{channel_id}/pins/{message_id}", channel_id=channel_id, message_id=message_id
+        )
+        headers = {"Authorization": str(authentication)}
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+    async def group_dm_add_recipient(
+        self, authentication: BearerAuthentication, channel_id: str | int, user_id: str | int
+    ) -> None:
+        """Adds a recipient to a group DM.
+
+        Read the `documentation <https://discord.dev/resources/channel#group-dm-add-recipient>`__
+
+        Parameters
+        -----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to add the recipient to.
+        user_id: :class:`str` | :class:`int`
+            The id of the user to add.
+        """
+        route = Route("PUT", "/channels/{channel_id}/recipients/{user_id}", channel_id=channel_id, user_id=user_id)
+        headers = {"Authorization": str(authentication)}
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+    async def group_dm_remove_recipient(
+        self, authentication: BearerAuthentication, channel_id: str | int, user_id: str | int
+    ) -> None:
+        """Removes a recipient from a group DM.
+
+        Read the `documentation <https://discord.dev/resources/channel#group-dm-remove-recipient>`__
+
+        Parameters
+        -----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to remove the recipient from.
+        user_id: :class:`str` | :class:`int`
+            The id of the user to remove.
+        """
+        route = Route("DELETE", "/channels/{channel_id}/recipients/{user_id}", channel_id=channel_id, user_id=user_id)
+        headers = {"Authorization": str(authentication)}
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+    async def start_thread_from_message(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        message_id: str | int,
+        name: str,
+        *,
+        auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = Undefined,
+        rate_limit_per_user: int | None | UndefinedType = Undefined,
+        reason: str | UndefinedType = Undefined,
+    ) -> ChannelData:
+        """Starts a thread from a message.
+
+        Read the `documentation <https://discord.dev/resources/channel#start-thread-from-message>`__
+
+        Parameters
+        -----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The id of the channel to start the thread in.
+        message_id: :class:`str` | :class:`int`
+            The id of the message to start the thread from.
+        name: :class:`str`
+            The name of the thread.
+        auto_archive_duration: :class:`int` | :class:`UndefinedType`
+            The auto archive duration of the thread.
+        rate_limit_per_user: :class:`int` | :data:`None` | :class:`UndefinedType`
+            The time every member has to wait before sending another message.
+
+            .. note::
+                This has to be between 0 and 21600.
+        """
+        route = Route(
+            "POST",
+            "/channels/{channel_id}/messages/{message_id}/threads",
+            channel_id=channel_id,
+            message_id=message_id,
+        )
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if not isinstance(reason, UndefinedType):
+            headers["X-Audit-Log-Reason"] = reason
+
+        payload = {
+            "name": name,
+        }
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if not isinstance(auto_archive_duration, UndefinedType):
+            payload["auto_archive_duration"] = auto_archive_duration
+        if not isinstance(rate_limit_per_user, UndefinedType):
+            payload["rate_limit_per_user"] = rate_limit_per_user
+
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def start_thread_without_message(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        name: str,
+        *,
+        auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = Undefined,
+        thread_type: Literal[11, 12] | UndefinedType = Undefined,
+        reason: str | UndefinedType = Undefined,
+        invitable: bool | UndefinedType = Undefined,
+        rate_limit_per_user: int | None | UndefinedType = Undefined,
+    ) -> ChannelData:
+        """Starts a thread without a message
+
+        Read the `documentation <https://discord.dev/resources/channel#start-thread-without-message>`__
+
+        Parameters
+        ----------
+        authentication: :class:`BotAuthentication`
+            Authentication info.
+        channel_id: :class:`str` | :class:`int`
+            The channel to create the thread in.
+        name: :class:`str`
+            The name of the thread.
+
+            .. note::
+                This has to be between 1-100 characters long.
+        auto_archive_duration: Literal[60, 1440, 4320, 10080] | :class:`UndefinedType`
+            The time to automatically archive the thread after no activity.
+        rate_limit_per_user: :class:`int` | :data:`None` | :class:`UndefinedType`
+            The time every member has to wait before sending another message
+
+            .. note::
+                This has to be between 0 and 21600.
+
+        Returns
+        -------
+        :class:`ChannelData`
+            The channel data.
+        """
+        route = Route(
+            "POST",
+            "/channels/{channel_id}/threads",
+            channel_id=channel_id,
+        )
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if not isinstance(reason, UndefinedType):
+            headers["X-Audit-Log-Reason"] = reason
+
+        payload = {
+            "name": name,
+        }
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if not isinstance(auto_archive_duration, UndefinedType):
+            payload["auto_archive_duration"] = auto_archive_duration
+        if not isinstance(thread_type, UndefinedType):
+            payload["type"] = thread_type
+        if not isinstance(invitable, UndefinedType):
+            payload["invitable"] = invitable
+        if not isinstance(rate_limit_per_user, UndefinedType):
+            payload["rate_limit_per_user"] = rate_limit_per_user
+
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
