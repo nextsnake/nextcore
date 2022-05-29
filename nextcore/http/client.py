@@ -277,16 +277,15 @@ class HTTPClient:
                     error = await response.json()
                     if response.status == 400:
                         raise BadRequestError(error, response)
-                    elif response.status == 401:
+                    if response.status == 401:
                         raise UnauthorizedError(error, response)
-                    elif response.status == 403:
+                    if response.status == 403:
                         raise ForbiddenError(error, response)
-                    elif response.status == 404:
+                    if response.status == 404:
                         raise NotFoundError(error, response)
-                    elif response.status >= 500:
+                    if response.status >= 500:
                         raise InternalServerError(error, response)
-                    else:
-                        raise HTTPRequestStatusError(error, response)
+                    raise HTTPRequestStatusError(error, response)
                 else:
                     # Should be in 0-200 range
                     return response
