@@ -50,7 +50,7 @@ class GatewayCloseCode(IntEnum):
     SESSION_TIMEOUT = 4009
     """Your session timed out."""
     INVALID_SHARD = 4010
-    """We sent a invalid shard id or our shard count is too low."""
+    """We sent an invalid shard id or our shard count is too low."""
     SHARDING_REQUIRED = 4011
     """Sharding is required to continue."""
     INVALID_API_VERSION = 4012
