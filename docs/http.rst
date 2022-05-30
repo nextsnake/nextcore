@@ -4,7 +4,7 @@ HTTP
 ====
 
 HTTP reference
--------------
+--------------
 .. autoclass:: HTTPClient
     :members:
 
