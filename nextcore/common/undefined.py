@@ -30,6 +30,22 @@ __all__ = ("Undefined", "UndefinedType")
 
 
 class UndefinedType:
+    """A second :data:`None` for specifying that it has not been provided
+
+    .. warning::
+        You should not create this manually. Please use :data:`UndefinedType`
+    
+    **Example usage:**
+
+    .. code-block:: python3
+        :emphasize-lines: 4,5
+        
+        from nextcore.common import Undefined, UndefinedType
+        thing = Undefined
+
+        if isinstance(thing, UndefinedType):
+            print("Thing is undefined!")
+    """
     def __repr__(self) -> str:
         return "Undefined"
 
