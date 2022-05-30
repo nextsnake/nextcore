@@ -38,7 +38,7 @@ class GatewayCloseCode(IntEnum):
     DECODE_ERROR = 4002
     """We sent a invalid payload."""
     NOT_AUTHENTICATED = 4003
-    """We sent a payload before you were authenticated."""
+    """We sent a payload before we were authenticated."""
     AUTHENTICATION_FAILED = 4004
     """We sent a invalid token."""
     ALREADY_AUTHENTICATED = 4005
