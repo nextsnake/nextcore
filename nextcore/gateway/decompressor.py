@@ -37,8 +37,7 @@ class Decompressor:
         self._buffer: bytearray = bytearray()
 
     def decompress(self, data: bytes) -> bytes | None:
-        """
-        Decompress zlib data.
+        """Decompress zlib data.
 
         Returns
         -------
