@@ -48,7 +48,7 @@ from .op_code import GatewayOpcode
 from .times_per import TimesPer
 
 if TYPE_CHECKING:
-    from typing import Any, Final, Literal
+    from typing import Any, Final, Literal, ClassVar
 
     from discord_typings import (
         DispatchEvent,
@@ -148,7 +148,7 @@ class Shard:
         "_heartbeat_sent_at",
         "_latency",
     )
-    GATEWAY_URL: Final[str] = "wss://gateway.discord.gg?v=10&compress=zlib-stream"
+    GATEWAY_URL: ClassVar[str] = "wss://gateway.discord.gg?v=10&compress=zlib-stream"
     """The gateway URL to connect to"""
 
     def __init__(
