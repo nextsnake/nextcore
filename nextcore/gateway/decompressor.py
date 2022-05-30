@@ -28,9 +28,7 @@ ZLIB_SUFFIX = b"\x00\x00\xff\xff"
 
 
 class Decompressor:
-    """
-    A simple wrapper around zlib to handle spreading a payload over multiple messages
-    """
+    """A wrapper around zlib to handle partial payloads"""
 
     __slots__ = ("_decompressor", "_buffer")
 
