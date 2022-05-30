@@ -58,4 +58,4 @@ class GatewayCloseCode(IntEnum):
     INVALID_INTENTS = 4013
     """We sent a invalid intents."""
     DISALLOWED_INTENTS = 4014
-    """We sent a intents that are not allowed to use."""
+    """We sent intents that are not allowed to use."""
