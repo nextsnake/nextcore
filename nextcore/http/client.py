@@ -455,6 +455,7 @@ class HTTPClient:
     # Wrapper functions for requests
     async def get_gateway(self) -> GetGatewayData:
         """Gets gateway connection info.
+
         See the `documentation <https://discord.dev/topics/gateway#get-gateway>`__ for more info.
 
         Example usage:
