@@ -56,6 +56,6 @@ class GatewayCloseCode(IntEnum):
     INVALID_API_VERSION = 4012
     """We sent a invalid api version."""
     INVALID_INTENTS = 4013
-    """We sent a invalid intents."""
+    """We sent invalid intents."""
     DISALLOWED_INTENTS = 4014
     """We sent intents that are not allowed to use."""
