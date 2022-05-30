@@ -25,9 +25,7 @@ __all__ = ("GatewayOpcode",)
 
 
 class GatewayOpcode(IntEnum):
-    """
-    Enum of all opcodes that can be sent/received to/from the gateway.
-    """
+    """Enum of all opcodes that can be sent/received to/from the gateway."""
 
     DISPATCH = 0
     """Can be received"""
