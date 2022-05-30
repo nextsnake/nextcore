@@ -97,6 +97,52 @@ class HTTPClient:
 
         .. warning::
             If your time is not correct, and this is set to :data:`True`, this may result in more ratelimits being hit.
+            
+            .. tab:: Ubuntu
+
+                You can check if your clock is synchronized by running the following command:
+
+                .. code-block:: bash
+
+                    timedatectl
+
+                If it is synchronized, it will show "System clock synchronized: yes" and "NTP service: running"
+
+                If the system clock is not synchronized but the ntp service is running you will have to wait a few minutes for it to sync.
+
+                To enable the ntp service run the following command:
+
+                .. code-block:: bash
+
+                    sudo timedatectl set-ntp on
+
+                This will automatically sync the system clock every once in a while.
+
+            .. tab:: Arch
+
+                You can check if your clock is synchronized by running the following command:
+
+                .. code-block:: bash
+
+                    timedatectl
+
+                If it is synchronized, it will show "System clock synchronized: yes" and "NTP service: running"
+
+                If the system clock is not synchronized but the ntp service is running you will have to wait a few minutes for it to sync.
+
+                To enable the ntp service run the following command:
+
+                .. code-block:: bash
+
+                    sudo timedatectl set-ntp on
+
+                This will automatically sync the system clock every once in a while.
+
+            .. tab:: Windows
+
+                This can be turned on by going to ``Settings -> Time & language -> Date & time`` and turning on ``Set time automatically``.
+
+
     timeout: :class:`float`
         The default request timeout in seconds.
     default_headers: dict[:class:`str`, :class:`str`]
