@@ -371,7 +371,7 @@ class HTTPClient:
         """
         # Maybe merge this into _request?
         if self._session is None:
-            self._session = ClientSession()
+            self._session = ClientSession(json_serialize=json_dumps)
 
     async def _get_bucket(self, route: Route, ratelimit_storage: RatelimitStorage) -> Bucket:
         """Gets a bucket object for a route.
