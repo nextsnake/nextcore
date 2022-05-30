@@ -1,3 +1,5 @@
+.. currentmodule:: nextcore.gateway
+
 Gateway
 =======
 
@@ -15,37 +17,37 @@ This will respond with ``pong`` every time someone sends ``ping`` in chat.
 
 Gateway reference
 -----------------
-.. autoclass:: nextcore.gateway.ShardManager
+.. autoclass:: ShardManager
    :members:
 
-.. autoclass:: nextcore.gateway.Shard
+.. autoclass:: Shard
    :members:
 
-.. autoclass:: nextcore.gateway.GatewayOpcode
+.. autoclass:: GatewayOpcode
    :members:
 
 Gateway errors
 --------------
-.. autoexception:: nextcore.gateway.ReconnectCheckFailedError
+.. autoexception:: ReconnectCheckFailedError
    :members:
 
-.. autoexception:: nextcore.gateway.DisconnectError
+.. autoexception:: DisconnectError
    :members:
 
-.. autoexception:: nextcore.gateway.InvalidIntentsError
+.. autoexception:: InvalidIntentsError
    :members:
 
-.. autoexception:: nextcore.gateway.DisallowedIntentsError
+.. autoexception:: DisallowedIntentsError
    :members:
 
-.. autoexception:: nextcore.gateway.InvalidTokenError
+.. autoexception:: InvalidTokenError
    :members:
 
-.. autoexception:: nextcore.gateway.InvalidApiVersionError
+.. autoexception:: InvalidApiVersionError
    :members:
 
-.. autoexception:: nextcore.gateway.InvalidShardCountError
+.. autoexception:: InvalidShardCountError
    :members:
 
-.. autoexception:: nextcore.gateway.UnhandledCloseCodeError
+.. autoexception:: UnhandledCloseCodeError
    :members:

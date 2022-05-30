@@ -3,7 +3,7 @@
 
 Events
 ======
-This is a document showing you the arguments from the different instances of :class:`Dispatcher <common.Dispatcher>` in the library.
+This is a document showing you the arguments from the different instances of :class:`common.Dispatcher` in the library.
 
 Raw Dispatcher
 --------------

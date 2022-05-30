@@ -1,5 +1,8 @@
+.. currentmodule:: nextcore.common
+
+
 Common
 ======
 
-.. autoclass:: nextcore.common.Dispatcher
+.. autoclass:: Dispatcher
    :members:
