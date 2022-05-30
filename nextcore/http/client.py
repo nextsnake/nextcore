@@ -544,6 +544,7 @@ class HTTPClient:
     # Channel
     async def get_channel(self, authentication: BotAuthentication, channel_id: str | int) -> ChannelData:
         """Gets a channel by ID.
+
         See the `documentation <https://discord.dev/resources/channels#get-channel>`__
 
         Parameters
