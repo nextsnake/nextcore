@@ -54,7 +54,7 @@ class GatewayCloseCode(IntEnum):
     SHARDING_REQUIRED = 4011
     """Sharding is required to continue."""
     INVALID_API_VERSION = 4012
-    """We sent a invalid api version."""
+    """We sent an invalid api version."""
     INVALID_INTENTS = 4013
     """We sent invalid intents."""
     DISALLOWED_INTENTS = 4014
