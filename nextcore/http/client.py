@@ -433,6 +433,7 @@ class HTTPClient:
 
     async def get_gateway_bot(self, authentication: BotAuthentication) -> GetGatewayBotData:
         """Gets gateway connection information.
+
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`__
 
         Example usage:
