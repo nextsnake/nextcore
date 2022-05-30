@@ -109,11 +109,11 @@ class Shard:
         The name of the library that is using this gateway. This should be set if you are making your own library on top of nextcore.
     ready: :class:`asyncio.Event`
         Fires when the gateway has connected and received the READY event.
-    raw_dispatcher: :class:`Dispatcher<nextcore.common.Dispatcher>`
+    raw_dispatcher: :class:`~common.Dispatcher`
         A dispatcher with raw payloads sent by discord. The event name is the opcode, and the value is the raw data.
-    event_dispatcher: :class:`Dispatcher<nextcore.common.Dispatcher>`
+    event_dispatcher: :class:`~common.Dispatcher`
         A dispatcher for DISPATCH events sent by discord. The event name is the event name, and the value is the inner payload.
-    dispatcher: :class:`Dispatcher<nextcore.common.Dispatcher>`
+    dispatcher: :class:`~common.Dispatcher`
         A dispatcher for internal events.
     session_id: :class:`str`
         The ID of the current session.
