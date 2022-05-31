@@ -28,7 +28,20 @@ ZLIB_SUFFIX = b"\x00\x00\xff\xff"
 
 
 class Decompressor:
-    """A wrapper around zlib to handle partial payloads"""
+    """A wrapper around zlib to handle partial payloads
+    
+    **Example usage**
+
+    .. code-block::
+        
+        from nextcore.gateway import Decompressor
+
+        decompressor = Decompressor()
+
+        data = decompressor.decompress(zlib_data) # bytes from the Discord gateway
+
+        print(data.decode("utf-8"))
+    """
 
     __slots__ = ("_decompressor", "_buffer")
 
@@ -39,10 +52,31 @@ class Decompressor:
     def decompress(self, data: bytes) -> bytes | None:
         """Decompress zlib data.
 
+        **Example usage:**
+
+        .. code-block::
+            :emphasize-lines: 5
+            
+            from nextcore.gateway import Decompressor
+
+            decompressor = Decompressor()
+
+            data = decompressor.decompress(zlib_data) # bytes from the Discord gateway
+
+            print(data.decode("utf-8"))
+
+
+        Parameters
+        ----------
+        data: :class:`bytes`
+            The zlib compressed bytes.
+
         Returns
         -------
         :class:`bytes` | :data:`None`:
-            The decompressed data. This is :data:`None` if this is a partial payload.
+            The decompressed data.
+
+            This is :data:`None` if this is a partial payload.
 
         Raises
         ------

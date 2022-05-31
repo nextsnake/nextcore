@@ -26,6 +26,9 @@ Gateway reference
 .. autoclass:: GatewayOpcode
    :members:
 
+.. autoclass:: Decompressor
+   :members:
+
 Gateway errors
 --------------
 .. autoexception:: ReconnectCheckFailedError
