@@ -341,7 +341,7 @@ class HTTPClient:
     async def ws_connect(self, url: str, **kwargs: Any) -> ClientWebSocketResponse:
         """Connects to a websocket.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -458,7 +458,7 @@ class HTTPClient:
 
         See the `documentation <https://discord.dev/topics/gateway#get-gateway>`__ for more info.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -483,7 +483,7 @@ class HTTPClient:
 
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`__
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 

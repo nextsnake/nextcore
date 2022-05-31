@@ -12,7 +12,7 @@ These are the raw dispatchers that just relay raw events from the discord websoc
 
 The event name here is the gateway `opcode <https://discord.dev/docs/topics/gateway#gateway-opcodes>`__.
 
-Example usage:
+**Example usage:**
 
 .. code-block:: python
 
@@ -27,7 +27,7 @@ These dispatchers dispatch the data inside the ``d`` key of a :attr:`GatewayOpco
 
 The event name is the Dispatch `event name <https://discord.dev/topics/gateway#commands-and-events-gateway-events>`__.
 
-Example usage:
+**Example usage:**
 
 .. code-block:: python
    
@@ -49,7 +49,7 @@ Whenever Discord disconnects us from the discord gateway.
 .. note::
    This does not dispatch closes made by the :class:`gateway.Shard` itself.
 
-Example usage:
+**Example usage:**
 
 .. code-block:: python
 
@@ -61,7 +61,7 @@ sent
 ^^^^
 Whenever we send a message to Discord over the websocket.
 
-Example usage:
+**Example usage:**
 
 .. code-block:: python
 
@@ -73,7 +73,7 @@ critical
 ^^^^^^^^
 Whenever a critical event happens, this event is dispatched. The first argument will be a :class:`Exception` object of what happened.
 
-Example usage:
+**Example usage:**
 
 .. code-block:: python
 
@@ -91,7 +91,7 @@ request_response
 ^^^^^^^^^^^^^^^^
 Whenever a response to a request to Discord has been received, this event is dispatcher. The first argument will be the :class:`aiohttp.ClientResponse` object.
 
-Example usage:
+**Example usage:**
 
 .. code-block:: python
 

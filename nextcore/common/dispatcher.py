@@ -73,7 +73,7 @@ class Dispatcher(Generic[EventNameT]):
     There is also "global" events. This makes all handlers get every event.
     This will also provide a :class:`EventNameT` parameter to the handler (and check if you are using :meth:`Dispatcher.wait_for`).
 
-    Example usage:
+    **Example usage:**
 
     .. code-block:: python
 
@@ -116,7 +116,7 @@ class Dispatcher(Generic[EventNameT]):
     ]:
         """Decorator to register a event listener.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -160,7 +160,7 @@ class Dispatcher(Generic[EventNameT]):
     ) -> None:
         """Add a event listener.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -199,7 +199,7 @@ class Dispatcher(Generic[EventNameT]):
     ) -> None:
         """Removes a event listener.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -254,7 +254,7 @@ class Dispatcher(Generic[EventNameT]):
         .. note::
             If no listener is registered, the error will be logged.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -285,7 +285,7 @@ class Dispatcher(Generic[EventNameT]):
     ) -> None:
         """Removes an error handler.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -337,7 +337,7 @@ class Dispatcher(Generic[EventNameT]):
     ) -> WaitForReturn | GlobalWaitForReturn[EventNameT]:
         """Wait for an event to occur.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -402,7 +402,7 @@ class Dispatcher(Generic[EventNameT]):
     async def dispatch(self, event_name: EventNameT, *args: Any) -> None:
         """Dispatch a event
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 

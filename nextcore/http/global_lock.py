@@ -36,7 +36,7 @@ __all__ = ("GlobalLock",)
 class GlobalLock:
     """A ratelimiter that works towards a Discord global lock.
 
-    Example usage:
+    **Example usage:**
 
     .. code-block:: python
 
