@@ -24,7 +24,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Dict  # pylint: ignore [outdated-typing-dict]
+    from typing import Union  # pylint: ignore [outdated-typing-union]
+
+    from typing_extensions import TypeAlias
+
+    JsonCompatible: TypeAlias = Union[str, int, float, None, Dict[Union[str, int, float, None], "JsonCompatible"]]
 
 try:
     import orjson
@@ -39,7 +44,7 @@ except ImportError:
 __all__ = ("json_loads", "json_dumps")
 
 
-def json_loads(data: str) -> Any:
+def json_loads(data: str) -> JsonCompatible:
     """Loads a json string into a python object.
 
     Parameters
@@ -52,7 +57,7 @@ def json_loads(data: str) -> Any:
     return json.loads(data)
 
 
-def json_dumps(to_dump: Any) -> str:
+def json_dumps(to_dump: JsonCompatible) -> str:
     """Dumps a python object into a json string.
 
     Parameters

@@ -29,11 +29,11 @@ ZLIB_SUFFIX = b"\x00\x00\xff\xff"
 
 class Decompressor:
     """A wrapper around zlib to handle partial payloads
-    
+
     **Example usage**
 
     .. code-block::
-        
+
         from nextcore.gateway import Decompressor
 
         decompressor = Decompressor()
@@ -56,7 +56,7 @@ class Decompressor:
 
         .. code-block::
             :emphasize-lines: 5
-            
+
             from nextcore.gateway import Decompressor
 
             decompressor = Decompressor()

@@ -97,7 +97,7 @@ class HTTPClient:
 
         .. warning::
             If your time is not correct, and this is set to :data:`True`, this may result in more ratelimits being hit.
-            
+
             .. tab:: Ubuntu
 
                 You can check if your clock is synchronized by running the following command:
