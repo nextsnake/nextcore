@@ -26,10 +26,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Dict  # pylint: ignore [outdated-typing-dict]
     from typing import Union  # pylint: ignore [outdated-typing-union]
+    from typing import List # pylint: ignore [outdated-typing-list]
 
     from typing_extensions import TypeAlias
 
-    JsonCompatible: TypeAlias = Union[str, int, float, None, Dict[Union[str, int, float, None], "JsonCompatible"]]
+    JsonCompatible: TypeAlias = Union[str, int, float, None, Dict[Union[str, int, float, None], "JsonCompatible"], List["JsonCompatible"]]
 
 try:
     import orjson
@@ -51,6 +52,13 @@ def json_loads(data: str) -> JsonCompatible:
     ----------
     data:
         The json string to load.
+
+    Raises
+    ------
+    :exc:`ValueError`
+        The text provided is not valid json
+    :exc:`TypeError`
+        data must be a :class:`str`
     """
     if _has_orjson:
         return orjson.loads(data)
