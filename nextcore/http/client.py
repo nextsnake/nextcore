@@ -82,17 +82,17 @@ class HTTPClient:
 
     Parameters
     ----------
-    trust_local_time: :class:`bool`
+    trust_local_time:
         Whether to trust local time.
         If this is not set HTTP ratelimiting will be a bit slower but may be a bit more accurate on systems where the local time is off.
-    timeout: :class:`float`
+    timeout:
         The default request timeout in seconds.
-    max_ratelimit_retries: :class:`int`
+    max_ratelimit_retries:
         How many times to attempt to retry a request after ratelimiting failed.
 
     Attributes
     ----------
-    trust_local_time: :class:`bool`
+    trust_local_time:
         If this is enabled, the ratelimiter will use the local time instead of the discord provided time. This may improve your bot's speed slightly.
 
         .. warning::
@@ -143,20 +143,20 @@ class HTTPClient:
                 This can be turned on by going to ``Settings -> Time & language -> Date & time`` and turning on ``Set time automatically``.
 
 
-    timeout: :class:`float`
+    timeout:
         The default request timeout in seconds.
-    default_headers: dict[:class:`str`, :class:`str`]
+    default_headers:
         The default headers to pass to every request.
-    max_retries: :class:`int`
+    max_retries:
         How many times to attempt to retry a request after ratelimiting failed.
 
         .. note::
             This does not retry server errors.
-    ratelimit_storages: dict[:class:`int`, :class:`RatelimitStorage`]
+    ratelimit_storages:
         Classes to store ratelimit information.
 
         The key here is the ratelimit_key (often a user ID).
-    dispatcher: :class:`Dispatcher`
+    dispatcher:
         Events from the HTTPClient. See the :ref:`events<HTTPClient dispatcher>`
     """
 
@@ -196,17 +196,17 @@ class HTTPClient:
 
         Parameters
         ----------
-        route: :class:`Route`
+        route:
             The route to request
-        ratelimit_key: :class:`str` | :data:`None`
+        ratelimit_key:
             A ID used for differentiating ratelimits.
             This should be a bot or oauth2 token.
 
             .. note::
                 This should be :data:`None` for unauthenticated routes or webhooks (does not include modifying the webhook via a bot).
-        headers: :class:`dict[str, str]`
+        headers:
             Headers to mix with :attr:`HTTPClient.default_headers` to pass to :meth:`aiohttp.ClientSession.request`
-        kwargs: :data:`typing.Any`
+        kwargs:
             Keyword arguments to pass to :meth:`aiohttp.ClientSession.request`
 
         Returns
@@ -350,9 +350,9 @@ class HTTPClient:
 
         Parameters
         ----------
-        url: :class:`str`
+        url:
             The url to connect to.
-        kwargs: :data:`typing.Any`
+        kwargs:
             Keyword arguments to pass to :meth:`aiohttp.ClientSession.ws_connect`
 
         Returns
@@ -383,9 +383,9 @@ class HTTPClient:
 
         Parameters
         ----------
-        route: :class:`Route`
+        route:
             The route to get the bucket for.
-        ratelimit_storage: :class:`RatelimitStorage`
+        ratelimit_storage:
             The user's ratelimits.
         """
         # TODO: Can this be written better?
@@ -494,7 +494,7 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
 
         Returns
@@ -532,26 +532,26 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        guild_id: :class:`int`
+        guild_id:
             The guild to query the audit log for.
-        user_id: :class:`int` | :data:`None`
+        user_id:
             The user to filter the audit log by.
 
             This will be the user that did the action if present, if not it will be the user that got actioned.
 
             If this is :data:`None` this will not filter.
-        action_type: :class:`AuditLogEvents` | :data:`None`
+        action_type:
             The action type to filter the audit log by.
 
             If this is :data:`None` this will not filter.
-        before: :class:`int` | :data:`None`
+        before:
             Get entries before this entry.
 
             .. note::
                 This does not have to be a valid entry id.
-        limit: :class:`int`
+        limit:
             The amount of entries to get.
 
             This has a minimum of 1 and a maximum of 100.
@@ -596,9 +596,9 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`int`
+        channel_id:
             The channel ID to get.
 
         Returns
@@ -636,18 +636,18 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BearerAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the group dm channel to update
-        name: :class:`str` | :class:`UndefinedType`
+        name:
             The name of the group dm.
 
             .. note::
                 This has to be between 1 to 100 characters long.
-        icon: :class:`str` | :class:`UndefinedType`
+        icon:
             A base64 encoded image of what to change the group dm icon to.
-        reason: :class:`str` | :class:`UndefinedType`
+        reason:
             A reason for the audit log.
 
             .. note::
@@ -704,30 +704,30 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to update.
-        name: :class:`str` | :class:`UndefinedType`
+        name:
             The name of the channel.
-        channel_type: Literal[0, 5] | :class:`UndefinedType`
+        channel_type:
             The type of the channel.
 
             .. note::
                 This is named ``type`` in the API, however to not overwrite the type function in python this is changed here.
-        position: :class:`int` | :data:`None` | :class:`UndefinedType`
+        position:
             The position of the channel.
 
             .. note::
                 If this is set to :data:`None` it will default to ``0``.
-        topic: :class:`str` | :data:`None` | :class:`UndefinedType`
+        topic:
             The channel topic.
-        nsfw: :class:`bool` | :data:`None` | :class:`UndefinedType`
+        nsfw:
             Whether the channel marked as age restricted.
 
             .. note::
                 If this is set to :data:`None` it will default to :data:`False`.
-        rate_limit_per_user: :class:`int` | :data:`None` | :class:`UndefinedType`
+        rate_limit_per_user:
             How many seconds a user has to wait before sending another message or create a thread.
 
             Bots, as well as users with the ``manage_messages`` or ``manage_channel`` are unaffected
@@ -735,7 +735,7 @@ class HTTPClient:
 
             .. note::
                 This has to be between 0-21600 seconds.
-        bitrate: :class:`int` | :data:`None` | :class:`UndefinedType`
+        bitrate:
             The bitrate of the channel in bits per second.
 
             .. note::
@@ -744,37 +744,37 @@ class HTTPClient:
                 This has to be between 8000-96000 for guilds without the ``VIP_REGIONS`` feature.
 
                 For guilds with the ``VIP_REGIONS`` feature this has to be between 8000-128000.
-        user_limit: :class:`int` | :data:`None` | :class:`UndefinedType`
+        user_limit:
             The maximum amount of users that can be in a voice channel at a time.
-        permission_overwrites: list[:class:`discord_typings.PartialPermissionOverwriteData`] | :data:`None` | :class:`UndefinedType`
+        permission_overwrites:
             The permission overwrites for the channel.
 
             .. note::
                 If this is set to :data:`None` it will default to an empty list.
-        parent_id: :class:`int` | :class:`str` | :class:`UndefinedType`
+        parent_id:
             The id of the parent channel.
 
             This can be a text channel for threads or a category channel.
-        rtc_region: :class:`str` | :data:`None` | :class:`UndefinedType`
+        rtc_region:
             The voice region of the channel.
 
             .. note::
                 If this is :data:`None` it is automatic. Every time someone joins a empty channel, the closest region will be used.
-        video_quality_mode: Literal[1, 2] | :data:`None` | :class:`UndefinedType`
+        video_quality_mode:
             The video quality mode of the channel.
 
             .. note::
                 If this is :data:`None` it will not be present in the Guild payload.
 
                 This is rougly the same as setting it to ``1``.
-        default_auto_archive_duration: Literal[60, 1440, 4320, 10080] | :data:`None` | :class:`UndefinedType`
+        default_auto_archive_duration:
             The default auto archive duration for threads created in this channel.
 
             .. note::
                 If this is :data:`None` it will not be present in the Guild payload.
 
                 The client treats this as it being set to 24 hours however this may change without notice.
-        reason: :class:`str` | :class:`UndefinedType`
+        reason:
             The reason to put in the audit log.
         """
 
@@ -842,28 +842,28 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        thread_id: :class:`str` | :class:`int`
+        thread_id:
             The id of the thread to update.
-        name: :class:`str` | :class:`UndefinedType`
+        name:
             The name of the thread.
-        archived: :class:`bool` | :class:`UndefinedType`
+        archived:
             Whether the thread is archived.
-        auto_archive_duration: Literal[60, 1440, 4320, 10080] | :class:`UndefinedType`
+        auto_archive_duration:
             How long in minutes to automatically archive the thread after recent activity
-        locked: :class:`bool` | :class:`UndefinedType`
+        locked:
             Whether the thread can only be un-archived by members with the ``manage_threads`` permission.
-        invitable: :class:`bool` | :class:`UndefinedType`
+        invitable:
             Whether members without the ``manage_threads`` permission can invite members without the ``manage_channels`` permission to the thread.
-        rate_limit_per_user: :class:`int` | :data:`None` | :class:`UndefinedType`
+        rate_limit_per_user:
             The duration in seconds that a user must wait before sending another message to the thread.
 
             Bots, as well as users with the ``manage_messages`` or ``manage_channel`` are unaffected
 
             .. note::
                 This has to be between 0-21600 seconds.
-        reason: :class:`str` | :class:`UndefinedType`
+        reason:
             The reason to put in the audit log.
         """
 
@@ -902,9 +902,9 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication` | :class:`BearerAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to delete.
         """
 
@@ -957,26 +957,26 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to get messages from.
-        around: :class:`int` | :class:`UndefinedType`
+        around:
             The id of the message to get messages around.
 
             .. note::
                 This does not have to be a valid message id.
-        before: :class:`int` | :class:`UndefinedType`
+        before:
             The id of the message to get messages before.
 
             .. note::
                 This does not have to be a valid message id.
-        after: :class:`int` | :class:`UndefinedType`
+        after:
             The id of the message to get messages after.
 
             .. note::
                 This does not have to be a valid message id.
-        limit: :class:`int`
+        limit:
             The number of messages to get.
 
             .. note::
@@ -1031,18 +1031,18 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to create a message in.
-        content: :class:`str` | :class:`UndefinedType`
+        content:
             The content of the message.
-        tts: :class:`bool`
+        tts:
             Whether the ``content`` should be spoken out by the Discord client upon send.
 
             .. note::
                 This will still set ``Message.tts`` to :data:`True` even if ``content`` is not provided.
-        embeds: list[:class:`discord_typings.EmbedData`] | :class:`UndefinedType`
+        embeds:
             The embeds to send with the message.
 
             .. hint::
@@ -1052,25 +1052,25 @@ class HTTPClient:
                 There is a maximum 6,000 character limit across all embeds.
 
                 See the `embed limits documentation <https://discord.dev/resources/channel#embed-object-embed-limits>`__ for more info.
-        allowed_mentions: :class:`discord_typings.AllowedMentionsData` | :class:`UndefinedType`
+        allowed_mentions:
             The allowed mentions for the message.
-        message_reference: :class:`discord_typings.MessageReferenceData` | :class:`UndefinedType`
+        message_reference:
             The message to reply to.
-        componenets: list[:class:`discord_typings.ActionRowData`] | :class:`UndefinedType`
+        componenets:
             The components to send with the message.
-        sticker_ids: list[:class:`int`] | :class:`UndefinedType`
+        sticker_ids:
             A list of sticker ids to attach to the message.
 
             .. note::
                 This has a max of 3 stickers.
-        files: :class:`Iterable[:class:`discord_typings.File`]` | :class:`UndefinedType`
+        files:
             The files to send with the message.
-        attachments: list[:class:`discord_typings.CreateMessagePartialAttachmentData`] | :class:`UndefinedType`
+        attachments:
             Metadata about the ``files`` parameter.
 
             .. note::
                 This only includes the ``filename`` and ``description`` fields.
-        flags: :class:`int` | :class:`UndefinedType`
+        flags:
             Bitwise flags to send with the message.
 
             .. note::
@@ -1143,11 +1143,11 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to crosspost the message to.
-        message_id: :class:`str` | :class:`int`
+        message_id:
             The id of the message to crosspost.
 
         Returns
@@ -1182,13 +1182,13 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel where the message is located.
-        message_id: :class:`str` | :class:`int`
+        message_id:
             The id of the message to add a reaction to.
-        emoji: :class:`str`
+        emoji:
             The emoji to add to the message.
 
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
@@ -1213,13 +1213,13 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel where the message is located.
-        message_id: :class:`str` | :class:`int`
+        message_id:
             The id of the message to remove a reaction from.
-        emoji: :class:`str`
+        emoji:
             The emoji to remove from the message.
 
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
@@ -1255,17 +1255,17 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel where the message is located.
-        message_id: :class:`str` | :class:`int`
+        message_id:
             The id of the message to remove a reaction from.
-        emoji: :class:`str`
+        emoji:
             The emoji to remove from the message.
 
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
-        user_id: :class:`str` | :class:`int`
+        user_id:
             The id of the user to remove the reaction from.
         """
         route = Route(
@@ -1299,11 +1299,11 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel where the message is located.
-        message_id: :class:`str` | :class:`int`
+        message_id:
             The id of the message to get the reactions from.
 
         Returns
@@ -1349,11 +1349,11 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel where the message is located.
-        message_id: :class:`str` | :class:`int`
+        message_id:
             The id of the message to remove all reactions from.
         """
         route = Route(
@@ -1381,13 +1381,13 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel where the message is located.
-        message_id: :class:`str` | :class:`int`
+        message_id:
             The id of the message to remove all reactions from.
-        emoji: :class:`str`
+        emoji:
             The emoji to remove from the message.
 
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
@@ -1426,13 +1426,13 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel where the message is located.
-        message_id: :class:`str` | :class:`int`
+        message_id:
             The id of the message to edit.
-        content: :class:`str` | :class:`None` | :class:`UndefinedType`
+        content:
             The new content of the message.
 
             .. note::
@@ -1440,25 +1440,25 @@ class HTTPClient:
 
             .. note::
                 Adding/removing mentions will not affect mentions.
-        embeds: :class:`list[:class:`EmbedData`]` | :data:`None` | :class:`UndefinedType`
+        embeds:
             The new embeds of the message.
 
             This overwrites the previous embeds
-        flags: :class:`int` | :class:`None` | :class:`UndefinedType`
+        flags:
             The new flags of the message.
 
             .. warning::
                 Only the ``SUPPRESS_EMBEDS`` flag can be set. Trying to set other flags will be ignored.
-        allowed_mentions: :class:`AllowedMentionsData` | :class:`None` | :class:`UndefinedType`
+        allowed_mentions:
             The new allowed mentions of the message.
 
             .. note::
                 Setting this to ``None`` will make it use the default allowed mentions.
-        components: :class:`list[:class:`ActionRowData`]` | :class:`None` | :class:`UndefinedType`
+        components:
             The new components of the message.
-        files: list[:class:`File`] | :class:`None` | :class:`UndefinedType`
+        files:
             The new files of the message.
-        attachments: list[:class:`AttachmentData`] | :class:`None` | :class:`UndefinedType`
+        attachments:
             The new attachments of the message.
 
             .. warning::
@@ -1526,13 +1526,13 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel where the message is located.
-        message_id: :class:`str` | :class:`int`
+        message_id:
             The id of the message to delete.
-        reason: :class:`str` | :class:`UndefinedType`
+        reason:
             The reason for deleting the message.
 
             .. note::
@@ -1575,18 +1575,18 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel where the message is located.
-        messages: :class:`list[:class:`str` | :class:`int`]`
+        messages:
             The ids of the messages to delete.
 
             .. note::
                 This has to be between 2 and 100 messages.
 
                 Invalid messages still count towards the limit.
-        reason: :class:`str` | :class:`UndefinedType`
+        reason:
             The reason for deleting the message.
 
             .. note::
@@ -1626,28 +1626,28 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to edit.
-        target_type: :class:`int`
+        target_type:
             The type of the target.
 
             0: Role
             1: User
-        target_id: :class:`str` | :class:`int`
+        target_id:
             The id of the target to edit permissions for.
-        allow: :class:`str` | :class:`None` | :class:`UndefinedType`
+        allow:
             A bitwise flag of permissions to allow.
 
             .. note::
                 If this is set to :data:`None`, it will default to ``0``.
-        deny: :class:`str` | :class:`None` | :class:`UndefinedType`
+        deny:
             A bitwise flag of permissions to allow.
 
             .. note::
                 If this is set to :data:`None`, it will default to ``0``.
-        reason: :class:`str` | :class:`UndefinedType`
+        reason:
             The reason to show in audit log
 
             .. note::
@@ -1689,9 +1689,9 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to get invites for.
 
         Returns
@@ -1774,36 +1774,36 @@ class HTTPClient:
 
         Parameters
         -----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to create an invite for.
-        max_age: :class:`int` | :class:`UndefinedType`
+        max_age:
             How long the invite should last.
 
             .. note::
                 This has to be between 0 and 604800 seconds. (7 days)
 
                 Setting this to ``0`` will make it never expire.
-        max_uses: :class:`int` | :class:`UndefinedType`
+        max_uses:
             How many times the invite can be used before getting deleted.
-        temporary: :class:`bool` | :class:`UndefinedType`
+        temporary:
             Whether the invite grants temporary membership.
 
             This will kick members if they havent got a role when logging off.
-        unique: :class:`bool` | :class:`UndefinedType`
+        unique:
             Whether discord will make a new invite regardless of existing invites.
-        target_type: :class:`int` | :class:`UndefinedType`
+        target_type:
             The type of the target.
 
             0: A user's stream
             1: ``EMBEDDED`` Activity
-        target_user_id: :class:`str` | :class:`int` | :class:`UndefinedType`
+        target_user_id:
             The id of the user streaming to invite to.
 
             .. note::
                 This can only be set if ``target_type`` is ``0``.
-        target_application_id: :class:`str` | :class:`int` | :class:`UndefinedType`
+        target_application_id:
             The id of the ``EMBEDDED`` activity to play.
 
             .. note::
@@ -1853,11 +1853,11 @@ class HTTPClient:
 
         Parameters
         -----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to delete the permission from.
-        target_id: :class:`str` | :class:`int`
+        target_id:
             The id of the user or role to delete the permission from.
         """
         route = Route(
@@ -1884,11 +1884,11 @@ class HTTPClient:
 
         Parameters
         -----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to follow.
-        webhook_channel_id: :class:`str` | :class:`int`
+        webhook_channel_id:
             The id of the channel to receive posts to.
 
         Returns
@@ -1912,9 +1912,9 @@ class HTTPClient:
 
         Parameters
         -----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to trigger the typing indicator on.
         """
         route = Route("POST", "/channels/{channel_id}/typing", channel_id=channel_id)
@@ -1932,9 +1932,9 @@ class HTTPClient:
 
         Parameters
         -----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to get the pinned messages of.
 
         Returns
@@ -1970,13 +1970,13 @@ class HTTPClient:
 
         Parameters
         -----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to pin the message in.
-        message_id: :class:`str` | :class:`int`
+        message_id:
             The id of the message to pin.
-        reason: :class:`str` | :class:`UndefinedType`
+        reason:
             The reason to put in the audit log.
 
             .. note::
@@ -2004,11 +2004,11 @@ class HTTPClient:
 
         Parameters
         -----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to unpin the message in.
-        message_id: :class:`str` | :class:`int`
+        message_id:
             The id of the message to unpin.
         """
         route = Route(
@@ -2027,11 +2027,11 @@ class HTTPClient:
 
         Parameters
         -----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to add the recipient to.
-        user_id: :class:`str` | :class:`int`
+        user_id:
             The id of the user to add.
         """
         route = Route("PUT", "/channels/{channel_id}/recipients/{user_id}", channel_id=channel_id, user_id=user_id)
@@ -2048,11 +2048,11 @@ class HTTPClient:
 
         Parameters
         -----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to remove the recipient from.
-        user_id: :class:`str` | :class:`int`
+        user_id:
             The id of the user to remove.
         """
         route = Route("DELETE", "/channels/{channel_id}/recipients/{user_id}", channel_id=channel_id, user_id=user_id)
@@ -2077,15 +2077,15 @@ class HTTPClient:
 
         Parameters
         -----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The id of the channel to start the thread in.
-        message_id: :class:`str` | :class:`int`
+        message_id:
             The id of the message to start the thread from.
-        name: :class:`str`
+        name:
             The name of the thread.
-        auto_archive_duration: :class:`int` | :class:`UndefinedType`
+        auto_archive_duration:
             The auto archive duration of the thread.
         rate_limit_per_user: :class:`int` | :data:`None` | :class:`UndefinedType`
             The time every member has to wait before sending another message.
@@ -2141,18 +2141,18 @@ class HTTPClient:
 
         Parameters
         ----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The channel to create the thread in.
-        name: :class:`str`
+        name:
             The name of the thread.
 
             .. note::
                 This has to be between 1-100 characters long.
-        auto_archive_duration: Literal[60, 1440, 4320, 10080] | :class:`UndefinedType`
+        auto_archive_duration:
             The time to automatically archive the thread after no activity.
-        rate_limit_per_user: :class:`int` | :data:`None` | :class:`UndefinedType`
+        rate_limit_per_user:
             The time every member has to wait before sending another message
 
             .. note::
@@ -2205,9 +2205,9 @@ class HTTPClient:
 
         Parameters
         -----------
-        authentication: :class:`BotAuthentication`
+        authentication:
             Authentication info.
-        channel_id: :class:`str` | :class:`int`
+        channel_id:
             The thread to join.
         """
         route = Route("PUT", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)

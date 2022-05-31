@@ -43,12 +43,12 @@ class Bucket:
 
     Parameters
     ----------
-    metadata: :class:`BucketMetadata`
+    metadata:
         The metadata for the bucket.
 
     Attributes
     ----------
-    metadata: :class:`BucketMetadata`
+    metadata:
         The metadata for the bucket.
     """
 
@@ -110,7 +110,7 @@ class Bucket:
 
         Parameters
         ----------
-        session: :class:`RequestSession`
+        session:
             The session to clean up.
         """
         self._reserved.remove(session)
@@ -147,11 +147,11 @@ class Bucket:
 
         Parameters
         ----------
-        remaining: :class:`int`
+        remaining:
             The number of requests remaining in the bucket.
-        reset_after: :class:`float`
+        reset_after:
             The time in seconds until the bucket resets.
-        unlimited: :class:`bool`
+        unlimited:
             Whether the bucket is unlimited.
         """
         if not unlimited:

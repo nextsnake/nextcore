@@ -30,9 +30,9 @@ class BaseAuthentication:
 
     Attributes
     ----------
-    prefix: :class:`str`
+    prefix:
         The prefix of the authentication.
-    token: :class:`str`
+    token:
         The bot's token.
     """
 

@@ -46,18 +46,18 @@ class TimesPer:
 
     Parameters
     ----------
-    total: int
+    total:
         The total number of times this can be used per period.
-    per: float
+    per:
         How long each period lasts in seconds.
 
     Attributes
     ----------
-    total: :class:`int`
+    total:
         The amount of times this can be used per period.
-    remaining: :class:`int`
+    remaining:
         How many times this can be used this period.
-    per: :class:`float`
+    per:
         How long each period lasts in seconds.
     """
 

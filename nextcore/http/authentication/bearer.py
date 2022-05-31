@@ -36,14 +36,14 @@ class BearerAuthentication(BaseAuthentication):
 
     Parameters
     ----------
-    token: :class:`str`
+    token:
         The bot token.
 
     Attributes
     ----------
-    prefix: Literal["Bearer"]
+    prefix:
         The prefix of the token.
-    token: :class:`str`
+    token:
         The bot token
     """
 

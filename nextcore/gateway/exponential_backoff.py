@@ -39,11 +39,11 @@ class ExponentialBackoff:
 
     Parameters
     ----------
-    initial: :class:`float`
+    initial:
         The initial value of the backoff
-    base: :class:`float`
+    base:
         What to multiply the current time with when the next iteration of backoff is called
-    max_value: :class:`float`
+    max_value:
         The max value to cap the backoff at
 
     Attributes

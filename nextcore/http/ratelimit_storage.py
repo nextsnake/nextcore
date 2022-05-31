@@ -49,7 +49,7 @@ class RatelimitStorage:
 
     Attributes
     ----------
-    global_lock: :class:`GlobalLock`
+    global_lock:
         The users per user global ratelimit.
 
     """
@@ -74,7 +74,7 @@ class RatelimitStorage:
 
         Parameters
         ----------
-        nextcore_id: :class:`str` | :class:`int`
+        nextcore_id:
             The nextcore generated bucket id. This can be gotten by using :attr:`Route.bucket`
         """
         return self._nextcore_buckets.get(nextcore_id)
@@ -84,9 +84,9 @@ class RatelimitStorage:
 
         Parameters
         ----------
-        nextcore_id: :class:`str` | :class:`int`
+        nextcore_id:
             The nextcore generated id of the
-        bucket: :class:`Bucket`
+        bucket:
             The bucket to store.
         """
         self._nextcore_buckets[nextcore_id] = bucket
@@ -98,7 +98,7 @@ class RatelimitStorage:
 
         Parameters
         ----------
-        discord_id: :class:`str`
+        discord_id:
             The Discord bucket hash
         """
         return self._discord_buckets.get(discord_id)
@@ -110,9 +110,9 @@ class RatelimitStorage:
 
         Parameters
         ----------
-        discord_id: :class:`str`
+        discord_id:
             The Discord bucket hash
-        bucket: :class:`Bucket`
+        bucket:
             The bucket to store.
         """
         self._discord_buckets[discord_id] = bucket
@@ -122,7 +122,7 @@ class RatelimitStorage:
 
         Parameters
         ----------
-        bucket_route: :class:`str`
+        bucket_route:
             The bucket route.
         """
         return self._bucket_metadata.get(bucket_route)
@@ -132,9 +132,9 @@ class RatelimitStorage:
 
         Parameters
         ----------
-        bucket_route: :class:`str`
+        bucket_route:
             The bucket route.
-        metadata: :class:`BucketMetadata`
+        metadata:
             The metadata to store.
         """
         self._bucket_metadata[bucket_route] = metadata

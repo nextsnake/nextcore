@@ -34,13 +34,13 @@ class Route:
 
     Parameters
     ----------
-    method: :class:`str`
+    method:
         The HTTP method of the route
-    path: :class:`str`
+    path:
         The path of the route. This can include python formatting strings ({var_here}) from kwargs
-    ignore_global: :class:`bool`
+    ignore_global:
         If this route bypasses the global ratelimit.
-    parameters: :class:`str` | :class:`int`
+    parameters:
         The parameters of the route. These will be used to format the path.
 
         If ``guild_id``, ``channel_id`` or ``webhook_id`` is in the parameters,
@@ -50,17 +50,17 @@ class Route:
 
     Attributes
     ----------
-    method: :class:`str`
+    method:
         The HTTP method of the route
-    route: :class:`str`
+    route:
         The path of the route. This can include python formatting strings ({var_here}) from kwargs.
-    path: :class:`str`
+    path:
         The formatted version of :attr:`Route.route`
-    ignore_global: :class:`bool`
+    ignore_global:
         If this route bypasses the global ratelimit.
 
         This is always :data:`True` for unauthenticated routes.
-    bucket: :class:`str` | :class:`int`
+    bucket:
         The ratelimit bucket this fits in.
 
         This is created from :attr:`Route.guild_id`, :attr:`Route.channel_id`, :attr:`Route.webhook_id`, :attr:`Bucket.method` and :attr:`Route.path`

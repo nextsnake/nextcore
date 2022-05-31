@@ -85,16 +85,16 @@ class RateLimitingFailedError(Exception):
 
     Parameters
     ----------
-    max_retries: :class:`int`
+    max_retries:
         How many retries the request used that failed.
-    response: :class:`aiohttp.ClientResponse`
+    response:
         The response to the last request that failed.
 
     Attributes
     ----------
-    max_retries: :class:`int`
+    max_retries:
         How many retries the request used that failed.
-    response: :class:`aiohttp.ClientResponse`
+    response:
         The response to the last request that failed.
     """
 
@@ -111,20 +111,20 @@ class HTTPRequestStatusError(Exception):
 
     Parameters
     ----------
-    error: :class:`HTTPErrorTyping`
+    error:
         The error json from the body.
-    response: :class:`ClientResponse`
+    response:
         The response to the request.
 
     Attributes
     ----------
-    response: :class:`ClientResponse`
+    response:
         The response to the request.
-    error_code: :class:`int`
+    error_code:
         The error code.
-    message: :class:`str`
+    message:
         The error message.
-    error: :class:`HTTPErrorTyping`
+    error:
         The error json from the body.
     """
 

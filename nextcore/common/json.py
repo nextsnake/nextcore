@@ -49,7 +49,7 @@ def json_loads(data: str) -> JsonCompatible:
 
     Parameters
     ----------
-    data: :class:`str`
+    data:
         The json string to load.
     """
     if _has_orjson:
@@ -62,7 +62,7 @@ def json_dumps(to_dump: JsonCompatible) -> str:
 
     Parameters
     ----------
-    to_dump: :class:`typing.Any`
+    to_dump:
         The python object to dump.
     """
     if _has_orjson:

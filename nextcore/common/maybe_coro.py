@@ -35,11 +35,11 @@ async def maybe_coro(coro: Callable[..., Any], *args: Any, **kwargs: Any) -> Any
 
     Parameters
     ----------
-    coro: Callable[..., :data:`Any`]
+    coro:
         The function to execute
-    args: :data:`typing.Any`
+    args: 
         The arguments to pass to the function
-    kwargs: :data:`Any`
+    kwargs:
         The keyword arguments to pass to the function
 
     Returns

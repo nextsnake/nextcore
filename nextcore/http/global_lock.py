@@ -47,7 +47,7 @@ class GlobalLock:
 
     Parameters
     ----------
-    limit: :class:`int`
+    limit:
         The maximum number of requests that can be made per second.
 
         .. warning::

@@ -29,9 +29,9 @@ class BucketMetadata:
 
     Parameters
     ----------
-    limit: :class:`int` | :class:`None`
+    limit:
         The maximum number of requests that can be made in the given time period.
-    unlimited: :class:`bool`
+    unlimited:
         Whether the bucket has an unlimited number of requests. If this is :class:`True`,
         limit has to be None.
     """

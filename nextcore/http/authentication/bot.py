@@ -36,14 +36,14 @@ class BotAuthentication(BaseAuthentication):
 
     Parameters
     ----------
-    token: :class:`str`
+    token:
         The bot token.
 
     Attributes
     ----------
-    prefix: Literal["Bot"]
+    prefix:
         The prefix of the token.
-    token: :class:`str`
+    token:
         The bot token
     """
 

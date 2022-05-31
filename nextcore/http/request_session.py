@@ -29,18 +29,18 @@ class RequestSession:
 
     Parameters
     ----------
-    unlimited: :class:`bool`
+    unlimited:
         If this request was made when the bucket was unlimited.
 
         This exists to make sure that there is no bad state when switching between unlimited and limited.
 
     Attributes
     ----------
-    unlimited: :class:`bool`
+    unlimited:
         If this request was made when the bucket was unlimited.
 
         This exists to make sure that there is no bad state when switching between unlimited and limited.
-    pending_future: :class:`asyncio.Future`
+    pending_future:
         The future that when set will execute the request.
     """
 

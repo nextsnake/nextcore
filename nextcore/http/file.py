@@ -34,22 +34,22 @@ class File:
 
     Parameters
     ----------
-    name: :class:`str`
+    name:
         The name of the file.
 
         .. warning::
             Only files ending with a `supported file extension <https://discord.dev/reference#image-formatting-image-formats>`__ can be included in embeds.
-    contents: :class:`str` | :class:`bytes` | :class:`bytearray` | :class:`BinaryIO` | :class:`TextIO`
+    contents:
         The contents of the file.
 
     Attributes
     ----------
-    name: :class:`str`
+    name:
         The name of the file.
 
         .. warning::
             Only files ending with a `supported file extension <https://discord.dev/reference#image-formatting-image-formats>`__ can be included in embeds.
-    contents: :class:`str` | :class:`bytes` | :class:`bytearray` | :class:`BinaryIO` | :class:`TextIO`
+    contents:
         The contents of the file.
     """
 

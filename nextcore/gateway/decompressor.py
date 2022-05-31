@@ -68,7 +68,7 @@ class Decompressor:
 
         Parameters
         ----------
-        data: :class:`bytes`
+        data:
             The zlib compressed bytes.
 
         Returns

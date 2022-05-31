@@ -50,38 +50,38 @@ class ShardManager:
 
     Parameters
     ----------
-    authentication: :class:`BotAuthentication`
+    authentication:
         Authentication info.
-    intents: :class:`int`
+    intents:
         The intents the bot should connect with. See the `documentation <https://discord.dev/topics/gateway#gateway-intents>`__.
-    http_client: :class:`HTTPClient<nextcore.http.HTTPClient>`
+    http_client:
         The HTTP client to use for fetching info to connect to the gateway.
-    shard_count: :class:`int`
+    shard_count:
         The amount of shards the bot should spawn. If this is not set, the bot will automatically decide and keep the shard count up to date.
-    shard_ids: list[:class:`int`] | :data:`None`
+    shard_ids:
         The shard ids the bot should spawn. If this is not set, the bot will use all shard ids possible with the :attr:`ShardManager.shard_count`. This requires :attr:`ShardManager.shard_count` to be set.
-    presence: `UpdatePresence <https://discord.dev/topics/gateway#update-presence>`__
+    presence:
         The initial presence the bot should connect with.
 
     Attributes
     ----------
-    token: :class:`str`
+    token:
         The bot's token
-    intents: :class:`int`
+    intents:
         The intents the bot should connect with. See the `documentation <https://discord.dev/topics/gateway#gateway-intents>`__.
-    shard_count: :class:`int`
+    shard_count:
         The amount of shards the bot should spawn. If this is not set, the bot will automatically decide and keep the shard count up to date.
-    shard_ids: list[:class:`int`] | :data:`None`
+    shard_ids:
         The shard ids the bot should spawn. If this is not set, the bot will use all shard ids possible with the :attr:`ShardManager.shard_count`. This requires :attr:`ShardManager.shard_count` to be set.
-    presence: `UpdatePresence <https://discord.dev/topics/gateway#update-presence>`__
+    presence:
         The initial presence the bot should connect with.
-    active_shards: list[:class:`Shard`]
+    active_shards:
         A list of all shards that are currently connected.
-    raw_dispatcher: :class:`Dispatcher <nextcore.common.Dispatcher>`
+    raw_dispatcher:
         A dispatcher with raw payloads sent by discord. The event name is the opcode, and the value is the raw data.
-    event_dispatcher: :class:`Dispatcher <nextcore.common.Dispatcher>`
+    event_dispatcher:
         A dispatcher for DISPATCH events sent by discord. The event name is the event name, and the value is the inner payload.
-    max_concurrency: :class:`int`
+    max_concurrency:
         The maximum amount of concurrent IDENTIFY's the bot can make.
     """
 

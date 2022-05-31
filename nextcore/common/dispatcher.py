@@ -126,7 +126,7 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        event_name: :class:`EventNameT` | :data:`None`
+        event_name:
             The event name to register the listener to. If this is :data:`None`, the listener is considered a global event.
         """
 
@@ -171,9 +171,9 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        callback: :class:`EventCallback` | :class:`GlobalEventCallback`
+        callback:
             The event callback to register.
-        event_name: :class:`EventNameT` | :data:`None`
+        event_name:
             The event name to listen to. If this is :data:`None`,
             this is considered a global event and all events will be sent to the callback.
         """
@@ -207,9 +207,9 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        callback: :class:`EventCallback` | :class:`GlobalEventCallback`
+        callback: 
             The event callback to remove.
-        event_name: :class:`EventNameT` | :data:`None`
+        event_name:
             The event name to remove. If this is :data:`None`, the listener is considered a global event.
 
             .. warning::
@@ -293,9 +293,9 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        callback: :class:`ExceptionHandler` | :class:`GlobalExceptionHandler`
+        callback:
             The error handler to remove.
-        event_name: :class:`EventNameT` | :data:`None`
+        event_name:
             The event name to remove. If this is :data:`None`, the listener is considered a global event.
 
             .. warning::
@@ -349,9 +349,9 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        check: :class:`WaitForCheck` | :class:`GlobalWaitForCheck`
+        check:
             Check for it to return.
-        event_name: :class:`EventNameT` | :data:`None`
+        event_name:
             The event name to wait for. If this is :data:`None`,
             it is considered global and will return when any event is received and include a :class:`EventNameT` as the first event argument.
 
@@ -410,9 +410,9 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        event_name: :class:`EventNameT`
+        event_name:
             The event name to dispatch to.
-        args: :data:`typing.Any`
+        args:
             The event arguments. This will be passed to the listeners.
         """
         logger.debug("Dispatching event %s", event_name)

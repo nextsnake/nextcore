@@ -72,54 +72,54 @@ class Shard:
 
     Parameters
     ----------
-    shard_id: :class:`int`
+    shard_id:
         The ID of this shard.
-    shard_count: :class:`int`
+    shard_count:
         How many shards is in this shard set. Used for splitting events on Discord's side.
-    intents: :class:`int`
+    intents:
         The intents to connect with.
-    token: :class:`str`
+    token:
         The bot's token to connect with.
-    identify_ratelimiter: :class:`TimesPer`
+    identify_ratelimiter:
         The ratelimiter for IDENTIFYing the bot.
-    http_client: :class:`HTTPClient<nextcore.http.HTTPClient>`
+    http_client:
         HTTP client used to connect to Discord's gateway.
-    presence: `UpdatePresence <https://discord.dev/topics/gateway#update-presence>`__
+    presence:
         The initial presence info to send when connecting.
-    large_threshold: :class:`int`
+    large_threshold:
         A value between 50 and 250 that determines how many members a guild needs for the gateway to stop sending offline members in the guild member list.
-    library_name: :class:`str`
+    library_name:
         The name of the library that is using this gateway. This should be set if you are making your own library on top of nextcore.
 
     Attributes
     ----------
-    shard_id: :class:`int`
+    shard_id:
         The ID of this shard.
-    shard_count: :class:`int`
+    shard_count:
         How many shards are in this shard set. Used for splitting events on Discord's side.
-    intents: :class:`int`
+    intents:
         The intents to connect with.
-    token: :class:`str`
+    token:
         The bot's token to connect with. If this is changed, the session will be invalidated.
-    presence: `UpdatePresence <https://discord.dev/topics/gateway#update-presence>`__
+    presence:
         The initial presence info to send when connecting.
-    large_threshold: :class:`int`
+    large_threshold:
         A value between 50 and 250 that determines how many members a guild needs for the gateway to stop sending offline members in the guild member list.
-    library_name: :class:`str`
+    library_name:
         The name of the library that is using this gateway. This should be set if you are making your own library on top of nextcore.
-    ready: :class:`asyncio.Event`
+    ready:
         Fires when the gateway has connected and received the READY event.
-    raw_dispatcher: :class:`~common.Dispatcher`
+    raw_dispatcher:
         A dispatcher with raw payloads sent by discord. The event name is the opcode, and the value is the raw data.
-    event_dispatcher: :class:`~common.Dispatcher`
+    event_dispatcher:
         A dispatcher for DISPATCH events sent by discord. The event name is the event name, and the value is the inner payload.
-    dispatcher: :class:`~common.Dispatcher`
+    dispatcher:
         A dispatcher for internal events.
-    session_id: :class:`str`
+    session_id:
         The ID of the current session.
-    session_sequence_number: :class:`int`
+    session_sequence_number:
         The last sequence number of the current session.
-    should_reconnect: :class:`bool`
+    should_reconnect:
         Whether the gateway should reconnect or not.
     """
 
