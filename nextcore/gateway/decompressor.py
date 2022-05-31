@@ -24,7 +24,11 @@ from __future__ import annotations
 from zlib import decompressobj
 from zlib import error as zlib_error
 
-ZLIB_SUFFIX = b"\x00\x00\xff\xff"
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import ClassVar
+
 
 
 class Decompressor:
@@ -42,6 +46,9 @@ class Decompressor:
 
         print(data.decode("utf-8"))
     """
+
+
+    ZLIB_SUFFIX: ClassVar[bytes] = b"\x00\x00\xff\xff"
 
     __slots__ = ("_decompressor", "_buffer")
 
@@ -85,7 +92,7 @@ class Decompressor:
         """
         self._buffer.extend(data)
 
-        if len(data) < 4 or data[-4:] != ZLIB_SUFFIX:
+        if len(data) < 4 or data[-4:] != Decompressor.ZLIB_SUFFIX:
             # Not a full payload, try again next time
             return None
 
