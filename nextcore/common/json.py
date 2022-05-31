@@ -33,7 +33,7 @@ try:
 except ImportError:
     import json
 
-    _has_orjson: bool = False
+    _has_orjson = False
 
 
 __all__ = ("json_loads", "json_dumps")
