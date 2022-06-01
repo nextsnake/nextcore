@@ -26,13 +26,13 @@ from logging import Logger, getLogger
 from random import random
 from sys import platform
 from time import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 from aiohttp import ClientConnectorError, ClientWebSocketResponse, WSMsgType
+from discord_typings.gateway import UpdatePresenceCommand
 from frozendict import frozendict
 
-from ..common import json_dumps, json_loads
-from ..common.dispatcher import Dispatcher
+from ..common import Dispatcher, Undefined, UndefinedType, json_dumps, json_loads
 from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .errors import (
@@ -58,7 +58,12 @@ if TYPE_CHECKING:
         IdentifyCommand,
         InvalidSessionEvent,
         ReconnectEvent,
+        RequestGuildMembersCommand,
+        RequestGuildMembersData,
         ResumeCommand,
+        UpdatePresenceData,
+        VoiceUpdateCommand,
+        VoiceUpdateData,
     )
     from discord_typings.gateway import ReadyData, UpdatePresenceData
 
@@ -574,6 +579,29 @@ class Shard:
 
         await self._send(payload, wait_until_ready=False)
 
+    async def presence_update(self, presence: UpdatePresenceData) -> None:
+        """Changes the bot's presence for the current session.
+
+        .. warning::
+            This will not persist across sessions!
+
+            Use the ``presence`` parameter to :class:`Shard`
+
+        """
+        payload: UpdatePresenceCommand = {"op": GatewayOpcode.PRESENCE_UPDATE.value, "d": presence}
+
+        await self._send(payload)
+
+    async def voice_state_update(self, update: VoiceUpdateData):
+        """Updates the voice state of the logged in user.
+
+        This is per guild.
+        """
+
+        payload: VoiceUpdateCommand = {"op": GatewayOpcode.VOICE_STATE_UPDATE.value, "d": update}
+
+        await self._send(payload)
+
     async def resume(self) -> None:
         """Resume the session
 
@@ -597,3 +625,56 @@ class Shard:
             },
         }
         await self._send(payload, wait_until_ready=False)
+
+    @overload
+    async def request_guild_members(
+        self,
+        guild_id: str | int,
+        *,
+        query: str,
+        limit: int,
+        presences: bool | UndefinedType = Undefined,
+        user_ids: str | int | list[str | int],
+        nonce: str | UndefinedType = Undefined,
+    ) -> None:
+        ...
+
+    @overload
+    async def request_guild_members(
+        self,
+        guild_id: str | int,
+        *,
+        limit: int | UndefinedType = Undefined,
+        presences: bool | UndefinedType = Undefined,
+        nonce: str | UndefinedType = Undefined,
+    ) -> None:
+        ...
+
+    async def request_guild_members(
+        self,
+        guild_id: str | int,
+        *,
+        query: str | UndefinedType = Undefined,
+        limit: int | UndefinedType = Undefined,
+        presences: bool | UndefinedType = Undefined,
+        user_ids: str | int | list[str | int] | UndefinedType = Undefined,
+        nonce: str | UndefinedType = Undefined,
+    ) -> None:
+        # TODO: Pyright hates this!
+        # Seems like pyright ignores overloads
+        # and data not having all fields needed on initalization.
+        data: RequestGuildMembersData = {"guild_id": guild_id}
+        if not isinstance(query, UndefinedType):
+            data["query"] = query
+        if not isinstance(limit, UndefinedType):
+            data["limit"] = limit
+        if not isinstance(presences, UndefinedType):
+            data["presences"] = presences
+        if not isinstance(user_ids, UndefinedType):
+            data["user_ids"] = user_ids
+        if not isinstance(nonce, UndefinedType):
+            data["nonce"] = nonce
+
+        payload: RequestGuildMembersCommand = {"op": GatewayOpcode.REQUEST_GUILD_MEMBERS, "d": data}
+
+        await self._send(payload)

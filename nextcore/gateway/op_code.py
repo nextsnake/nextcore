@@ -33,7 +33,7 @@ class GatewayOpcode(IntEnum):
     """Can be sent/received"""
     IDENTIFY = 2
     """Can be sent"""
-    PRESENCE_UPDAATE = 3
+    PRESENCE_UPDATE = 3
     """Can be sent"""
     VOICE_STATE_UPDATE = 4
     """Can be sent"""
