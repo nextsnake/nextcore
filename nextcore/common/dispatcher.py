@@ -207,7 +207,7 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        callback: 
+        callback:
             The event callback to remove.
         event_name:
             The event name to remove. If this is :data:`None`, the listener is considered a global event.

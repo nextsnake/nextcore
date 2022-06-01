@@ -21,14 +21,12 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from zlib import decompressobj
 from zlib import error as zlib_error
 
-from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:
     from typing import ClassVar
-
 
 
 class Decompressor:
@@ -46,7 +44,6 @@ class Decompressor:
 
         print(data.decode("utf-8"))
     """
-
 
     ZLIB_SUFFIX: ClassVar[bytes] = b"\x00\x00\xff\xff"
 

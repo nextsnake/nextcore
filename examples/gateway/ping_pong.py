@@ -27,6 +27,7 @@ This will respond with "pong" every time someone sends "ping" in the chat.
 
 import asyncio
 from os import environ
+from typing import cast
 
 from discord_typings import MessageData
 
@@ -60,12 +61,10 @@ async def main():
     # This does not mean they are connected.
     await shard_manager.connect()
 
-    # We need to wait so asyncio doesn't cleanup the bot.
-    # This will wait forever.
-    # TODO: Replace this with wait until a critical error occurs.
+    # Raise a error and exit whenever a critical error occurs
+    error = await shard_manager.dispatcher.wait_for(lambda: True, "critical")
 
-    future: asyncio.Future[None] = asyncio.Future()
-    await future
+    raise cast(Exception, error)
 
 
 asyncio.run(main())

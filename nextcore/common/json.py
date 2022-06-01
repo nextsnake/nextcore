@@ -25,12 +25,14 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Dict  # pylint: ignore [outdated-typing-dict]
+    from typing import List  # pylint: ignore [outdated-typing-list]
     from typing import Union  # pylint: ignore [outdated-typing-union]
-    from typing import List # pylint: ignore [outdated-typing-list]
 
     from typing_extensions import TypeAlias
 
-    JsonCompatible: TypeAlias = Union[str, int, float, None, Dict[Union[str, int, float, None], "JsonCompatible"], List["JsonCompatible"]]
+    JsonCompatible: TypeAlias = Union[
+        str, int, float, None, Dict[Union[str, int, float, None], "JsonCompatible"], List["JsonCompatible"]
+    ]
 
 try:
     import orjson

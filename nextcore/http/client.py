@@ -362,7 +362,7 @@ class HTTPClient:
         """
         await self._ensure_session()
         assert self._session is not None, "Session was not set after HTTPClient._ensure_session()"
-        return await self._session.ws_connect(url, autoclose=False, **kwargs)
+        return await self._session.ws_connect(url, heartbeat=None, **kwargs)
 
     async def _ensure_session(self) -> None:
         """Makes sure :attr:`HTTPClient._session` is set.

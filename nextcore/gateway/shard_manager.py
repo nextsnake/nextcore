@@ -30,6 +30,7 @@ from aiohttp.helpers import get_running_loop
 from nextcore.gateway.times_per import TimesPer
 
 from ..common.dispatcher import Dispatcher
+from .errors import InvalidShardCountError
 from .shard import Shard
 
 if TYPE_CHECKING:
@@ -95,6 +96,7 @@ class ShardManager:
         "pending_shards",
         "raw_dispatcher",
         "event_dispatcher",
+        "dispatcher",
         "max_concurrency",
         "_active_shard_count",
         "_pending_shard_count",
@@ -125,6 +127,7 @@ class ShardManager:
         self.pending_shards: list[Shard] = []
         self.raw_dispatcher: Dispatcher[int] = Dispatcher()
         self.event_dispatcher: Dispatcher[str] = Dispatcher()
+        self.dispatcher: Dispatcher[str] = Dispatcher()
         self.max_concurrency: int | None = None
 
         # Privates
@@ -168,8 +171,9 @@ class ShardManager:
             # Register event listeners
             shard.raw_dispatcher.add_listener(self._on_raw_shard_receive)
             shard.event_dispatcher.add_listener(self._on_shard_dispatch)
+            shard.dispatcher.add_listener(self._on_shard_critical, "critical")
 
-            logger.debug("Added shard event listeners")
+            logger.info("Added shard event listeners")
 
             self.active_shards.append(shard)
 
@@ -201,3 +205,18 @@ class ShardManager:
     async def _on_shard_dispatch(self, event_name: str, data: Any) -> None:
         logger.debug("Relaying event")
         await self.event_dispatcher.dispatch(event_name, data)
+
+    async def _on_shard_critical(self, error: Exception):
+        if isinstance(error, InvalidShardCountError):
+            raise NotImplementedError("Re-scaling of shards is not implemented yet.")
+
+        await self.dispatcher.dispatch("critical", error)
+
+        await self.close()
+
+    async def close(self) -> None:
+        logger.debug("Closing shards")
+        for shard in self.active_shards:
+            await shard.close()
+        for shard in self.pending_shards:
+            await shard.close()

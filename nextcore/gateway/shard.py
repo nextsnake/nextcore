@@ -259,6 +259,11 @@ class Shard:
         loop = get_running_loop()
         loop.create_task(self._receive_loop())
 
+    async def close(self) -> None:
+        if self._ws is not None:
+            await self._ws.close()
+        self._ws = None  # Clear it to save some ram
+
     @property
     def latency(self) -> float:
         """Time in seconds between a heartbeat being sent and discord acknowledging it.
@@ -326,6 +331,15 @@ class Shard:
         # This prevents multiple heartbeat loops from running at the same time.
         # This also allows us to bypass the ratelimit.
         ws = self._ws
+
+        # Discord requires us to wait a random amount up to heartbeat_interval on the first interval
+        jitter = random()
+        initial_heartbeat = heartbeat_interval * jitter
+
+        self._logger.debug(
+            "Starting heartbeat with interval %s with initial heartbeat %s", heartbeat_interval, initial_heartbeat
+        )
+        await sleep(initial_heartbeat)
 
         while not ws.closed:
             payload: HeartbeatCommand = {
@@ -404,15 +418,6 @@ class Shard:
     # These should be prefixed by handle_ to avoid confusiuon with loop callbacks
     async def _handle_hello(self, data: HelloEvent) -> None:
         heartbeat_interval = data["d"]["heartbeat_interval"] / 1000  # Convert from ms to seconds
-
-        # Discord requires us to wait a random amount up to heartbeat_interval.
-        jitter = random()
-        initial_heartbeat = heartbeat_interval * jitter
-
-        self._logger.debug(
-            "Starting heartbeat with interval %s with initial heartbeat %s", heartbeat_interval, initial_heartbeat
-        )
-        await sleep(initial_heartbeat)
 
         loop = get_running_loop()
         loop.create_task(self._heartbeat_loop(heartbeat_interval))
@@ -528,13 +533,13 @@ class Shard:
             # TODO: Should this be merged into the else block?
             await self.dispatcher.dispatch("critical", UnhandledCloseCodeError(close_code))
         elif close_code == GatewayCloseCode.INVALID_API_VERSION:
-            self._logger.critical("Received invalid api version. Please update nextcore!")
+            self._logger.debug("Received invalid api version. Please update nextcore!")
             await self.dispatcher.dispatch("critical", InvalidApiVersionError())
         elif close_code == GatewayCloseCode.INVALID_INTENTS:
-            self._logger.critical("Sent invalid intents. This should never happen!")
+            self._logger.debug("Sent invalid intents.")
             await self.dispatcher.dispatch("critical", InvalidIntentsError())
         elif close_code == GatewayCloseCode.DISALLOWED_INTENTS:
-            self._logger.critical("Sent disallowed intents. This should be enabled in the settings.")
+            self._logger.debug("Sent disallowed intents. This should be enabled in the settings.")
             await self.dispatcher.dispatch("critical", DisallowedIntentsError())
         else:
             await self.dispatcher.dispatch("critical", UnhandledCloseCodeError(close_code))

@@ -37,7 +37,7 @@ async def maybe_coro(coro: Callable[..., Any], *args: Any, **kwargs: Any) -> Any
     ----------
     coro:
         The function to execute
-    args: 
+    args:
         The arguments to pass to the function
     kwargs:
         The keyword arguments to pass to the function
