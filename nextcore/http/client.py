@@ -2214,3 +2214,65 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+
+    async def add_thread_member(self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int) -> None:
+        """Adds a member to a thread
+
+        .. note::
+            This will dispatch a ``THREAD_MEMBERS_UPDATE`` event.
+
+        Parameters
+        ----------
+        authentication:
+            The auth info.
+        channel_id:
+            The thread to add the member to.
+        user_id:
+            The id of the member to add.
+        """
+        route = Route("PUT", "/channels/{channel_id}/thread-members/{user_id}", channel_id=channel_id, user_id=user_id)
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)})
+
+    async def leave_thread(self, authentication: BotAuthentication, channel_id: str | int) -> None:
+        """Leaves a thread
+
+        .. note::
+            This will dispatch a ``THREAD_MEMBERS_UPDATE`` event.
+
+        Parameters
+        ----------
+        authentication:
+            The auth info.
+        channel_id:
+            The channel to leave
+        """
+        route = Route("DELETE", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)})
+
+    async def remove_thread_member(self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int) -> None:
+        """Removes a member from a thread
+
+        .. note::
+            This will dispatch a ``THREAD_MEMBERS_UPDATE`` event.
+
+        .. note::
+            This requires the ``MANAGE_THREADS`` permission.
+
+            You can also be the owner of the thread if it is a private thread.
+
+        Parameters
+        ----------
+        authentication:
+            The auth info.
+        channel_id:
+            The thread to add the member to.
+        user_id:
+            The id of the member to add.
+        """
+        route = Route("DELETE", "/channels/{channel_id}/thread-members/{user_id}", channel_id=channel_id, user_id=user_id)
+
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)})
+
+
