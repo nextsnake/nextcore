@@ -19,5 +19,33 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__version__ = "1.0.0a"
-__all__ = ("__version__",)
+from asyncio.futures import Future
+
+__all__ = ("RequestSession",)
+
+
+class RequestSession:
+    """A metadata class about a pending request. This is used by :class:`Bucket`
+
+    Parameters
+    ----------
+    unlimited:
+        If this request was made when the bucket was unlimited.
+
+        This exists to make sure that there is no bad state when switching between unlimited and limited.
+
+    Attributes
+    ----------
+    unlimited:
+        If this request was made when the bucket was unlimited.
+
+        This exists to make sure that there is no bad state when switching between unlimited and limited.
+    pending_future:
+        The future that when set will execute the request.
+    """
+
+    __slots__ = ("pending_future", "unlimited")
+
+    def __init__(self, unlimited: bool):
+        self.pending_future: Future[None] = Future()
+        self.unlimited: bool = unlimited

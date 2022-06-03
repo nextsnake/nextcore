@@ -19,5 +19,8 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__version__ = "1.0.0a"
-__all__ = ("__version__",)
+from .base import BaseAuthentication
+from .bearer import BearerAuthentication
+from .bot import BotAuthentication
+
+__all__ = ("BaseAuthentication", "BotAuthentication", "BearerAuthentication")

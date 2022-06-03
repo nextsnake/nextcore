@@ -19,5 +19,37 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__version__ = "1.0.0a"
-__all__ = ("__version__",)
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from .base import BaseAuthentication
+
+if TYPE_CHECKING:
+    from typing import Literal
+
+__all__ = ("BotAuthentication",)
+
+
+class BotAuthentication(BaseAuthentication):
+    """A wrapper around bot token authentication.
+
+    Parameters
+    ----------
+    token:
+        The bot token.
+
+    Attributes
+    ----------
+    prefix:
+        The prefix of the token.
+    token:
+        The bot token
+    """
+
+    __slots__: tuple[str, ...] = ()
+
+    def __init__(self, token: str):
+        self.prefix: Literal["Bot"] = "Bot"
+        self.token: str = token
+        self.rate_limit_key: str = f"{self.prefix} {self.token}"

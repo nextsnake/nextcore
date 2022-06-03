@@ -19,5 +19,41 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__version__ = "1.0.0a"
-__all__ = ("__version__",)
+"""Do requests to Discord over the HTTP API.
+
+This module includes a HTTP client that handles rate limits for you,
+and gives you convinient methods around the API.
+"""
+
+from .authentication import *
+from .bucket import Bucket
+from .bucket_metadata import BucketMetadata
+from .client import HTTPClient
+from .errors import *
+from .file import File
+from .global_lock import GlobalLock
+from .ratelimit_storage import RatelimitStorage
+from .request_session import RequestSession
+from .route import Route
+
+__all__ = (
+    "Bucket",
+    "BucketMetadata",
+    "HTTPClient",
+    "RateLimitingFailedError",
+    "HTTPRequestStatusError",
+    "BadRequestError",
+    "UnauthorizedError",
+    "ForbiddenError",
+    "NotFoundError",
+    "InternalServerError",
+    "CloudflareBanError",
+    "GlobalLock",
+    "RatelimitStorage",
+    "RequestSession",
+    "Route",
+    "File",
+    "BaseAuthentication",
+    "BotAuthentication",
+    "BearerAuthentication",
+)

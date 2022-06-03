@@ -1,0 +1,18 @@
+{
+    "problemMatcher": [
+        {
+            "owner": "pylint",
+            "serverity": "warning",
+            "pattern": [
+                {
+                    "regexp": "(.+):(\\d+):(\\d+): (?:I|R|C|W|E|F)(?:\\d+): (.+) \\((.+)\\)",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "message": 4,
+                    "code": 5
+                }
+            ]
+        }
+    ]
+}

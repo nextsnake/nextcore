@@ -19,5 +19,36 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__version__ = "1.0.0a"
-__all__ = ("__version__",)
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Final
+
+__all__ = ("Undefined", "UndefinedType")
+
+
+class UndefinedType:
+    """A second :data:`None` for specifying that it has not been provided
+
+    .. warning::
+        You should not create this manually. Please use :data:`UndefinedType`
+
+    **Example usage:**
+
+    .. code-block:: python3
+        :emphasize-lines: 4,5
+
+        from nextcore.common import Undefined, UndefinedType
+        thing = Undefined
+
+        if isinstance(thing, UndefinedType):
+            print("Thing is undefined!")
+    """
+
+    def __repr__(self) -> str:
+        return "Undefined"
+
+
+Undefined: Final[UndefinedType] = UndefinedType()

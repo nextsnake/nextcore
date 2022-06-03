@@ -19,5 +19,28 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__version__ = "1.0.0a"
-__all__ = ("__version__",)
+"""Wrapper around the Discord bot gateway
+
+This module allows you to receive events from Discord.
+"""
+
+from .decompressor import Decompressor
+from .errors import *
+from .op_code import GatewayOpcode
+from .shard import Shard
+from .shard_manager import ShardManager
+
+__all__ = (
+    "ShardManager",
+    "Shard",
+    "Decompressor",
+    "GatewayOpcode",
+    "ReconnectCheckFailedError",
+    "DisconnectError",
+    "InvalidIntentsError",
+    "DisallowedIntentsError",
+    "InvalidTokenError",
+    "InvalidApiVersionError",
+    "InvalidShardCountError",
+    "UnhandledCloseCodeError",
+)
