@@ -40,11 +40,9 @@ Shard dispatcher
 Can be found on :attr:`Shard.dispatcher <gateway.Shard.dispatcher>`.
 A dispatcher for shard changes that is not a event sent by Discord.
 
-The event name is a :class:`str` representing the event name.
-
 disconnect
 ^^^^^^^^^^
-Whenever Discord disconnects us from the discord gateway.
+Whenever Discord disconnects us from the gateway.
 
 .. note::
    This does not dispatch closes made by the :class:`gateway.Shard` itself.
@@ -56,6 +54,22 @@ Whenever Discord disconnects us from the discord gateway.
    @shard.listen("disconnect")
    async def on_disconnect(close_code: int):
       print(f"Disconnected with close code {close_code}")
+
+client_disconnect
+^^^^^^^^^^^^^^^^^
+Whenever we disconnect from the Discord gateway.
+
+**Example usage:**
+
+.. code-block:: python
+
+   @shard.listen("client_disconnect")
+   async def on_client_disconnect(close: bool) -> None:
+      if close:
+         print("We deleted and deleted the session! We should not be able to resume.")
+      else:
+         print("We disconnected and can still resume!")
+
 
 sent
 ^^^^

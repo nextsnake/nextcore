@@ -182,7 +182,7 @@ class Shard:
         self.ready: Event = Event()
         self.raw_dispatcher: Dispatcher[int] = Dispatcher()
         self.event_dispatcher: Dispatcher[str] = Dispatcher()
-        self.dispatcher: Dispatcher[Literal["disconnect", "sent", "critical"]] = Dispatcher()
+        self.dispatcher: Dispatcher[Literal["disconnect", "sent", "critical", "client_disconnect"]] = Dispatcher()
 
         # Session related
         self.session_id: str | None = None
@@ -234,6 +234,11 @@ class Shard:
 
         # Connect to gateway
         if self._ws is not None and not self._ws.closed:
+            # Notify that we disconnected the ws, as the normal disconnect is for disconnects from discord.
+            # Disconnects from discord also include a error code, which we don't.
+            # This does include a bool if we closed the session.
+            await self.dispatcher.dispatch("client_disconnect", False)
+
             # This is to keep the session alive.
             await self._ws.close(code=999)
 
@@ -266,6 +271,9 @@ class Shard:
 
     async def close(self) -> None:
         if self._ws is not None:
+            # We are destroying the session
+            await self.dispatcher.dispatch("client_disconnect", True)
+
             await self._ws.close()
         self._ws = None  # Clear it to save some ram
 
@@ -668,7 +676,7 @@ class Shard:
 
         .. warning::
             This may be cancelled if the shard disconnects while chunking.
-        
+
         Parameters
         ----------
         guild_id:
@@ -699,7 +707,7 @@ class Shard:
             A string which will be provided in the ``guild members chunk`` response to identify this request.
 
             .. note::
-                This is max 32 characters. 
+                This is max 32 characters.
 
                 If it is longer it will be ignored.
         """

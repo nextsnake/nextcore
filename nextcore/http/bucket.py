@@ -73,7 +73,7 @@ class Bucket:
     @asynccontextmanager
     async def acquire(self) -> AsyncIterator[None]:  # TODO: Fix type
         """Reserve a spot in the bucket to do a request.
-        
+
         **Example usage**
 
         .. code-block:: python
