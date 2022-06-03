@@ -664,6 +664,9 @@ class Shard:
 
         .. note::
             This will dispatch ``GUILD_MEMBERS_CHUNK`` events as a response.
+
+        .. warning::
+            This may be cancelled if the shard disconnects while chunking.
         
         Parameters
         ----------
