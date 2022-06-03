@@ -262,6 +262,16 @@ class Dispatcher(Generic[EventNameT]):
                 print("Oops!")
 
             dispatcher.add_error_handler(error_handler, "join")
+
+        Parameters
+        ----------
+        callback:
+            The callback to be called whenever a error occurs
+        event_name:
+            The event to restrict the error handler to.
+
+            .. note::
+                Passing this will make callback not be given the event name.
         """
         if event_name is None:
             if TYPE_CHECKING:
