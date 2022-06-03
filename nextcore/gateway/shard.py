@@ -227,6 +227,11 @@ class Shard:
         """Connect to the gateway.
 
         This will automatically RESUME if a session is set.
+
+        Raises
+        ------
+        :exc:`ReconnectCheckFailedError`
+            :attr:`Shard.should_reconnect` was false and a :meth:`Shard.identify` call was needed.
         """
         # Clear state
         self._decompressor = Decompressor()
