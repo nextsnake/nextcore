@@ -634,7 +634,6 @@ class Shard:
         query: str,
         limit: int,
         presences: bool | UndefinedType = Undefined,
-        user_ids: str | int | list[str | int],
         nonce: str | UndefinedType = Undefined,
     ) -> None:
         ...
@@ -646,6 +645,7 @@ class Shard:
         *,
         limit: int | UndefinedType = Undefined,
         presences: bool | UndefinedType = Undefined,
+        user_ids: str | int | list[str | int],
         nonce: str | UndefinedType = Undefined,
     ) -> None:
         ...
