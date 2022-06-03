@@ -270,6 +270,11 @@ class Shard:
         loop.create_task(self._receive_loop())
 
     async def close(self) -> None:
+        """Close the connection to the gateway and destroy the session.
+
+        .. note::
+            This will dispatch a ``client_disconnect`` event.
+        """
         if self._ws is not None:
             # We are destroying the session
             await self.dispatcher.dispatch("client_disconnect", True)
