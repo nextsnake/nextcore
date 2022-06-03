@@ -661,6 +661,9 @@ class Shard:
         nonce: str | UndefinedType = Undefined,
     ) -> None:
         """Request info about the members in this guild.
+
+        .. note::
+            This will dispatch ``GUILD_MEMBERS_CHUNK`` events as a response.
         
         Parameters
         ----------
