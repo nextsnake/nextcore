@@ -660,6 +660,42 @@ class Shard:
         user_ids: str | int | list[str | int] | UndefinedType = Undefined,
         nonce: str | UndefinedType = Undefined,
     ) -> None:
+        """Request info about the members in this guild.
+        
+        Parameters
+        ----------
+        guild_id:
+            The guild to request members from
+        query:
+            What the members username have to start with to be returned
+
+            .. note::
+                If this is not empty limit will be max 100.
+        limit:
+            The max amount of members to return.
+
+            .. note::
+                This can be 0 when used with a empty query.
+
+                If this is 0, this would require the ``GUILD_MEMBERS`` intent
+        presences:
+            Whether to include presences for members requested.
+
+            .. note::
+                This requires the ``GUILD_PRESENCES`` intent.
+        user_ids:
+            The ID of the members to query.
+
+            .. note::
+                This has a limit of 100 members.
+        nonce:
+            A string which will be provided in the ``guild members chunk`` response to identify this request.
+
+            .. note::
+                This is max 32 characters. 
+
+                If it is longer it will be ignored.
+        """
         # TODO: Pyright hates this!
         # Seems like pyright ignores overloads
         # and data not having all fields needed on initalization.
@@ -675,6 +711,6 @@ class Shard:
         if not isinstance(nonce, UndefinedType):
             data["nonce"] = nonce
 
-        payload: RequestGuildMembersCommand = {"op": GatewayOpcode.REQUEST_GUILD_MEMBERS, "d": data}
+        payload: RequestGuildMembersCommand = {"op": GatewayOpcode.REQUEST_GUILD_MEMBERS.value, "d": data}
 
         await self._send(payload)
