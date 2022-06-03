@@ -72,12 +72,20 @@ class Bucket:
 
     @asynccontextmanager
     async def acquire(self) -> AsyncIterator[None]:  # TODO: Fix type
-        """Reserve a spot in the bucket to do a request."""
+        """Reserve a spot in the bucket to do a request.
+        
+        **Example usage**
+
+        .. code-block:: python
+
+            async with bucket.acquire():
+                # Do request
+                await bucket.update(...)
+        """
         session = await self._aenter()
         try:
             yield None
         finally:
-            # Exit
             await self._aexit(session)
 
     async def _aenter(self) -> RequestSession:
