@@ -28,7 +28,7 @@ from sys import platform
 from time import time
 from typing import TYPE_CHECKING, overload
 
-from aiohttp import ClientConnectorError, ClientWebSocketResponse, WSMsgType
+from aiohttp import ClientConnectorError, ClientWebSocketResponse, WSMsgType, WSServerHandshakeError
 from discord_typings.gateway import UpdatePresenceCommand
 from frozendict import frozendict
 
@@ -250,6 +250,8 @@ class Shard:
                 break
             except ClientConnectorError:
                 self._logger.error("Failed to connect to gateway? Check your internet connection.")
+            except WSServerHandshakeError:
+                self._logger.exception("Failed to connect to gateway?")
 
         if self.session_id is None and self.session_sequence_number is None:
             if not self.should_reconnect:
