@@ -2315,3 +2315,23 @@ class HTTPClient:
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
+
+    async def list_thread_members(self, authentication: BotAuthentication, channel_id: str | int) -> list[ThreadMemberData]:
+        """Gets all thread members
+
+        .. warning::
+            You need the ``GUILD_MEMBERS`` privileged intent!
+
+        Parameters
+        ----------
+        authentication:
+            The auth info.
+        channel_id:
+            The thread to get members from.
+        """
+        route = Route("GET", "/channels/{channel_id}/thread-members", channel_id=channel_id)
+
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)})
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
