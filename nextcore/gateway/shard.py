@@ -732,15 +732,15 @@ class Shard:
         # Seems like pyright ignores overloads
         # and data not having all fields needed on initalization.
         data: RequestGuildMembersData = {"guild_id": guild_id}
-        if not isinstance(query, UndefinedType):
+        if query is not UndefinedType.UNDEFINED:
             data["query"] = query
-        if not isinstance(limit, UndefinedType):
+        if limit is not UndefinedType.UNDEFINED:
             data["limit"] = limit
-        if not isinstance(presences, UndefinedType):
+        if presences is not UndefinedType.UNDEFINED:
             data["presences"] = presences
-        if not isinstance(user_ids, UndefinedType):
+        if user_ids is not UndefinedType.UNDEFINED:
             data["user_ids"] = user_ids
-        if not isinstance(nonce, UndefinedType):
+        if nonce is not UndefinedType.UNDEFINED:
             data["nonce"] = nonce
 
         payload: RequestGuildMembersCommand = {"op": GatewayOpcode.REQUEST_GUILD_MEMBERS.value, "d": data}
