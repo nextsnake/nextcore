@@ -28,7 +28,12 @@ from sys import platform
 from time import time
 from typing import TYPE_CHECKING, overload
 
-from aiohttp import ClientConnectorError, ClientWebSocketResponse, WSMsgType, WSServerHandshakeError
+from aiohttp import (
+    ClientConnectorError,
+    ClientWebSocketResponse,
+    WSMsgType,
+    WSServerHandshakeError,
+)
 from discord_typings.gateway import UpdatePresenceCommand
 from frozendict import frozendict
 
