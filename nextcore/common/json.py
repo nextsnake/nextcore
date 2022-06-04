@@ -24,9 +24,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Dict  # pylint: ignore [outdated-typing-dict]
-    from typing import List  # pylint: ignore [outdated-typing-list]
-    from typing import Union  # pylint: ignore [outdated-typing-union]
+    from typing import Dict  # pylint: disable=outdated-typing-dict
+    from typing import List  # pylint: disable=outdated-typing-list
+    from typing import Union  # pylint: disable=outdated-typing-union
 
     from typing_extensions import TypeAlias
 
