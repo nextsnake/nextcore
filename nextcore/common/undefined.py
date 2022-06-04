@@ -22,8 +22,12 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import TYPE_CHECKING
 
-__all__ = ("UndefinedType", )
+if TYPE_CHECKING:
+    from typing import Literal
+
+__all__ = ("UndefinedType", "UNDEFINED")
 
 class UndefinedType(Enum):
     """A second :data:`None` for specifying that it should not be provided.
@@ -41,3 +45,5 @@ class UndefinedType(Enum):
             print("Thing is undefined!")
     """
     UNDEFINED = None
+
+UNDEFINED: Literal[UndefinedType.UNDEFINED] = UndefinedType.UNDEFINED

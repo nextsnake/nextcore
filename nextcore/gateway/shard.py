@@ -37,7 +37,7 @@ from aiohttp import (
 from discord_typings.gateway import UpdatePresenceCommand
 from frozendict import frozendict
 
-from ..common import Dispatcher, UndefinedType, json_dumps, json_loads
+from ..common import Dispatcher, UndefinedType, json_dumps, json_loads, UNDEFINED
 from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .errors import (
@@ -658,9 +658,9 @@ class Shard:
         *,
         query: str,
         limit: int,
-        presences: bool | UndefinedType = UndefinedType.UNDEFINED,
-        user_ids: str | int | list[str | int] | UndefinedType = UndefinedType.UNDEFINED,
-        nonce: str | UndefinedType = UndefinedType.UNDEFINED,
+        presences: bool | UndefinedType = UNDEFINED,
+        user_ids: str | int | list[str | int] | UndefinedType = UNDEFINED,
+        nonce: str | UndefinedType = UNDEFINED,
     ) -> None:
         ...
 
@@ -669,10 +669,10 @@ class Shard:
         self,
         guild_id: str | int,
         *,
-        limit: int | UndefinedType = UndefinedType.UNDEFINED,
-        presences: bool | UndefinedType = UndefinedType.UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
+        presences: bool | UndefinedType = UNDEFINED,
         user_ids: str | int | list[str | int],
-        nonce: str | UndefinedType = UndefinedType.UNDEFINED,
+        nonce: str | UndefinedType = UNDEFINED,
     ) -> None:
         ...
 
@@ -680,11 +680,11 @@ class Shard:
         self,
         guild_id: str | int,
         *,
-        query: str | UndefinedType = UndefinedType.UNDEFINED,
-        limit: int | UndefinedType = UndefinedType.UNDEFINED,
-        presences: bool | UndefinedType = UndefinedType.UNDEFINED,
-        user_ids: str | int | list[str | int] | UndefinedType = UndefinedType.UNDEFINED,
-        nonce: str | UndefinedType = UndefinedType.UNDEFINED,
+        query: str | UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
+        presences: bool | UndefinedType = UNDEFINED,
+        user_ids: str | int | list[str | int] | UndefinedType = UNDEFINED,
+        nonce: str | UndefinedType = UNDEFINED,
     ) -> None:
         """Request info about the members in this guild.
 
@@ -732,15 +732,15 @@ class Shard:
         # Seems like pyright ignores overloads
         # and data not having all fields needed on initalization.
         data: RequestGuildMembersData = {"guild_id": guild_id}
-        if query is not UndefinedType.UNDEFINED:
+        if query is not UNDEFINED:
             data["query"] = query
-        if limit is not UndefinedType.UNDEFINED:
+        if limit is not UNDEFINED:
             data["limit"] = limit
-        if presences is not UndefinedType.UNDEFINED:
+        if presences is not UNDEFINED:
             data["presences"] = presences
-        if user_ids is not UndefinedType.UNDEFINED:
+        if user_ids is not UNDEFINED:
             data["user_ids"] = user_ids
-        if nonce is not UndefinedType.UNDEFINED:
+        if nonce is not UNDEFINED:
             data["nonce"] = nonce
 
         payload: RequestGuildMembersCommand = {"op": GatewayOpcode.REQUEST_GUILD_MEMBERS.value, "d": data}

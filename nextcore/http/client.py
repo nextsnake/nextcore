@@ -30,7 +30,7 @@ from urllib.parse import quote
 from aiohttp import ClientSession, FormData
 
 from .. import __version__ as nextcore_version
-from ..common import Dispatcher, UndefinedType, json_dumps
+from ..common import Dispatcher, UndefinedType, json_dumps, UNDEFINED
 from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
 from .errors import (
@@ -623,9 +623,9 @@ class HTTPClient:
         authentication: BearerAuthentication,
         channel_id: str | int,
         *,
-        name: str | UndefinedType = UndefinedType.UNDEFINED,
-        icon: str | None | UndefinedType = UndefinedType.UNDEFINED,
-        reason: str | UndefinedType = UndefinedType.UNDEFINED,
+        name: str | UndefinedType = UNDEFINED,
+        icon: str | None | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
     ) -> ChannelData:
         """Modifies the group dm.
 
@@ -658,15 +658,15 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if name is not UndefinedType.UNDEFINED:
+        if name is not UNDEFINED:
             payload["name"] = name
 
-        if icon is not UndefinedType.UNDEFINED:
+        if icon is not UNDEFINED:
             payload["icon"] = icon
 
         headers = {"Authorization": str(authentication)}
 
-        if reason is not UndefinedType.UNDEFINED:
+        if reason is not UNDEFINED:
             headers["reason"] = reason
 
         r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
@@ -679,20 +679,20 @@ class HTTPClient:
         authentication: BearerAuthentication,
         channel_id: str | int,
         *,
-        name: str | UndefinedType = UndefinedType.UNDEFINED,
-        channel_type: Literal[0, 5] | UndefinedType = UndefinedType.UNDEFINED,
-        position: int | None | UndefinedType = UndefinedType.UNDEFINED,
-        topic: str | None | UndefinedType = UndefinedType.UNDEFINED,
-        nsfw: bool | None | UndefinedType = UndefinedType.UNDEFINED,
-        rate_limit_per_user: int | None | UndefinedType = UndefinedType.UNDEFINED,
-        bitrate: int | None | UndefinedType = UndefinedType.UNDEFINED,
-        user_limit: int | None | UndefinedType = UndefinedType.UNDEFINED,
-        permission_overwrites: list[dict[Any, Any]] | None | UndefinedType = UndefinedType.UNDEFINED,  # TODO: implement a partial
-        parent_id: int | str | UndefinedType = UndefinedType.UNDEFINED,
-        rtc_region: str | None | UndefinedType = UndefinedType.UNDEFINED,
-        video_quality_mode: Literal[1, 2] | None | UndefinedType = UndefinedType.UNDEFINED,  # TODO: Implement VideoQualityMode
-        default_auto_archive_duration: Literal[60, 1440, 4320, 10080] | None | UndefinedType = UndefinedType.UNDEFINED,
-        reason: str | UndefinedType = UndefinedType.UNDEFINED,
+        name: str | UndefinedType = UNDEFINED,
+        channel_type: Literal[0, 5] | UndefinedType = UNDEFINED,
+        position: int | None | UndefinedType = UNDEFINED,
+        topic: str | None | UndefinedType = UNDEFINED,
+        nsfw: bool | None | UndefinedType = UNDEFINED,
+        rate_limit_per_user: int | None | UndefinedType = UNDEFINED,
+        bitrate: int | None | UndefinedType = UNDEFINED,
+        user_limit: int | None | UndefinedType = UNDEFINED,
+        permission_overwrites: list[dict[Any, Any]] | None | UndefinedType = UNDEFINED,  # TODO: implement a partial
+        parent_id: int | str | UndefinedType = UNDEFINED,
+        rtc_region: str | None | UndefinedType = UNDEFINED,
+        video_quality_mode: Literal[1, 2] | None | UndefinedType = UNDEFINED,  # TODO: Implement VideoQualityMode
+        default_auto_archive_duration: Literal[60, 1440, 4320, 10080] | None | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
     ) -> ChannelData:
         """Modifies a guild channel.
 
@@ -783,36 +783,36 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if name is not UndefinedType.UNDEFINED:
+        if name is not UNDEFINED:
             payload["name"] = name
-        if channel_type is not UndefinedType.UNDEFINED:
+        if channel_type is not UNDEFINED:
             payload["type"] = channel_type
-        if position is not UndefinedType.UNDEFINED:
+        if position is not UNDEFINED:
             payload["position"] = position
-        if topic is not UndefinedType.UNDEFINED:
+        if topic is not UNDEFINED:
             payload["topic"] = topic
-        if nsfw is not UndefinedType.UNDEFINED:
+        if nsfw is not UNDEFINED:
             payload["nsfw"] = nsfw
-        if rate_limit_per_user is not UndefinedType.UNDEFINED:
+        if rate_limit_per_user is not UNDEFINED:
             payload["rate_limit_per_user"] = rate_limit_per_user
-        if bitrate is not UndefinedType.UNDEFINED:
+        if bitrate is not UNDEFINED:
             payload["bitrate"] = bitrate
-        if user_limit is not UndefinedType.UNDEFINED:
+        if user_limit is not UNDEFINED:
             payload["user_limit"] = user_limit
-        if permission_overwrites is not UndefinedType.UNDEFINED:
+        if permission_overwrites is not UNDEFINED:
             payload["permission_overwrites"] = permission_overwrites
-        if parent_id is not UndefinedType.UNDEFINED:
+        if parent_id is not UNDEFINED:
             payload["parent_id"] = parent_id
-        if rtc_region is not UndefinedType.UNDEFINED:
+        if rtc_region is not UNDEFINED:
             payload["rtc_region"] = rtc_region
-        if video_quality_mode is not UndefinedType.UNDEFINED:
+        if video_quality_mode is not UNDEFINED:
             payload["video_quality_mode"] = video_quality_mode
-        if default_auto_archive_duration is not UndefinedType.UNDEFINED:
+        if default_auto_archive_duration is not UNDEFINED:
             payload["default_auto_archive_duration"] = default_auto_archive_duration
 
         headers = {"Authorization": str(authentication)}
 
-        if reason is not UndefinedType.UNDEFINED:
+        if reason is not UNDEFINED:
             headers["reason"] = reason
 
         r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
@@ -825,13 +825,13 @@ class HTTPClient:
         authentication: BotAuthentication,
         thread_id: int | str,
         *,
-        name: str | UndefinedType = UndefinedType.UNDEFINED,
-        archived: bool | UndefinedType = UndefinedType.UNDEFINED,
-        auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = UndefinedType.UNDEFINED,
-        locked: bool | UndefinedType = UndefinedType.UNDEFINED,
-        invitable: bool | UndefinedType = UndefinedType.UNDEFINED,
-        rate_limit_per_user: int | UndefinedType = UndefinedType.UNDEFINED,
-        reason: str | UndefinedType = UndefinedType.UNDEFINED,
+        name: str | UndefinedType = UNDEFINED,
+        archived: bool | UndefinedType = UNDEFINED,
+        auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = UNDEFINED,
+        locked: bool | UndefinedType = UNDEFINED,
+        invitable: bool | UndefinedType = UNDEFINED,
+        rate_limit_per_user: int | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
     ) -> ThreadChannelData:
         """Modifies a thread.
 
@@ -872,22 +872,22 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if name is not UndefinedType.UNDEFINED:
+        if name is not UNDEFINED:
             payload["name"] = name
-        if archived is not UndefinedType.UNDEFINED:
+        if archived is not UNDEFINED:
             payload["archived"] = archived
-        if auto_archive_duration is not UndefinedType.UNDEFINED:
+        if auto_archive_duration is not UNDEFINED:
             payload["auto_archive_duration"] = auto_archive_duration
-        if locked is not UndefinedType.UNDEFINED:
+        if locked is not UNDEFINED:
             payload["locked"] = locked
-        if invitable is not UndefinedType.UNDEFINED:
+        if invitable is not UNDEFINED:
             payload["invitable"] = invitable
-        if rate_limit_per_user is not UndefinedType.UNDEFINED:
+        if rate_limit_per_user is not UNDEFINED:
             payload["rate_limit_per_user"] = rate_limit_per_user
 
         headers = {"Authorization": str(authentication)}
 
-        if reason is not UndefinedType.UNDEFINED:
+        if reason is not UNDEFINED:
             headers["reason"] = reason
 
         r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
@@ -940,10 +940,10 @@ class HTTPClient:
         authentication: BotAuthentication,
         channel_id: int | str,
         *,
-        around: int | UndefinedType = UndefinedType.UNDEFINED,
-        before: int | UndefinedType = UndefinedType.UNDEFINED,
-        after: int | UndefinedType = UndefinedType.UNDEFINED,
-        limit: int | UndefinedType = UndefinedType.UNDEFINED,
+        around: int | UndefinedType = UNDEFINED,
+        before: int | UndefinedType = UNDEFINED,
+        after: int | UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
     ) -> list[MessageData]:
         """Gets messages from a channel.
 
@@ -992,13 +992,13 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if around is not UndefinedType.UNDEFINED:
+        if around is not UNDEFINED:
             params["around"] = around
-        if before is not UndefinedType.UNDEFINED:
+        if before is not UNDEFINED:
             params["before"] = before
-        if after is not UndefinedType.UNDEFINED:
+        if after is not UNDEFINED:
             params["after"] = after
-        if limit is not UndefinedType.UNDEFINED:
+        if limit is not UNDEFINED:
             params["limit"] = limit
 
         r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, params=params)
@@ -1011,16 +1011,16 @@ class HTTPClient:
         authentication: BotAuthentication,
         channel_id: int | str,
         *,
-        content: str | UndefinedType = UndefinedType.UNDEFINED,
-        tts: bool | UndefinedType = UndefinedType.UNDEFINED,
-        embeds: list[EmbedData] | UndefinedType = UndefinedType.UNDEFINED,
-        allowed_mentions: AllowedMentionsData | UndefinedType = UndefinedType.UNDEFINED,
-        message_reference: MessageReferenceData | UndefinedType = UndefinedType.UNDEFINED,
-        componenets: list[ActionRowData] | UndefinedType = UndefinedType.UNDEFINED,
-        sticker_ids: list[int] | UndefinedType = UndefinedType.UNDEFINED,
-        files: Iterable[File] | UndefinedType = UndefinedType.UNDEFINED,
-        attachments: list[AttachmentData] | UndefinedType = UndefinedType.UNDEFINED,  # TODO: Partial
-        flags: int | UndefinedType = UndefinedType.UNDEFINED,
+        content: str | UndefinedType = UNDEFINED,
+        tts: bool | UndefinedType = UNDEFINED,
+        embeds: list[EmbedData] | UndefinedType = UNDEFINED,
+        allowed_mentions: AllowedMentionsData | UndefinedType = UNDEFINED,
+        message_reference: MessageReferenceData | UndefinedType = UNDEFINED,
+        componenets: list[ActionRowData] | UndefinedType = UNDEFINED,
+        sticker_ids: list[int] | UndefinedType = UNDEFINED,
+        files: Iterable[File] | UndefinedType = UNDEFINED,
+        attachments: list[AttachmentData] | UndefinedType = UNDEFINED,  # TODO: Partial
+        flags: int | UndefinedType = UNDEFINED,
     ) -> MessageData:
         """Creates a message in a channel.
 
@@ -1090,23 +1090,23 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if content is not UndefinedType.UNDEFINED:
+        if content is not UNDEFINED:
             payload["content"] = content
-        if tts is not UndefinedType.UNDEFINED:
+        if tts is not UNDEFINED:
             payload["tts"] = tts
-        if embeds is not UndefinedType.UNDEFINED:
+        if embeds is not UNDEFINED:
             payload["embeds"] = embeds
-        if allowed_mentions is not UndefinedType.UNDEFINED:
+        if allowed_mentions is not UNDEFINED:
             payload["allowed_mentions"] = allowed_mentions
-        if message_reference is not UndefinedType.UNDEFINED:
+        if message_reference is not UNDEFINED:
             payload["message_reference"] = message_reference
-        if componenets is not UndefinedType.UNDEFINED:
+        if componenets is not UNDEFINED:
             payload["componenets"] = componenets
-        if sticker_ids is not UndefinedType.UNDEFINED:
+        if sticker_ids is not UNDEFINED:
             payload["sticker_ids"] = sticker_ids
-        if attachments is not UndefinedType.UNDEFINED:
+        if attachments is not UNDEFINED:
             payload["attachments"] = attachments
-        if flags is not UndefinedType.UNDEFINED:
+        if flags is not UNDEFINED:
             payload["flags"] = flags
 
         # Create a form data response as files cannot be uploaded via json.
@@ -1114,7 +1114,7 @@ class HTTPClient:
         form.add_field("payload_json", json_dumps(payload))
 
         # Add files
-        if files is not UndefinedType.UNDEFINED:
+        if files is not UNDEFINED:
             for file_id, file in enumerate(files):
                 # Content type seems to have no effect here.
                 form.add_field(f"file[{file_id}]", file.contents, filename=file.name)
@@ -1287,8 +1287,8 @@ class HTTPClient:
         message_id: int | str,
         emoji: str,
         *,
-        after: str | int | UndefinedType = UndefinedType.UNDEFINED,
-        limit: int | UndefinedType = UndefinedType.UNDEFINED,
+        after: str | int | UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
     ) -> list[UserData]:
         """Gets the reactions to a message.
 
@@ -1324,9 +1324,9 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if after is not UndefinedType.UNDEFINED:
+        if after is not UNDEFINED:
             params["after"] = after
-        if limit is not UndefinedType.UNDEFINED:
+        if limit is not UNDEFINED:
             params["limit"] = limit
 
         r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, params=params)
@@ -1409,13 +1409,13 @@ class HTTPClient:
         channel_id: int | str,
         message_id: int | str,
         *,
-        content: str | None | UndefinedType = UndefinedType.UNDEFINED,
-        embeds: list[EmbedData] | None | UndefinedType = UndefinedType.UNDEFINED,
-        flags: int | None | UndefinedType = UndefinedType.UNDEFINED,
-        allowed_mentions: AllowedMentionsData | None | UndefinedType = UndefinedType.UNDEFINED,
-        components: list[ActionRowData] | None | UndefinedType = UndefinedType.UNDEFINED,
-        files: list[File] | None | UndefinedType = UndefinedType.UNDEFINED,
-        attachments: list[AttachmentData] | None | UndefinedType = UndefinedType.UNDEFINED,  # TODO: Partial
+        content: str | None | UndefinedType = UNDEFINED,
+        embeds: list[EmbedData] | None | UndefinedType = UNDEFINED,
+        flags: int | None | UndefinedType = UNDEFINED,
+        allowed_mentions: AllowedMentionsData | None | UndefinedType = UNDEFINED,
+        components: list[ActionRowData] | None | UndefinedType = UNDEFINED,
+        files: list[File] | None | UndefinedType = UNDEFINED,
+        attachments: list[AttachmentData] | None | UndefinedType = UNDEFINED,  # TODO: Partial
     ) -> MessageData:
         """Edits a message.
 
@@ -1478,22 +1478,22 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if content is not UndefinedType.UNDEFINED:
+        if content is not UNDEFINED:
             payload["content"] = content
-        if embeds is not UndefinedType.UNDEFINED:
+        if embeds is not UNDEFINED:
             payload["embeds"] = embeds
-        if flags is not UndefinedType.UNDEFINED:
+        if flags is not UNDEFINED:
             payload["flags"] = flags
-        if allowed_mentions is not UndefinedType.UNDEFINED:
+        if allowed_mentions is not UNDEFINED:
             payload["allowed_mentions"] = allowed_mentions
-        if components is not UndefinedType.UNDEFINED:
+        if components is not UNDEFINED:
             payload["components"] = components
-        if attachments is not UndefinedType.UNDEFINED:
+        if attachments is not UNDEFINED:
             payload["attachments"] = attachments
 
         # This is a special case where we need to send the files as a multipart form
         form = FormData()
-        if files is not UndefinedType.UNDEFINED:
+        if files is not UNDEFINED:
             if files is None:
                 raise NotImplementedError("What is this even supposed to do?")
             for file in files:
@@ -1512,7 +1512,7 @@ class HTTPClient:
         channel_id: str | int,
         message_id: str | int,
         *,
-        reason: str | UndefinedType = UndefinedType.UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
     ) -> None:
         """Deletes a message.
 
@@ -1545,7 +1545,7 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if reason is not UndefinedType.UNDEFINED:
+        if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
@@ -1556,7 +1556,7 @@ class HTTPClient:
         channel_id: str | int,
         messages: list[str] | list[int] | list[str | int],
         *,
-        reason: str | UndefinedType = UndefinedType.UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
     ) -> None:
         """Deletes multiple messages.
 
@@ -1597,7 +1597,7 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if reason is not UndefinedType.UNDEFINED:
+        if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
@@ -1611,9 +1611,9 @@ class HTTPClient:
         target_type: Literal[0, 1],
         target_id: str | int,
         *,
-        allow: str | None | UndefinedType = UndefinedType.UNDEFINED,
-        deny: str | None | UndefinedType = UndefinedType.UNDEFINED,
-        reason: str | UndefinedType = UndefinedType.UNDEFINED,
+        allow: str | None | UndefinedType = UNDEFINED,
+        deny: str | None | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
     ) -> None:
         """Edits the permissions of a channel.
 
@@ -1665,14 +1665,14 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if allow is not UndefinedType.UNDEFINED:
+        if allow is not UNDEFINED:
             payload["allow"] = allow
-        if deny is not UndefinedType.UNDEFINED:
+        if deny is not UNDEFINED:
             payload["deny"] = deny
 
         payload["type"] = target_type
 
-        if reason is not UndefinedType.UNDEFINED:
+        if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
@@ -1713,13 +1713,13 @@ class HTTPClient:
         authentication: BotAuthentication,
         channel_id: str | int,
         *,
-        max_age: int | UndefinedType = UndefinedType.UNDEFINED,
-        max_uses: int | UndefinedType = UndefinedType.UNDEFINED,
-        temporary: bool | UndefinedType = UndefinedType.UNDEFINED,
-        unique: bool | UndefinedType = UndefinedType.UNDEFINED,
+        max_age: int | UndefinedType = UNDEFINED,
+        max_uses: int | UndefinedType = UNDEFINED,
+        temporary: bool | UndefinedType = UNDEFINED,
+        unique: bool | UndefinedType = UNDEFINED,
         target_type: Literal[0],
         target_user_id: str | int,
-        target_application_id: UndefinedType = UndefinedType.UNDEFINED,
+        target_application_id: UndefinedType = UNDEFINED,
     ) -> InviteData:
         ...
 
@@ -1729,12 +1729,12 @@ class HTTPClient:
         authentication: BotAuthentication,
         channel_id: str | int,
         *,
-        max_age: int | UndefinedType = UndefinedType.UNDEFINED,
-        max_uses: int | UndefinedType = UndefinedType.UNDEFINED,
-        temporary: bool | UndefinedType = UndefinedType.UNDEFINED,
-        unique: bool | UndefinedType = UndefinedType.UNDEFINED,
+        max_age: int | UndefinedType = UNDEFINED,
+        max_uses: int | UndefinedType = UNDEFINED,
+        temporary: bool | UndefinedType = UNDEFINED,
+        unique: bool | UndefinedType = UNDEFINED,
         target_type: Literal[1],
-        target_user_id: UndefinedType = UndefinedType.UNDEFINED,
+        target_user_id: UndefinedType = UNDEFINED,
         target_application_id: str | int,
     ) -> InviteData:
         ...
@@ -1745,13 +1745,13 @@ class HTTPClient:
         authentication: BotAuthentication,
         channel_id: str | int,
         *,
-        max_age: int | UndefinedType = UndefinedType.UNDEFINED,
-        max_uses: int | UndefinedType = UndefinedType.UNDEFINED,
-        temporary: bool | UndefinedType = UndefinedType.UNDEFINED,
-        unique: bool | UndefinedType = UndefinedType.UNDEFINED,
-        target_type: UndefinedType = UndefinedType.UNDEFINED,
-        target_user_id: UndefinedType = UndefinedType.UNDEFINED,
-        target_application_id: UndefinedType = UndefinedType.UNDEFINED,
+        max_age: int | UndefinedType = UNDEFINED,
+        max_uses: int | UndefinedType = UNDEFINED,
+        temporary: bool | UndefinedType = UNDEFINED,
+        unique: bool | UndefinedType = UNDEFINED,
+        target_type: UndefinedType = UNDEFINED,
+        target_user_id: UndefinedType = UNDEFINED,
+        target_application_id: UndefinedType = UNDEFINED,
     ) -> InviteData:
         ...
 
@@ -1760,13 +1760,13 @@ class HTTPClient:
         authentication: BotAuthentication,
         channel_id: str | int,
         *,
-        max_age: int | UndefinedType = UndefinedType.UNDEFINED,
-        max_uses: int | UndefinedType = UndefinedType.UNDEFINED,
-        temporary: bool | UndefinedType = UndefinedType.UNDEFINED,
-        unique: bool | UndefinedType = UndefinedType.UNDEFINED,
-        target_type: Literal[0, 1] | UndefinedType = UndefinedType.UNDEFINED,
-        target_user_id: str | int | UndefinedType = UndefinedType.UNDEFINED,
-        target_application_id: str | int | UndefinedType = UndefinedType.UNDEFINED,
+        max_age: int | UndefinedType = UNDEFINED,
+        max_uses: int | UndefinedType = UNDEFINED,
+        temporary: bool | UndefinedType = UNDEFINED,
+        unique: bool | UndefinedType = UNDEFINED,
+        target_type: Literal[0, 1] | UndefinedType = UNDEFINED,
+        target_user_id: str | int | UndefinedType = UNDEFINED,
+        target_application_id: str | int | UndefinedType = UNDEFINED,
     ) -> InviteData:
         """Creates an invite for a channel.
 
@@ -1819,19 +1819,19 @@ class HTTPClient:
 
         payload = {}
 
-        if max_age is not UndefinedType.UNDEFINED:
+        if max_age is not UNDEFINED:
             payload["max_age"] = max_age
-        if max_uses is not UndefinedType.UNDEFINED:
+        if max_uses is not UNDEFINED:
             payload["max_uses"] = max_uses
-        if temporary is not UndefinedType.UNDEFINED:
+        if temporary is not UNDEFINED:
             payload["temporary"] = temporary
-        if unique is not UndefinedType.UNDEFINED:
+        if unique is not UNDEFINED:
             payload["unique"] = unique
-        if target_type is not UndefinedType.UNDEFINED:
+        if target_type is not UNDEFINED:
             payload["target_type"] = target_type
-        if target_user_id is not UndefinedType.UNDEFINED:
+        if target_user_id is not UNDEFINED:
             payload["target_user_id"] = target_user_id
-        if target_application_id is not UndefinedType.UNDEFINED:
+        if target_application_id is not UNDEFINED:
             payload["target_application_id"] = target_application_id
 
         r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
@@ -1845,7 +1845,7 @@ class HTTPClient:
         channel_id: str | int,
         target_id: str | int,
         *,
-        reason: str | UndefinedType = UndefinedType.UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
     ) -> None:
         """Deletes a channel permission.
 
@@ -1867,7 +1867,7 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if reason is not UndefinedType.UNDEFINED:
+        if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
@@ -1956,7 +1956,7 @@ class HTTPClient:
         channel_id: str | int,
         message_id: str | int,
         *,
-        reason: str | UndefinedType = UndefinedType.UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
     ) -> None:
         """Pins a message.
 
@@ -1987,7 +1987,7 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if reason is not UndefinedType.UNDEFINED:
+        if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
@@ -2067,9 +2067,9 @@ class HTTPClient:
         message_id: str | int,
         name: str,
         *,
-        auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = UndefinedType.UNDEFINED,
-        rate_limit_per_user: int | None | UndefinedType = UndefinedType.UNDEFINED,
-        reason: str | UndefinedType = UndefinedType.UNDEFINED,
+        auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = UNDEFINED,
+        rate_limit_per_user: int | None | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
     ) -> ChannelData:
         """Starts a thread from a message.
 
@@ -2104,7 +2104,7 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if reason is not UndefinedType.UNDEFINED:
+        if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
         payload = {
@@ -2113,9 +2113,9 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if auto_archive_duration is not UndefinedType.UNDEFINED:
+        if auto_archive_duration is not UNDEFINED:
             payload["auto_archive_duration"] = auto_archive_duration
-        if rate_limit_per_user is not UndefinedType.UNDEFINED:
+        if rate_limit_per_user is not UNDEFINED:
             payload["rate_limit_per_user"] = rate_limit_per_user
 
         r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
@@ -2129,11 +2129,11 @@ class HTTPClient:
         channel_id: str | int,
         name: str,
         *,
-        auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = UndefinedType.UNDEFINED,
-        thread_type: Literal[11, 12] | UndefinedType = UndefinedType.UNDEFINED,
-        reason: str | UndefinedType = UndefinedType.UNDEFINED,
-        invitable: bool | UndefinedType = UndefinedType.UNDEFINED,
-        rate_limit_per_user: int | None | UndefinedType = UndefinedType.UNDEFINED,
+        auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = UNDEFINED,
+        thread_type: Literal[11, 12] | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        invitable: bool | UndefinedType = UNDEFINED,
+        rate_limit_per_user: int | None | UndefinedType = UNDEFINED,
     ) -> ChannelData:
         """Starts a thread without a message
 
@@ -2173,7 +2173,7 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if reason is not UndefinedType.UNDEFINED:
+        if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
         payload = {
@@ -2182,13 +2182,13 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if auto_archive_duration is not UndefinedType.UNDEFINED:
+        if auto_archive_duration is not UNDEFINED:
             payload["auto_archive_duration"] = auto_archive_duration
-        if thread_type is not UndefinedType.UNDEFINED:
+        if thread_type is not UNDEFINED:
             payload["type"] = thread_type
-        if invitable is not UndefinedType.UNDEFINED:
+        if invitable is not UNDEFINED:
             payload["invitable"] = invitable
-        if rate_limit_per_user is not UndefinedType.UNDEFINED:
+        if rate_limit_per_user is not UNDEFINED:
             payload["rate_limit_per_user"] = rate_limit_per_user
 
         r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
