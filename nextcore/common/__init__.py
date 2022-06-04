@@ -26,4 +26,4 @@ from .json import *
 from .maybe_coro import *
 from .undefined import *
 
-__all__ = ("Dispatcher", "json_loads", "json_dumps", "maybe_coro", "Undefined", "UndefinedType")
+__all__ = ("Dispatcher", "json_loads", "json_dumps", "maybe_coro", "UndefinedType")

@@ -37,7 +37,7 @@ from aiohttp import (
 from discord_typings.gateway import UpdatePresenceCommand
 from frozendict import frozendict
 
-from ..common import Dispatcher, Undefined, UndefinedType, json_dumps, json_loads
+from ..common import Dispatcher, UndefinedType, json_dumps, json_loads
 from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .errors import (
@@ -658,9 +658,9 @@ class Shard:
         *,
         query: str,
         limit: int,
-        presences: bool | UndefinedType = Undefined,
-        user_ids: str | int | list[str | int] | UndefinedType = Undefined,
-        nonce: str | UndefinedType = Undefined,
+        presences: bool | UndefinedType = UndefinedType.UNDEFINED,
+        user_ids: str | int | list[str | int] | UndefinedType = UndefinedType.UNDEFINED,
+        nonce: str | UndefinedType = UndefinedType.UNDEFINED,
     ) -> None:
         ...
 
@@ -669,10 +669,10 @@ class Shard:
         self,
         guild_id: str | int,
         *,
-        limit: int | UndefinedType = Undefined,
-        presences: bool | UndefinedType = Undefined,
+        limit: int | UndefinedType = UndefinedType.UNDEFINED,
+        presences: bool | UndefinedType = UndefinedType.UNDEFINED,
         user_ids: str | int | list[str | int],
-        nonce: str | UndefinedType = Undefined,
+        nonce: str | UndefinedType = UndefinedType.UNDEFINED,
     ) -> None:
         ...
 
@@ -680,11 +680,11 @@ class Shard:
         self,
         guild_id: str | int,
         *,
-        query: str | UndefinedType = Undefined,
-        limit: int | UndefinedType = Undefined,
-        presences: bool | UndefinedType = Undefined,
-        user_ids: str | int | list[str | int] | UndefinedType = Undefined,
-        nonce: str | UndefinedType = Undefined,
+        query: str | UndefinedType = UndefinedType.UNDEFINED,
+        limit: int | UndefinedType = UndefinedType.UNDEFINED,
+        presences: bool | UndefinedType = UndefinedType.UNDEFINED,
+        user_ids: str | int | list[str | int] | UndefinedType = UndefinedType.UNDEFINED,
+        nonce: str | UndefinedType = UndefinedType.UNDEFINED,
     ) -> None:
         """Request info about the members in this guild.
 
