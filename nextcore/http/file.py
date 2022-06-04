@@ -24,7 +24,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import BinaryIO, Final, TextIO, Union
+    from typing import BinaryIO, Final, TextIO
+    from typing import Union # pylint: disable=outdated-typing-union
     from typing_extensions import TypeAlias
 
     Contents: TypeAlias = Final[Union[str, bytes, bytearray, BinaryIO, TextIO]]
