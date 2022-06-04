@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 
     from ..http import BotAuthentication, HTTPClient
 
-__all__ = ("ShardManager",)
+__all__: Final[tuple[str, ...]] = ("ShardManager",)
 
 logger = getLogger(__name__)
 

@@ -26,11 +26,11 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Final
+
+__all__: Final[tuple[str, ...]] = ("GlobalLock",)
 
 logger = getLogger(__name__)
-
-__all__ = ("GlobalLock",)
 
 
 class GlobalLock:

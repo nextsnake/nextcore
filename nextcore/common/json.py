@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from typing import Dict  # pylint: ignore [outdated-typing-dict]
     from typing import List  # pylint: ignore [outdated-typing-list]
     from typing import Union  # pylint: ignore [outdated-typing-union]
+    from typing import Final
 
     from typing_extensions import TypeAlias
 
@@ -44,7 +45,7 @@ except ImportError:
     _has_orjson = False
 
 
-__all__ = ("json_loads", "json_dumps")
+__all__: Final[tuple[str, ...]] = ("json_loads", "json_dumps")
 
 
 def json_loads(data: str) -> JsonCompatible:
