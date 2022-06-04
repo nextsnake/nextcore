@@ -65,6 +65,7 @@ if TYPE_CHECKING:
         MessageData,
         MessageReferenceData,
         ThreadChannelData,
+        ThreadMemberData,
         UserData,
     )
     from discord_typings.resources.audit_log import AuditLogEvents
@@ -2286,3 +2287,31 @@ class HTTPClient:
         await self._request(
             route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}
         )
+
+    async def get_thread_member(
+        self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int
+    ) -> ThreadMemberData:
+        """Gets a thread member.
+
+        Parameters
+        ----------
+        authentication:
+            The auth info.
+        channel_id:
+            The thread to get from
+        user_id:
+            The member to get info from.
+
+        Raises
+        ------
+        :exc:`NotFoundError`
+            The member is not part of the thread.
+        """
+        route = Route("GET", "/channels/{channel_id}/thread-members/{user_id}", channel_id=channel_id, user_id=user_id)
+
+        r = await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
