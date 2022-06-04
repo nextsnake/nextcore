@@ -141,8 +141,6 @@ class HTTPClient:
             .. tab:: Windows
 
                 This can be turned on by going to ``Settings -> Time & language -> Date & time`` and turning on ``Set time automatically``.
-
-
     timeout:
         The default request timeout in seconds.
     default_headers:
