@@ -31,10 +31,10 @@ from .bucket_metadata import BucketMetadata
 from .client import HTTPClient
 from .errors import *
 from .file import File
-from .global_lock import GlobalLock
 from .ratelimit_storage import RatelimitStorage
 from .request_session import RequestSession
 from .route import Route
+from .global_rate_limiter import *
 
 __all__ = (
     "Bucket",
@@ -48,7 +48,6 @@ __all__ = (
     "NotFoundError",
     "InternalServerError",
     "CloudflareBanError",
-    "GlobalLock",
     "RatelimitStorage",
     "RequestSession",
     "Route",
@@ -56,4 +55,7 @@ __all__ = (
     "BaseAuthentication",
     "BotAuthentication",
     "BearerAuthentication",
+    "BaseGlobalRateLimiter",
+    "UnlimitedGlobalRateLimiter",
+    "LimitedGlobalRateLimiter",
 )

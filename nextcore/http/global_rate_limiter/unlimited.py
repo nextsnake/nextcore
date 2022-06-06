@@ -50,7 +50,6 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
     """
     def __init__(self) -> None:
         self._pending_requests: deque[Future[None]] = deque()
-        self._blocked: bool = False
         self._pending_release: Lock = Lock()
 
     @asynccontextmanager
@@ -70,7 +69,7 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
             A context manager that will wait in __aenter__ until a request should be made.
         """
         del priority # Unused
-        if self._blocked:
+        if self._pending_release.locked():
             # Add to queue
             future: Future[None] = Future()
             self._pending_requests.append(future)

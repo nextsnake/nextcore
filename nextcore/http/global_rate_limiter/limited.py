@@ -48,7 +48,7 @@ class LimitedGlobalRateLimiter(BaseGlobalRateLimiter):
 
     def __init__(self, limit: int = 50) -> None:
         self.limit: int = limit
-        self.remaining: int = 50
+        self.remaining: int = limit
         self._pending_requests: PriorityQueue[PriorityRequestContainer] = PriorityQueue()
         self._reserved_requests: int = 0
         self._pending_reset: bool = False
