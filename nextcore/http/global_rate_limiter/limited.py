@@ -43,6 +43,9 @@ class LimitedGlobalRateLimiter(BaseGlobalRateLimiter):
     limit:
         The amount of requests that can be made per second.
     """
+
+    __slots__ = ("limit", "remaining", "_remaining_requests", "_reserved_requests", "_pending_reset")
+
     def __init__(self, limit: int = 50) -> None:
         self.limit: int = limit
         self.remaining: int = 50
@@ -52,6 +55,19 @@ class LimitedGlobalRateLimiter(BaseGlobalRateLimiter):
 
     @asynccontextmanager
     async def acquire(self, *, priority: int = 0) -> AsyncIterator[None]:
+        """Use a spot in the rate-limit.
+
+        Parameters
+        ----------
+        priority:
+            The request priority. **Lower** number means it will be requested earlier.
+
+        Returns
+        -------
+        :class:`typing.AsyncContextManager`
+            A context manager that will wait in __aenter__ until a request should be made.
+        """
+
         calculated_remaining = self.remaining - self._reserved_requests
         logger.debug("Calculated remaining: %s", calculated_remaining)
         logger.debug("Reserved requests: %s", self._reserved_requests)
@@ -102,4 +118,8 @@ class LimitedGlobalRateLimiter(BaseGlobalRateLimiter):
             loop.call_later(1, self._reset)
 
     def update(self, retry_after: float) -> None:
+        """A function that gets called whenever the global rate-limit gets exceeded
+
+        This just makes a warning log.
+        """
         logger.warning("Exceeded global rate-limit! (Retry after: %s)", retry_after)
