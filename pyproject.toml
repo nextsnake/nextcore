@@ -1,13 +1,43 @@
 [tool.poetry]
 name = "nextcore"
 version = "1.0.0a"
-description = "A minimal gateway and http handler for discord bot libraries"
-authors = ["Nextcore developers"]
+description = "A low level Discord API wrapper"
+authors = ["nextcore developers"]
 license = "MIT"
-
+classifiers = [
+    "Private :: Do Not Upload",
+    "Development Status :: 3 - Alpha",
+    "Framework :: AsyncIO",
+    "Framework :: aiohttp",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Cython",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: Implementation",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Communications :: Chat",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed"
+]
+# Uncomment after #32 has been merged
+# readme = "README.md"
+homepage = "https://nextcord.dev" # TODO: Replace this?
+repository = "https://github.com/nextsnake/nextcore"
+documentation = "https://docs.nextcord.gay" # TODO: Replace this
+keywords = ["discord", "bot", "wrapper", "api"]
 packages = [
     { include = "nextcore" }
 ]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/nextsnake/nextcore/issues"
 
 [tool.poetry.dependencies]
 python = "^3.8"
