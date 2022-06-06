@@ -190,7 +190,7 @@ class HTTPClient:
         self._session: ClientSession | None = None
 
     async def _request(
-        self, route: Route, ratelimit_key: str | None, *, headers: dict[str, str] | None = None, **kwargs: Any
+        self, route: Route, ratelimit_key: str | None, *, headers: dict[str, str] | None = None, global_priority: int = 0, **kwargs: Any
     ) -> ClientResponse:
         """Requests a route from the Discord API
 
@@ -204,6 +204,11 @@ class HTTPClient:
 
             .. note::
                 This should be :data:`None` for unauthenticated routes or webhooks (does not include modifying the webhook via a bot).
+        global_priority:
+            The request priority for global requests. **Lower** priority will be picked first.
+
+            .. warning::
+                This may be ignored by your :class:`BaseGlobalRateLimiter`.
         headers:
             Headers to mix with :attr:`HTTPClient.default_headers` to pass to :meth:`aiohttp.ClientSession.request`
         kwargs:
@@ -256,7 +261,7 @@ class HTTPClient:
             bucket = await self._get_bucket(route, ratelimit_storage)
             async with bucket.acquire():
                 if not route.ignore_global:
-                    async with ratelimit_storage.global_lock:
+                    async with ratelimit_storage.global_rate_limiter.acquire(priority=global_priority):
                         logger.info("Requesting %s %s", route.method, route.path)
                         response = await self._session.request(
                             route.method, route.BASE_URL + route.path, headers=headers, timeout=self.timeout, **kwargs
@@ -280,29 +285,13 @@ class HTTPClient:
 
                     scope = response.headers["X-RateLimit-Scope"]
                     if scope == "global":
-                        # Global ratelimit handling
+                        # Global rate-limit handling
                         # We use retry_after from the body instead of the headers as they have more precision than the headers.
                         data = await response.json()
                         retry_after = data["retry_after"]
-
-                        if ratelimit_storage.global_lock.limit is None:
-                            # User decided that they don't want to set a static global ratelimit (hopefully using large bot sharding, if not shame on you)
-                            logger.info(
-                                "Global ratelimit hit, but no static was set. Blame the user and move on. Retrying in %s seconds.",
-                                retry_after,
-                            )
-                        else:
-                            logger.warning(
-                                "Global ratelimit hit! This should usually not happen... Discord says to retry in %s, global: %s",
-                                retry_after,
-                                ratelimit_storage.global_lock,
-                            )
-
-                        # Lock the global lock temporarily
-                        if ratelimit_storage.global_lock.limit is None:
-                            loop = get_running_loop()
-                            ratelimit_storage.global_lock.lock()
-                            loop.call_later(retry_after, ratelimit_storage.global_lock.unlock)
+                        
+                        # Notify the global rate-limiter.
+                        ratelimit_storage.global_rate_limiter.update(retry_after)
                     elif scope == "user":
                         # Failure in Bucket or clustering?
                         logger.warning(

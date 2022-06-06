@@ -151,6 +151,8 @@ class GlobalLock:
 
         self._remaining = self._limit
 
+        logger.debug("Can release up to %s, pending: %s", self._limit, len(self._pending))
+
         for future_id, future in enumerate(self._pending):
             if future_id >= self._limit:
                 logger.debug("Reset done, %s pending left", len(self._pending))

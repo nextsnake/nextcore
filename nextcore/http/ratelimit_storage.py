@@ -26,7 +26,7 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 from weakref import WeakValueDictionary
 
-from .global_lock import GlobalLock
+from .global_rate_limiter import BaseGlobalRateLimiter, LimitedGlobalRateLimiter
 
 if TYPE_CHECKING:
     from typing import Literal
@@ -51,10 +51,9 @@ class RatelimitStorage:
     ----------
     global_lock:
         The users per user global ratelimit.
-
     """
 
-    __slots__ = ("_nextcore_buckets", "_discord_buckets", "_bucket_metadata", "global_lock")
+    __slots__ = ("_nextcore_buckets", "_discord_buckets", "_bucket_metadata", "global_rate_limiter")
 
     def __init__(self) -> None:
         self._nextcore_buckets: dict[str | int, Bucket] = {}
@@ -62,7 +61,7 @@ class RatelimitStorage:
         self._bucket_metadata: dict[
             str, BucketMetadata
         ] = {}  # This will never get cleared however it improves performance so I think not deleting it is fine
-        self.global_lock = GlobalLock()
+        self.global_rate_limiter: BaseGlobalRateLimiter = LimitedGlobalRateLimiter()
 
         # Register a garbage collection callback
         gc.callbacks.append(self._cleanup_buckets)
@@ -166,7 +165,6 @@ class RatelimitStorage:
 
         # Clear up the buckets
         self._nextcore_buckets.clear()
-        self._discord_buckets.clear()
 
         # Clear up the metadata
         self._bucket_metadata.clear()
