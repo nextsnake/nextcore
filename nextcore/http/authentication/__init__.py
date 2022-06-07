@@ -19,8 +19,15 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from .base import BaseAuthentication
 from .bearer import BearerAuthentication
 from .bot import BotAuthentication
 
-__all__ = ("BaseAuthentication", "BotAuthentication", "BearerAuthentication")
+if TYPE_CHECKING:
+    from typing import Final
+
+__all__: Final[tuple[str, ...]] = ("BaseAuthentication", "BotAuthentication", "BearerAuthentication")

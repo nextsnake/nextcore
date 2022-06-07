@@ -21,7 +21,12 @@
 
 from __future__ import annotations
 
-__all__ = ("BucketMetadata",)
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Final
+
+__all__: Final[tuple[str, ...]] = ("BucketMetadata",)
 
 
 class BucketMetadata:

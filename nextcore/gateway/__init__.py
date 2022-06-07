@@ -24,13 +24,20 @@
 This module allows you to receive events from Discord.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Final
+
 from .decompressor import Decompressor
 from .errors import *
 from .op_code import GatewayOpcode
 from .shard import Shard
 from .shard_manager import ShardManager
 
-__all__ = (
+__all__: Final[tuple[str, ...]] = (
     "ShardManager",
     "Shard",
     "Decompressor",

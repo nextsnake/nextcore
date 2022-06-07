@@ -47,7 +47,7 @@ from .ratelimit_storage import RatelimitStorage
 from .route import Route
 
 if TYPE_CHECKING:
-    from typing import Any, Iterable, Literal
+    from typing import Any, Final, Iterable, Literal
 
     from aiohttp import ClientResponse, ClientWebSocketResponse
     from discord_typings import (
@@ -74,7 +74,7 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
-__all__ = ("HTTPClient",)
+__all__: Final[tuple[str, ...]] = ("HTTPClient",)
 
 
 class HTTPClient:
