@@ -74,7 +74,7 @@ if TYPE_CHECKING:
 
     from ..http import HTTPClient
 
-__all__ = ("Shard",)
+__all__: Final[tuple[str, ...]] = ("Shard",)
 
 
 class Shard:

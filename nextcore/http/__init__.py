@@ -25,6 +25,10 @@ This module includes a HTTP client that handles rate limits for you,
 and gives you convinient methods around the API.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from .authentication import *
 from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
@@ -36,7 +40,10 @@ from .ratelimit_storage import RatelimitStorage
 from .request_session import RequestSession
 from .route import Route
 
-__all__ = (
+if TYPE_CHECKING:
+    from typing import Final
+
+__all__: Final[tuple[str, ...]] = (
     "Bucket",
     "BucketMetadata",
     "HTTPClient",

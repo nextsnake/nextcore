@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import BinaryIO, Final, TextIO
 
-__all__ = ("File",)
+__all__: Final[tuple[str, ...]] = ("File",)
 
 # This is not a attr.dataclass because it does not support slots.
 class File:

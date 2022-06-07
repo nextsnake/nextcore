@@ -26,7 +26,9 @@ from zlib import decompressobj
 from zlib import error as zlib_error
 
 if TYPE_CHECKING:
-    from typing import ClassVar
+    from typing import ClassVar, Final
+
+__all__: Final[tuple[str, ...]] = ("Decompressor",)
 
 
 class Decompressor:

@@ -34,7 +34,7 @@ EventNameT = TypeVar("EventNameT", bound=Hashable)
 if TYPE_CHECKING:
     from typing import Tuple  # pylint: disable=outdated-typing-tuple
     from typing import Union  # pylint: disable=outdated-typing-union
-    from typing import Any, Awaitable, Callable
+    from typing import Any, Awaitable, Callable, Final
 
     from typing_extensions import Unpack
 
@@ -56,7 +56,7 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
-__all__ = ("Dispatcher",)
+__all__: Final[tuple[str, ...]] = ("Dispatcher",)
 
 
 class Dispatcher(Generic[EventNameT]):

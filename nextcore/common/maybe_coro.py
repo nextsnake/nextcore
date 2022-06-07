@@ -25,9 +25,9 @@ from asyncio import iscoroutine
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from typing import Any, Callable, Final
 
-__all__ = ("maybe_coro",)
+__all__: Final[tuple[str, ...]] = ("maybe_coro",)
 
 
 async def maybe_coro(coro: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
