@@ -25,6 +25,10 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import BinaryIO, Final, TextIO
+    from typing import Union # pylint: disable=outdated-typing-union
+    from typing_extensions import TypeAlias
+
+    Contents: TypeAlias = Final[Union[str, bytes, bytearray, BinaryIO, TextIO]]
 
 __all__: Final[tuple[str, ...]] = ("File",)
 
@@ -55,6 +59,6 @@ class File:
 
     __slots__ = ("name", "contents")
 
-    def __init__(self, name: str, contents: str | bytes | bytearray | BinaryIO | TextIO):
+    def __init__(self, name: str, contents: Contents):
         self.name: Final[str] = name
-        self.contents: Final[str | bytes | bytearray | BinaryIO | TextIO] = contents
+        self.contents: Contents = contents
