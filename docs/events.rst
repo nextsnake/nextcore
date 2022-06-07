@@ -17,7 +17,7 @@ The event name here is the gateway `opcode <https://discord.dev/docs/topics/gate
 .. code-block:: python
 
     @shard.listen(GatewayOpcode.HEARTBEAT_ACK)
-    async def on_ready(data):
+    async def on_heartbeat_ack(data):
         print("<3")
 
 Event Dispatcher
