@@ -24,7 +24,20 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from typing import Final
+
     from aiohttp import ClientResponse
+
+__all__: Final[tuple[str, ...]] = (
+    "RateLimitingFailedError",
+    "HTTPRequestStatusError",
+    "BadRequestError",
+    "UnauthorizedError",
+    "ForbiddenError",
+    "NotFoundError",
+    "InternalServerError",
+    "CloudflareBanError",
+)
 
 
 class RateLimitingFailedError(Exception):

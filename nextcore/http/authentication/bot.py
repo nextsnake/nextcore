@@ -26,9 +26,9 @@ from typing import TYPE_CHECKING
 from .base import BaseAuthentication
 
 if TYPE_CHECKING:
-    from typing import Literal
+    from typing import Final, Literal
 
-__all__ = ("BotAuthentication",)
+__all__: Final[tuple[str, ...]] = ("BotAuthentication",)
 
 
 class BotAuthentication(BaseAuthentication):

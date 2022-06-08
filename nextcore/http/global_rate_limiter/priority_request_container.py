@@ -25,30 +25,33 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Final
+    from asyncio import Future
 
-__all__: Final[tuple[str, ...]] = ("BaseAuthentication",)
+__all__: Final[tuple[str, ...]] = ("PriorityRequestContainer", )
 
+class PriorityRequestContainer:
+    """A container for requests for :class:`queue.PriorityQueue` to ignore the future when comparing greater than and less than
 
-class BaseAuthentication:
-    """A wrapper around discord credentials.
-
-    .. warning::
-        This is a base class. You should probably use :class:`BotAuthentication` or :class:`BearerAuthentication` instead.
-
-    Attributes
+    Parameters
     ----------
-    prefix:
-        The prefix of the authentication.
-    token:
-        The bot's token.
+    priority:
+        The request priority. This will be compared!
+    future:
+        The future for when the request is done
+
+    Attributes 
+    ----------
+    priority:
+        The request priority. This will be compared!
+    future:
+        The future for when the request is done
     """
 
-    __slots__ = ("prefix", "token", "rate_limit_key")
+    __slots__: tuple[str, ...] = ("priority", "future")
 
-    def __init__(self, prefix: str, token: str):
-        self.prefix: str = prefix
-        self.token: str = token
-        self.rate_limit_key: str = token
+    def __init__(self, priority: int, future: Future[None]):
+        self.priority: int = priority
+        self.future: Future[None] = future
 
-    def __str__(self) -> str:
-        return f"{self.prefix} {self.token}"
+    def __gt__(self, other: PriorityRequestContainer):
+        return self.priority > other.priority

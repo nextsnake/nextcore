@@ -19,9 +19,15 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from enum import IntEnum
+from __future__ import annotations
 
-__all__ = ("GatewayCloseCode",)
+from enum import IntEnum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Final
+
+__all__: Final[tuple[str, ...]] = ("GatewayCloseCode",)
 
 
 class GatewayCloseCode(IntEnum):

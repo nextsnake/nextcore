@@ -24,10 +24,14 @@ from __future__ import annotations
 from asyncio import Lock, sleep
 from logging import getLogger
 from time import time
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Final
 
 logger = getLogger(__name__)
 
-__all__ = ("TimesPer",)
+__all__: Final[tuple[str, ...]] = ("TimesPer",)
 
 
 class TimesPer:

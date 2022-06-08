@@ -26,12 +26,14 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from typing import Final
+
     from typing_extensions import Self
 
 
 logger = getLogger(__name__)
 
-__all__ = ("ExponentialBackoff",)
+__all__: Final[tuple[str, ...]] = ("ExponentialBackoff",)
 
 
 class ExponentialBackoff:
