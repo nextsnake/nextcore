@@ -466,7 +466,7 @@ class HTTPClient:
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-    async def get_gateway_bot(self, authentication: BotAuthentication) -> GetGatewayBotData:
+    async def get_gateway_bot(self, authentication: BotAuthentication, *, global_priority: int = 0) -> GetGatewayBotData:
         """Gets gateway connection information.
 
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`__
@@ -484,6 +484,8 @@ class HTTPClient:
         ----------
         authentication:
             Authentication info.
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
         Returns
         -------
@@ -495,7 +497,7 @@ class HTTPClient:
         """
         route = Route("GET", "/gateway/bot")
         r = await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}
+            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority
         )
 
         # TODO: Make this verify the payload from discord?
@@ -511,6 +513,7 @@ class HTTPClient:
         action_type: AuditLogEvents | None = None,
         before: int | None = None,
         limit: int = 50,
+        global_priority: int = 0
     ) -> AuditLogData:
         """Gets the guild audit log.
         See the `documentation <https://discord.dev/resources/audit-log#get-guild-audit-log>`__
@@ -543,7 +546,9 @@ class HTTPClient:
             The amount of entries to get.
 
             This has a minimum of 1 and a maximum of 100.
-
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        
         Returns
         -------
         :class:`AuditLogData`
@@ -571,13 +576,14 @@ class HTTPClient:
             ratelimit_key=authentication.rate_limit_key,
             params=params,
             headers={"Authorization": str(authentication)},
+            global_priority=global_priority
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     # Channel
-    async def get_channel(self, authentication: BotAuthentication, channel_id: str | int) -> ChannelData:
+    async def get_channel(self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0) -> ChannelData:
         """Gets a channel by ID.
 
         See the `documentation <https://discord.dev/resources/channels#get-channel>`__
@@ -588,6 +594,8 @@ class HTTPClient:
             Authentication info.
         channel_id:
             The channel ID to get.
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
         Returns
         -------
@@ -599,7 +607,7 @@ class HTTPClient:
         """
         route = Route("GET", "/channels/{channel_id}", channel_id=channel_id)
         r = await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}
+            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority
         )
 
         # TODO: Make this verify the payload from discord?
@@ -614,6 +622,7 @@ class HTTPClient:
         name: str | UndefinedType = UNDEFINED,
         icon: str | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> ChannelData:
         """Modifies the group dm.
 
@@ -640,6 +649,8 @@ class HTTPClient:
 
             .. note::
                 This has to be between 1 and 512 characters
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route("PATCH", "/channels/{channel_id}", channel_id=channel_id)
         payload = {}  # TODO: Use a typehint for payload
@@ -657,7 +668,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["reason"] = reason
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -681,6 +692,7 @@ class HTTPClient:
         video_quality_mode: Literal[1, 2] | None | UndefinedType = UNDEFINED,  # TODO: Implement VideoQualityMode
         default_auto_archive_duration: Literal[60, 1440, 4320, 10080] | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> ChannelData:
         """Modifies a guild channel.
 
@@ -764,6 +776,8 @@ class HTTPClient:
                 The client treats this as it being set to 24 hours however this may change without notice.
         reason:
             The reason to put in the audit log.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
 
         route = Route("PATCH", "/channels/{channel_id}", channel_id=channel_id)
@@ -803,7 +817,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["reason"] = reason
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -820,6 +834,7 @@ class HTTPClient:
         invitable: bool | UndefinedType = UNDEFINED,
         rate_limit_per_user: int | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> ThreadChannelData:
         """Modifies a thread.
 
@@ -853,6 +868,8 @@ class HTTPClient:
                 This has to be between 0-21600 seconds.
         reason:
             The reason to put in the audit log.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
 
         route = Route("PATCH", "/channels/{channel_id}", channel_id=thread_id)
@@ -878,13 +895,13 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["reason"] = reason
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_channel(
-        self, authentication: BotAuthentication | BearerAuthentication, channel_id: int | str
+        self, authentication: BotAuthentication | BearerAuthentication, channel_id: int | str, *, global_priority: int = 0
     ) -> None:
         """Deletes a channel.
 
@@ -894,33 +911,35 @@ class HTTPClient:
             Authentication info.
         channel_id:
             The id of the channel to delete.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
 
         route = Route("DELETE", "/channels/{channel_id}", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, headers=headers, ratelimit_key=authentication.rate_limit_key)
+        await self._request(route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority)
 
     @overload
     async def get_channel_messages(
-        self, authentication: BotAuthentication, channel_id: int | str, *, around: int, limit: int | UndefinedType
+        self, authentication: BotAuthentication, channel_id: int | str, *, around: int, limit: int | UndefinedType, global_priority: int = 0
     ) -> list[MessageData]:
         ...
 
     @overload
     async def get_channel_messages(
-        self, authentication: BotAuthentication, channel_id: int | str, *, before: int, limit: int | UndefinedType
+        self, authentication: BotAuthentication, channel_id: int | str, *, before: int, limit: int | UndefinedType, global_priority: int = 0
     ) -> list[MessageData]:
         ...
 
     @overload
     async def get_channel_messages(
-        self, authentication: BotAuthentication, channel_id: int | str, *, after: int, limit: int | UndefinedType
+        self, authentication: BotAuthentication, channel_id: int | str, *, after: int, limit: int | UndefinedType, global_priority: int = 0
     ) -> list[MessageData]:
         ...
 
     @overload
-    async def get_channel_messages(self, authentication: BotAuthentication, channel_id: int | str) -> list[MessageData]:
+    async def get_channel_messages(self, authentication: BotAuthentication, channel_id: int | str, *, global_priority: int = 0) -> list[MessageData]:
         ...
 
     async def get_channel_messages(
@@ -932,6 +951,7 @@ class HTTPClient:
         before: int | UndefinedType = UNDEFINED,
         after: int | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> list[MessageData]:
         """Gets messages from a channel.
 
@@ -971,6 +991,8 @@ class HTTPClient:
                 This has to be between 1-100.
             .. note::
                 If this is not provided it will default to ``50``.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
 
         route = Route("GET", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -989,7 +1011,7 @@ class HTTPClient:
         if limit is not UNDEFINED:
             params["limit"] = limit
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, params=params)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, params=params, global_priority=global_priority)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -1009,6 +1031,7 @@ class HTTPClient:
         files: Iterable[File] | UndefinedType = UNDEFINED,
         attachments: list[AttachmentData] | UndefinedType = UNDEFINED,  # TODO: Partial
         flags: int | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> MessageData:
         """Creates a message in a channel.
 
@@ -1063,6 +1086,8 @@ class HTTPClient:
 
             .. note::
                 Only the ``SUPRESS_EMBEDS`` flag can be set.
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
         Returns
         -------
@@ -1112,13 +1137,14 @@ class HTTPClient:
             ratelimit_key=authentication.rate_limit_key,
             headers=headers,
             data=form,
+            global_priority=global_priority
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def crosspost_message(
-        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str
+        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, *, global_priority: int = 0
     ) -> MessageData:
         """Crossposts a message from another channel.
 
@@ -1137,6 +1163,8 @@ class HTTPClient:
             The id of the channel to crosspost the message to.
         message_id:
             The id of the message to crosspost.
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
         Returns
         -------
@@ -1151,13 +1179,13 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def create_reaction(
-        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str
+        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str, *, global_priority: int = 0
     ) -> None:
         """Creates a reaction to a message.
 
@@ -1180,6 +1208,8 @@ class HTTPClient:
             The emoji to add to the message.
 
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route(
             "PUT",
@@ -1190,10 +1220,10 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
     async def delete_own_reaction(
-        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str
+        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str, *, global_priority: int = 0
     ) -> None:
         """Deletes a reaction from a message.
 
@@ -1211,6 +1241,8 @@ class HTTPClient:
             The emoji to remove from the message.
 
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route(
             "DELETE",
@@ -1221,7 +1253,7 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
     async def delete_user_reaction(
         self,
@@ -1230,6 +1262,8 @@ class HTTPClient:
         message_id: int | str,
         emoji: str,
         user_id: int | str,
+        *,
+        global_priority: int = 0
     ) -> None:
         """Deletes a reaction from a message from another user.
 
@@ -1255,6 +1289,8 @@ class HTTPClient:
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
         user_id:
             The id of the user to remove the reaction from.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route(
             "DELETE",
@@ -1266,7 +1302,7 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
     async def get_reactions(
         self,
@@ -1277,6 +1313,7 @@ class HTTPClient:
         *,
         after: str | int | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> list[UserData]:
         """Gets the reactions to a message.
 
@@ -1293,6 +1330,8 @@ class HTTPClient:
             The id of the channel where the message is located.
         message_id:
             The id of the message to get the reactions from.
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
         Returns
         -------
@@ -1317,13 +1356,13 @@ class HTTPClient:
         if limit is not UNDEFINED:
             params["limit"] = limit
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, params=params)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, params=params, global_priority=global_priority)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_all_reactions(
-        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str
+        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, *, global_priority: int = 0
     ) -> None:
         """Deletes all reactions from a message.
 
@@ -1343,6 +1382,8 @@ class HTTPClient:
             The id of the channel where the message is located.
         message_id:
             The id of the message to remove all reactions from.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route(
             "DELETE",
@@ -1352,10 +1393,10 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
     async def delete_all_reactions_for_emoji(
-        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str
+        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str, *, global_priority: int = 0
     ) -> None:
         """Deletes all reactions from a message with a specific emoji.
 
@@ -1379,6 +1420,8 @@ class HTTPClient:
             The emoji to remove from the message.
 
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route(
             "DELETE",
@@ -1389,7 +1432,7 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
     async def edit_message(
         self,
@@ -1404,6 +1447,7 @@ class HTTPClient:
         components: list[ActionRowData] | None | UndefinedType = UNDEFINED,
         files: list[File] | None | UndefinedType = UNDEFINED,
         attachments: list[AttachmentData] | None | UndefinedType = UNDEFINED,  # TODO: Partial
+        global_priority: int = 0
     ) -> MessageData:
         """Edits a message.
 
@@ -1451,6 +1495,8 @@ class HTTPClient:
 
             .. warning::
                 This has to include previous and current attachments or they will be removed.
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
         Returns
         -------
@@ -1489,7 +1535,7 @@ class HTTPClient:
 
         form.add_field("payload_json", json_dumps(payload))
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, data=form)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, data=form, global_priority=global_priority)
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
@@ -1501,6 +1547,7 @@ class HTTPClient:
         message_id: str | int,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> None:
         """Deletes a message.
 
@@ -1525,6 +1572,8 @@ class HTTPClient:
 
             .. note::
                 If this is set to ``Undefined``, there will be no reason.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route(
             "DELETE", "/channels/{channel_id}/messages/{message_id}", channel_id=channel_id, message_id=message_id
@@ -1536,7 +1585,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
     async def bulk_delete_messages(
         self,
@@ -1545,6 +1594,7 @@ class HTTPClient:
         messages: list[str] | list[int] | list[str | int],
         *,
         reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> None:
         """Deletes multiple messages.
 
@@ -1579,6 +1629,8 @@ class HTTPClient:
 
             .. note::
                 If this is set to ``Undefined``, there will be no reason.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route("POST", "/channels/{channel_id}/messages/bulk-delete", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
@@ -1589,7 +1641,7 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, json={"messages": messages}
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, json={"messages": messages}, global_priority=global_priority
         )
 
     async def edit_channel_permissions(
@@ -1602,6 +1654,7 @@ class HTTPClient:
         allow: str | None | UndefinedType = UNDEFINED,
         deny: str | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> None:
         """Edits the permissions of a channel.
 
@@ -1640,6 +1693,8 @@ class HTTPClient:
 
             .. note::
                 If this is set to ``Undefined``, there will be no reason.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route(
             "PUT",
@@ -1663,10 +1718,10 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
 
     async def get_channel_invites(
-        self, authentication: BotAuthentication, channel_id: str | int
+        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
     ) -> list[InviteMetadata]:
         """Gets the invites for a channel.
 
@@ -1681,6 +1736,8 @@ class HTTPClient:
             Authentication info.
         channel_id:
             The id of the channel to get invites for.
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
         Returns
         -------
@@ -1690,7 +1747,7 @@ class HTTPClient:
         route = Route("GET", "/channels/{channel_id}/invites", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
@@ -1708,6 +1765,7 @@ class HTTPClient:
         target_type: Literal[0],
         target_user_id: str | int,
         target_application_id: UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> InviteData:
         ...
 
@@ -1724,6 +1782,7 @@ class HTTPClient:
         target_type: Literal[1],
         target_user_id: UndefinedType = UNDEFINED,
         target_application_id: str | int,
+        global_priority: int = 0
     ) -> InviteData:
         ...
 
@@ -1740,6 +1799,7 @@ class HTTPClient:
         target_type: UndefinedType = UNDEFINED,
         target_user_id: UndefinedType = UNDEFINED,
         target_application_id: UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> InviteData:
         ...
 
@@ -1755,6 +1815,7 @@ class HTTPClient:
         target_type: Literal[0, 1] | UndefinedType = UNDEFINED,
         target_user_id: str | int | UndefinedType = UNDEFINED,
         target_application_id: str | int | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> InviteData:
         """Creates an invite for a channel.
 
@@ -1796,6 +1857,8 @@ class HTTPClient:
 
             .. note::
                 This can only be set if ``target_type`` is ``1``.
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
         Returns
         -------
@@ -1822,7 +1885,7 @@ class HTTPClient:
         if target_application_id is not UNDEFINED:
             payload["target_application_id"] = target_application_id
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
@@ -1834,6 +1897,7 @@ class HTTPClient:
         target_id: str | int,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> None:
         """Deletes a channel permission.
 
@@ -1847,6 +1911,8 @@ class HTTPClient:
             The id of the channel to delete the permission from.
         target_id:
             The id of the user or role to delete the permission from.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route(
             "DELETE", "/channels/{channel_id}/permissions/{target_id}", channel_id=channel_id, target_id=target_id
@@ -1858,10 +1924,10 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
     async def follow_news_channel(
-        self, authentication: BotAuthentication, channel_id: str | int, webhook_channel_id: str | int
+        self, authentication: BotAuthentication, channel_id: str | int, webhook_channel_id: str | int, *, global_priority: int = 0
     ) -> FollowedChannelData:
         """Follows a news channel.
 
@@ -1878,6 +1944,8 @@ class HTTPClient:
             The id of the channel to follow.
         webhook_channel_id:
             The id of the channel to receive posts to.
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
         Returns
         -------
@@ -1888,12 +1956,12 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
         payload = {"webhook_channel_id": webhook_channel_id}
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
-    async def trigger_typing_indicator(self, authentication: BotAuthentication, channel_id: str | int) -> None:
+    async def trigger_typing_indicator(self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0) -> None:
         """Triggers a typing indicator.
 
         Read the `documentation <https://discord.dev/resources/channel#trigger-typing-indicator>`__
@@ -1904,13 +1972,15 @@ class HTTPClient:
             Authentication info.
         channel_id:
             The id of the channel to trigger the typing indicator on.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route("POST", "/channels/{channel_id}/typing", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
 
-    async def get_pinned_messages(self, authentication: BotAuthentication, channel_id: str | int) -> list[MessageData]:
+    async def get_pinned_messages(self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0) -> list[MessageData]:
         """Gets the pinned messages of a channel.
 
         Read the `documentation <https://discord.dev/resources/channel#get-pinned-messages>`__
@@ -1924,6 +1994,8 @@ class HTTPClient:
             Authentication info.
         channel_id:
             The id of the channel to get the pinned messages of.
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
         Returns
         -------
@@ -1945,6 +2017,7 @@ class HTTPClient:
         message_id: str | int,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> None:
         """Pins a message.
 
@@ -1969,6 +2042,8 @@ class HTTPClient:
 
             .. note::
                 This has to be between 1 and 512 characters.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route("PUT", "/channels/{channel_id}/pins/{message_id}", channel_id=channel_id, message_id=message_id)
         headers = {"Authorization": str(authentication)}
@@ -1981,7 +2056,7 @@ class HTTPClient:
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
 
     async def unpin_message(
-        self, authentication: BotAuthentication, channel_id: str | int, message_id: str | int
+        self, authentication: BotAuthentication, channel_id: str | int, message_id: str | int, *, global_priority: int = 0
     ) -> None:
         """Unpins a message.
 
@@ -1998,16 +2073,18 @@ class HTTPClient:
             The id of the channel to unpin the message in.
         message_id:
             The id of the message to unpin.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route(
             "DELETE", "/channels/{channel_id}/pins/{message_id}", channel_id=channel_id, message_id=message_id
         )
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
     async def group_dm_add_recipient(
-        self, authentication: BearerAuthentication, channel_id: str | int, user_id: str | int
+        self, authentication: BearerAuthentication, channel_id: str | int, user_id: str | int, *, global_priority: int = 0
     ) -> None:
         """Adds a recipient to a group DM.
 
@@ -2021,14 +2098,16 @@ class HTTPClient:
             The id of the channel to add the recipient to.
         user_id:
             The id of the user to add.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route("PUT", "/channels/{channel_id}/recipients/{user_id}", channel_id=channel_id, user_id=user_id)
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
     async def group_dm_remove_recipient(
-        self, authentication: BearerAuthentication, channel_id: str | int, user_id: str | int
+        self, authentication: BearerAuthentication, channel_id: str | int, user_id: str | int, *, global_priority: int = 0
     ) -> None:
         """Removes a recipient from a group DM.
 
@@ -2042,11 +2121,13 @@ class HTTPClient:
             The id of the channel to remove the recipient from.
         user_id:
             The id of the user to remove.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route("DELETE", "/channels/{channel_id}/recipients/{user_id}", channel_id=channel_id, user_id=user_id)
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
     async def start_thread_from_message(
         self,
@@ -2058,6 +2139,7 @@ class HTTPClient:
         auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = UNDEFINED,
         rate_limit_per_user: int | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> ChannelData:
         """Starts a thread from a message.
 
@@ -2080,6 +2162,8 @@ class HTTPClient:
 
             .. note::
                 This has to be between 0 and 21600.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route(
             "POST",
@@ -2106,7 +2190,7 @@ class HTTPClient:
         if rate_limit_per_user is not UNDEFINED:
             payload["rate_limit_per_user"] = rate_limit_per_user
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
@@ -2122,6 +2206,7 @@ class HTTPClient:
         reason: str | UndefinedType = UNDEFINED,
         invitable: bool | UndefinedType = UNDEFINED,
         rate_limit_per_user: int | None | UndefinedType = UNDEFINED,
+        global_priority: int = 0
     ) -> ChannelData:
         """Starts a thread without a message
 
@@ -2145,6 +2230,8 @@ class HTTPClient:
 
             .. note::
                 This has to be between 0 and 21600.
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
         Returns
         -------
@@ -2179,14 +2266,14 @@ class HTTPClient:
         if rate_limit_per_user is not UNDEFINED:
             payload["rate_limit_per_user"] = rate_limit_per_user
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
     # TODO: Add start thread in forum channel here!
 
-    async def join_thread(self, authentication: BotAuthentication, channel_id: str | int) -> None:
+    async def join_thread(self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0) -> None:
         """Joins a thread.
 
         Read the `documentation <https://discord.dev/resources/channel#join-thread>`__
@@ -2197,14 +2284,16 @@ class HTTPClient:
             Authentication info.
         channel_id:
             The thread to join.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route("PUT", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
     async def add_thread_member(
-        self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int
+        self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int, *, global_priority: int = 0
     ) -> None:
         """Adds a member to a thread
 
@@ -2219,14 +2308,16 @@ class HTTPClient:
             The thread to add the member to.
         user_id:
             The id of the member to add.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route("PUT", "/channels/{channel_id}/thread-members/{user_id}", channel_id=channel_id, user_id=user_id)
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}
+            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority
         )
 
-    async def leave_thread(self, authentication: BotAuthentication, channel_id: str | int) -> None:
+    async def leave_thread(self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0) -> None:
         """Leaves a thread
 
         .. note::
@@ -2238,15 +2329,17 @@ class HTTPClient:
             The auth info.
         channel_id:
             The channel to leave
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route("DELETE", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}
+            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority
         )
 
     async def remove_thread_member(
-        self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int
+        self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int, *, global_priority: int = 0
     ) -> None:
         """Removes a member from a thread
 
@@ -2266,17 +2359,19 @@ class HTTPClient:
             The thread to add the member to.
         user_id:
             The id of the member to add.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route(
             "DELETE", "/channels/{channel_id}/thread-members/{user_id}", channel_id=channel_id, user_id=user_id
         )
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}
+            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority
         )
 
     async def get_thread_member(
-        self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int
+        self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int, *, global_priority: int = 0
     ) -> ThreadMemberData:
         """Gets a thread member.
 
@@ -2288,6 +2383,8 @@ class HTTPClient:
             The thread to get from
         user_id:
             The member to get info from.
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
         Raises
         ------
@@ -2297,13 +2394,13 @@ class HTTPClient:
         route = Route("GET", "/channels/{channel_id}/thread-members/{user_id}", channel_id=channel_id, user_id=user_id)
 
         r = await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}
+            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority
         )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
-    async def list_thread_members(self, authentication: BotAuthentication, channel_id: str | int) -> list[ThreadMemberData]:
+    async def list_thread_members(self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0) -> list[ThreadMemberData]:
         """Gets all thread members
 
         .. warning::
@@ -2315,10 +2412,12 @@ class HTTPClient:
             The auth info.
         channel_id:
             The thread to get members from.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
         route = Route("GET", "/channels/{channel_id}/thread-members", channel_id=channel_id)
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)})
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority)
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
