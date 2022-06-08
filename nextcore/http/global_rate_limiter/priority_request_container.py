@@ -24,10 +24,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Final
     from asyncio import Future
+    from typing import Final
 
-__all__: Final[tuple[str, ...]] = ("PriorityRequestContainer", )
+__all__: Final[tuple[str, ...]] = ("PriorityRequestContainer",)
+
 
 class PriorityRequestContainer:
     """A container for requests for :class:`queue.PriorityQueue` to ignore the future when comparing greater than and less than
@@ -39,7 +40,7 @@ class PriorityRequestContainer:
     future:
         The future for when the request is done
 
-    Attributes 
+    Attributes
     ----------
     priority:
         The request priority. This will be compared!

@@ -37,7 +37,7 @@ from aiohttp import (
 from discord_typings.gateway import UpdatePresenceCommand
 from frozendict import frozendict
 
-from ..common import Dispatcher, UndefinedType, json_dumps, json_loads, UNDEFINED
+from ..common import UNDEFINED, Dispatcher, UndefinedType, json_dumps, json_loads
 from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .errors import (

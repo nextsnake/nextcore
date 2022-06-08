@@ -20,13 +20,15 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING, AsyncIterator
-from .base import BaseGlobalRateLimiter
-from .priority_request_container import PriorityRequestContainer
+
 from asyncio import Future, get_running_loop
+from contextlib import asynccontextmanager
 from logging import getLogger
 from queue import PriorityQueue
+from typing import TYPE_CHECKING, AsyncIterator
+
+from .base import BaseGlobalRateLimiter
+from .priority_request_container import PriorityRequestContainer
 
 if TYPE_CHECKING:
     from typing import Final
@@ -34,6 +36,7 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("LimitedGlobalRateLimiter",)
 
 logger = getLogger(__name__)
+
 
 class LimitedGlobalRateLimiter(BaseGlobalRateLimiter):
     """A limited global rate-limiter.
@@ -77,11 +80,11 @@ class LimitedGlobalRateLimiter(BaseGlobalRateLimiter):
             item = PriorityRequestContainer(priority, future)
 
             self._pending_requests.put_nowait(item)
-            
+
             logger.debug("Added request to queue with priority %s", priority)
             await future
             logger.debug("Out of queue, doing request")
-        
+
         self._reserved_requests += 1
         try:
             yield None
@@ -99,7 +102,7 @@ class LimitedGlobalRateLimiter(BaseGlobalRateLimiter):
         self._pending_reset = False
 
         self.remaining = self.limit
-        
+
         to_release = min(self._pending_requests.qsize(), self.remaining - self._reserved_requests)
         logger.debug("Releasing %s requests", to_release)
         for _ in range(to_release):
@@ -108,12 +111,12 @@ class LimitedGlobalRateLimiter(BaseGlobalRateLimiter):
 
             # Mark it as completed, good practice (and saves a bit of memory due to a infinitly expanding int)
             self._pending_requests.task_done()
-            
+
             # Release it and allow further requests
             future.set_result(None)
         if self._pending_requests.qsize():
             self._pending_reset = True
-            
+
             loop = get_running_loop()
             loop.call_later(1, self._reset)
 

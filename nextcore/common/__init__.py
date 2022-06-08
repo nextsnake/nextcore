@@ -32,5 +32,5 @@ from .undefined import *
 
 if TYPE_CHECKING:
     from typing import Final
-    
+
 __all__: Final[tuple[str, ...]] = ("Dispatcher", "json_loads", "json_dumps", "maybe_coro", "UndefinedType", "UNDEFINED")

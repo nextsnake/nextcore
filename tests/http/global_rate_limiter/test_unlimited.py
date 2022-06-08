@@ -1,5 +1,5 @@
 from asyncio import TimeoutError as AsyncioTimeoutError
-from asyncio import wait_for, sleep
+from asyncio import sleep, wait_for
 
 from pytest import mark, raises
 

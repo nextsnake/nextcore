@@ -20,10 +20,12 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
+
 from .base import BaseGlobalRateLimiter
-from .unlimited import UnlimitedGlobalRateLimiter
 from .limited import LimitedGlobalRateLimiter
+from .unlimited import UnlimitedGlobalRateLimiter
 
 if TYPE_CHECKING:
     from typing import Final

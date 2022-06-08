@@ -21,7 +21,6 @@
 
 from __future__ import annotations
 
-from asyncio import get_running_loop
 from logging import getLogger
 from time import time
 from typing import TYPE_CHECKING, overload
@@ -30,7 +29,7 @@ from urllib.parse import quote
 from aiohttp import ClientSession, FormData
 
 from .. import __version__ as nextcore_version
-from ..common import Dispatcher, UndefinedType, json_dumps, UNDEFINED
+from ..common import UNDEFINED, Dispatcher, UndefinedType, json_dumps
 from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
 from .errors import (
@@ -60,6 +59,7 @@ if TYPE_CHECKING:
         FollowedChannelData,
         GetGatewayBotData,
         GetGatewayData,
+        HasMoreListThreadsData,
         InviteData,
         InviteMetadata,
         MessageData,
@@ -189,7 +189,13 @@ class HTTPClient:
         self._session: ClientSession | None = None
 
     async def _request(
-        self, route: Route, ratelimit_key: str | None, *, headers: dict[str, str] | None = None, global_priority: int = 0, **kwargs: Any
+        self,
+        route: Route,
+        ratelimit_key: str | None,
+        *,
+        headers: dict[str, str] | None = None,
+        global_priority: int = 0,
+        **kwargs: Any,
     ) -> ClientResponse:
         """Requests a route from the Discord API
 
@@ -288,7 +294,7 @@ class HTTPClient:
                         # We use retry_after from the body instead of the headers as they have more precision than the headers.
                         data = await response.json()
                         retry_after = data["retry_after"]
-                        
+
                         # Notify the global rate-limiter.
                         ratelimit_storage.global_rate_limiter.update(retry_after)
                     elif scope == "user":
@@ -466,7 +472,9 @@ class HTTPClient:
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-    async def get_gateway_bot(self, authentication: BotAuthentication, *, global_priority: int = 0) -> GetGatewayBotData:
+    async def get_gateway_bot(
+        self, authentication: BotAuthentication, *, global_priority: int = 0
+    ) -> GetGatewayBotData:
         """Gets gateway connection information.
 
         See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`__
@@ -497,7 +505,10 @@ class HTTPClient:
         """
         route = Route("GET", "/gateway/bot")
         r = await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -513,7 +524,7 @@ class HTTPClient:
         action_type: AuditLogEvents | None = None,
         before: int | None = None,
         limit: int = 50,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> AuditLogData:
         """Gets the guild audit log.
         See the `documentation <https://discord.dev/resources/audit-log#get-guild-audit-log>`__
@@ -548,7 +559,7 @@ class HTTPClient:
             This has a minimum of 1 and a maximum of 100.
         global_priority:
             The priority of the request for the global rate-limiter.
-        
+
         Returns
         -------
         :class:`AuditLogData`
@@ -576,14 +587,16 @@ class HTTPClient:
             ratelimit_key=authentication.rate_limit_key,
             params=params,
             headers={"Authorization": str(authentication)},
-            global_priority=global_priority
+            global_priority=global_priority,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     # Channel
-    async def get_channel(self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0) -> ChannelData:
+    async def get_channel(
+        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+    ) -> ChannelData:
         """Gets a channel by ID.
 
         See the `documentation <https://discord.dev/resources/channels#get-channel>`__
@@ -607,7 +620,10 @@ class HTTPClient:
         """
         route = Route("GET", "/channels/{channel_id}", channel_id=channel_id)
         r = await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -622,7 +638,7 @@ class HTTPClient:
         name: str | UndefinedType = UNDEFINED,
         icon: str | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> ChannelData:
         """Modifies the group dm.
 
@@ -668,7 +684,13 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["reason"] = reason
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -692,7 +714,7 @@ class HTTPClient:
         video_quality_mode: Literal[1, 2] | None | UndefinedType = UNDEFINED,  # TODO: Implement VideoQualityMode
         default_auto_archive_duration: Literal[60, 1440, 4320, 10080] | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> ChannelData:
         """Modifies a guild channel.
 
@@ -817,7 +839,13 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["reason"] = reason
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -834,7 +862,7 @@ class HTTPClient:
         invitable: bool | UndefinedType = UNDEFINED,
         rate_limit_per_user: int | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> ThreadChannelData:
         """Modifies a thread.
 
@@ -895,13 +923,23 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["reason"] = reason
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_channel(
-        self, authentication: BotAuthentication | BearerAuthentication, channel_id: int | str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication | BearerAuthentication,
+        channel_id: int | str,
+        *,
+        global_priority: int = 0,
     ) -> None:
         """Deletes a channel.
 
@@ -918,28 +956,50 @@ class HTTPClient:
         route = Route("DELETE", "/channels/{channel_id}", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority)
+        await self._request(
+            route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+        )
 
     @overload
     async def get_channel_messages(
-        self, authentication: BotAuthentication, channel_id: int | str, *, around: int, limit: int | UndefinedType, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: int | str,
+        *,
+        around: int,
+        limit: int | UndefinedType,
+        global_priority: int = 0,
     ) -> list[MessageData]:
         ...
 
     @overload
     async def get_channel_messages(
-        self, authentication: BotAuthentication, channel_id: int | str, *, before: int, limit: int | UndefinedType, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: int | str,
+        *,
+        before: int,
+        limit: int | UndefinedType,
+        global_priority: int = 0,
     ) -> list[MessageData]:
         ...
 
     @overload
     async def get_channel_messages(
-        self, authentication: BotAuthentication, channel_id: int | str, *, after: int, limit: int | UndefinedType, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: int | str,
+        *,
+        after: int,
+        limit: int | UndefinedType,
+        global_priority: int = 0,
     ) -> list[MessageData]:
         ...
 
     @overload
-    async def get_channel_messages(self, authentication: BotAuthentication, channel_id: int | str, *, global_priority: int = 0) -> list[MessageData]:
+    async def get_channel_messages(
+        self, authentication: BotAuthentication, channel_id: int | str, *, global_priority: int = 0
+    ) -> list[MessageData]:
         ...
 
     async def get_channel_messages(
@@ -951,7 +1011,7 @@ class HTTPClient:
         before: int | UndefinedType = UNDEFINED,
         after: int | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> list[MessageData]:
         """Gets messages from a channel.
 
@@ -1011,7 +1071,13 @@ class HTTPClient:
         if limit is not UNDEFINED:
             params["limit"] = limit
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, params=params, global_priority=global_priority)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            params=params,
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -1031,7 +1097,7 @@ class HTTPClient:
         files: Iterable[File] | UndefinedType = UNDEFINED,
         attachments: list[AttachmentData] | UndefinedType = UNDEFINED,  # TODO: Partial
         flags: int | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> MessageData:
         """Creates a message in a channel.
 
@@ -1137,14 +1203,19 @@ class HTTPClient:
             ratelimit_key=authentication.rate_limit_key,
             headers=headers,
             data=form,
-            global_priority=global_priority
+            global_priority=global_priority,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def crosspost_message(
-        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: int | str,
+        message_id: int | str,
+        *,
+        global_priority: int = 0,
     ) -> MessageData:
         """Crossposts a message from another channel.
 
@@ -1179,13 +1250,21 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        r = await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def create_reaction(
-        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: int | str,
+        message_id: int | str,
+        emoji: str,
+        *,
+        global_priority: int = 0,
     ) -> None:
         """Creates a reaction to a message.
 
@@ -1220,10 +1299,18 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
     async def delete_own_reaction(
-        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: int | str,
+        message_id: int | str,
+        emoji: str,
+        *,
+        global_priority: int = 0,
     ) -> None:
         """Deletes a reaction from a message.
 
@@ -1253,7 +1340,9 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
     async def delete_user_reaction(
         self,
@@ -1263,7 +1352,7 @@ class HTTPClient:
         emoji: str,
         user_id: int | str,
         *,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> None:
         """Deletes a reaction from a message from another user.
 
@@ -1302,7 +1391,9 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
     async def get_reactions(
         self,
@@ -1313,7 +1404,7 @@ class HTTPClient:
         *,
         after: str | int | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> list[UserData]:
         """Gets the reactions to a message.
 
@@ -1356,13 +1447,24 @@ class HTTPClient:
         if limit is not UNDEFINED:
             params["limit"] = limit
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, params=params, global_priority=global_priority)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            params=params,
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_all_reactions(
-        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: int | str,
+        message_id: int | str,
+        *,
+        global_priority: int = 0,
     ) -> None:
         """Deletes all reactions from a message.
 
@@ -1393,10 +1495,18 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
     async def delete_all_reactions_for_emoji(
-        self, authentication: BotAuthentication, channel_id: int | str, message_id: int | str, emoji: str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: int | str,
+        message_id: int | str,
+        emoji: str,
+        *,
+        global_priority: int = 0,
     ) -> None:
         """Deletes all reactions from a message with a specific emoji.
 
@@ -1432,7 +1542,9 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
     async def edit_message(
         self,
@@ -1447,7 +1559,7 @@ class HTTPClient:
         components: list[ActionRowData] | None | UndefinedType = UNDEFINED,
         files: list[File] | None | UndefinedType = UNDEFINED,
         attachments: list[AttachmentData] | None | UndefinedType = UNDEFINED,  # TODO: Partial
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> MessageData:
         """Edits a message.
 
@@ -1535,7 +1647,13 @@ class HTTPClient:
 
         form.add_field("payload_json", json_dumps(payload))
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, data=form, global_priority=global_priority)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            data=form,
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
@@ -1547,7 +1665,7 @@ class HTTPClient:
         message_id: str | int,
         *,
         reason: str | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> None:
         """Deletes a message.
 
@@ -1585,7 +1703,9 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
     async def bulk_delete_messages(
         self,
@@ -1594,7 +1714,7 @@ class HTTPClient:
         messages: list[str] | list[int] | list[str | int],
         *,
         reason: str | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> None:
         """Deletes multiple messages.
 
@@ -1641,7 +1761,11 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, json={"messages": messages}, global_priority=global_priority
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json={"messages": messages},
+            global_priority=global_priority,
         )
 
     async def edit_channel_permissions(
@@ -1654,7 +1778,7 @@ class HTTPClient:
         allow: str | None | UndefinedType = UNDEFINED,
         deny: str | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> None:
         """Edits the permissions of a channel.
 
@@ -1718,7 +1842,13 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
+        await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
 
     async def get_channel_invites(
         self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
@@ -1747,7 +1877,9 @@ class HTTPClient:
         route = Route("GET", "/channels/{channel_id}/invites", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        r = await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
@@ -1765,7 +1897,7 @@ class HTTPClient:
         target_type: Literal[0],
         target_user_id: str | int,
         target_application_id: UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> InviteData:
         ...
 
@@ -1782,7 +1914,7 @@ class HTTPClient:
         target_type: Literal[1],
         target_user_id: UndefinedType = UNDEFINED,
         target_application_id: str | int,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> InviteData:
         ...
 
@@ -1799,7 +1931,7 @@ class HTTPClient:
         target_type: UndefinedType = UNDEFINED,
         target_user_id: UndefinedType = UNDEFINED,
         target_application_id: UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> InviteData:
         ...
 
@@ -1815,7 +1947,7 @@ class HTTPClient:
         target_type: Literal[0, 1] | UndefinedType = UNDEFINED,
         target_user_id: str | int | UndefinedType = UNDEFINED,
         target_application_id: str | int | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> InviteData:
         """Creates an invite for a channel.
 
@@ -1885,7 +2017,13 @@ class HTTPClient:
         if target_application_id is not UNDEFINED:
             payload["target_application_id"] = target_application_id
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
@@ -1897,7 +2035,7 @@ class HTTPClient:
         target_id: str | int,
         *,
         reason: str | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> None:
         """Deletes a channel permission.
 
@@ -1924,10 +2062,17 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
     async def follow_news_channel(
-        self, authentication: BotAuthentication, channel_id: str | int, webhook_channel_id: str | int, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        webhook_channel_id: str | int,
+        *,
+        global_priority: int = 0,
     ) -> FollowedChannelData:
         """Follows a news channel.
 
@@ -1956,12 +2101,20 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
         payload = {"webhook_channel_id": webhook_channel_id}
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
-    async def trigger_typing_indicator(self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0) -> None:
+    async def trigger_typing_indicator(
+        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+    ) -> None:
         """Triggers a typing indicator.
 
         Read the `documentation <https://discord.dev/resources/channel#trigger-typing-indicator>`__
@@ -1978,9 +2131,11 @@ class HTTPClient:
         route = Route("POST", "/channels/{channel_id}/typing", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
-    async def get_pinned_messages(self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0) -> list[MessageData]:
+    async def get_pinned_messages(
+        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+    ) -> list[MessageData]:
         """Gets the pinned messages of a channel.
 
         Read the `documentation <https://discord.dev/resources/channel#get-pinned-messages>`__
@@ -2005,7 +2160,7 @@ class HTTPClient:
         route = Route("GET", "/channels/{channel_id}/pins", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
@@ -2017,7 +2172,7 @@ class HTTPClient:
         message_id: str | int,
         *,
         reason: str | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> None:
         """Pins a message.
 
@@ -2056,7 +2211,12 @@ class HTTPClient:
         await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
 
     async def unpin_message(
-        self, authentication: BotAuthentication, channel_id: str | int, message_id: str | int, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        message_id: str | int,
+        *,
+        global_priority: int = 0,
     ) -> None:
         """Unpins a message.
 
@@ -2081,10 +2241,17 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
     async def group_dm_add_recipient(
-        self, authentication: BearerAuthentication, channel_id: str | int, user_id: str | int, *, global_priority: int = 0
+        self,
+        authentication: BearerAuthentication,
+        channel_id: str | int,
+        user_id: str | int,
+        *,
+        global_priority: int = 0,
     ) -> None:
         """Adds a recipient to a group DM.
 
@@ -2104,10 +2271,17 @@ class HTTPClient:
         route = Route("PUT", "/channels/{channel_id}/recipients/{user_id}", channel_id=channel_id, user_id=user_id)
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
     async def group_dm_remove_recipient(
-        self, authentication: BearerAuthentication, channel_id: str | int, user_id: str | int, *, global_priority: int = 0
+        self,
+        authentication: BearerAuthentication,
+        channel_id: str | int,
+        user_id: str | int,
+        *,
+        global_priority: int = 0,
     ) -> None:
         """Removes a recipient from a group DM.
 
@@ -2127,7 +2301,9 @@ class HTTPClient:
         route = Route("DELETE", "/channels/{channel_id}/recipients/{user_id}", channel_id=channel_id, user_id=user_id)
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
     async def start_thread_from_message(
         self,
@@ -2139,7 +2315,7 @@ class HTTPClient:
         auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = UNDEFINED,
         rate_limit_per_user: int | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> ChannelData:
         """Starts a thread from a message.
 
@@ -2190,7 +2366,13 @@ class HTTPClient:
         if rate_limit_per_user is not UNDEFINED:
             payload["rate_limit_per_user"] = rate_limit_per_user
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
@@ -2206,7 +2388,7 @@ class HTTPClient:
         reason: str | UndefinedType = UNDEFINED,
         invitable: bool | UndefinedType = UNDEFINED,
         rate_limit_per_user: int | None | UndefinedType = UNDEFINED,
-        global_priority: int = 0
+        global_priority: int = 0,
     ) -> ChannelData:
         """Starts a thread without a message
 
@@ -2266,14 +2448,22 @@ class HTTPClient:
         if rate_limit_per_user is not UNDEFINED:
             payload["rate_limit_per_user"] = rate_limit_per_user
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, json=payload, global_priority=global_priority)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
     # TODO: Add start thread in forum channel here!
 
-    async def join_thread(self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0) -> None:
+    async def join_thread(
+        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+    ) -> None:
         """Joins a thread.
 
         Read the `documentation <https://discord.dev/resources/channel#join-thread>`__
@@ -2290,7 +2480,9 @@ class HTTPClient:
         route = Route("PUT", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
     async def add_thread_member(
         self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int, *, global_priority: int = 0
@@ -2314,10 +2506,15 @@ class HTTPClient:
         route = Route("PUT", "/channels/{channel_id}/thread-members/{user_id}", channel_id=channel_id, user_id=user_id)
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
         )
 
-    async def leave_thread(self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0) -> None:
+    async def leave_thread(
+        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+    ) -> None:
         """Leaves a thread
 
         .. note::
@@ -2335,7 +2532,10 @@ class HTTPClient:
         route = Route("DELETE", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
         )
 
     async def remove_thread_member(
@@ -2367,7 +2567,10 @@ class HTTPClient:
         )
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
         )
 
     async def get_thread_member(
@@ -2394,13 +2597,18 @@ class HTTPClient:
         route = Route("GET", "/channels/{channel_id}/thread-members/{user_id}", channel_id=channel_id, user_id=user_id)
 
         r = await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
         )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
-    async def list_thread_members(self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0) -> list[ThreadMemberData]:
+    async def list_thread_members(
+        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+    ) -> list[ThreadMemberData]:
         """Gets all thread members
 
         .. warning::
@@ -2417,7 +2625,53 @@ class HTTPClient:
         """
         route = Route("GET", "/channels/{channel_id}/thread-members", channel_id=channel_id)
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, global_priority=global_priority)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
 
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def list_public_archived_threads(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        *,
+        before: str | UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> HasMoreListThreadsData:
+        """List public archived threads
+
+        .. note::
+            This requires the ``READ_MESSAGE_HISTORY`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Auth info.
+        channel_id:
+            The channel to get threads from
+        before:
+            A ISO8601 timestamp of public threads to get after
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        params = {}
+        
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if before is not UNDEFINED:
+            params["before"] = before
+        if limit is not UNDEFINED:
+            params["limit"] = limit
+
+        route = Route("GET", "/channels/{channel_id}/threads/archived/public", channel_id=channel_id)
+        
+        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, params=params, global_priority=global_priority)
+        
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
