@@ -56,6 +56,7 @@ if TYPE_CHECKING:
         AuditLogData,
         ChannelData,
         EmbedData,
+        EmojiData,
         FollowedChannelData,
         GetGatewayBotData,
         GetGatewayData,
@@ -2780,6 +2781,177 @@ class HTTPClient:
             ratelimit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             params=params,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    # Emoji
+    async def list_guild_emojis(
+        self, authentication: BotAuthentication, guild_id: int | str, *, global_priority: int = 0
+    ) -> list[EmojiData]:
+        """List all emojis in a guild.
+
+        Read the `documentation <https://discord.dev/resources/emoji#list-guild-emojis>`__
+
+        Parameters
+        ----------
+        authentication:
+            Auth info
+        guild_id:
+            The guild to list emojis from
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/guilds/{guild_id}/emojis", guild_id=guild_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_guild_emoji(
+        self, authentication: BotAuthentication, guild_id: int | str, emoji_id: int | str, *, global_priority: int = 0
+    ) -> list[EmojiData]:
+        """Get emoji info
+
+        Read the `documentation <https://discord.dev/resources/emoji#get-guild-emoji>`__
+
+        Parameters
+        ----------
+        authentication:
+            Auth info
+        guild_id:
+            The guild to get the emoji from
+        emoji_id:
+            The emoji to get
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/guilds/{guild_id}/emojis/{emoji_id}", guild_id=guild_id, emoji_id=emoji_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    # TODO: Add create guild emoji here
+
+    async def modify_guild_emoji(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        emoji_id: int | str,
+        *,
+        name: str | UndefinedType = UNDEFINED,
+        roles: list[int | str] | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> EmojiData:
+        """Modify a emoji
+
+        Read the `documentation <https://discord.dev/resources/emoji#modify-guild-emoji>`__
+
+        .. note::
+            This requires the ``MANAGE_EMOJIS_AND_STICKERS`` permission.
+        .. note::
+            This dispatches a ``GUILD_EMOJIS_UPDATE`` event.
+
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        guild_id:
+            The guild where the emoji is in
+        emoji_id:
+            The emoji to modify
+        name:
+            The emoji name.
+        roles:
+            IDs of roles that can use this emoji.
+        reason:
+            Reason to show in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("PATCH", "/guilds/{guild_id}/emojis/{emoji_id}", guild_id=guild_id, emoji_id=emoji_id)
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        params = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if name is not UNDEFINED:
+            params["name"] = name
+        if roles is not UNDEFINED:
+            params["roles"] = roles
+
+        r = self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            params=params,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def delete_guild_emoji(
+        self, authentication: BotAuthentication, guild_id: int | str, emoji_id: int | str, *, global_priority: int = 0
+    ) -> list[EmojiData]:
+        """Delete a emoji
+
+        Read the `documentation <https://discord.dev/resources/emoji#delete-guild-emoji>`__
+
+        .. note::
+            This requires the ``MANAGE_EMOJIS_AND_STICKERS`` permission.
+
+        .. note::
+            This dispatches a ``GUILD_EMOJIS_UPDATE`` event.
+
+        Parameters
+        ----------
+        authentication:
+            Auth info
+        guild_id:
+            The guild to get the emoji from
+        emoji_id:
+            The emoji to get
+        reason:
+            The reason to put in the audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("DELETE", "/guilds/{guild_id}/emojis/{emoji_id}", guild_id=guild_id, emoji_id=emoji_id)
+
+        headers = {"Authorization": str(authentication)}
+
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
 
