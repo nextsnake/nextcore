@@ -19,50 +19,13 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-"""Do requests to Discord over the HTTP API.
-
-This module includes a HTTP client that handles rate limits for you,
-and gives you convinient methods around the API.
-"""
-
 from __future__ import annotations
-
 from typing import TYPE_CHECKING
-
-from .authentication import *
-from .bucket import Bucket
-from .bucket_metadata import BucketMetadata
-from .client import HTTPClient
-from .errors import *
-from .file import File
-from .ratelimit_storage import RatelimitStorage
-from .request_session import RequestSession
-from .route import Route
-from .global_rate_limiter import *
+from .base import BaseGlobalRateLimiter
+from .unlimited import UnlimitedGlobalRateLimiter
+from .limited import LimitedGlobalRateLimiter
 
 if TYPE_CHECKING:
     from typing import Final
 
-__all__: Final[tuple[str, ...]] = (
-    "Bucket",
-    "BucketMetadata",
-    "HTTPClient",
-    "RateLimitingFailedError",
-    "HTTPRequestStatusError",
-    "BadRequestError",
-    "UnauthorizedError",
-    "ForbiddenError",
-    "NotFoundError",
-    "InternalServerError",
-    "CloudflareBanError",
-    "RatelimitStorage",
-    "RequestSession",
-    "Route",
-    "File",
-    "BaseAuthentication",
-    "BotAuthentication",
-    "BearerAuthentication",
-    "BaseGlobalRateLimiter",
-    "UnlimitedGlobalRateLimiter",
-    "LimitedGlobalRateLimiter",
-)
+__all__: Final[tuple[str, ...]] = ("BaseGlobalRateLimiter", "UnlimitedGlobalRateLimiter", "LimitedGlobalRateLimiter")
