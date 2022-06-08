@@ -2131,7 +2131,9 @@ class HTTPClient:
         route = Route("POST", "/channels/{channel_id}/typing", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
     async def get_pinned_messages(
         self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
@@ -2160,7 +2162,9 @@ class HTTPClient:
         route = Route("GET", "/channels/{channel_id}/pins", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority)
+        r = await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
@@ -2646,6 +2650,8 @@ class HTTPClient:
     ) -> HasMoreListThreadsData:
         """List public archived threads
 
+        Read the `documentation <https://discord.dev/resources/channel#list-public-archived-threads>`__
+
         .. note::
             This requires the ``READ_MESSAGE_HISTORY`` permission
 
@@ -2661,7 +2667,7 @@ class HTTPClient:
             The priority of the request for the global rate-limiter.
         """
         params = {}
-        
+
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if before is not UNDEFINED:
@@ -2670,8 +2676,112 @@ class HTTPClient:
             params["limit"] = limit
 
         route = Route("GET", "/channels/{channel_id}/threads/archived/public", channel_id=channel_id)
-        
-        r = await self._request(route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}, params=params, global_priority=global_priority)
-        
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            params=params,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def list_private_archived_threads(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        *,
+        before: str | UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> HasMoreListThreadsData:
+        """List private archived threads
+
+        Read the `documentation <https://discord.dev/resources/channel#list-private-archived-threads>`__
+
+        .. note::
+            This requires the ``READ_MESSAGE_HISTORY`` and ``MANAGE_THREADS`` permissions.
+
+        Parameters
+        ----------
+        authentication:
+            Auth info.
+        channel_id:
+            The channel to get threads from
+        before:
+            A ISO8601 timestamp of public threads to get after
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        params = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if before is not UNDEFINED:
+            params["before"] = before
+        if limit is not UNDEFINED:
+            params["limit"] = limit
+
+        route = Route("GET", "/channels/{channel_id}/threads/archived/private", channel_id=channel_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            params=params,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def list_private_joined_archived_threads(
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        *,
+        before: str | UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> HasMoreListThreadsData:
+        """List private archived threads the bot has joined.
+
+        Read the `documentation <https://discord.dev/resources/channel#list-joined-private-archived-threads>`__
+
+        .. note::
+            This requires the ``READ_MESSAGE_HISTORY`` permission.
+
+        Parameters
+        ----------
+        authentication:
+            Auth info.
+        channel_id:
+            The channel to get threads from
+        before:
+            A ISO8601 timestamp of public threads to get after
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        params = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if before is not UNDEFINED:
+            params["before"] = before
+        if limit is not UNDEFINED:
+            params["limit"] = limit
+
+        route = Route("GET", "/channels/{channel_id}/users/@me/threads/archived/private", channel_id=channel_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            params=params,
+            global_priority=global_priority,
+        )
+
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
