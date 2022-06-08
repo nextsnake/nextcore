@@ -89,17 +89,16 @@ class Route:
         path: str,
         *,
         ignore_global: bool = False,
+        guild_id: str | int | None = None,
+        channel_id: str | int | None = None,
+        webhook_id: str | int | None = None,
+
         **parameters: str | int,
     ) -> None:
         self.method: str = method
         self.route: str = path
-        self.path: str = path.format(**parameters)
+        self.path: str = path.format(guild_id=guild_id, channel_id=channel_id, webhook_id=webhook_id, **parameters)
         self.ignore_global: bool = ignore_global
-
-        # Bucket
-        guild_id: str | int | None = parameters.get("guild_id")
-        channel_id: str | int | None = parameters.get("channel_id")
-        webhook_id: str | int | None = parameters.get("webhook_id")
 
         self.bucket: str | int = f"{guild_id}{channel_id}{webhook_id}{method}{path}"
 
