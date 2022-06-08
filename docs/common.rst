@@ -12,5 +12,5 @@ Common
 
 .. data:: Undefined
    :type: UndefinedType
-
-   A global instance of :class:`UndefinedType`.
+   
+   A alias for :attr:`UndefinedType.UNDEFINED`

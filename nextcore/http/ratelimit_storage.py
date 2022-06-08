@@ -29,14 +29,14 @@ from weakref import WeakValueDictionary
 from .global_rate_limiter import BaseGlobalRateLimiter, LimitedGlobalRateLimiter
 
 if TYPE_CHECKING:
-    from typing import Literal
+    from typing import Final, Literal
 
     from .bucket import Bucket
     from .bucket_metadata import BucketMetadata
 
 logger = getLogger(__name__)
 
-__all__ = ("RatelimitStorage",)
+__all__: Final[tuple[str, ...]] = ("RatelimitStorage",)
 
 
 class RatelimitStorage:

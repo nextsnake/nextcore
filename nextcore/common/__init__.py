@@ -21,9 +21,16 @@
 
 """Common utility functions for the library"""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from .dispatcher import Dispatcher
 from .json import *
 from .maybe_coro import *
 from .undefined import *
 
-__all__ = ("Dispatcher", "json_loads", "json_dumps", "maybe_coro", "Undefined", "UndefinedType")
+if TYPE_CHECKING:
+    from typing import Final
+    
+__all__: Final[tuple[str, ...]] = ("Dispatcher", "json_loads", "json_dumps", "maybe_coro", "UndefinedType", "UNDEFINED")

@@ -18,10 +18,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
+from __future__ import annotations
 
 from enum import IntEnum
+from typing import TYPE_CHECKING
 
-__all__ = ("GatewayOpcode",)
+if TYPE_CHECKING:
+    from typing import Final
+
+__all__: Final[tuple[str, ...]] = ("GatewayOpcode",)
 
 
 class GatewayOpcode(IntEnum):

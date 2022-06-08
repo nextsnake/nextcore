@@ -24,9 +24,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import ClassVar, Literal
+    from typing import ClassVar, Final, Literal
 
-__all__ = ("Route",)
+__all__: Final[tuple[str, ...]] = ("Route",)
 
 
 class Route:

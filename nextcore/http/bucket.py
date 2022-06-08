@@ -29,13 +29,13 @@ from typing import TYPE_CHECKING
 from .request_session import RequestSession
 
 if TYPE_CHECKING:
-    from typing import AsyncIterator
+    from typing import AsyncIterator, Final
 
     from .bucket_metadata import BucketMetadata
 
 logger = getLogger(__name__)
 
-__all__ = ("Bucket",)
+__all__: Final[tuple[str, ...]] = ("Bucket",)
 
 
 class Bucket:
