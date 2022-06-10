@@ -3387,3 +3387,123 @@ class HTTPClient:
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
+
+    async def search_guild_members(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        query: str,
+        *,
+        limit: int | UndefinedType = UNDEFINED,
+    ) -> list[GuildMemberData]:
+        """Searches for members in the guild with a username or nickname that starts with ``query``
+
+        Read the `documentation <https://discord.dev/resources/guild#search-guild-members>`__
+
+        Parameters
+        ----------
+        authentication:
+            Auth info.
+        guild_id:
+            The guild to get the members from
+        query:
+            What a members username or nickname has to start with to be included
+        limit:
+            The amount of results to return
+
+            .. note::
+                This has to be between ``1`` and `10,000`
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/guilds/{guild_id}/members/search", guild_id=guild_id)
+
+        params = {"query": query}
+
+        # These can technically be provided by default however its wasted bandwidth
+        # TODO: Reconsider this?
+        # This only adds them if they are provided (not Undefined)
+        if limit is not UNDEFINED:
+            params["limit"] = limit
+
+        r = await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def add_guild_member(self, bot_authentication: BotAuthentication, user_authentication: BearerAuthentication, guild_id: str | int, user_id: str | int, *, nick: str | UndefinedType = UNDEFINED, roles: list[str | int] | UndefinedType = UNDEFINED, mute: bool | UndefinedType = UNDEFINED, deaf: bool | UndefinedType = UNDEFINED) -> GuildMemberData | None:
+        """Adds a member to a guild
+
+        .. note::
+            The bot requires the ``CREATE_INSTANT_INVITE`` permission.
+
+        Parameters
+        ----------
+        bot_authentication:
+            The bot to use to invite the user
+        user_authentication:
+            The user to add to the guild.
+
+            .. note::
+                This requires the ``guilds.join`` scope.
+        guild_id:
+            The guild to add the user to
+        user_id:
+            The user to add to the guild.
+        nick:
+            What to set the users nickname to.
+
+            .. note::
+                Setting this requires the ``MANAGE_NICKNAMES`` permission
+        roles:
+            Roles to assign to the user.
+
+            .. note::
+                Setting this requires the ``MANAGE_ROLES`` permission
+        mute:
+            Whether to server mute the user
+
+            .. note::
+                Setting this requires the ``MUTE_MEMBERS`` permission
+        deaf:
+            Whether to server deafen the user
+
+            .. note::
+                Setting this requires the ``DEAFEN_MEMBERS`` permission
+
+
+        Returns
+        -------
+        :class:`discord_typings.GuildMemberData`
+            The member was added to the guild
+        :data:`None`
+            The member was already in the guild
+        """
+        route = Route("PUT", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
+
+        params = {
+            "access_token": user_authentication.token
+        }
+
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if nick is not UNDEFINED:
+            params["nick"] = nick
+        if roles is not UNDEFINED:
+            params["roles"] = roles
+        if mute is not UNDEFINED:
+            params["mute"] = mute
+        if deaf is not UNDEFINED:
+            params["deaf"] = deaf
+
+        r = await self._request(route, ratelimit_key=bot_authentication.rate_limit_key, headers={"Authorization": str(bot_authentication)}, params=params)
+        
+        if r.status == 201:
+            # Member was added to the guild
+            # TODO: Make this verify the data from Discord
+            return await r.json()  # type: ignore [no-any-return]
+
+
