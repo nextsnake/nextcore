@@ -25,6 +25,7 @@ from logging import getLogger
 from time import time
 from typing import TYPE_CHECKING, overload
 from urllib.parse import quote
+from warnings import warn
 
 from aiohttp import ClientSession, FormData
 
@@ -55,16 +56,22 @@ if TYPE_CHECKING:
         AttachmentData,
         AuditLogData,
         ChannelData,
+        ChannelPositionData,
         EmbedData,
         EmojiData,
         FollowedChannelData,
         GetGatewayBotData,
         GetGatewayData,
+        GuildData,
+        GuildMemberData,
+        GuildPreviewData,
         HasMoreListThreadsData,
         InviteData,
         InviteMetadata,
         MessageData,
         MessageReferenceData,
+        PartialChannelData,
+        RoleData,
         ThreadChannelData,
         ThreadMemberData,
         UserData,
@@ -2952,6 +2959,429 @@ class HTTPClient:
             route,
             ratelimit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    # Guild
+    async def create_guild(
+        self,
+        authentication: BotAuthentication,
+        name: str,
+        *,
+        region: str | None | UndefinedType = UNDEFINED,
+        icon: str | UndefinedType = UNDEFINED,
+        verification_level: Literal[0, 1, 2, 3, 4] | UndefinedType = UNDEFINED,
+        default_message_notifications: Literal[0, 1] | UndefinedType = UNDEFINED,
+        explicit_content_filter: Literal[0, 1, 2] | UndefinedType = UNDEFINED,
+        roles: list[RoleData] | UndefinedType = UNDEFINED,
+        channels: list[PartialChannelData] | UndefinedType = UNDEFINED,
+        afk_channel_id: str | int | UndefinedType = UNDEFINED,
+        afk_timeout: int | UndefinedType = UNDEFINED,
+        system_channel_id: str | int | UndefinedType = UNDEFINED,
+        system_channel_flags: int | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> GuildData:
+        """Create a guild
+
+        See the `documentation <https://discord.dev/resources/guild#create-guild>`__.
+
+        .. note::
+            This can only be used by bots in less than 10 guilds.
+
+        .. note::
+            This dispatches a ``GUILD_CREATE`` event
+
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        name:
+            The guild name
+        region:
+            The region of voice channels
+
+            .. warning::
+                This is deprecated by discord and may be removed in a future version of the Discord API.
+        icon:
+            A base64 encoded 128x128px icon of the guild.
+        verification_level:
+            The guild verification level
+        default_message_notifications:
+            The default message notification level
+
+            - ``0``: All messages
+            - ``1``: Only mentions
+        explicit_content_filter_level:
+            The explicit content filter level.
+
+            - ``0`` Disabled
+            - ``1`` Members without roles
+            - ``2`` All members
+        roles:
+            A list of roles to initially create.
+
+            .. hint::
+                The id here is just a placeholder and can be used other places in this payload to reference it.
+
+                It will be replaced by a snowflake by Discord once it has been created
+        channels:
+            Channels to initially create
+
+            .. note::
+                Not providing this will create a default setup
+
+            .. hint::
+                The id here is just a placeholder and can be used other places in this payload to reference it.
+
+                It will be replaced by a snowflake by Discord once it has been created
+
+            .. hint::
+                Overwrites can be created by using a placeholder in the target and using the same placeholder as a role id.
+        afk_channel_id:
+            The voice channel afk members will be moved to when idle in voice chat.
+        afk_timeout:
+            The time in seconds a member has to be idle in a voice channel to be moved to the ``afk_channel_id``
+        system_channel_id:
+            The id of the channel where guild notices such as welcome messages and boost events are posted
+        system_channel_flags:
+            A bitwise flag deciding what messages to post in the system channel.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("POST", "/guilds")
+        payload = {"name": name}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if region is not UNDEFINED:
+            warn(FutureWarning("Guild wide voice regions and may be removed in a future Discord API version."))
+            payload["region"] = region
+        if icon is not UNDEFINED:
+            payload["icon"] = icon
+        if verification_level is not UNDEFINED:
+            payload["verification_level"] = verification_level
+        if default_message_notifications is not UNDEFINED:
+            payload["default_messsage_notifications"] = default_message_notifications
+        if explicit_content_filter is not UNDEFINED:
+            payload["explicit_content_filter"] = explicit_content_filter
+        if roles is not UNDEFINED:
+            payload["roles"] = roles
+        if channels is not UNDEFINED:
+            payload["channels"] = channels
+        if afk_channel_id is not UNDEFINED:
+            payload["afk_channel_id"] = afk_channel_id
+        if afk_timeout is not UNDEFINED:
+            payload["afk_timeout"] = afk_timeout
+        if system_channel_id is not UNDEFINED:
+            payload["system_channel_id"] = system_channel_id
+        if system_channel_flags is not UNDEFINED:
+            payload["system_channel_flags"] = system_channel_flags
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            json=payload,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_guild(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        *,
+        with_counts: bool | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> GuildData:  # TODO: More spesific typehints due to with_counts
+        """Get a guild by ID
+
+        Read the `documentation <https://discord.dev/resources/guild#get-guild>`__
+
+        Parameters
+        ----------
+        authentication:
+            The authenticaton info.
+        guild_id:
+            The guild to get
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/guilds/{guild_id}", guild_id=guild_id)
+
+        params = {}
+
+        # Save a bit of bandwith by not including it by default
+        # TODO: Not sure if this is worth it
+        if with_counts is not UNDEFINED:
+            params["with_counts"] = with_counts
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            params=params,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def guild_guild_preview(
+        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+    ) -> GuildPreviewData:
+        """Gets a guild preview by ID
+
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-preview>`__
+
+        .. note::
+            If the bot is not in the guild, it needs the ``LURKABLE`` feature.
+
+        Parameters
+        ----------
+        authentication:
+            The authentication info
+        guild_id:
+            The id of the guild to get
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/guilds/{guild_id}/preview", guild_id=guild_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    # TODO: Implement modify guild here
+
+    async def delete_guild(
+        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+    ) -> None:
+        """Deletes a guild
+
+        Read the `documentation <https://discord.dev/resources/guild#delete-guild>`__
+
+        .. note::
+            You have to be the guild owner to delete it.
+
+        .. note::
+            This dispatches a ``GUILD_DELETE`` event
+
+        Parameters
+        ----------
+        authentication:
+            The auth info.
+        guild_id:
+            The id of the guild to delete
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("DELETE", "/guilds/{guild_id}", guild_id=guild_id)
+
+        await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+    async def get_guild_channels(
+        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+    ) -> None:
+        """Gets all channels in a guild
+
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-channels>`__
+
+        Parameters
+        ----------
+        authentication:
+            The auth info.
+        guild_id:
+            The guild to get channels from
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/guilds/{guild_id}/channels")
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    # TODO: Implement create guild channel
+
+    async def modify_guild_channel_positions(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        *position_updates: ChannelPositionData,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> None:
+        """Modifies channel positions
+
+        Read the `documentation <https://discord.dev/resources/guild#modify-guild-channel-positions>`__
+
+        Parameters
+        ----------
+        authentication:
+            The auth info.
+        guild_id:
+            The guild to modify channel positions in.
+        position_updates:
+            The position updates to do.
+        reason:
+            The reason to put in the audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("PATCH", "/guilds/{guild_id}/channels", guild_id=guild_id)
+
+        headers = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        await self._request(
+            route,
+            json=position_updates,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+    async def list_active_guild_threads(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        *,
+        global_priority: int = 0,
+    ) -> HasMoreListThreadsData:  # TODO: This is not the correct type
+        """List active guild threads
+
+        Read the `documentation <https://discord.dev/resources/guild#list-active-guild-threads>`__
+
+        Parameters
+        ----------
+        authentication:
+            Auth info.
+        guild_id:
+            The guild to get threads from
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/guilds/{guild_id}/threads/active", guild_id=guild_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_guild_member(
+        self, authentication: BotAuthentication, guild_id: str | int, user_id: str | int, *, global_priority: int = 0
+    ) -> GuildMemberData:
+        """Gets a member
+
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-member>`__
+
+        Parameters
+        ----------
+        authentication:
+            Auth info.
+        guild_id:
+            The guild to get the member from
+        user_id:
+            The user to get the member from
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def list_guild_members(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        *,
+        after: int | UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> list[GuildMemberData]:
+        """Lists members in a guild
+
+        Read the `documentation <https://discord.dev/resources/guild#list-guild-members>`__
+
+        .. note::
+            This requires the ``GUILD_MEMBERS`` intent enabled in the `developer portal <https://discord.com/developers/applications>`__
+
+        Parameters
+        ----------
+        authentication:
+            Auth info.
+        guild_id:
+            The guild to get the members from
+        after:
+            What a members id has to be above for them to be returned.
+
+            .. hint::
+                This is usually the highest user id in the previous page.
+            .. note::
+                This defaults to ``0``
+        limit:
+            How many members to return per page
+
+            .. note::
+                This defaults to ``1``
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/guilds/{guild_id}/members", guild_id=guild_id)
+
+        query = {}
+        # These can technically be provided by default however its wasted bandwidth
+        # TODO: Reconsider this?
+        # This only adds them if they are provided (not Undefined)
+        if after is not UNDEFINED:
+            query["after"] = after
+        if limit is not UNDEFINED:
+            query["limit"] = limit
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            query=query,
             global_priority=global_priority,
         )
 
