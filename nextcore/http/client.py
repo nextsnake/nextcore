@@ -3395,6 +3395,7 @@ class HTTPClient:
         query: str,
         *,
         limit: int | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
     ) -> list[GuildMemberData]:
         """Searches for members in the guild with a username or nickname that starts with ``query``
 
@@ -3427,13 +3428,28 @@ class HTTPClient:
             params["limit"] = limit
 
         r = await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers={"Authorization": str(authentication)}
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
         )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
-    async def add_guild_member(self, bot_authentication: BotAuthentication, user_authentication: BearerAuthentication, guild_id: str | int, user_id: str | int, *, nick: str | UndefinedType = UNDEFINED, roles: list[str | int] | UndefinedType = UNDEFINED, mute: bool | UndefinedType = UNDEFINED, deaf: bool | UndefinedType = UNDEFINED) -> GuildMemberData | None:
+    async def add_guild_member(
+        self,
+        bot_authentication: BotAuthentication,
+        user_authentication: BearerAuthentication,
+        guild_id: str | int,
+        user_id: str | int,
+        *,
+        nick: str | UndefinedType = UNDEFINED,
+        roles: list[str | int] | UndefinedType = UNDEFINED,
+        mute: bool | UndefinedType = UNDEFINED,
+        deaf: bool | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> GuildMemberData | None:
         """Adds a member to a guild
 
         .. note::
@@ -3472,6 +3488,8 @@ class HTTPClient:
 
             .. note::
                 Setting this requires the ``DEAFEN_MEMBERS`` permission
+        global_priority:
+            The priority of the request for the global rate-limiter.
 
 
         Returns
@@ -3483,10 +3501,7 @@ class HTTPClient:
         """
         route = Route("PUT", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
 
-        params = {
-            "access_token": user_authentication.token
-        }
-
+        params = {"access_token": user_authentication.token}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -3499,11 +3514,280 @@ class HTTPClient:
         if deaf is not UNDEFINED:
             params["deaf"] = deaf
 
-        r = await self._request(route, ratelimit_key=bot_authentication.rate_limit_key, headers={"Authorization": str(bot_authentication)}, params=params)
-        
+        r = await self._request(
+            route,
+            ratelimit_key=bot_authentication.rate_limit_key,
+            headers={"Authorization": str(bot_authentication)},
+            params=params,
+            global_priority=global_priority,
+        )
+
         if r.status == 201:
             # Member was added to the guild
             # TODO: Make this verify the data from Discord
             return await r.json()  # type: ignore [no-any-return]
 
+    async def modify_guild_member(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        user_id: str | int,
+        *,
+        nick: str | None | UndefinedType = UNDEFINED,
+        roles: list[str | int] | None | UndefinedType = UNDEFINED,
+        mute: bool | None | UndefinedType = UNDEFINED,
+        deaf: bool | None | UndefinedType = UNDEFINED,
+        channel_id: str | int | None | UndefinedType = UNDEFINED,
+        communication_disabled_until: str | None | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> GuildMemberData:
+        """Modifies a member
 
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        guild_id:
+            The guild where the member to update is in.
+        nick:
+            What to change the users nickname to.
+
+            .. note::
+                Setting it to :data:`None` will remove the nickname.
+            .. note::
+                Setting this requires the ``MANAGE_NICKNAMES`` permission
+        roles:
+            The roles the member has.
+
+            .. note::
+                Setting this requires the ``MANAGE_ROLES`` permission
+        mute:
+            Whether to server mute the user
+
+            .. note::
+                Setting this requires the ``MUTE_MEMBERS`` permission
+        deaf:
+            Whether to server deafen the user
+
+            .. note::
+                Setting this requires the ``DEAFEN_MEMBERS`` permission
+        channel_id:
+            The channel to move the member to.
+
+            .. warning::
+                This will fail if the member is not in a voice channel
+            .. note::
+                Setting this requires having the ``VIEW_CHANNEL`` and ``CONNECT`` permissions in the ``channel_id`` channel, and the ``MOVE_MEMBERS`` permission
+        communication_disabled_until:
+            A ISO8601 timestamp of When the member's timeout will expire.
+
+            .. note::
+                This has to be under 28 days in the future.
+            .. note::
+                This requires the ``MODERATE_MEMBERS`` permission
+        reason:
+            The reason to put in the audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        :class:`discord_typings.GuildMemberData`
+            The member after the update
+        """
+        route = Route("PATCH", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if nick is not UNDEFINED:
+            payload["nick"] = nick
+        if roles is not UNDEFINED:
+            payload["roles"] = roles
+        if mute is not UNDEFINED:
+            payload["mute"] = mute
+        if deaf is not UNDEFINED:
+            payload["deaf"] = deaf
+        if channel_id is not UNDEFINED:
+            payload["channel_id"] = channel_id
+        if communication_disabled_until is not UNDEFINED:
+            payload["communication_disabled_until"] = communication_disabled_until
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["reason"] = reason
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def modify_current_member(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        user_id: str | int,
+        *,
+        nick: str | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> GuildMemberData:
+        """Modifies a member
+
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        guild_id:
+            The guild where the member to update is in.
+        nick:
+            What to change the users nickname to.
+
+            .. note::
+                Setting it to :data:`None` will remove the nickname.
+        reason:
+            The reason to put in the audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        :class:`discord_typings.GuildMemberData`
+            The member after the update
+        """
+        route = Route("PATCH", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if nick is not UNDEFINED:
+            payload["nick"] = nick
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["reason"] = reason
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+    # TODO: Maybe add modify current user role here?`It is deprecated so not going to be implemented as of now
+    async def add_guild_member_role(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        user_id: str | int,
+        role_id: str | int,
+        *,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> None:
+        """Add a role to a member
+
+        .. note::
+            This requires the ``MANAGE_ROLES`` permission
+
+        Parameters
+        ----------
+        authentication:
+            The auth info.
+        guild_id:
+            The guild where the member is located
+        user_id:
+            The id of the member to add the role to
+        role_id:
+            The id of the role to add.
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route(
+            "PUT",
+            "/guilds/{guild_id}/members/{user_id}/roles/{role_id}",
+            guild_id=guild_id,
+            user_id=user_id,
+            role_id=role_id,
+        )
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
+
+    async def remove_guild_member_role(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        user_id: str | int,
+        role_id: str | int,
+        *,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> None:
+        """Removes a role from a member
+
+        .. note::
+            This requires the ``MANAGE_ROLES`` permission
+
+        Parameters
+        ----------
+        authentication:
+            The auth info.
+        guild_id:
+            The guild where the member is located
+        user_id:
+            The id of the member to remove the role from
+        role_id:
+            The id of the role to remove
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route(
+            "DELETE",
+            "/guilds/{guild_id}/members/{user_id}/roles/{role_id}",
+            guild_id=guild_id,
+            user_id=user_id,
+            role_id=role_id,
+        )
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
