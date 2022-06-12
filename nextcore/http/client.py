@@ -55,6 +55,7 @@ if TYPE_CHECKING:
         AllowedMentionsData,
         AttachmentData,
         AuditLogData,
+        BanData,
         ChannelData,
         ChannelPositionData,
         EmbedData,
@@ -72,6 +73,7 @@ if TYPE_CHECKING:
         MessageReferenceData,
         PartialChannelData,
         RoleData,
+        RolePositionData,
         ThreadChannelData,
         ThreadMemberData,
         UserData,
@@ -947,6 +949,7 @@ class HTTPClient:
         authentication: BotAuthentication | BearerAuthentication,
         channel_id: int | str,
         *,
+        reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> None:
         """Deletes a channel.
@@ -957,12 +960,20 @@ class HTTPClient:
             Authentication info.
         channel_id:
             The id of the channel to delete.
+        reason:
+            The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
         """
 
         route = Route("DELETE", "/channels/{channel_id}", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
+
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
             route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
@@ -3197,7 +3208,7 @@ class HTTPClient:
 
     async def get_guild_channels(
         self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
-    ) -> None:
+    ) -> list[ChannelData]:
         """Gets all channels in a guild
 
         Read the `documentation <https://discord.dev/resources/guild#get-guild-channels>`__
@@ -3211,7 +3222,7 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
         """
-        route = Route("GET", "/guilds/{guild_id}/channels")
+        route = Route("GET", "/guilds/{guild_id}/channels", guild_id=guild_id)
 
         r = await self._request(
             route,
@@ -3791,3 +3802,684 @@ class HTTPClient:
         await self._request(
             route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
+
+    async def remove_guild_member(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        user_id: str | int,
+        *,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> None:
+        """Removes a member from a guild
+
+        .. note::
+            This requires the ``KICK_MEMBERS`` permission and that the bot is higher in the role hierarchy than the member you are trying to kick
+
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        guild_id:
+            The id of theguild to kick the member from
+        user_id:
+            The id of the user to kick
+        reason:
+            The reason to put in the audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("DELETE", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+        )
+
+    @overload
+    async def get_guild_bans(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        *,
+        before: int,
+        limit: int | UndefinedType,
+        global_priority: int = 0,
+    ) -> list[BanData]:
+        ...
+
+    @overload
+    async def get_guild_bans(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        *,
+        after: int,
+        limit: int | UndefinedType,
+        global_priority: int = 0,
+    ) -> list[BanData]:
+        ...
+
+    @overload
+    async def get_guild_bans(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        *,
+        global_priority: int = 0,
+    ) -> list[BanData]:
+        ...
+
+    async def get_guild_bans(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        *,
+        before: int | UndefinedType = UNDEFINED,
+        after: int | UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> list[BanData]:
+        """Gets a list of bans in a guild.
+
+        See the `documentation <https://discord.dev/resources/guild#get-guild-bans>`__
+
+        .. note::
+            This requires the ``BAN_MEMBERS`` permission..
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of the guild to get bans from
+        before:
+            Do not return bans from users with a id more than this.
+
+            .. note::
+                This does not have to be a id of a existing user.
+        after:
+            Do not return bans from users with a id less than this.
+
+            .. note::
+                This does not have to be a id of a existing user.
+        limit:
+            The number of bans to get.
+
+            .. note::
+                This has to be between 1-100.
+            .. note::
+                If this is not provided it will default to ``50``.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("GET", "/guilds/{guild_id}/bans", guild_id=guild_id)
+        headers = {"Authorization": str(authentication)}
+
+        params = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if before is not UNDEFINED:
+            params["before"] = before
+        if after is not UNDEFINED:
+            params["after"] = after
+        if limit is not UNDEFINED:
+            params["limit"] = limit
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            params=params,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_guild_ban(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        user_id: int | str,
+        *,
+        global_priority: int = 0,
+    ) -> BanData:
+        """Gets a ban
+
+        See the `documentation <https://discord.dev/resources/guild#get-guild-ban>`__
+
+        .. note::
+            This requires the ``BAN_MEMBERS`` permission..
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of the guild to get the ban from
+        user_id:
+            The user to get ban info for
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("GET", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def create_guild_ban(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        user_id: str | int,
+        *,
+        delete_message_days: int | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> None:
+        """Bans a user from a guild
+
+        Read the `documentation <https://discord.dev/resources/guild#create-guild-ban>`__
+
+        .. note::
+            This requires the ``BAN_MEMBERS`` permission and that the bot is higher in the role hierarchy than the member you are trying to kick
+
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        guild_id:
+            The id of the guild to ban the member from
+        user_id:
+            The id of the user to ban
+        delete_message_days:
+            Delete all messages younger than delete_message_days days sent by the user.
+        reason:
+            The reason to put in the audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("PUT", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if delete_message_days is not UNDEFINED:
+            payload["delete_message_days"] = delete_message_days
+
+        await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            global_priority=global_priority,
+            json=payload,
+        )
+
+    async def remove_guild_ban(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        user_id: str | int,
+        *,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> None:
+        """Unbans a user from a guild
+
+        Read the `documentation <https://discord.dev/resources/guild#remove-guild-ban>`__
+
+        .. note::
+            This requires the ``BAN_MEMBERS`` permission and that the bot is higher in the role hierarchy than the member you are trying to kick
+
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        guild_id:
+            The id of the guild to unban the member from
+        user_id:
+            The id of the user to unban
+        reason:
+            The reason to put in the audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("DELETE", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            global_priority=global_priority,
+        )
+
+    async def get_guild_roles(
+        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+    ) -> list[RoleData]:
+        """Gets all roles in a guild
+
+        Read the `documentation <https://discord.com/developers/docs/resources/guild#get-guild-roles>`__
+
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        guild_id:
+            The guild to get the roles from
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        list[discord_typings.RoleData]
+            The roles in the guild
+        """
+        route = Route("GET", "/guilds/{guild_id}/roles", guild_id=guild_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    @overload
+    async def create_guild_role(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        *,
+        name: str | UndefinedType = UNDEFINED,
+        permissions: str | UndefinedType = UNDEFINED,
+        color: int | UndefinedType = UNDEFINED,
+        hoist: bool | UndefinedType = UNDEFINED,
+        mentionable: bool | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> RoleData:
+        ...
+
+    @overload
+    async def create_guild_role(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        *,
+        name: str | UndefinedType = UNDEFINED,
+        permissions: str | UndefinedType = UNDEFINED,
+        color: int | UndefinedType = UNDEFINED,
+        hoist: bool | UndefinedType = UNDEFINED,
+        icon: str | None,
+        mentionable: bool | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> RoleData:
+        ...
+
+    @overload
+    async def create_guild_role(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        *,
+        name: str | UndefinedType = UNDEFINED,
+        permissions: str | UndefinedType = UNDEFINED,
+        color: int | UndefinedType = UNDEFINED,
+        hoist: bool | UndefinedType = UNDEFINED,
+        unicode_emoji: str | None,
+        mentionable: bool | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> RoleData:
+        ...
+
+    async def create_guild_role(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        *,
+        name: str | UndefinedType = UNDEFINED,
+        permissions: str | UndefinedType = UNDEFINED,
+        color: int | UndefinedType = UNDEFINED,
+        hoist: bool | UndefinedType = UNDEFINED,
+        icon: str | None | UndefinedType = UNDEFINED,
+        unicode_emoji: str | None | UndefinedType = UNDEFINED,
+        mentionable: bool | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> RoleData:
+        """Creates a role
+
+        .. note::
+            This requires the ``MANAGE_ROLES`` permission
+
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        guild_id:
+            The guild to create the role in
+        name:
+            The name of the role
+        permissions:
+            The permissions the role has
+        color:
+            The color of the role
+        hoist:
+            If the role will be split into a seperate section in the member list.
+        icon:
+            Base64 encoded image data of the role icon
+
+            .. note::
+                This requires the ``ROLE_ICONS`` guild feature.
+        unicode_emoji:
+            A unicode emoji to use for the role icon.
+
+            .. note::
+                This requires the ``ROLE_ICONS`` guild feature.
+        mentionable:
+            Whether the role can be mentioned by members without the ``MENTION_EVERYONE`` permission.
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.RoleData
+            The role that was created
+        """
+        route = Route("POST", "/guilds/{guild_id}/roles", guild_id=guild_id)
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if name is not UNDEFINED:
+            payload["name"] = name
+        if permissions is not UNDEFINED:
+            payload["permissions"] = permissions
+        if color is not UNDEFINED:
+            payload["color"] = color
+        if hoist is not UNDEFINED:
+            payload["hoist"] = hoist
+        if icon is not UNDEFINED:
+            payload["icon"] = icon
+        if unicode_emoji is not UNDEFINED:
+            payload["unicode_emoji"] = unicode_emoji
+        if mentionable is not UNDEFINED:
+            payload["mentionable"] = mentionable
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def modify_guild_role_positions(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        *position_updates: RolePositionData,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> list[RoleData]:
+        """Modifies role positions
+
+        .. note::
+            This requires the ``MANAGE_ROLES`` permission
+
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        guild_id:
+            The guild to modify role positions in
+        position_updates:
+            The positions to update
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/guilds/{guild_id}/roles", guild_id=guild_id)
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        r = await self._request(
+            route, ratelimit_key=authentication.rate_limit_key, json=position_updates, global_priority=global_priority
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+
+    @overload
+    async def modify_guild_role(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        role_id: str | int,
+        *,
+        name: str | UndefinedType = UNDEFINED,
+        permissions: str | UndefinedType = UNDEFINED,
+        color: int | UndefinedType = UNDEFINED,
+        hoist: bool | UndefinedType = UNDEFINED,
+        icon: str | None,
+        mentionable: bool | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> RoleData:
+        ...
+
+    @overload
+    async def modify_guild_role(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        role_id: str | int,
+        *,
+        name: str | UndefinedType = UNDEFINED,
+        permissions: str | UndefinedType = UNDEFINED,
+        color: int | UndefinedType = UNDEFINED,
+        hoist: bool | UndefinedType = UNDEFINED,
+        unicode_emoji: str | None,
+        mentionable: bool | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> RoleData:
+        ...
+
+    async def modify_guild_role(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        role_id: str | int,
+        *,
+        name: str | UndefinedType = UNDEFINED,
+        permissions: str | UndefinedType = UNDEFINED,
+        color: int | UndefinedType = UNDEFINED,
+        hoist: bool | UndefinedType = UNDEFINED,
+        icon: str | None | UndefinedType = UNDEFINED,
+        unicode_emoji: str | None | UndefinedType = UNDEFINED,
+        mentionable: bool | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> RoleData:
+        """Modifies a role
+
+        .. note::
+            This requires the ``MANAGE_ROLES`` permission
+
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        guild_id:
+            The guild where the role is located in
+        role_id:
+            The role to modify
+        name:
+            The name of the role
+        permissions:
+            The permissions the role has
+        color:
+            The color of the role
+        hoist:
+            If the role will be split into a seperate section in the member list.
+        icon:
+            Base64 encoded image data of the role icon
+
+            .. note::
+                This requires the ``ROLE_ICONS`` guild feature.
+        unicode_emoji:
+            A unicode emoji to use for the role icon.
+
+            .. note::
+                This requires the ``ROLE_ICONS`` guild feature.
+        mentionable:
+            Whether the role can be mentioned by members without the ``MENTION_EVERYONE`` permission.
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.RoleData
+            The updated role
+        """
+        route = Route("PATCH", "/guilds/{guild_id}/roles/{role_id}", guild_id=guild_id, role_id=role_id)
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if name is not UNDEFINED:
+            payload["name"] = name
+        if permissions is not UNDEFINED:
+            payload["permissions"] = permissions
+        if color is not UNDEFINED:
+            payload["color"] = color
+        if hoist is not UNDEFINED:
+            payload["hoist"] = hoist
+        if icon is not UNDEFINED:
+            payload["icon"] = icon
+        if unicode_emoji is not UNDEFINED:
+            payload["unicode_emoji"] = unicode_emoji
+        if mentionable is not UNDEFINED:
+            payload["mentionable"] = mentionable
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def delete_guild_role(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        role_id: int | str,
+        *,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> None:
+        """Deletes a channel.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        channel_id:
+            The id of the role to delete.
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("DELETE", "/guilds/{guild_id}/roles/{role_id}", guild_id=guild_id, role_id=role_id)
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        await self._request(
+            route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+        )
+    async def get_guild_prune_count(self, authentication: BotAuthentication, guild_id: str | int, *, days: int | UndefinedType = UNDEFINED, ) -> dict[str, Any]: # TODO: Replace return type
+        """Gets the amount of members that would be pruned
+
+        .. note::
+            This requires the ``KICK_MEMBERS`` permission
+        """
+
+
