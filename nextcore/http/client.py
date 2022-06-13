@@ -30,7 +30,7 @@ from urllib.parse import quote
 from aiohttp import ClientSession, FormData
 
 from .. import __version__ as nextcore_version
-from ..common import Dispatcher, UndefinedType, json_dumps, UNDEFINED
+from ..common import UNDEFINED, Dispatcher, UndefinedType, json_dumps
 from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
 from .errors import (
@@ -188,7 +188,13 @@ class HTTPClient:
         self._session: ClientSession | None = None
 
     async def _request(
-        self, route: Route, ratelimit_key: str | None, *, headers: dict[str, str] | None = None, global_priority: int = 0, **kwargs: Any
+        self,
+        route: Route,
+        ratelimit_key: str | None,
+        *,
+        headers: dict[str, str] | None = None,
+        global_priority: int = 0,
+        **kwargs: Any,
     ) -> ClientResponse:
         """Requests a route from the Discord API
 
@@ -202,13 +208,14 @@ class HTTPClient:
 
             .. note::
                 This should be :data:`None` for unauthenticated routes or webhooks (does not include modifying the webhook via a bot).
+        headers:
+            Headers to mix with :attr:`HTTPClient.default_headers` to pass to :meth:`aiohttp.ClientSession.request`
         global_priority:
             The request priority for global requests. **Lower** priority will be picked first.
 
             .. warning::
                 This may be ignored by your :class:`BaseGlobalRateLimiter`.
-        headers:
-            Headers to mix with :attr:`HTTPClient.default_headers` to pass to :meth:`aiohttp.ClientSession.request`
+
         kwargs:
             Keyword arguments to pass to :meth:`aiohttp.ClientSession.request`
 
@@ -275,55 +282,75 @@ class HTTPClient:
                 logger.debug("Response status: %s", response.status)
                 await self.dispatcher.dispatch("request_response", response)
 
-                # Handle ratelimit errors
-                if response.status == 429:
-                    # Cloudflare ban check
-                    if "via" not in response.headers:
-                        raise CloudflareBanError()
-
-                    scope = response.headers["X-RateLimit-Scope"]
-                    if scope == "global":
-                        # Global rate-limit handling
-                        # We use retry_after from the body instead of the headers as they have more precision than the headers.
-                        data = await response.json()
-                        retry_after = data["retry_after"]
-                        
-                        # Notify the global rate-limiter.
-                        ratelimit_storage.global_rate_limiter.update(retry_after)
-                    elif scope == "user":
-                        # Failure in Bucket or clustering?
-                        logger.warning(
-                            "Ratelimit exceeded on bucket %s! Retry after: %s. Bucket state: %s",
-                            route.bucket,
-                            response.headers["X-RateLimit-Retry-After"],
-                            bucket,
-                        )
-                    elif scope == "shared":
-                        # Resource is shared between multiple users.
-                        # This can't be avoided however it doesnt count towards your ban limit so nothing to do here.
-
-                        logger.info("Ratelimit exceeded on bucket %s.", route.bucket)
-                    else:
-                        # Well shit... Lets try again and hope for the best.
-                        logger.warning("Unknown ratelimit scope %s received. Maybe try updating?", scope)
-                elif response.status >= 300:
-                    error = await response.json()
-                    if response.status == 400:
-                        raise BadRequestError(error, response)
-                    if response.status == 401:
-                        raise UnauthorizedError(error, response)
-                    if response.status == 403:
-                        raise ForbiddenError(error, response)
-                    if response.status == 404:
-                        raise NotFoundError(error, response)
-                    if response.status >= 500:
-                        raise InternalServerError(error, response)
-                    raise HTTPRequestStatusError(error, response)
-                else:
-                    # Should be in 0-200 range
+                # Response handling
+                if response.status < 300:
+                    # Ok!
                     return response
-        # This should always be set as it has to pass through the loop atleast once.
+
+                await self._handle_response_error(route, response, ratelimit_storage)
+
         raise RateLimitingFailedError(self.max_retries, response)  # pyright: ignore [reportUnboundVariable]
+
+    async def _handle_response_error(self, route: Route, response: ClientResponse, storage: RatelimitStorage) -> None:
+        if response.status == 429:
+            await self._handle_rate_limited_error(route, response, storage)
+        else:
+            error = await response.json()
+            if response.status == 400:
+                raise BadRequestError(error, response)
+            if response.status == 401:
+                raise UnauthorizedError(error, response)
+            if response.status == 403:
+                raise ForbiddenError(error, response)
+            if response.status == 404:
+                raise NotFoundError(error, response)
+            if response.status >= 500:
+                raise InternalServerError(error, response)
+            raise HTTPRequestStatusError(error, response)
+
+    async def _handle_rate_limited_error(
+        self, route: Route, response: ClientResponse, storage: RatelimitStorage
+    ) -> None:
+        # Cloudflare bans arent proxied so via is not sent
+        # These bans are usually 1h, however they can be permenant due to repeat offense.
+        if "via" not in response.headers:
+            raise CloudflareBanError()
+
+        error = await response.json()
+
+        if "X-RateLimit-Scope" in response.headers:
+            scope = response.headers["X-RateLimit-Scope"]
+
+            if scope == "shared":
+                logger.info(
+                    "Exceeded rate-limit on shared route! (%s)"
+                    "This is not unexpected as shared rate-limites is shared by multiple users (and therefore, is out of our control). "
+                    "This does not count towards a cloudflare ban. Retry after: %s",
+                    route.bucket,
+                    error["retry_after"],
+                )
+            elif scope == "user":
+                logger.warning(
+                    "Exceeded bucket rate-limit on bucket %s! This may be a bug in your bucket implementation. Retry after: %s",
+                    route.bucket,
+                    error["retry_after"],
+                )
+            elif scope == "global":
+                # This will be logged by the global rate-limiter the user chose
+                storage.global_rate_limiter.update(error["retry_after"])
+            else:
+                logger.warning("Received unknown ratelimiting scope %s", scope)
+        else:
+            logger.debug("Received rate-limited response with no scope header")
+            is_global = error["global"]
+
+            if is_global:
+                storage.global_rate_limiter.update(error["retry_after"])
+            else:
+                logger.warning(
+                    "Received rate-limited response from a shared or bucket ratelimit! No header was present. Bucket: %s",
+                    route.bucket,
+                )
 
     async def ws_connect(self, url: str, **kwargs: Any) -> ClientWebSocketResponse:
         """Connects to a websocket.
