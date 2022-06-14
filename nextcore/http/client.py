@@ -77,6 +77,8 @@ if TYPE_CHECKING:
         ThreadChannelData,
         ThreadMemberData,
         UserData,
+        VoiceRegionData,
+        IntegrationData
     )
     from discord_typings.resources.audit_log import AuditLogEvents
 
@@ -4475,11 +4477,230 @@ class HTTPClient:
         await self._request(
             route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
         )
-    async def get_guild_prune_count(self, authentication: BotAuthentication, guild_id: str | int, *, days: int | UndefinedType = UNDEFINED, ) -> dict[str, Any]: # TODO: Replace return type
+
+    async def get_guild_prune_count(self, authentication: BotAuthentication, guild_id: str | int, *, days: int | UndefinedType = UNDEFINED, include_roles: list[str] | UndefinedType = UNDEFINED, global_priority: int = 0) -> dict[str, Any]: # TODO: Replace return type
         """Gets the amount of members that would be pruned
 
         .. note::
             This requires the ``KICK_MEMBERS`` permission
+
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        guild_id:
+            The guild to get the prune count for
+        days:
+            How many days a user has to be inactive for to get included in the prune count
+
+            .. note::
+                If this is :data:`UNDEFINED`, this will default to 7.
+        include_roles:
+            IDs of roles to be pruned aswell as the default role.
+        global_priority:
+            The priority of the request for the global rate-limiter.
         """
+        route = Route("GET", "/guilds/{guild_id}/prune", guild_id=guild_id)
+        
+        query = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+
+        if days is not UNDEFINED:
+            query["days"] = days
+        if include_roles is not UNDEFINED:
+            query["include_roles"] = ",".join(include_roles)
+
+        r = await self._request(route, headers={"Authorization": str(authentication)}, query=query, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority)
+
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def begin_guild_prune(self, authentication: BotAuthentication, guild_id: str | int, *, days: int | UndefinedType = UNDEFINED, compute_prune_count: bool | UndefinedType = UNDEFINED, include_roles: list[str] | UndefinedType = UNDEFINED, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0) -> dict[str, Any]: # TODO: Replace return type
+        """Gets the amount of members that would be pruned
+
+        .. note::
+            This requires the ``KICK_MEMBERS`` permission
+
+        Parameters
+        ----------
+        authentication:
+            The auth info
+        guild_id:
+            The guild to get the prune count for
+        days:
+            How many days a user has to be inactive for to get included in the prune count
+
+            .. note::
+                If this is :data:`UNDEFINED`, this will default to 7.
+        include_roles:
+            IDs of roles to be pruned aswell as the default role.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/guilds/{guild_id}/prune", guild_id=guild_id)
+        
+        query = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+
+        if days is not UNDEFINED:
+            query["days"] = days
+        if compute_prune_count is not UNDEFINED:
+            query["compute_prune_count"] = compute_prune_count
+        if include_roles is not UNDEFINED:
+            query["include_roles"] = ",".join(include_roles)
+
+        headers = {}
+
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        r = await self._request(route, headers={"Authorization": str(authentication)}, query=query, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority)
+
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_guild_voice_regions(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        *,
+        global_priority: int = 0,
+    ) -> list[VoiceRegionData]:
+        """Gets voice regions for a guild.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to get voice regions from
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("GET", "/guilds/{guild_id}/regions", guild_id=guild_id)
+
+        r = await self._request(
+            route, headers={"Authorization": str(authentication)}, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_guild_invites(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        *,
+        global_priority: int = 0,
+    ) -> list[InviteMetadata]:
+        """Gets all guild invites
+
+        .. note::
+            This requires the ``MANAGE_GUILD`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to get invites for
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("GET", "/guilds/{guild_id}/invites", guild_id=guild_id)
+
+        r = await self._request(
+            route, headers={"Authorization": str(authentication)}, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_guild_integrations(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        *,
+        global_priority: int = 0,
+    ) -> list[IntegrationData]:
+        """Gets guild integrations
+
+        .. note::
+            This requires the ``MANAGE_GUILD`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to get integrations for
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("GET", "/guilds/{guild_id}/invites", guild_id=guild_id)
+
+        r = await self._request(
+            route, headers={"Authorization": str(authentication)}, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def delete_guild_integration(
+        self,
+        authentication: BotAuthentication | BearerAuthentication,
+        guild_id: int | str,
+        integration_id: int | str,
+        *,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> None:
+        """Deletes a integration
+
+        .. note::
+            This will delete any associated webhooks and kick any associated bots.
+
+        .. note::
+            This requires the ``MANAGE_GUILD`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of the guild where the integration is located in
+        integration_id:
+            The id of the integration to delete
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("DELETE", "/guilds/{guild_id}/integrations/{integration_id}", guild_id=guild_id, integration_id=integration_id)
+        headers = {"Authorization": str(authentication)}
+
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        await self._request(
+            route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+        )
 
 
