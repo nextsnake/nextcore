@@ -66,7 +66,10 @@ if TYPE_CHECKING:
         GuildData,
         GuildMemberData,
         GuildPreviewData,
+        GuildWidgetData,
+        GuildWidgetSettingsData,
         HasMoreListThreadsData,
+        IntegrationData,
         InviteData,
         InviteMetadata,
         MessageData,
@@ -78,7 +81,8 @@ if TYPE_CHECKING:
         ThreadMemberData,
         UserData,
         VoiceRegionData,
-        IntegrationData
+        WelcomeChannelData,
+        WelcomeScreenData,
     )
     from discord_typings.resources.audit_log import AuditLogEvents
 
@@ -970,7 +974,6 @@ class HTTPClient:
 
         route = Route("DELETE", "/channels/{channel_id}", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
-
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -4308,7 +4311,6 @@ class HTTPClient:
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-
     @overload
     async def modify_guild_role(
         self,
@@ -4478,7 +4480,15 @@ class HTTPClient:
             route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
         )
 
-    async def get_guild_prune_count(self, authentication: BotAuthentication, guild_id: str | int, *, days: int | UndefinedType = UNDEFINED, include_roles: list[str] | UndefinedType = UNDEFINED, global_priority: int = 0) -> dict[str, Any]: # TODO: Replace return type
+    async def get_guild_prune_count(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        *,
+        days: int | UndefinedType = UNDEFINED,
+        include_roles: list[str] | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> dict[str, Any]:  # TODO: Replace return type
         """Gets the amount of members that would be pruned
 
         .. note::
@@ -4501,7 +4511,7 @@ class HTTPClient:
             The priority of the request for the global rate-limiter.
         """
         route = Route("GET", "/guilds/{guild_id}/prune", guild_id=guild_id)
-        
+
         query = {}
 
         # These have different behaviour when not provided and set to None.
@@ -4512,13 +4522,28 @@ class HTTPClient:
         if include_roles is not UNDEFINED:
             query["include_roles"] = ",".join(include_roles)
 
-        r = await self._request(route, headers={"Authorization": str(authentication)}, query=query, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority)
-
+        r = await self._request(
+            route,
+            headers={"Authorization": str(authentication)},
+            query=query,
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-    async def begin_guild_prune(self, authentication: BotAuthentication, guild_id: str | int, *, days: int | UndefinedType = UNDEFINED, compute_prune_count: bool | UndefinedType = UNDEFINED, include_roles: list[str] | UndefinedType = UNDEFINED, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0) -> dict[str, Any]: # TODO: Replace return type
+    async def begin_guild_prune(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        *,
+        days: int | UndefinedType = UNDEFINED,
+        compute_prune_count: bool | UndefinedType = UNDEFINED,
+        include_roles: list[str] | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> dict[str, Any]:  # TODO: Replace return type
         """Gets the amount of members that would be pruned
 
         .. note::
@@ -4541,7 +4566,7 @@ class HTTPClient:
             The priority of the request for the global rate-limiter.
         """
         route = Route("GET", "/guilds/{guild_id}/prune", guild_id=guild_id)
-        
+
         query = {}
 
         # These have different behaviour when not provided and set to None.
@@ -4556,15 +4581,19 @@ class HTTPClient:
 
         headers = {}
 
-
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
 
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        r = await self._request(route, headers={"Authorization": str(authentication)}, query=query, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority)
-
+        r = await self._request(
+            route,
+            headers={"Authorization": str(authentication)},
+            query=query,
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -4591,7 +4620,10 @@ class HTTPClient:
         route = Route("GET", "/guilds/{guild_id}/regions", guild_id=guild_id)
 
         r = await self._request(
-            route, headers={"Authorization": str(authentication)}, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+            route,
+            headers={"Authorization": str(authentication)},
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -4622,7 +4654,10 @@ class HTTPClient:
         route = Route("GET", "/guilds/{guild_id}/invites", guild_id=guild_id)
 
         r = await self._request(
-            route, headers={"Authorization": str(authentication)}, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+            route,
+            headers={"Authorization": str(authentication)},
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -4653,7 +4688,10 @@ class HTTPClient:
         route = Route("GET", "/guilds/{guild_id}/invites", guild_id=guild_id)
 
         r = await self._request(
-            route, headers={"Authorization": str(authentication)}, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+            route,
+            headers={"Authorization": str(authentication)},
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -4690,9 +4728,13 @@ class HTTPClient:
             The priority of the request for the global rate-limiter.
         """
 
-        route = Route("DELETE", "/guilds/{guild_id}/integrations/{integration_id}", guild_id=guild_id, integration_id=integration_id)
+        route = Route(
+            "DELETE",
+            "/guilds/{guild_id}/integrations/{integration_id}",
+            guild_id=guild_id,
+            integration_id=integration_id,
+        )
         headers = {"Authorization": str(authentication)}
-
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -4703,4 +4745,349 @@ class HTTPClient:
             route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
         )
 
+    async def get_guild_widget_settings(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        *,
+        global_priority: int = 0,
+    ) -> GuildWidgetSettingsData:
+        """Gets widget settings for a guild
 
+        .. note::
+            This requires the ``MANAGE_GUILD`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to get the widget settings for
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("GET", "/guilds/{guild_id}/widget", guild_id=guild_id)
+
+        r = await self._request(
+            route,
+            headers={"Authorization": str(authentication)},
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def modify_guild_widget_settings(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        *,
+        enabled: bool | UndefinedType = UNDEFINED,
+        channel_id: str | int | None | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> GuildWidgetSettingsData:
+        """Modifies a guilds widget settings
+
+        .. note::
+            This requires the ``MANAGE_GUILD`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to modify the widget for
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("PATCH", "/guilds/{guild_id}/widget", guild_id=guild_id)
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if enabled is not UNDEFINED:
+            payload["enabled"] = enabled
+        if channel_id is not UNDEFINED:
+            payload["channel_id"] = channel_id
+
+        r = await self._request(
+            route,
+            headers={"Authorization": str(authentication)},
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_guild_widget(
+        self,
+        guild_id: int | str,
+    ) -> GuildWidgetData:
+        """Gets a widget from a guild id
+
+        Parameters
+        ----------
+        guild_id:
+            The id of guild to get the widget for.
+        """
+
+        route = Route("GET", "/guilds/{guild_id}/widget.json", guild_id=guild_id, ignore_global=True)
+
+        r = await self._request(
+            route,
+            ratelimit_key=None,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_guild_vanity_url(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        *,
+        global_priority: int = 0,
+    ) -> GuildWidgetSettingsData:
+        """Gets the vanity invite from a guild
+
+        .. note::
+            This requires the ``MANAGE_GUILD`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to get the vanity invite from
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("GET", "/guilds/{guild_id}/vanity-url", guild_id=guild_id)
+
+        r = await self._request(
+            route,
+            headers={"Authorization": str(authentication)},
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # TODO: Implement get guild widget image
+
+    async def get_guild_welcome_screen(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        *,
+        global_priority: int = 0,
+    ) -> WelcomeScreenData:
+        """Gets the welcome screen for a guild
+
+        .. note::
+            This requires the ``MANAGE_GUILD`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to get the welcome screen for
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("GET", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
+
+        r = await self._request(
+            route,
+            headers={"Authorization": str(authentication)},
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def modify_guild_welcome_screen(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        *,
+        enabled: bool | None | UndefinedType = UNDEFINED,
+        welcome_channels: list[WelcomeChannelData] | None | UndefinedType = UNDEFINED,
+        description: str | None | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> WelcomeScreenData:
+        """Modifies a guilds welcome screen
+
+        .. note::
+            This requires the ``MANAGE_GUILD`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to modify the welcome screen for
+        enabled:
+            Whether the welcome screen is enabled
+        welcome_channels:
+            The channels to show on the welcome screen
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("PATCH", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if enabled is not UNDEFINED:
+            payload["enabled"] = enabled
+        if welcome_channels is not UNDEFINED:
+            payload["welcome_channels"] = welcome_channels
+        if description is not UNDEFINED:
+            payload["description"] = description
+
+        r = await self._request(
+            route,
+            headers={"Authorization": str(authentication)},
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def modify_current_user_voice_state(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        channel_id: str | int,
+        *,
+        suppress: bool | UndefinedType = UNDEFINED,
+        request_to_speak_timestamp: str | None | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> None:
+        """Modifies the voice state of the bot
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to get the vanity invite from
+        channel_id:
+            The id of a stage channel the bot is in
+        suppress:
+            Whether to be in the audience.
+
+            .. note::
+                You need the ``MUTE_MEMBERS`` if you want to set this to :data:`False`, however no permission is required to set it to :data:`False`.
+        request_to_speak_timestamp:
+            A timestamp of when a user requested to speak.
+
+            .. note::
+                There is no validation if this is in the future or the past.
+
+            .. note::
+                You need the ``REQUEST_TO_SPEAK`` to set this to a non-:data:`None` value, however setting it to :data:`None` requires no permission.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("PATCH", "/guilds/{guild_id}/voice-states/@me", guild_id=guild_id)
+
+        payload = {"channel_id": channel_id}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if suppress is not UNDEFINED:
+            payload["suppress"] = suppress
+        if request_to_speak_timestamp is not UNDEFINED:
+            payload["request_to_speak_timestamp"] = request_to_speak_timestamp
+
+        await self._request(
+            route,
+            headers={"Authorization": str(authentication)},
+            json=payload,
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
+        )
+
+    async def modify_user_voice_state(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        channel_id: str | int,
+        user_id: str | int,
+        *,
+        suppress: bool | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> None:
+        """Modifies the voice state of the bot
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to get the vanity invite from
+        channel_id:
+            The id of a stage channel the user is in
+        user_id:
+            The user to modify the voice state for
+        suppress:
+            Whether to be in the audience.
+
+            .. note::
+                You need the ``MUTE_MEMBERS`` if you want to set this to :data:`False`, however no permission is required to set it to :data:`False`.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route("PATCH", "/guilds/{guild_id}/voice-states/{user_id}", guild_id=guild_id, user_id=user_id)
+
+        payload = {"channel_id": channel_id}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if suppress is not UNDEFINED:
+            payload["suppress"] = suppress
+
+        await self._request(
+            route,
+            headers={"Authorization": str(authentication)},
+            json=payload,
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
+        )
