@@ -66,6 +66,9 @@ if TYPE_CHECKING:
         GuildData,
         GuildMemberData,
         GuildPreviewData,
+        GuildScheduledEventData,
+        GuildScheduledEventEntityMetadata,
+        GuildTemplateData,
         GuildWidgetData,
         GuildWidgetSettingsData,
         HasMoreListThreadsData,
@@ -4096,7 +4099,7 @@ class HTTPClient:
     ) -> list[RoleData]:
         """Gets all roles in a guild
 
-        Read the `documentation <https://discord.com/developers/docs/resources/guild#get-guild-roles>`__
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-roles>`__
 
         Parameters
         ----------
@@ -4957,7 +4960,6 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
         """
-
         route = Route("PATCH", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
 
         headers = {"Authorization": str(authentication)}
@@ -4980,7 +4982,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            headers={"Authorization": str(authentication)},
+            headers=headers,
             ratelimit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
@@ -5091,3 +5093,494 @@ class HTTPClient:
             ratelimit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
+
+    # Scheduled events
+
+    async def list_scheduled_events_for_guild(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        *,
+        with_user_count: bool | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> list[GuildScheduledEventData]:  # TODO: Narrow type more with a overload with_user_count
+        """Gets all scheduled events for a guild
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild scheduled events from
+        with_user_count:
+            Include :attr:`discord_typings.GuildScheduledEventData.user_count`
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
+
+        query = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if with_user_count is not UNDEFINED:
+            query["with_user_count"] = with_user_count
+
+        r = await self._request(
+            route,
+            headers={"Authorization": str(authentication)},
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    @overload
+    async def create_guild_scheduled_event(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        name: str,
+        privacy_level: Literal[2],
+        scheduled_start_time: str,
+        entity_type: Literal[3],
+        *,
+        entity_metadata: GuildScheduledEventEntityMetadata,
+        scheduled_end_time: str,
+        description: str | UndefinedType = UNDEFINED,
+        image: str | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> GuildScheduledEventData:
+        ...
+
+    @overload
+    async def create_guild_scheduled_event(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        name: str,
+        privacy_level: Literal[2],
+        scheduled_start_time: str,
+        entity_type: Literal[1, 2],
+        *,
+        channel_id: str | int,
+        scheduled_end_time: str | UndefinedType = UNDEFINED,
+        description: str | UndefinedType = UNDEFINED,
+        image: str | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> GuildScheduledEventData:
+        ...
+
+    async def create_guild_scheduled_event(
+        self,
+        authentication: BotAuthentication,
+        guild_id: int | str,
+        name: str,
+        privacy_level: Literal[2],
+        scheduled_start_time: str,
+        entity_type: Literal[1, 2, 3],
+        *,
+        channel_id: str | int | None | UndefinedType = UNDEFINED,
+        entity_metadata: GuildScheduledEventEntityMetadata | UndefinedType = UNDEFINED,
+        scheduled_end_time: str | UndefinedType = UNDEFINED,
+        description: str | UndefinedType = UNDEFINED,
+        image: str | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> GuildScheduledEventData:
+        """Create a scheduled event
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to create the scheduled event in
+        name:
+            The name of the event
+        privacy_level:
+            Who can join the event
+
+            .. note::
+                This can currently only be ``2``
+        scheduled_start_time:
+            A ISO8601 timestamp of when the event should start
+        entity_type:
+            What the event points to.
+
+            **Types:**
+            - ``1``: A stage channel
+            - ``2`` A voice channnel
+            - ``3`` A external link
+        channel_id:
+            The channel the event is for
+        entity_metadata:
+            Metadata about the event spesific to what ``entity_type`` you chose.
+        scheduled_end_time:
+            A ISO8601 timestamp of when the event ends.
+        description:
+            The description of the event.
+        image:
+            A base64 encoded image to use as a cover.
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        :class:`discord_typings.GuildScheduledEventData`
+            The scheduled event that was created
+        """
+        route = Route("POST", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
+
+        payload = {
+            "name": name,
+            "privacy_level": privacy_level,
+            "scheduled_start_time": scheduled_start_time,
+            "entity_type": entity_type,
+        }
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if channel_id is not UNDEFINED:
+            payload["channel_id"] = channel_id
+        if entity_metadata is not UNDEFINED:
+            payload["entity_metadata"] = entity_metadata
+        if scheduled_end_time is not UNDEFINED:
+            payload["scheduled_end_time"] = scheduled_end_time
+        if description is not UNDEFINED:
+            payload["description"] = description
+        if image is not UNDEFINED:
+            payload["image"] = image
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        r = await self._request(
+            route,
+            headers=headers,
+            json=payload,
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_scheduled_event(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        guild_scheduled_event_id: str | int,
+        *,
+        with_user_count: bool | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> GuildScheduledEventData:  # TODO: Narrow type more with a overload with_user_count
+        """Gets a scheduled event by id
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild scheduled events from
+        guild_scheduled_event_id:
+            The id of the event to get.
+        with_user_count:
+            Include :attr:`discord_typings.GuildScheduledEventData.user_count`
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route(
+            "GET",
+            "/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}",
+            guild_id=guild_id,
+            guild_scheduled_event_id=guild_scheduled_event_id,
+        )
+
+        query = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if with_user_count is not UNDEFINED:
+            query["with_user_count"] = with_user_count
+
+        r = await self._request(
+            route,
+            headers={"Authorization": str(authentication)},
+            ratelimit_key=authentication.rate_limit_key,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # TODO: Add Modify Guild Scheduled Event
+
+    async def delete_guild_scheduled_event(
+        self,
+        authentication: BotAuthentication | BearerAuthentication,
+        guild_id: int | str,
+        guild_scheduled_event_id: int | str,
+        *,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> None:
+        """Deletes scheduled event.
+
+        .. note::
+            This requires the ``MANAGE_EVENTS`` guild permission.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of the guild where the scheduled event is in
+        guild_scheduled_event_id:
+            The id of the event to delete.
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+
+        route = Route(
+            "DELETE",
+            "/guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}",
+            guild_id=guild_id,
+            guild_scheduled_event_id=guild_scheduled_event_id,
+        )
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        await self._request(
+            route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+        )
+
+    # TODO: Add Get Guild Scheduled Event Users
+    async def get_guild_template(
+        self, authentication: BotAuthentication, template_code: str, *, global_priority: int = 0
+    ) -> GuildTemplateData:
+        """Gets a template by code
+
+        See the `documentation <https://discord.dev/resources/guild-template#get-guild-templates>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        template_code:
+            The template code to get the template from
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        :class:`discord_typings.GuildTemplateData`
+            The template you requested
+        """
+        route = Route("GET", "/guilds/templates/{template_code}", template_code=template_code)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def create_guild_from_guild_template(
+        self,
+        authentication: BotAuthentication,
+        template_code: str,
+        name: str,
+        *,
+        icon: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> GuildData:
+        """Creates a guild from a template
+
+        See the `documentation <https://discord.dev/resources/guild-template#create-guild-from-guild-template>`__
+
+        .. warning::
+            This will fail if the bot is in more than 10 guilds.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        template_code:
+            The template code to create the guild from
+        name:
+            The name of the guild
+        icon:
+            Base64 encoded 128x128px image to set the guild icon to.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        :class:`discord_typings.GuildData`
+            The guild created
+        """
+        route = Route("POST", "/guilds/templates/{template_code}", template_code=template_code)
+
+        payload = {"name": name}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if icon is not UNDEFINED:
+            payload["icon"] = icon
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            json=payload,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_guild_templates(
+        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+    ) -> list[GuildTemplateData]:
+        """Gets all templates in a guild
+
+        See the `documentation <https://discord.dev/resources/guild-template#get-guild-templates>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The guild id to get templates from
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        list[:class:`discord_typings.GuildTemplateData`]
+            The templates in the guild
+        """
+        route = Route("GET", "/guilds/{guild_id}/templates", guild_id=guild_id)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def create_guild_template(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        name: str,
+        *,
+        description: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> GuildTemplateData:  # TODO: Narrow typing to overload description.
+        """Creates a template from a guild
+
+        See the `documentation <https://discord.dev/resources/guild-template#create-guild-template>`__
+
+        .. note::
+            This requires the ``MANAGE_GUILD`` permission
+
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The guild to create a template from
+        name:
+            The name of the template
+
+            .. note::
+                This has to be between ``2`` and ``100`` characters long.
+        description:
+            The description of the template
+
+            .. note::
+                This has to be between ``0`` and ``120`` characters long.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        :class:`discord_typings.GuildData`
+            The guild created
+        """
+        route = Route("POST", "/guilds/{guild_id}/templates", guild_id=guild_id)
+
+        payload = {"name": name}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if description is not UNDEFINED:
+            payload["description"] = description
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            json=payload,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def sync_guild_template(
+        self, authentication: BotAuthentication, guild_id: str | int, template_code: str, *, global_priority: int = 0
+    ) -> None:
+        """Updates a template with the guild.
+
+        See the `documentation <https://discord.dev/resources/guild-template#get-guild-templates>`__
+
+        .. note::
+            This requires the ``MANAGE_GUILD`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The guild id of the template
+        template_code:
+            The template to sync
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route(
+            "PUT", "/guilds/{guild_id}/templates/{template_code}", guild_id=guild_id, template_code=template_code
+        )
+
+        await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
