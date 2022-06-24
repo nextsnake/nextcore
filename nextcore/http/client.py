@@ -86,6 +86,9 @@ if TYPE_CHECKING:
         VoiceRegionData,
         WelcomeChannelData,
         WelcomeScreenData,
+        StageInstanceData,
+        StickerData,
+        StickerPackData
     )
     from discord_typings.resources.audit_log import AuditLogEvents
 
@@ -5553,9 +5556,9 @@ class HTTPClient:
     async def sync_guild_template(
         self, authentication: BotAuthentication, guild_id: str | int, template_code: str, *, global_priority: int = 0
     ) -> None:
-        """Updates a template with the guild.
+        """Updates a template with the updated-guild.
 
-        See the `documentation <https://discord.dev/resources/guild-template#get-guild-templates>`__
+        See the `documentation <https://discord.dev/resources/guild-template#sync-guild-templates>`__
 
         .. note::
             This requires the ``MANAGE_GUILD`` permission
@@ -5584,3 +5587,648 @@ class HTTPClient:
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
+
+    async def modify_guild_template(
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        template_code: str,
+        *,
+        name: str | UndefinedType = UNDEFINED,
+        description: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> None:
+        """Updates a template.
+
+        See the `documentation <https://discord.dev/resources/guild-template#modify-guild-templates>`__
+
+        .. note::
+            This requires the ``MANAGE_GUILD`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The guild id of the template
+        template_code:
+            The code of the template to modify
+        name:
+            What to change the template name to
+
+            .. note::
+                This has to be between ``2`` and ``100`` characters long.
+        description:
+            What to change the template description to.
+
+            .. note::
+                This has to be between ``0`` and ``120`` characters long.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route(
+            "PATCH", "/guilds/{guild_id}/templates/{template_code}", guild_id=guild_id, template_code=template_code
+        )
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if name is not UNDEFINED:
+            payload["name"] = name
+        if description is not UNDEFINED:
+            payload["description"] = description
+
+        await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def delete_guild_template(
+        self, authentication: BotAuthentication, guild_id: str | int, template_code: str, *, global_priority: int = 0
+    ) -> GuildTemplateData:
+        """Deletes a template
+
+        See the `documentation <https://discord.dev/resources/guild-template#delete-guild-template>`__
+
+        .. note::
+            This requires the ``MANAGE_GUILD`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The guild id where the template is located
+        template_code:
+            The code of the template to delete
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        :class:`discord_typings.GuildTemplateData`
+            The deleted template
+        """
+        route = Route(
+            "DELETE", "/guilds/{guild_id}/templates/{template_code}", guild_id=guild_id, template_code=template_code
+        )
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # Invite
+    async def get_invite(
+        self, authentication: BotAuthentication, invite_code: str, *, global_priority: int = 0
+    ) -> InviteData:
+        """Gets a invite from a invite code
+
+        See the `documentation <https://discord.dev/resources/invite#get-invite>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        invite_code:
+            The code of the invite to get
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.InviteData
+            The invite that was fetched
+        """
+        route = Route("GET", "/invites/{invite_code}", invite_code=invite_code)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def delete_invite(
+        self, authentication: BotAuthentication, invite_code: str, *, global_priority: int = 0
+    ) -> InviteData:
+        """Gets a invite from a invite code
+
+        See the `documentation <https://discord.dev/resources/invite#get-invite>`__
+
+        .. note::
+            This requires the ``MANAGE_CHANNELS`` permission in the channel the invite is from or the ``MANAGE_GUILD`` permission.
+
+        .. note::
+            This will dispatch a ``INVITE_DELETE`` event.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        invite_code:
+            The code of the invite to delete
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.InviteData
+            The invite that was deleted
+        """
+        route = Route("DELETE", "/invites/{invite_code}", invite_code=invite_code)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # Stage instance
+    async def create_stage_instance(
+        self, authentication: BotAuthentication, channel_id: str | int, topic: str, *, privacy_level: Literal[1, 2] | UndefinedType = UNDEFINED, send_start_notification: bool | UndefinedType = UNDEFINED, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+    ) -> StageInstanceData:
+        """Creates a stage instance
+
+        See the `documentation <https://discord.dev/resources/stage-instance#create-stage-instance>`__
+
+        .. note::
+            This requires the ``MANAGE_CHANNELS``, ``MUTE_MEMBERS`` and ``MOVE_MEMBERS`` permission.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        channel_id:
+            The id of the stage channel to create a stage instance in
+        topic:
+            The topic of the stage instance
+
+            .. note::
+                This has to be between ``1`` and ``120`` characters.
+        privacy_level:
+            The privacy level of the stage instance.
+
+            .. note::
+                This will default to ``2``/Guild only if not provided.
+
+            **Possible values**
+            - ``1``: Public (deprecated)
+            - ``2`` Guild only
+        send_start_notification:
+            If you should send a notification to all members in the guild
+
+            .. note::
+                Setting this to :data:`True` requires the ``MENTION_EVERYONE`` permission.
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.StageInstanceData
+            The stage instance that was created.
+        """
+        route = Route("POST", "/stage-instances")
+
+        payload = {"channel_id": channel_id, "topic": topic}
+
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if privacy_level is not UNDEFINED:
+            payload["privacy_level"] = privacy_level
+        if send_start_notification is not UNDEFINED:
+            payload["send_start_notification"] = send_start_notification
+
+
+        headers = {"Authorization": str(authentication)}
+
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_stage_instance(
+        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+    ) -> StageInstanceData:
+        """Gets a stage instance from a stage channel id
+
+        See the `documentation <https://discord.dev/resources/stage-instance#get-stage-instance>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        channel_id:
+            The code of the invite to get
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.StageInstanceData
+            The stage instance that was fetched.
+        """
+        route = Route("GET", "/stage-instances/{channel_id}", channel_id=channel_id)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def modify_stage_instance(
+        self, authentication: BotAuthentication, channel_id: str | int, *, topic: str | UndefinedType = UNDEFINED, privacy_level: Literal[1, 2] | UndefinedType = UNDEFINED, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+    ) -> StageInstanceData:
+        """Modifies a stage instance
+
+        See the `documentation <https://discord.dev/resources/stage-instance#modify-stage-instance>`__
+
+        .. note::
+            This requires the ``MANAGE_CHANNELS``, ``MUTE_MEMBERS`` and ``MOVE_MEMBERS`` permission.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        channel_id:
+            The id of the stage channel to modify a stage instance in
+        topic:
+            The topic of the stage instance
+
+            .. note::
+                This has to be between ``1`` and ``120`` characters.
+        privacy_level:
+            The privacy level of the stage instance.
+
+            **Possible values**
+            - ``1``: Public (deprecated)
+            - ``2`` Guild only
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.StageInstanceData
+            The updated stage instance
+        """
+        route = Route("PATCH", "/stage-instances/{channel_id}", channel_id=channel_id)
+
+        payload = {}
+
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if topic is not UNDEFINED:
+            payload["topic"] = topic
+        if privacy_level is not UNDEFINED:
+            payload["privacy_level"] = privacy_level
+
+
+        headers = {"Authorization": str(authentication)}
+
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def delete_stage_instance(
+        self, authentication: BotAuthentication, channel_id: str | int, *, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+    ) -> None:
+        """Modifies a stage instance
+
+        See the `documentation <https://discord.dev/resources/stage-instance#delete-stage-instance>`__
+
+        .. note::
+            This requires the ``MANAGE_CHANNELS``, ``MUTE_MEMBERS`` and ``MOVE_MEMBERS`` permission.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        channel_id:
+            The id of the stage channel to delete the stage instance for.
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("DELETE", "/stage-instances/{channel_id}", channel_id=channel_id)
+
+        headers = {"Authorization": str(authentication)}
+
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # Sticker
+    async def get_sticker(
+        self, authentication: BotAuthentication, sticker_id: str | int, *, global_priority: int = 0
+    ) -> StickerData:
+        """Gets a sticker from a sticker id.
+
+        See the `documentation <https://discord.dev/resources/sticker#get-sticker>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        sticker_id:
+            The id of the sticker to get.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.StickerData
+            The sticker that was fetched
+        """
+        route = Route("GET", "/stickers/{sticker_id}", sticker_id=sticker_id)
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_nitro_sticker_packs(
+        self, *, global_priority: int = 0
+    ) -> dict[Literal["sticker_packs"], list[StickerPackData]]:
+        """Gets all nitro sticker packs
+
+        See the `documentation <https://discord.dev/resources/sticker#list-nitro-sticker-packs>`__
+
+        Parameters
+        ----------
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("GET", "/sticker-packs")
+        r = await self._request(
+            route,
+            ratelimit_key=None,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def list_guild_stickers(
+        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+    ) -> list[StickerData]:
+        """Gets all custom stickers added by a guild
+
+        See the `documentation <https://discord.dev/resources/sticker#list-guild-stickers>`__
+
+        .. note::
+            The ``user`` field will be provided if you have the ``MANAGE_EMOJIS_AND_STICKERS`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to get stickers from
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        list[discord_typings.StickerData]
+            The stickers in the guild
+        """
+        route = Route("GET", "/guilds/{guild_id}/stickers", guild_id=guild_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_guild_sticker(
+        self, authentication: BotAuthentication, guild_id: str | int, sticker_id: str | int, *, global_priority: int = 0
+    ) -> StickerData:
+        """Get a custom sticker
+
+        See the `documentation <https://discord.dev/resources/sticker#get-guild-sticker>`__
+
+        .. note::
+            The ``user`` field will be provided if you have the ``MANAGE_EMOJIS_AND_STICKERS`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of guild to get the sticker from
+        sticker_id:
+            The sticker to get
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        list[discord_typings.StickerData]
+            The stickers in the guild
+        """
+        route = Route("GET", "/guilds/{guild_id}/stickers/{sticker_id}", guild_id=guild_id, sticker_id=sticker_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+        
+    # TODO: Add create guild sticker
+
+    async def modify_guild_sticker(
+        self, authentication: BotAuthentication, guild_id: str | int, sticker_id: str | int, *, name: str | UndefinedType = UNDEFINED, description: str | UndefinedType = UNDEFINED, tags: list[str] | UndefinedType = UNDEFINED, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+    ) -> StickerData: # TODO: Make StickerData always include user
+        """Modifies a sticker
+
+        See the `documentation <https://discord.dev/resources/sticker#modify-guild-sticker>`__
+
+        .. note::
+            This requires the ``MANAGE_EMOJIS_AND_STICKERS`` permission.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of the guild where the sticker is in.
+        sticker_id:
+            The id of the sticker to update
+        name:
+            The name of the sticker.
+
+            .. note::
+                This has to be between ``2`` and ``30`` characters
+        description:
+            The description of the sticker
+
+            .. note::
+                This has to be between ``2`` and ``100`` characters
+        tags:
+            Autocomplete/suggestion tags for the sticker (max 200 characters)
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.StageInstanceData
+            The updated stage instance
+        """
+        route = Route("PATCH", "/guilds/{guild_id}/stickers/{sticker_id}", guild_id=guild_id, sticker_id=sticker_id)
+
+        payload = {}
+
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if name is not UNDEFINED:
+            payload["name"] = name
+        if description is not UNDEFINED:
+            payload["description"] = description
+        if tags is not UNDEFINED:
+            payload["tags"] = tags
+
+        headers = {"Authorization": str(authentication)}
+
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def delete_guild_sticker(
+        self, authentication: BotAuthentication, guild_id: str | int, sticker_id: str | int, *, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+    ) -> None:
+        """Modifies a stage instance
+
+        See the `documentation <https://discord.dev/resources/stage-instance#delete-stage-instance>`__
+
+        .. note::
+            This requires the ``MANAGE_CHANNELS``, ``MUTE_MEMBERS`` and ``MOVE_MEMBERS`` permission.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        channel_id:
+            The id of the stage channel to delete the stage instance for.
+        reason:
+            The reason to put in audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("DELETE", "/guilds/{guild_id}/stickers/{sticker_id}", guild_id=guild_id, sticker_id=sticker_id)
+
+        headers = {"Authorization": str(authentication)}
+
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # User
+
