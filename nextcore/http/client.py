@@ -80,15 +80,15 @@ if TYPE_CHECKING:
         PartialChannelData,
         RoleData,
         RolePositionData,
+        StageInstanceData,
+        StickerData,
+        StickerPackData,
         ThreadChannelData,
         ThreadMemberData,
         UserData,
         VoiceRegionData,
         WelcomeChannelData,
         WelcomeScreenData,
-        StageInstanceData,
-        StickerData,
-        StickerPackData
     )
     from discord_typings.resources.audit_log import AuditLogEvents
 
@@ -5762,7 +5762,15 @@ class HTTPClient:
 
     # Stage instance
     async def create_stage_instance(
-        self, authentication: BotAuthentication, channel_id: str | int, topic: str, *, privacy_level: Literal[1, 2] | UndefinedType = UNDEFINED, send_start_notification: bool | UndefinedType = UNDEFINED, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        topic: str,
+        *,
+        privacy_level: Literal[1, 2] | UndefinedType = UNDEFINED,
+        send_start_notification: bool | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
     ) -> StageInstanceData:
         """Creates a stage instance
 
@@ -5810,7 +5818,6 @@ class HTTPClient:
 
         payload = {"channel_id": channel_id, "topic": topic}
 
-
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if privacy_level is not UNDEFINED:
@@ -5818,15 +5825,12 @@ class HTTPClient:
         if send_start_notification is not UNDEFINED:
             payload["send_start_notification"] = send_start_notification
 
-
         headers = {"Authorization": str(authentication)}
-
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
-
 
         r = await self._request(
             route,
@@ -5872,7 +5876,14 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def modify_stage_instance(
-        self, authentication: BotAuthentication, channel_id: str | int, *, topic: str | UndefinedType = UNDEFINED, privacy_level: Literal[1, 2] | UndefinedType = UNDEFINED, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        *,
+        topic: str | UndefinedType = UNDEFINED,
+        privacy_level: Literal[1, 2] | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
     ) -> StageInstanceData:
         """Modifies a stage instance
 
@@ -5912,7 +5923,6 @@ class HTTPClient:
 
         payload = {}
 
-
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if topic is not UNDEFINED:
@@ -5920,15 +5930,12 @@ class HTTPClient:
         if privacy_level is not UNDEFINED:
             payload["privacy_level"] = privacy_level
 
-
         headers = {"Authorization": str(authentication)}
-
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
-
 
         r = await self._request(
             route,
@@ -5942,7 +5949,12 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_stage_instance(
-        self, authentication: BotAuthentication, channel_id: str | int, *, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        *,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
     ) -> None:
         """Modifies a stage instance
 
@@ -5966,12 +5978,10 @@ class HTTPClient:
 
         headers = {"Authorization": str(authentication)}
 
-
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
-
 
         r = await self._request(
             route,
@@ -6111,12 +6121,21 @@ class HTTPClient:
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
-        
+
     # TODO: Add create guild sticker
 
     async def modify_guild_sticker(
-        self, authentication: BotAuthentication, guild_id: str | int, sticker_id: str | int, *, name: str | UndefinedType = UNDEFINED, description: str | UndefinedType = UNDEFINED, tags: list[str] | UndefinedType = UNDEFINED, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
-    ) -> StickerData: # TODO: Make StickerData always include user
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        sticker_id: str | int,
+        *,
+        name: str | UndefinedType = UNDEFINED,
+        description: str | UndefinedType = UNDEFINED,
+        tags: list[str] | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> StickerData:  # TODO: Make StickerData always include user
         """Modifies a sticker
 
         See the `documentation <https://discord.dev/resources/sticker#modify-guild-sticker>`__
@@ -6158,7 +6177,6 @@ class HTTPClient:
 
         payload = {}
 
-
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if name is not UNDEFINED:
@@ -6170,12 +6188,10 @@ class HTTPClient:
 
         headers = {"Authorization": str(authentication)}
 
-
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
-
 
         r = await self._request(
             route,
@@ -6189,7 +6205,13 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_guild_sticker(
-        self, authentication: BotAuthentication, guild_id: str | int, sticker_id: str | int, *, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: str | int,
+        sticker_id: str | int,
+        *,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
     ) -> None:
         """Modifies a stage instance
 
@@ -6213,12 +6235,10 @@ class HTTPClient:
 
         headers = {"Authorization": str(authentication)}
 
-
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
-
 
         r = await self._request(
             route,
@@ -6231,4 +6251,256 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     # User
+    async def get_current_user(
+        self, authentication: BotAuthentication | BearerAuthentication, *, global_priority: int = 0
+    ) -> UserData:
+        """Gets the current user
 
+        See the `documentation <https://discord.dev/resources/user#get-current-user>`__
+
+        .. note::
+            If you are using :class:`BearerAuthentication` you need the ``IDENTIFY`` scope.
+
+            :attr:`UserData.email` will only be provided if you have the ``EMAIL`` scope.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.UserData
+            The current user
+        """
+        route = Route("GET", "/users/@me")
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_user(
+        self, authentication: BotAuthentication | BearerAuthentication, user_id: str | int, *, global_priority: int = 0
+    ) -> UserData:
+        """Gets a user by id
+
+        See the `documentation <https://discord.dev/resources/user#get-user>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        user_id:
+            The id of the user to fetch
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.UserData
+            The user you fetched
+        """
+        route = Route("GET", "/users/{user_id}", user_id=user_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def modify_current_user(
+        self,
+        authentication: BotAuthentication,
+        *,
+        username: str | UndefinedType = UNDEFINED,
+        avatar: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
+    ) -> UserData:
+        """Modifies the current user
+
+        See the `documentation <https://discord.dev/resources/user#modify-current-user>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        username:
+            The username to update to
+        avatar:
+            Base64 encoded image to change the current users avatar to
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.UserData
+            The updated user
+        """
+        route = Route("PATCH", "/users/@me")
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if username is not UNDEFINED:
+            payload["username"] = username
+        if avatar is not UNDEFINED:
+            payload["avatar"] = avatar
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_current_user_guilds(
+        self,
+        authentication: BotAuthentication | BearerAuthentication,
+        *,
+        before: str | int,
+        after: str | int,
+        limit: int,
+        global_priority: int = 0,
+    ) -> list[GuildData]:  # TODO: Replace with partial guild data
+        """Gets the guilds the current user is in
+
+        See the `documentation <https://discord.dev/resources/user#get-current-user-guilds>`__
+
+        .. note::
+            If you are using :class:`BearerAuthentication` you need the ``guilds`` scope.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        before:
+            Get guilds before this id
+
+            .. note::
+                This does not have to be a valid id.
+        after:
+            Get guilds after this id
+
+            .. note::
+                This does not have to be a valid id.
+        limit:
+            The max amount of guilds to return
+
+            .. note::
+                This has to be between ``1`` and ``200``
+            .. note::
+                This defaults to ``200``
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        list[discord_typings.PartialGuildData]
+            The guilds fetched
+        """
+        route = Route("GET", "/users/@me/guilds")
+
+        query = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if before is not UNDEFINED:
+            query["before"] = before
+        if after is not UNDEFINED:
+            query["after"] = after
+        if limit is not UNDEFINED:
+            query["limit"] = limit
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            query=query,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_current_user_guild_member(
+        self, authentication: BotAuthentication | BearerAuthentication, guild_id: str | int, *, global_priority: int = 0
+    ) -> GuildMemberData:
+        """Gets the current users member in a guild
+
+        See the `documentation <https://discord.dev/resources/user#get-current-user-guild-member>`__
+
+        .. note::
+            This requires the ``guilds.members.read`` scope
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of the guild to get the member in
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.GuildMemberData
+            The current member
+        """
+        route = Route("GET", "/users/@me/guilds/{guild_id}/member", guild_id=guild_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+
+    async def leave_guild(
+        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+    ) -> None:
+        """Leave a guild
+
+        See the `documentation <https://discord.dev/resources/user#leave-guild>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of the guild to leave
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.UserData
+            The current user
+        """
+        route = Route("DELETE", "/users/@me/guilds/{guild_id}", guild_id=guild_id)
+
+        await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
