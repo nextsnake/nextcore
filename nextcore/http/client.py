@@ -89,6 +89,7 @@ if TYPE_CHECKING:
         VoiceRegionData,
         WelcomeChannelData,
         WelcomeScreenData,
+        DMChannelData,
     )
     from discord_typings.resources.audit_log import AuditLogEvents
 
@@ -6504,3 +6505,114 @@ class HTTPClient:
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
+
+    async def create_dm(
+        self, authentication: BotAuthentication, recipient_id: str | int, *, global_priority: int = 0
+    ) -> DMChannelData:
+        """Creates a DM channel
+
+        See the `documentation <https://discord.dev/resources/user#create-dm>`__
+
+        .. warning::
+            You should not use this endpoint to DM everyone in a server about something. DMs should generally be initiated by a user action.
+
+            If you open a significant amount of DMs too quickly, your bot may be blocked from opening new ones.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        recipient_id:
+            The id of user to DM.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.DMChannelData
+            The DM channel created/fetched.
+        """
+        route = Route("POST", "/users/@me/channels")
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            json={"recipient_id": recipient_id},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # TODO: Add Create Group DM
+
+    async def get_user_connections(
+        self, authentication: BearerAuthentication, *, global_priority: int = 0
+    ) -> list[dict[str, Any]]: # TODO: This should be more strict
+        """Gets the users connections
+
+        See the `documentation <https://discord.dev/resources/user#get-user-connections>`__
+
+        .. note::
+            This requires the ``connections`` scope
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.GuildMemberData
+            The current member
+        """
+        route = Route("GET", "/users/@me/connections")
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # Voice
+    async def list_voice_regions(
+        self, authentication: BotAuthentication, *, global_priority: int = 0
+    ) -> list[VoiceRegionData]: # TODO: This should be more strict
+        """Gets the users connections
+
+        See the `documentation <https://discord.dev/resources/voice#list-voice-regions>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        list[discord_typings.VoiceRegionData]
+            Voice regions
+        """
+        route = Route("GET", "/voice/regions")
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+   
+
+
