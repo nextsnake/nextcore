@@ -58,6 +58,7 @@ if TYPE_CHECKING:
         BanData,
         ChannelData,
         ChannelPositionData,
+        DMChannelData,
         EmbedData,
         EmojiData,
         FollowedChannelData,
@@ -87,10 +88,9 @@ if TYPE_CHECKING:
         ThreadMemberData,
         UserData,
         VoiceRegionData,
+        WebhookData,
         WelcomeChannelData,
         WelcomeScreenData,
-        DMChannelData,
-        WebhookData
     )
     from discord_typings.resources.audit_log import AuditLogEvents
 
@@ -6476,7 +6476,6 @@ class HTTPClient:
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-
     async def leave_guild(
         self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
     ) -> None:
@@ -6550,7 +6549,7 @@ class HTTPClient:
 
     async def get_user_connections(
         self, authentication: BearerAuthentication, *, global_priority: int = 0
-    ) -> list[dict[str, Any]]: # TODO: This should be more strict
+    ) -> list[dict[str, Any]]:  # TODO: This should be more strict
         """Gets the users connections
 
         See the `documentation <https://discord.dev/resources/user#get-user-connections>`__
@@ -6585,7 +6584,7 @@ class HTTPClient:
     # Voice
     async def list_voice_regions(
         self, authentication: BotAuthentication, *, global_priority: int = 0
-    ) -> list[VoiceRegionData]: # TODO: This should be more strict
+    ) -> list[VoiceRegionData]:  # TODO: This should be more strict
         """Gets the users connections
 
         See the `documentation <https://discord.dev/resources/voice#list-voice-regions>`__
@@ -6614,10 +6613,16 @@ class HTTPClient:
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-   
     # Webhook
     async def create_webhook(
-        self, authentication: BotAuthentication, channel_id: str | int, name: str, *, avatar: str | None | UndefinedType = UNDEFINED, reason: str, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: str | int,
+        name: str,
+        *,
+        avatar: str | None | UndefinedType = UNDEFINED,
+        reason: str,
+        global_priority: int = 0,
     ) -> WebhookData:
         """Creates a webhook
 
@@ -6806,7 +6811,9 @@ class HTTPClient:
         discord_typings.WebhookData
             The webhook that was fetched
         """
-        route = Route("GET", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token)
+        route = Route(
+            "GET", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token
+        )
 
         r = await self._request(
             route,
@@ -6818,7 +6825,15 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def modify_webhook(
-        self, authentication: BotAuthentication, webhook_id: str | int, *, name: str | UndefinedType = UNDEFINED, avatar: str | None | UndefinedType = UNDEFINED, channel_id: str | int | UndefinedType = UNDEFINED, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        webhook_id: str | int,
+        *,
+        name: str | UndefinedType = UNDEFINED,
+        avatar: str | None | UndefinedType = UNDEFINED,
+        channel_id: str | int | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
     ) -> WebhookData:
         """Modifies a webhook
 
@@ -6863,7 +6878,7 @@ class HTTPClient:
         # This only adds them if they are provided (not Undefined)
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
-        
+
         r = await self._request(
             route,
             headers=headers,
@@ -6876,7 +6891,15 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def modify_webhook_with_token(
-        self, webhook_id: str | int, webhook_token: str, *, name: str | UndefinedType = UNDEFINED, avatar: str | None | UndefinedType = UNDEFINED, channel_id: str | int | UndefinedType = UNDEFINED, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+        self,
+        webhook_id: str | int,
+        webhook_token: str,
+        *,
+        name: str | UndefinedType = UNDEFINED,
+        avatar: str | None | UndefinedType = UNDEFINED,
+        channel_id: str | int | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
     ) -> WebhookData:
         """Modifies a webhook
 
@@ -6902,7 +6925,9 @@ class HTTPClient:
         discord_typings.WebhookData
             The updated webhook
         """
-        route = Route("PATCH", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token)
+        route = Route(
+            "PATCH", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token
+        )
 
         payload = {}
 
@@ -6921,7 +6946,7 @@ class HTTPClient:
         # This only adds them if they are provided (not Undefined)
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
-        
+
         r = await self._request(
             route,
             headers=headers,
@@ -6962,7 +6987,6 @@ class HTTPClient:
         # This only adds them if they are provided (not Undefined)
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
-        
 
         r = await self._request(
             route,
@@ -6993,7 +7017,9 @@ class HTTPClient:
         discord_typings.WebhookData
             The webhook that was fetched
         """
-        route = Route("DELETE", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token)
+        route = Route(
+            "DELETE", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token
+        )
 
         headers = {}
 
@@ -7017,7 +7043,13 @@ class HTTPClient:
     # TODO: @ooliver1 should implement execute github-compatible webhook
 
     async def get_webhook_message(
-        self, webhook_id: str | int, webhook_token: str, message_id: str | int, *, thread_id: str | int, global_priority: int = 0
+        self,
+        webhook_id: str | int,
+        webhook_token: str,
+        message_id: str | int,
+        *,
+        thread_id: str | int,
+        global_priority: int = 0,
     ) -> MessageData:
         """Gets a message sent by the webhook
 
@@ -7035,7 +7067,7 @@ class HTTPClient:
             The id of the message to fetch
         thread_id:
             The id of the thread to fetch the message from
-            
+
             .. note::
                 This has to be a thread in the channel the webhook is in
         global_priority:
@@ -7046,7 +7078,13 @@ class HTTPClient:
         discord_typings.MessageData
             The message that was fetched
         """
-        route = Route("GET", "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}", webhook_id=webhook_id, webhook_token=webhook_token, message_id=message_id)
+        route = Route(
+            "GET",
+            "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}",
+            webhook_id=webhook_id,
+            webhook_token=webhook_token,
+            message_id=message_id,
+        )
 
         query = {}
 
@@ -7055,12 +7093,7 @@ class HTTPClient:
         if thread_id is not UNDEFINED:
             query["thread_id"] = thread_id
 
-        r = await self._request(
-            route,
-            ratelimit_key=None,
-            global_priority=global_priority,
-            query=query
-        )
+        r = await self._request(route, ratelimit_key=None, global_priority=global_priority, query=query)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -7068,7 +7101,13 @@ class HTTPClient:
     # TODO: @ooliver1 should implement edit webhook message
 
     async def delete_webhook_message(
-        self, webhook_id: str | int, webhook_token: str, message_id: str | int, *, thread_id: str | int, global_priority: int = 0
+        self,
+        webhook_id: str | int,
+        webhook_token: str,
+        message_id: str | int,
+        *,
+        thread_id: str | int,
+        global_priority: int = 0,
     ) -> None:
         """Deletes a message sent by the webhook
 
@@ -7086,13 +7125,19 @@ class HTTPClient:
             The id of the message to fetch
         thread_id:
             The id of the thread to fetch the message from
-            
+
             .. note::
                 This has to be a thread in the channel the webhook is in
         global_priority:
             The priority of the request for the global rate-limiter.
         """
-        route = Route("DELETE", "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}", webhook_id=webhook_id, webhook_token=webhook_token, message_id=message_id)
+        route = Route(
+            "DELETE",
+            "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}",
+            webhook_id=webhook_id,
+            webhook_token=webhook_token,
+            message_id=message_id,
+        )
 
         query = {}
 
@@ -7101,14 +7146,7 @@ class HTTPClient:
         if thread_id is not UNDEFINED:
             query["thread_id"] = thread_id
 
-        r = await self._request(
-            route,
-            ratelimit_key=None,
-            global_priority=global_priority,
-            query=query
-        )
+        r = await self._request(route, ratelimit_key=None, global_priority=global_priority, query=query)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
-
-
