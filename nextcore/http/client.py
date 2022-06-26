@@ -90,6 +90,7 @@ if TYPE_CHECKING:
         WelcomeChannelData,
         WelcomeScreenData,
         DMChannelData,
+        WebhookData
     )
     from discord_typings.resources.audit_log import AuditLogEvents
 
@@ -6614,5 +6615,500 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
    
+    # Webhook
+    async def create_webhook(
+        self, authentication: BotAuthentication, channel_id: str | int, name: str, *, avatar: str | None | UndefinedType = UNDEFINED, reason: str, global_priority: int = 0
+    ) -> WebhookData:
+        """Creates a webhook
+
+        See the `documentation <https://discord.dev/resources/webhook#create-webhook>`__
+
+        .. note::
+            This requires the ``MANAGE_WEBHOOKS`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        channel_id:
+            The id of the channel to create a webhook in
+        name:
+            The name of the webhook
+
+            .. note::
+                This has to be between ``1`` and ``80`` characters.
+
+                It has to follow the `Discord nickname restrictions <https://discord.dev/resources/user#usernames-and-nicknames>`__ (with the exception of the length limit.)
+        avatar:
+            Base64 encoded image avatar to use as the default avatar
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.WebhookData
+            The webhook that was created
+        """
+        route = Route("POST", "/channels/{channel_id}/webhooks", channel_id=channel_id)
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if name is not UNDEFINED:
+            payload["name"] = name
+        if avatar is not UNDEFINED:
+            payload["avatar"] = avatar
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            json=payload,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_channel_webhooks(
+        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+    ) -> list[WebhookData]:
+        """Gets all webhooks in a channel
+
+        See the `documentation <https://discord.dev/resources/webhook#get-channel-webhooks>`__
+
+        .. note::
+            This requires the ``MANAGE_WEBHOOKS`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        channel_id:
+            The id of the channel to get webhooks from
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        list[discord_typings.WebhookData]
+            The webhooks in the channel
+        """
+        route = Route("GET", "/channels/{channel_id}/webhooks", channel_id=channel_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_guild_webhooks(
+        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+    ) -> list[WebhookData]:
+        """Gets all webhooks in a guild
+
+        See the `documentation <https://discord.dev/resources/webhook#get-guild-webhooks>`__
+
+        .. note::
+            This requires the ``MANAGE_WEBHOOKS`` permission
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        guild_id:
+            The id of the guild to get webhooks from
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        list[discord_typings.WebhookData]
+            The webhooks in the channel
+        """
+        route = Route("GET", "/guilds/{guild_id}/webhooks", guild_id=guild_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_webhook(
+        self, authentication: BotAuthentication, webhook_id: str | int, *, global_priority: int = 0
+    ) -> WebhookData:
+        """Gets a webhook by webhook id
+
+        See the `documentation <https://discord.dev/resources/webhook#get-webhook>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        webhook_id:
+            The id of the webhook to fetch
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.WebhookData
+            The webhook that was fetched
+        """
+        route = Route("GET", "/webhooks/{webhook_id}", webhook_id=webhook_id)
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_webhook_with_token(
+        self, webhook_id: str | int, webhook_token: str, *, global_priority: int = 0
+    ) -> WebhookData:
+        """Gets a webhook by webhook id and token
+
+        See the `documentation <https://discord.dev/resources/webhook#get-webhook-with-token>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        webhook_id:
+            The id of the webhook to fetch
+        webhook_token:
+            The token of the webhook
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.WebhookData
+            The webhook that was fetched
+        """
+        route = Route("GET", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token)
+
+        r = await self._request(
+            route,
+            ratelimit_key=None,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def modify_webhook(
+        self, authentication: BotAuthentication, webhook_id: str | int, *, name: str | UndefinedType = UNDEFINED, avatar: str | None | UndefinedType = UNDEFINED, channel_id: str | int | UndefinedType = UNDEFINED, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+    ) -> WebhookData:
+        """Modifies a webhook
+
+        See the `documentation <https://discord.dev/resources/webhook#modify-webhook>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        webhook_id:
+            The id of the webhook to modify
+        name:
+            The new name of the webhook
+        avatar:
+            Base64 encoded avatar of the webhook
+        channel_id:
+            The id of a channel to move the webhook to.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.WebhookData
+            The updated webhook
+        """
+        route = Route("PATCH", "/webhooks/{webhook_id}", webhook_id=webhook_id)
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if name is not UNDEFINED:
+            payload["name"] = name
+        if avatar is not UNDEFINED:
+            payload["avatar"] = avatar
+        if channel_id is not UNDEFINED:
+            payload["channel_id"] = channel_id
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+        
+        r = await self._request(
+            route,
+            headers=headers,
+            ratelimit_key=authentication.rate_limit_key,
+            json=payload,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def modify_webhook_with_token(
+        self, webhook_id: str | int, webhook_token: str, *, name: str | UndefinedType = UNDEFINED, avatar: str | None | UndefinedType = UNDEFINED, channel_id: str | int | UndefinedType = UNDEFINED, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+    ) -> WebhookData:
+        """Modifies a webhook
+
+        See the `documentation <https://discord.dev/resources/webhook#modify-webhook-with-token>`__
+
+        Parameters
+        ----------
+        webhook_id:
+            The id of the webhook to modify
+        webhook_token:
+            The token of the webhook to use for authentication
+        name:
+            The new name of the webhook
+        avatar:
+            Base64 encoded avatar of the webhook
+        channel_id:
+            The id of a channel to move the webhook to.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.WebhookData
+            The updated webhook
+        """
+        route = Route("PATCH", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token)
+
+        payload = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if name is not UNDEFINED:
+            payload["name"] = name
+        if avatar is not UNDEFINED:
+            payload["avatar"] = avatar
+        if channel_id is not UNDEFINED:
+            payload["channel_id"] = channel_id
+
+        headers = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+        
+        r = await self._request(
+            route,
+            headers=headers,
+            ratelimit_key=None,
+            json=payload,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def delete_webhook(
+        self, authentication: BotAuthentication, webhook_id: str | int, *, reason: str, global_priority: int = 0
+    ) -> None:
+        """Deletes a webhook
+
+        See the `documentation <https://discord.dev/resources/webhook#delete-webhook>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        webhook_id:
+            The id of the webhook to delete
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.WebhookData
+            The webhook that was deleted
+        """
+        route = Route("DELETE", "/webhooks/{webhook_id}", webhook_id=webhook_id)
+
+        headers = {"Authorization": str(authentication)}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+        
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers=headers,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def delete_webhook_with_token(
+        self, webhook_id: str | int, webhook_token: str, *, reason: str, global_priority: int = 0
+    ) -> None:
+        """Deletes a webhook
+
+        See the `documentation <https://discord.dev/resources/webhook#delete-webhook-with-token>`__
+
+        Parameters
+        ----------
+        webhook_id:
+            The id of the webhook to delete
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.WebhookData
+            The webhook that was fetched
+        """
+        route = Route("DELETE", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token)
+
+        headers = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        r = await self._request(
+            route,
+            ratelimit_key=None,
+            headers=headers,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # TODO: @ooliver1 should implement execute webhook
+    # TODO: @ooliver1 should implement execute slack-compatible webhook
+    # TODO: @ooliver1 should implement execute github-compatible webhook
+
+    async def get_webhook_message(
+        self, webhook_id: str | int, webhook_token: str, message_id: str | int, *, thread_id: str | int, global_priority: int = 0
+    ) -> MessageData:
+        """Gets a message sent by the webhook
+
+        See the `documentation <https://discord.dev/resources/webhook#get-webhook>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        webhook_id:
+            The id of the webhook to fetch a message from
+        webhook_token:
+            The token of the webhook
+        message_id:
+            The id of the message to fetch
+        thread_id:
+            The id of the thread to fetch the message from
+            
+            .. note::
+                This has to be a thread in the channel the webhook is in
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.MessageData
+            The message that was fetched
+        """
+        route = Route("GET", "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}", webhook_id=webhook_id, webhook_token=webhook_token, message_id=message_id)
+
+        query = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if thread_id is not UNDEFINED:
+            query["thread_id"] = thread_id
+
+        r = await self._request(
+            route,
+            ratelimit_key=None,
+            global_priority=global_priority,
+            query=query
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # TODO: @ooliver1 should implement edit webhook message
+
+    async def delete_webhook_message(
+        self, webhook_id: str | int, webhook_token: str, message_id: str | int, *, thread_id: str | int, global_priority: int = 0
+    ) -> None:
+        """Deletes a message sent by the webhook
+
+        See the `documentation <https://discord.dev/resources/webhook#get-webhook>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        webhook_id:
+            The id of the webhook to fetch a message from
+        webhook_token:
+            The token of the webhook
+        message_id:
+            The id of the message to fetch
+        thread_id:
+            The id of the thread to fetch the message from
+            
+            .. note::
+                This has to be a thread in the channel the webhook is in
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route("DELETE", "/webhooks/{webhook_id}/{webhook_token}/messages/{message_id}", webhook_id=webhook_id, webhook_token=webhook_token, message_id=message_id)
+
+        query = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if thread_id is not UNDEFINED:
+            query["thread_id"] = thread_id
+
+        r = await self._request(
+            route,
+            ratelimit_key=None,
+            global_priority=global_priority,
+            query=query
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
 
 
