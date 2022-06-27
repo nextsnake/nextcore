@@ -53,6 +53,8 @@ if TYPE_CHECKING:
     from discord_typings import (
         ActionRowData,
         AllowedMentionsData,
+        ApplicationCommandData,
+        ApplicationCommandOptionData,
         AttachmentData,
         AuditLogData,
         BanData,
@@ -92,6 +94,7 @@ if TYPE_CHECKING:
         WelcomeChannelData,
         WelcomeScreenData,
     )
+    from discord_typings.interactions.commands import Locales
     from discord_typings.resources.audit_log import AuditLogEvents
 
     from .authentication import BearerAuthentication, BotAuthentication
@@ -471,67 +474,161 @@ class HTTPClient:
             await ratelimit_storage.store_bucket_by_discord_id(bucket_hash, bucket)
 
     # Wrapper functions for requests
-    async def get_gateway(self) -> GetGatewayData:
-        """Gets gateway connection info.
+    # Application commands
+    async def get_global_application_commands(
+        self,
+        authentication: BotAuthentication | BearerAuthentication,
+        application_id: str | int,
+        *,
+        global_priority: int = 0,
+    ) -> list[ApplicationCommandData]:  # TODO: Narrow typing to never include guild_id
+        """Gets all global commands
 
-        See the `documentation <https://discord.dev/topics/gateway#get-gateway>`__ for more info.
-
-        **Example usage:**
-
-        .. code-block:: python
-
-            gateway_info = await http_client.get_gateway()
-
-        Returns
-        -------
-        :class:`dict`
-            The gateway info.
-
-            .. hint::
-                A list of fields are available in the documentation.
-        """
-        route = Route("GET", "/gateway", ignore_global=True)
-        r = await self._request(route, ratelimit_key=None)
-
-        # TODO: Make this verify the payload from discord?
-        return await r.json()  # type: ignore [no-any-return]
-
-    async def get_gateway_bot(
-        self, authentication: BotAuthentication, *, global_priority: int = 0
-    ) -> GetGatewayBotData:
-        """Gets gateway connection information.
-
-        See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`__
-
-        **Example usage:**
-
-        .. code-block:: python
-
-            bot_info = await http_client.get_gateway_bot(token)
-
-        .. note::
-            This endpoint requires a bot token.
+        See the `documentation <https://discord.dev/interactions/application-commands#get-global-application-commands>`__
 
         Parameters
         ----------
         authentication:
             Authentication info.
+        application_id:
+            The application id/client id of the current application
+
+            .. note::
+                You can only get commands for your current application
         global_priority:
             The priority of the request for the global rate-limiter.
 
         Returns
         -------
-        :class:`dict`
-            Gateway connection info.
-
-            .. hint::
-                A list of fields are available in the documentation.
+        list[discord_typings.ApplicationCommandData]
+            The global commmands registered to the application
         """
-        route = Route("GET", "/gateway/bot")
+        route = Route("GET", "/applications/{application_id}/commands", application_id=application_id)
+
         r = await self._request(
             route,
             ratelimit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def create_global_application_command(
+        self,
+        authentication: BotAuthentication | BearerAuthentication,
+        application_id: str | int,
+        name: str,
+        description: str,
+        *,
+        name_localizations: dict[Locales, str] | None | UndefinedType = UNDEFINED,
+        description_localizations: dict[Locales, str] | None | UndefinedType = UNDEFINED,
+        options: list[ApplicationCommandOptionData] | UndefinedType = UNDEFINED,
+        default_member_permissions: str | None | UndefinedType = UNDEFINED,
+        dm_permission: bool | None | UndefinedType = UNDEFINED,
+        type: Literal[1, 2, 3] | UndefinedType = UNDEFINED, # TODO: Replace this with a type alias in discord_typings
+        global_priority: int = 0,
+    ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
+        """Creates or updates a global application command
+
+        See the `documentation <https://discord.dev/interactions/application-commands#create-global-application-command>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        application_id:
+            The application id/client id of the current application
+
+            .. note::
+                You can only update commands for your current application
+        name:
+            The name of the command
+
+            .. note::
+                If the name is already taken by a existing application command with the same name and type
+                it will update the exisiting command.
+            .. note::
+                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming>`__
+        description:
+            The description of the command
+
+            .. note::
+                This has to be between 1-100 characters long
+
+            .. warning::
+                Some special characters may be automatically removed from this!
+        name_localizations:
+            The localizations for the name
+
+            .. note::
+                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming>`__
+        description_localizations:
+            The localizations for the description
+
+            .. note::
+                This has to be between 1-100 characters long
+
+            .. warning::
+                Some special characters may be automatically removed from this!
+        options:
+            The parameters or sub-commands of the command
+
+            .. note::
+                This should only be provide
+        default_member_permissions:
+            The default permissions to require to use the command
+        dm_permission:
+            Whether the command can be used in DMs.
+
+            .. note::
+                If this is :data:`UNDEFINED`, it defaults to :data:`True`.
+        type:
+            The type of the command
+
+            .. note::
+                This defaults to ``1`` if it is :data:`UNDEFINED`.
+
+            **Possible values**
+            - ``1``: Slash/text command
+            - ``2``: User context menu
+            - ``3``: Message context menu
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.ApplicationCommandData
+            The command that was created
+        """
+        route = Route("POST", "/applications/{application_id}/commands", application_id=application_id)
+
+        payload = {
+            "name": name,
+            "description": description
+        }
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if name_localizations is not UNDEFINED:
+            payload["name_localizations"] = name_localizations
+        if description_localizations is not UNDEFINED:
+            payload["description_localizations"] = description_localizations
+        if options is not UNDEFINED:
+            payload["options"] = options
+        if default_member_permissions is not UNDEFINED:
+            payload["default_member_permissions"] = default_member_permissions
+        if dm_permission is not UNDEFINED:
+            payload["dm_permission"] = dm_permission
+        if type is not UNDEFINED:
+            payload["type"] = type
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            json=payload,
             global_priority=global_priority,
         )
 
@@ -7147,6 +7244,74 @@ class HTTPClient:
             query["thread_id"] = thread_id
 
         r = await self._request(route, ratelimit_key=None, global_priority=global_priority, query=query)
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # Gateway
+    async def get_gateway(self) -> GetGatewayData:
+        """Gets gateway connection info.
+
+        See the `documentation <https://discord.dev/topics/gateway#get-gateway>`__ for more info.
+
+        **Example usage:**
+
+        .. code-block:: python
+
+            gateway_info = await http_client.get_gateway()
+
+        Returns
+        -------
+        :class:`dict`
+            The gateway info.
+
+            .. hint::
+                A list of fields are available in the documentation.
+        """
+        route = Route("GET", "/gateway", ignore_global=True)
+        r = await self._request(route, ratelimit_key=None)
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_gateway_bot(
+        self, authentication: BotAuthentication, *, global_priority: int = 0
+    ) -> GetGatewayBotData:
+        """Gets gateway connection information.
+
+        See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`__
+
+        **Example usage:**
+
+        .. code-block:: python
+
+            bot_info = await http_client.get_gateway_bot(token)
+
+        .. note::
+            This endpoint requires a bot token.
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        :class:`dict`
+            Gateway connection info.
+
+            .. hint::
+                A list of fields are available in the documentation.
+        """
+        route = Route("GET", "/gateway/bot")
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
