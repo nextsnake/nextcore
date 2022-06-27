@@ -99,6 +99,7 @@ if TYPE_CHECKING:
 
     from .authentication import BearerAuthentication, BotAuthentication
     from .file import File
+    from ..common.json import JsonCompatible
 
 logger = getLogger(__name__)
 
@@ -604,7 +605,7 @@ class HTTPClient:
         """
         route = Route("POST", "/applications/{application_id}/commands", application_id=application_id)
 
-        payload = {
+        payload: JsonCompatible = {
             "name": name,
             "description": description
         }
@@ -790,7 +791,7 @@ class HTTPClient:
             The priority of the request for the global rate-limiter.
         """
         route = Route("PATCH", "/channels/{channel_id}", channel_id=channel_id)
-        payload = {}  # TODO: Use a typehint for payload
+        payload: JsonCompatible = {}  # TODO: Use a typehint for payload
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -924,7 +925,7 @@ class HTTPClient:
         """
 
         route = Route("PATCH", "/channels/{channel_id}", channel_id=channel_id)
-        payload = {}  # TODO: Use a typehint for payload
+        payload: JsonCompatible = {}  # TODO: Use a typehint for payload
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -1022,7 +1023,7 @@ class HTTPClient:
         """
 
         route = Route("PATCH", "/channels/{channel_id}", channel_id=thread_id)
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -1294,7 +1295,7 @@ class HTTPClient:
 
         # We use payload_json here as the format is more strictly defined than form data.
         # This means we don't have to manually format the data.
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -1749,7 +1750,7 @@ class HTTPClient:
         )
 
         headers = {"Authorization": str(authentication)}
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -1957,7 +1958,7 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -2129,7 +2130,7 @@ class HTTPClient:
         route = Route("POST", "/channels/{channel_id}/invites", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         if max_age is not UNDEFINED:
             payload["max_age"] = max_age
@@ -2228,7 +2229,7 @@ class HTTPClient:
         """
         route = Route("POST", "/channels/{channel_id}/followers", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
-        payload = {"webhook_channel_id": webhook_channel_id}
+        payload: JsonCompatible = {"webhook_channel_id": webhook_channel_id}
 
         r = await self._request(
             route,
@@ -2488,7 +2489,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload = {
+        payload: JsonCompatible = {
             "name": name,
         }
 
@@ -2566,7 +2567,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload = {
+        payload: JsonCompatible = {
             "name": name,
         }
 
@@ -3173,7 +3174,7 @@ class HTTPClient:
             The priority of the request for the global rate-limiter.
         """
         route = Route("POST", "/guilds")
-        payload = {"name": name}
+        payload: JsonCompatible = {"name": name}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -3719,7 +3720,7 @@ class HTTPClient:
         """
         route = Route("PATCH", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -3789,7 +3790,7 @@ class HTTPClient:
         """
         route = Route("PATCH", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -4136,7 +4137,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -4344,7 +4345,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -4520,7 +4521,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -4920,7 +4921,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -5071,7 +5072,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -5131,7 +5132,7 @@ class HTTPClient:
 
         route = Route("PATCH", "/guilds/{guild_id}/voice-states/@me", guild_id=guild_id)
 
-        payload = {"channel_id": channel_id}
+        payload: JsonCompatible = {"channel_id": channel_id}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -5181,7 +5182,7 @@ class HTTPClient:
 
         route = Route("PATCH", "/guilds/{guild_id}/voice-states/{user_id}", guild_id=guild_id, user_id=user_id)
 
-        payload = {"channel_id": channel_id}
+        payload: JsonCompatible = {"channel_id": channel_id}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -5339,7 +5340,7 @@ class HTTPClient:
         """
         route = Route("POST", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
 
-        payload = {
+        payload: JsonCompatible = {
             "name": name,
             "privacy_level": privacy_level,
             "scheduled_start_time": scheduled_start_time,
@@ -5541,7 +5542,7 @@ class HTTPClient:
         """
         route = Route("POST", "/guilds/templates/{template_code}", template_code=template_code)
 
-        payload = {"name": name}
+        payload: JsonCompatible = {"name": name}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -5634,7 +5635,7 @@ class HTTPClient:
         """
         route = Route("POST", "/guilds/{guild_id}/templates", guild_id=guild_id)
 
-        payload = {"name": name}
+        payload: JsonCompatible = {"name": name}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -5729,7 +5730,7 @@ class HTTPClient:
             "PATCH", "/guilds/{guild_id}/templates/{template_code}", guild_id=guild_id, template_code=template_code
         )
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -5915,7 +5916,7 @@ class HTTPClient:
         """
         route = Route("POST", "/stage-instances")
 
-        payload = {"channel_id": channel_id, "topic": topic}
+        payload: JsonCompatible = {"channel_id": channel_id, "topic": topic}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -6020,7 +6021,7 @@ class HTTPClient:
         """
         route = Route("PATCH", "/stage-instances/{channel_id}", channel_id=channel_id)
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -6274,7 +6275,7 @@ class HTTPClient:
         """
         route = Route("PATCH", "/guilds/{guild_id}/stickers/{sticker_id}", guild_id=guild_id, sticker_id=sticker_id)
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -6449,7 +6450,7 @@ class HTTPClient:
         """
         route = Route("PATCH", "/users/@me")
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -6753,7 +6754,7 @@ class HTTPClient:
         """
         route = Route("POST", "/channels/{channel_id}/webhooks", channel_id=channel_id)
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -6958,7 +6959,7 @@ class HTTPClient:
         """
         route = Route("PATCH", "/webhooks/{webhook_id}", webhook_id=webhook_id)
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -7026,7 +7027,7 @@ class HTTPClient:
             "PATCH", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token
         )
 
-        payload = {}
+        payload: JsonCompatible = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
