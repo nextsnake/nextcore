@@ -55,6 +55,7 @@ if TYPE_CHECKING:
         AllowedMentionsData,
         ApplicationCommandData,
         ApplicationCommandOptionData,
+        ApplicationCommandPayload,
         AttachmentData,
         AuditLogData,
         BanData,
@@ -66,6 +67,7 @@ if TYPE_CHECKING:
         FollowedChannelData,
         GetGatewayBotData,
         GetGatewayData,
+        GuildApplicationCommandPermissionData,
         GuildData,
         GuildMemberData,
         GuildPreviewData,
@@ -93,15 +95,13 @@ if TYPE_CHECKING:
         WebhookData,
         WelcomeChannelData,
         WelcomeScreenData,
-        ApplicationCommandPayload,
-        GuildApplicationCommandPermissionData
     )
     from discord_typings.interactions.commands import Locales
     from discord_typings.resources.audit_log import AuditLogEvents
 
+    from ..common.json import JsonCompatible
     from .authentication import BearerAuthentication, BotAuthentication
     from .file import File
-    from ..common.json import JsonCompatible
 
 logger = getLogger(__name__)
 
@@ -539,7 +539,7 @@ class HTTPClient:
         options: list[ApplicationCommandOptionData] | UndefinedType = UNDEFINED,
         default_member_permissions: str | None | UndefinedType = UNDEFINED,
         dm_permission: bool | None | UndefinedType = UNDEFINED,
-        type: Literal[1, 2, 3] | UndefinedType = UNDEFINED, # TODO: Replace this with a type alias in discord_typings
+        type: Literal[1, 2, 3] | UndefinedType = UNDEFINED,  # TODO: Replace this with a type alias in discord_typings
         global_priority: int = 0,
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Creates or updates a global application command
@@ -616,10 +616,7 @@ class HTTPClient:
         """
         route = Route("POST", "/applications/{application_id}/commands", application_id=application_id)
 
-        payload: JsonCompatible = {
-            "name": name,
-            "description": description
-        }
+        payload: JsonCompatible = {"name": name, "description": description}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -678,7 +675,12 @@ class HTTPClient:
         discord_typings.ApplicationCommandData
             The global commmand fetched
         """
-        route = Route("GET", "/applications/{application_id}/commands/{command_id}", application_id=application_id, command_id=command_id)
+        route = Route(
+            "GET",
+            "/applications/{application_id}/commands/{command_id}",
+            application_id=application_id,
+            command_id=command_id,
+        )
 
         r = await self._request(
             route,
@@ -703,7 +705,7 @@ class HTTPClient:
         options: list[ApplicationCommandOptionData] | UndefinedType = UNDEFINED,
         default_member_permissions: str | None | UndefinedType = UNDEFINED,
         dm_permission: bool | None | UndefinedType = UNDEFINED,
-        type: Literal[1, 2, 3] | UndefinedType = UNDEFINED, # TODO: Replace this with a type alias in discord_typings
+        type: Literal[1, 2, 3] | UndefinedType = UNDEFINED,  # TODO: Replace this with a type alias in discord_typings
         global_priority: int = 0,
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Updates a global application command
@@ -778,7 +780,12 @@ class HTTPClient:
         discord_typings.ApplicationCommandData
             The command that was edited
         """
-        route = Route("PATCH", "/applications/{application_id}/commands/{command_id}", application_id=application_id, command_id=command_id)
+        route = Route(
+            "PATCH",
+            "/applications/{application_id}/commands/{command_id}",
+            application_id=application_id,
+            command_id=command_id,
+        )
 
         payload: JsonCompatible = {}
 
@@ -838,7 +845,12 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
         """
-        route = Route("GET", "/applications/{application_id}/commands/{command_id}", application_id=application_id, command_id=command_id)
+        route = Route(
+            "GET",
+            "/applications/{application_id}/commands/{command_id}",
+            application_id=application_id,
+            command_id=command_id,
+        )
 
         r = await self._request(
             route,
@@ -849,7 +861,6 @@ class HTTPClient:
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
-
 
     async def bulk_overwrite_global_application_commands(
         self,
@@ -875,7 +886,7 @@ class HTTPClient:
             .. note::
                 You can only update commands for your current application
         commands:
-            The global commands to overwrite the current global commands with 
+            The global commands to overwrite the current global commands with
         global_priority:
             The priority of the request for the global rate-limiter.
 
@@ -896,7 +907,7 @@ class HTTPClient:
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
-    
+
     async def get_guild_application_commands(
         self,
         authentication: BotAuthentication | BearerAuthentication,
@@ -905,7 +916,9 @@ class HTTPClient:
         *,
         with_localizations: bool | UndefinedType = UNDEFINED,
         global_priority: int = 0,
-    ) -> list[ApplicationCommandData]:  # TODO: Narrow typing to always include guild_id and localization overload and never dm_permission
+    ) -> list[
+        ApplicationCommandData
+    ]:  # TODO: Narrow typing to always include guild_id and localization overload and never dm_permission
         """Gets all commands in a guild
 
         See the `documentation <https://discord.dev/interactions/application-commands#get-guild-application-commands>`__
@@ -929,7 +942,12 @@ class HTTPClient:
         list[discord_typings.ApplicationCommandData]
             The commmands registered to the guild
         """
-        route = Route("GET", "/applications/{application_id}/guilds/{guild_id}commands", application_id=application_id, guild_id=guild_id)
+        route = Route(
+            "GET",
+            "/applications/{application_id}/guilds/{guild_id}commands",
+            application_id=application_id,
+            guild_id=guild_id,
+        )
 
         query = {}
 
@@ -961,7 +979,7 @@ class HTTPClient:
         description_localizations: dict[Locales, str] | None | UndefinedType = UNDEFINED,
         options: list[ApplicationCommandOptionData] | UndefinedType = UNDEFINED,
         default_member_permissions: str | None | UndefinedType = UNDEFINED,
-        type: Literal[1, 2, 3] | UndefinedType = UNDEFINED, # TODO: Replace this with a type alias in discord_typings
+        type: Literal[1, 2, 3] | UndefinedType = UNDEFINED,  # TODO: Replace this with a type alias in discord_typings
         global_priority: int = 0,
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Creates or updates a guild command
@@ -1033,12 +1051,14 @@ class HTTPClient:
         discord_typings.ApplicationCommandData
             The command that was created
         """
-        route = Route("POST", "/applications/{application_id}/guilds/{guild_id}/commands", application_id=application_id, guild_id=guild_id)
+        route = Route(
+            "POST",
+            "/applications/{application_id}/guilds/{guild_id}/commands",
+            application_id=application_id,
+            guild_id=guild_id,
+        )
 
-        payload: JsonCompatible = {
-            "name": name,
-            "description": description
-        }
+        payload: JsonCompatible = {"name": name, "description": description}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -1098,7 +1118,13 @@ class HTTPClient:
         discord_typings.ApplicationCommandData
             The global commmand fetched
         """
-        route = Route("GET", "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}", application_id=application_id, guild_id=guild_id, command_id=command_id)
+        route = Route(
+            "GET",
+            "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}",
+            application_id=application_id,
+            guild_id=guild_id,
+            command_id=command_id,
+        )
 
         r = await self._request(
             route,
@@ -1123,7 +1149,7 @@ class HTTPClient:
         description_localizations: dict[Locales, str] | None | UndefinedType = UNDEFINED,
         options: list[ApplicationCommandOptionData] | UndefinedType = UNDEFINED,
         default_member_permissions: str | None | UndefinedType = UNDEFINED,
-        type: Literal[1, 2, 3] | UndefinedType = UNDEFINED, # TODO: Replace this with a type alias in discord_typings
+        type: Literal[1, 2, 3] | UndefinedType = UNDEFINED,  # TODO: Replace this with a type alias in discord_typings
         global_priority: int = 0,
     ) -> ApplicationCommandData:  # TODO: Narrow typing
         """Updates a guild application command
@@ -1195,7 +1221,13 @@ class HTTPClient:
         discord_typings.ApplicationCommandData
             The command that was edited
         """
-        route = Route("PATCH", "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}", application_id=application_id, guild_id=guild_id, command_id=command_id)
+        route = Route(
+            "PATCH",
+            "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}",
+            application_id=application_id,
+            guild_id=guild_id,
+            command_id=command_id,
+        )
 
         payload: JsonCompatible = {}
 
@@ -1258,7 +1290,13 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
         """
-        route = Route("GET", "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}", application_id=application_id, guild_id=guild_id, command_id=command_id)
+        route = Route(
+            "GET",
+            "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}",
+            application_id=application_id,
+            guild_id=guild_id,
+            command_id=command_id,
+        )
 
         r = await self._request(
             route,
@@ -1269,7 +1307,6 @@ class HTTPClient:
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
-
 
     async def bulk_overwrite_guild_application_commands(
         self,
@@ -1298,7 +1335,7 @@ class HTTPClient:
         guild_id:
             The guild to overwrite commands in
         commands:
-            The commands to overwrite the current commands with 
+            The commands to overwrite the current commands with
         global_priority:
             The priority of the request for the global rate-limiter.
 
@@ -1307,7 +1344,12 @@ class HTTPClient:
         list[discord_typings.ApplicationCommandData]
             The new commands
         """
-        route = Route("PUT", "/applications/{application_id}/guilds/{guild_id}/commands", application_id=application_id, guild_id=guild_id)
+        route = Route(
+            "PUT",
+            "/applications/{application_id}/guilds/{guild_id}/commands",
+            application_id=application_id,
+            guild_id=guild_id,
+        )
 
         r = await self._request(
             route,
@@ -1353,7 +1395,12 @@ class HTTPClient:
         list[discord_typings.GuildApplicationCommandPermissionData]
             The application command permissions overwrites in the guild
         """
-        route = Route("GET", "/applications/{application_id}/guilds/{guild_id}/commands/permissions", application_id=application_id, guild_id=guild_id)
+        route = Route(
+            "GET",
+            "/applications/{application_id}/guilds/{guild_id}/commands/permissions",
+            application_id=application_id,
+            guild_id=guild_id,
+        )
 
         r = await self._request(
             route,
@@ -1399,7 +1446,13 @@ class HTTPClient:
         discord_typings.GuildApplicationCommandPermissionData
             The application command permissions overwrites for the command
         """
-        route = Route("GET", "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions", application_id=application_id, guild_id=guild_id, command_id=command_id)
+        route = Route(
+            "GET",
+            "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions",
+            application_id=application_id,
+            guild_id=guild_id,
+            command_id=command_id,
+        )
 
         r = await self._request(
             route,
@@ -1410,7 +1463,7 @@ class HTTPClient:
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
-    
+
     # TODO: Add Edit Application Command Permissions
 
     # Audit log
