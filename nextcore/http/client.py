@@ -2305,7 +2305,7 @@ class HTTPClient:
 
         # We use payload_json here as the format is more strictly defined than form data.
         # This means we don't have to manually format the data.
-        payload = {}  # TODO: Not type-hinted here. This is bad.
+        payload: dict[str, Any] = {}  
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -7493,9 +7493,9 @@ class HTTPClient:
         self,
         authentication: BotAuthentication | BearerAuthentication,
         *,
-        before: Snowflake,
-        after: Snowflake,
-        limit: int,
+        before: Snowflake | UndefinedType = UNDEFINED,
+        after: Snowflake | UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> list[GuildData]:  # TODO: Replace with partial guild data
         """Gets the guilds the current user is in
@@ -7739,7 +7739,7 @@ class HTTPClient:
         name: str,
         *,
         avatar: str | None | UndefinedType = UNDEFINED,
-        reason: str,
+        reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> WebhookData:
         """Creates a webhook
@@ -7774,12 +7774,10 @@ class HTTPClient:
         """
         route = Route("POST", "/channels/{channel_id}/webhooks", channel_id=channel_id)
 
-        payload: dict[str, Any] = {}
+        payload: dict[str, Any] = {"name": name}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if name is not UNDEFINED:
-            payload["name"] = name
         if avatar is not UNDEFINED:
             payload["avatar"] = avatar
 
@@ -8077,7 +8075,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_webhook(
-        self, authentication: BotAuthentication, webhook_id: Snowflake, *, reason: str, global_priority: int = 0
+        self, authentication: BotAuthentication, webhook_id: Snowflake, *, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
     ) -> None:
         """Deletes a webhook
 
@@ -8117,7 +8115,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_webhook_with_token(
-        self, webhook_id: Snowflake, webhook_token: str, *, reason: str, global_priority: int = 0
+        self, webhook_id: Snowflake, webhook_token: str, *, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
     ) -> None:
         """Deletes a webhook
 
@@ -8166,7 +8164,7 @@ class HTTPClient:
         webhook_token: str,
         message_id: Snowflake,
         *,
-        thread_id: Snowflake,
+        thread_id: Snowflake | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> MessageData:
         """Gets a message sent by the webhook
@@ -8224,12 +8222,12 @@ class HTTPClient:
         webhook_token: str,
         message_id: Snowflake,
         *,
-        thread_id: Snowflake,
+        thread_id: Snowflake | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> None:
         """Deletes a message sent by the webhook
 
-        See the `documentation <https://discord.dev/resources/webhook#get-webhook>`__
+        See the `documentation <https://discord.dev/resources/webhook#delete-webhook-message>`__
 
         Parameters
         ----------
