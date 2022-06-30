@@ -4216,6 +4216,7 @@ class HTTPClient:
             route,
             ratelimit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
             json=payload,
         )
 
