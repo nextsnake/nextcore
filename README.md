@@ -1,7 +1,3 @@
-
-
-
-
 # Nextcore
 A low level Discord API wrapper
 
