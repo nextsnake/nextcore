@@ -324,7 +324,7 @@ class HTTPClient:
             if scope == "shared":
                 logger.info(
                     "Exceeded rate-limit on shared route! (%s)"
-                    "This is not unexpected as shared rate-limites is shared by multiple users (and therefore, is out of our control). "
+                    "This is not unexpected as shared rate-limits are shared by multiple users (and therefore, are out of our control). "
                     "This does not count towards a cloudflare ban. Retry after: %s",
                     route.bucket,
                     error["retry_after"],
