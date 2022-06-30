@@ -56,6 +56,7 @@ if TYPE_CHECKING:
         ApplicationCommandData,
         ApplicationCommandOptionData,
         ApplicationCommandPayload,
+        ApplicationData,
         AttachmentData,
         AuditLogData,
         BanData,
@@ -95,11 +96,10 @@ if TYPE_CHECKING:
         WebhookData,
         WelcomeChannelData,
         WelcomeScreenData,
-        ApplicationData
     )
-    from discord_typings.shared import Snowflake
     from discord_typings.interactions.commands import Locales
     from discord_typings.resources.audit_log import AuditLogEvents
+    from discord_typings.shared import Snowflake
 
     from ..common.json import JsonCompatible
     from .authentication import BearerAuthentication, BotAuthentication
@@ -253,7 +253,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`ClientResponse`
+        ClientResponse
             The response from the request.
 
         Raises
@@ -383,7 +383,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`aiohttp.ClientWebSocketResponse`
+        aiohttp.ClientWebSocketResponse
             The websocket response.
         """
         await self._ensure_session()
@@ -1514,7 +1514,6 @@ class HTTPClient:
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-
     # TODO: Add Edit Original Interaction Response
 
     async def delete_original_interaction_response(
@@ -1591,7 +1590,7 @@ class HTTPClient:
             "/webhooks/{application_id}/{interaction_token}/messages/{message_id}",
             application_id=application_id,
             interaction_token=interaction_token,
-            message_id=message_id
+            message_id=message_id,
         )
 
         r = await self._request(
@@ -1635,7 +1634,7 @@ class HTTPClient:
             "/webhooks/{application_id}/{interaction_token}/messages/{message_id}",
             application_id=application_id,
             interaction_token=interaction_token,
-            message_id=message_id
+            message_id=message_id,
         )
 
         r = await self._request(
@@ -1646,9 +1645,6 @@ class HTTPClient:
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
-
-
-
 
     # Audit log
     async def get_guild_audit_log(
@@ -1698,7 +1694,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`AuditLogData`
+        AuditLogData
             The guild audit log.
 
             .. hint::
@@ -1748,7 +1744,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`ChannelData`
+        ChannelData
             The channel.
 
             .. hint::
@@ -2301,7 +2297,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`discord_typings.MessageData`
+        discord_typings.MessageData
             The message that was sent.
         """
         route = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -2383,7 +2379,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`discord_typings.MessageData`
+        discord_typings.MessageData
             The message that was crossposted.
         """
         route = Route(
@@ -2756,7 +2752,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`MessageData`
+        MessageData
             The edited message.
         """
         route = Route(
@@ -3138,7 +3134,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`InviteData`
+        InviteData
             The invite data.
         """
         route = Route("POST", "/channels/{channel_id}/invites", channel_id=channel_id)
@@ -3238,7 +3234,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`FollowedChannelData`
+        FollowedChannelData
             The followed channel data.
         """
         route = Route("POST", "/channels/{channel_id}/followers", channel_id=channel_id)
@@ -3481,7 +3477,7 @@ class HTTPClient:
             The name of the thread.
         auto_archive_duration:
             The auto archive duration of the thread.
-        rate_limit_per_user: :class:`int` | :data:`None` | :class:`UndefinedType`
+        rate_limit_per_user: int` | :data:`None` | :class:`UndefinedType
             The time every member has to wait before sending another message.
 
             .. note::
@@ -3565,7 +3561,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`ChannelData`
+        ChannelData
             The channel data.
         """
         route = Route(
@@ -4630,7 +4626,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`discord_typings.GuildMemberData`
+        discord_typings.GuildMemberData
             The member was added to the guild
         :data:`None`
             The member was already in the guild
@@ -4729,7 +4725,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`discord_typings.GuildMemberData`
+        discord_typings.GuildMemberData
             The member after the update
         """
         route = Route("PATCH", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
@@ -4799,7 +4795,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`discord_typings.GuildMemberData`
+        discord_typings.GuildMemberData
             The member after the update
         """
         route = Route("PATCH", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
@@ -6349,7 +6345,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`discord_typings.GuildScheduledEventData`
+        discord_typings.GuildScheduledEventData
             The scheduled event that was created
         """
         route = Route("POST", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
@@ -6506,7 +6502,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`discord_typings.GuildTemplateData`
+        discord_typings.GuildTemplateData
             The template you requested
         """
         route = Route("GET", "/guilds/templates/{template_code}", template_code=template_code)
@@ -6551,7 +6547,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`discord_typings.GuildData`
+        discord_typings.GuildData
             The guild created
         """
         route = Route("POST", "/guilds/templates/{template_code}", template_code=template_code)
@@ -6644,7 +6640,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`discord_typings.GuildData`
+        discord_typings.GuildData
             The guild created
         """
         route = Route("POST", "/guilds/{guild_id}/templates", guild_id=guild_id)
@@ -6786,7 +6782,7 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`discord_typings.GuildTemplateData`
+        discord_typings.GuildTemplateData
             The deleted template
         """
         route = Route(
@@ -8277,11 +8273,8 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`dict`
+        discord_typings.GetGatewayData
             The gateway info.
-
-            .. hint::
-                A list of fields are available in the documentation.
         """
         route = Route("GET", "/gateway", ignore_global=True)
         r = await self._request(route, ratelimit_key=None)
@@ -8359,7 +8352,7 @@ class HTTPClient:
 
     async def get_current_authorization_information(
         self, authentication: BotAuthentication | BearerAuthentication, *, global_priority: int = 0
-    ) -> JsonCompatible: # TODO: Narrow typing
+    ) -> JsonCompatible:  # TODO: Narrow typing
         """Gets the bots application
 
         See the `documentation <https://discord.dev/topics/oauth2#get-current-bot-application-information>`__
@@ -8387,5 +8380,3 @@ class HTTPClient:
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
-
-
