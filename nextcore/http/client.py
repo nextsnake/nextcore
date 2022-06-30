@@ -1783,8 +1783,8 @@ class HTTPClient:
         target_type:
             The type of the target.
 
-            0: A user's stream
-            1: ``EMBEDDED`` Activity
+            - ``0``: A user's stream
+            - ``1``: ``EMBEDDED`` Activity
         target_user_id:
             The id of the user streaming to invite to.
 
