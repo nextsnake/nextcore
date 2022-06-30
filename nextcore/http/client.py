@@ -101,7 +101,6 @@ if TYPE_CHECKING:
     from discord_typings.resources.audit_log import AuditLogEvents
     from discord_typings.shared import Snowflake
 
-    from ..common.json import JsonCompatible
     from .authentication import BearerAuthentication, BotAuthentication
     from .file import File
 
@@ -618,7 +617,7 @@ class HTTPClient:
         """
         route = Route("POST", "/applications/{application_id}/commands", application_id=application_id)
 
-        payload: JsonCompatible = {"name": name, "description": description}
+        payload: dict[str, Any] = {"name": name, "description": description}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -789,7 +788,7 @@ class HTTPClient:
             command_id=command_id,
         )
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -1060,7 +1059,7 @@ class HTTPClient:
             guild_id=guild_id,
         )
 
-        payload: JsonCompatible = {"name": name, "description": description}
+        payload: dict[str, Any] = {"name": name, "description": description}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -1231,7 +1230,7 @@ class HTTPClient:
             command_id=command_id,
         )
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -1652,13 +1651,14 @@ class HTTPClient:
         authentication: BotAuthentication,
         guild_id: Snowflake,
         *,
-        user_id: int | None = None,
-        action_type: AuditLogEvents | None = None,
-        before: int | None = None,
-        limit: int = 50,
+        user_id: int | UndefinedType = UNDEFINED,
+        action_type: AuditLogEvents | UndefinedType = UNDEFINED,
+        before: int | UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> AuditLogData:
         """Gets the guild audit log.
+
         See the `documentation <https://discord.dev/resources/audit-log#get-guild-audit-log>`__
 
         .. note::
@@ -1674,12 +1674,8 @@ class HTTPClient:
             The user to filter the audit log by.
 
             This will be the user that did the action if present, if not it will be the user that got actioned.
-
-            If this is :data:`None` this will not filter.
         action_type:
             The action type to filter the audit log by.
-
-            If this is :data:`None` this will not filter.
         before:
             Get entries before this entry.
 
@@ -1688,7 +1684,11 @@ class HTTPClient:
         limit:
             The amount of entries to get.
 
-            This has a minimum of 1 and a maximum of 100.
+            .. note::
+                This has a minimum of 1 and a maximum of 100.
+
+            .. note::
+                This defaults to 50.
         global_priority:
             The priority of the request for the global rate-limiter.
 
@@ -1701,23 +1701,23 @@ class HTTPClient:
                 A list of fields are available in the documentation.
         """
         route = Route("GET", f"/guilds/{guild_id}/audit-logs", guild_id=guild_id)
-        params = {  # TODO: Use a typehint
-            "limit": limit,
-        }
+        query: dict[str, str] = {}
 
         # They are NotRequired but can't be None.
         # This converts None to NotRequired
-        if user_id is not None:
-            params["user_id"] = user_id
-        if action_type is not None:
-            params["action_type"] = action_type
-        if before is not None:
-            params["before"] = before
+        if user_id is not UNDEFINED:
+            query["user_id"] = str(user_id)
+        if action_type is not UNDEFINED:
+            query["action_type"] = str(action_type)
+        if before is not UNDEFINED:
+            query["before"] = str(before)
+        if limit is not UNDEFINED:
+            query["limit"] = str(limit)
 
         r = await self._request(
             route,
             ratelimit_key=authentication.rate_limit_key,
-            params=params,
+            query=query,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -1801,7 +1801,7 @@ class HTTPClient:
             The priority of the request for the global rate-limiter.
         """
         route = Route("PATCH", "/channels/{channel_id}", channel_id=channel_id)
-        payload: JsonCompatible = {}  # TODO: Use a typehint for payload
+        payload: dict[str, Any] = {}  # TODO: Use a typehint for payload
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -1935,7 +1935,7 @@ class HTTPClient:
         """
 
         route = Route("PATCH", "/channels/{channel_id}", channel_id=channel_id)
-        payload: JsonCompatible = {}  # TODO: Use a typehint for payload
+        payload: dict[str, Any] = {}  # TODO: Use a typehint for payload
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -2033,7 +2033,7 @@ class HTTPClient:
         """
 
         route = Route("PATCH", "/channels/{channel_id}", channel_id=thread_id)
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -2198,24 +2198,24 @@ class HTTPClient:
         route = Route("GET", "/channels/{channel_id}/messages", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        params = {}
+        query: dict[str, str] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if around is not UNDEFINED:
-            params["around"] = around
+            query["around"] = str(around)
         if before is not UNDEFINED:
-            params["before"] = before
+            query["before"] = str(before)
         if after is not UNDEFINED:
-            params["after"] = after
+            query["after"] = str(after)
         if limit is not UNDEFINED:
-            params["limit"] = limit
+            query["limit"] = str(limit)
 
         r = await self._request(
             route,
             ratelimit_key=authentication.rate_limit_key,
             headers=headers,
-            params=params,
+            query=query,
             global_priority=global_priority,
         )
 
@@ -2305,7 +2305,7 @@ class HTTPClient:
 
         # We use payload_json here as the format is more strictly defined than form data.
         # This means we don't have to manually format the data.
-        payload: JsonCompatible = {}
+        payload = {}  # TODO: Not type-hinted here. This is bad.
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -2578,20 +2578,20 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        params = {}
+        query: dict[str, str] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if after is not UNDEFINED:
-            params["after"] = after
+            query["after"] = str(after)
         if limit is not UNDEFINED:
-            params["limit"] = limit
+            query["limit"] = str(limit)
 
         r = await self._request(
             route,
             ratelimit_key=authentication.rate_limit_key,
             headers=headers,
-            params=params,
+            query=query,
             global_priority=global_priority,
         )
 
@@ -2760,7 +2760,7 @@ class HTTPClient:
         )
 
         headers = {"Authorization": str(authentication)}
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -2968,7 +2968,7 @@ class HTTPClient:
         )
         headers = {"Authorization": str(authentication)}
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -3140,7 +3140,7 @@ class HTTPClient:
         route = Route("POST", "/channels/{channel_id}/invites", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         if max_age is not UNDEFINED:
             payload["max_age"] = max_age
@@ -3239,7 +3239,7 @@ class HTTPClient:
         """
         route = Route("POST", "/channels/{channel_id}/followers", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
-        payload: JsonCompatible = {"webhook_channel_id": webhook_channel_id}
+        payload: dict[str, Any] = {"webhook_channel_id": webhook_channel_id}
 
         r = await self._request(
             route,
@@ -3499,7 +3499,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload: JsonCompatible = {
+        payload: dict[str, Any] = {
             "name": name,
         }
 
@@ -3577,7 +3577,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload: JsonCompatible = {
+        payload: dict[str, Any] = {
             "name": name,
         }
 
@@ -3806,14 +3806,14 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
         """
-        params = {}
+        query: dict[str, str] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if before is not UNDEFINED:
-            params["before"] = before
+            query["before"] = before
         if limit is not UNDEFINED:
-            params["limit"] = limit
+            query["limit"] = str(limit)
 
         route = Route("GET", "/channels/{channel_id}/threads/archived/public", channel_id=channel_id)
 
@@ -3821,7 +3821,7 @@ class HTTPClient:
             route,
             ratelimit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            params=params,
+            query=query,
             global_priority=global_priority,
         )
 
@@ -3855,14 +3855,14 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
         """
-        params = {}
+        query: dict[str, str] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if before is not UNDEFINED:
-            params["before"] = before
+            query["before"] = before
         if limit is not UNDEFINED:
-            params["limit"] = limit
+            query["limit"] = str(limit)
 
         route = Route("GET", "/channels/{channel_id}/threads/archived/private", channel_id=channel_id)
 
@@ -3870,7 +3870,7 @@ class HTTPClient:
             route,
             ratelimit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            params=params,
+            query=query,
             global_priority=global_priority,
         )
 
@@ -3904,14 +3904,14 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
         """
-        params = {}
+        query: dict[str, str] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if before is not UNDEFINED:
-            params["before"] = before
+            query["before"] = before
         if limit is not UNDEFINED:
-            params["limit"] = limit
+            query["limit"] = str(limit)
 
         route = Route("GET", "/channels/{channel_id}/users/@me/threads/archived/private", channel_id=channel_id)
 
@@ -3919,7 +3919,7 @@ class HTTPClient:
             route,
             ratelimit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            params=params,
+            query=query,
             global_priority=global_priority,
         )
 
@@ -4034,20 +4034,20 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        params = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if name is not UNDEFINED:
-            params["name"] = name
+            payload["name"] = name
         if roles is not UNDEFINED:
-            params["roles"] = roles
+            payload["roles"] = roles
 
         r = self._request(
             route,
             ratelimit_key=authentication.rate_limit_key,
             headers=headers,
-            params=params,
+            json=payload,
             global_priority=global_priority,
         )
 
@@ -4055,7 +4055,13 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_guild_emoji(
-        self, authentication: BotAuthentication, guild_id: Snowflake, emoji_id: int | str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        emoji_id: int | str,
+        *,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
     ) -> list[EmojiData]:
         """Delete a emoji
 
@@ -4184,7 +4190,7 @@ class HTTPClient:
             The priority of the request for the global rate-limiter.
         """
         route = Route("POST", "/guilds")
-        payload: JsonCompatible = {"name": name}
+        payload: dict[str, Any] = {"name": name}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -4246,18 +4252,18 @@ class HTTPClient:
         """
         route = Route("GET", "/guilds/{guild_id}", guild_id=guild_id)
 
-        params = {}
+        query: dict[str, str] = {}
 
         # Save a bit of bandwith by not including it by default
         # TODO: Not sure if this is worth it
         if with_counts is not UNDEFINED:
-            params["with_counts"] = with_counts
+            query["with_counts"] = str(with_counts).lower()  # Use true instead of True
 
         r = await self._request(
             route,
             ratelimit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            params=params,
+            query=query,
             global_priority=global_priority,
         )
 
@@ -4552,18 +4558,19 @@ class HTTPClient:
         """
         route = Route("GET", "/guilds/{guild_id}/members/search", guild_id=guild_id)
 
-        params = {"query": query}
+        url_query: dict[str, str] = {"query": query}  # Different name to not overwrite the query argument
 
         # These can technically be provided by default however its wasted bandwidth
         # TODO: Reconsider this?
         # This only adds them if they are provided (not Undefined)
         if limit is not UNDEFINED:
-            params["limit"] = limit
+            url_query["limit"] = str(limit)
 
         r = await self._request(
             route,
             ratelimit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            query=url_query,
             global_priority=global_priority,
         )
 
@@ -4584,6 +4591,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> GuildMemberData | None:
         """Adds a member to a guild
+
+        Read the `documentation <https://discord.dev/resources/guild#add-guild-member>`__
 
         .. note::
             The bot requires the ``CREATE_INSTANT_INVITE`` permission.
@@ -4634,24 +4643,24 @@ class HTTPClient:
         """
         route = Route("PUT", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
 
-        params = {"access_token": user_authentication.token}
+        payload: dict[str, Any] = {"access_token": user_authentication.token}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if nick is not UNDEFINED:
-            params["nick"] = nick
+            payload["nick"] = nick
         if roles is not UNDEFINED:
-            params["roles"] = roles
+            payload["roles"] = roles
         if mute is not UNDEFINED:
-            params["mute"] = mute
+            payload["mute"] = mute
         if deaf is not UNDEFINED:
-            params["deaf"] = deaf
+            payload["deaf"] = deaf
 
         r = await self._request(
             route,
             ratelimit_key=bot_authentication.rate_limit_key,
             headers={"Authorization": str(bot_authentication)},
-            params=params,
+            json=payload,
             global_priority=global_priority,
         )
 
@@ -4731,7 +4740,7 @@ class HTTPClient:
         """
         route = Route("PATCH", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -4801,7 +4810,7 @@ class HTTPClient:
         """
         route = Route("PATCH", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -5004,8 +5013,8 @@ class HTTPClient:
         authentication: BotAuthentication,
         guild_id: Snowflake,
         *,
-        before: int | UndefinedType = UNDEFINED,
-        after: int | UndefinedType = UNDEFINED,
+        before: Snowflake | UndefinedType = UNDEFINED,
+        after: Snowflake | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> list[BanData]:
@@ -5046,22 +5055,22 @@ class HTTPClient:
         route = Route("GET", "/guilds/{guild_id}/bans", guild_id=guild_id)
         headers = {"Authorization": str(authentication)}
 
-        params = {}
+        query: dict[str, str] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if before is not UNDEFINED:
-            params["before"] = before
+            query["before"] = str(before)
         if after is not UNDEFINED:
-            params["after"] = after
+            query["after"] = str(after)
         if limit is not UNDEFINED:
-            params["limit"] = limit
+            query["limit"] = str(limit)
 
         r = await self._request(
             route,
             ratelimit_key=authentication.rate_limit_key,
             headers=headers,
-            params=params,
+            query=query,
             global_priority=global_priority,
         )
 
@@ -5148,7 +5157,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -5356,7 +5365,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -5532,7 +5541,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -5932,7 +5941,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -6083,7 +6092,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -6143,7 +6152,7 @@ class HTTPClient:
 
         route = Route("PATCH", "/guilds/{guild_id}/voice-states/@me", guild_id=guild_id)
 
-        payload: JsonCompatible = {"channel_id": channel_id}
+        payload: dict[str, Any] = {"channel_id": channel_id}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -6193,7 +6202,7 @@ class HTTPClient:
 
         route = Route("PATCH", "/guilds/{guild_id}/voice-states/{user_id}", guild_id=guild_id, user_id=user_id)
 
-        payload: JsonCompatible = {"channel_id": channel_id}
+        payload: dict[str, Any] = {"channel_id": channel_id}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -6351,7 +6360,7 @@ class HTTPClient:
         """
         route = Route("POST", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
 
-        payload: JsonCompatible = {
+        payload: dict[str, Any] = {
             "name": name,
             "privacy_level": privacy_level,
             "scheduled_start_time": scheduled_start_time,
@@ -6553,7 +6562,7 @@ class HTTPClient:
         """
         route = Route("POST", "/guilds/templates/{template_code}", template_code=template_code)
 
-        payload: JsonCompatible = {"name": name}
+        payload: dict[str, Any] = {"name": name}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -6646,7 +6655,7 @@ class HTTPClient:
         """
         route = Route("POST", "/guilds/{guild_id}/templates", guild_id=guild_id)
 
-        payload: JsonCompatible = {"name": name}
+        payload: dict[str, Any] = {"name": name}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -6741,7 +6750,7 @@ class HTTPClient:
             "PATCH", "/guilds/{guild_id}/templates/{template_code}", guild_id=guild_id, template_code=template_code
         )
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -6927,7 +6936,7 @@ class HTTPClient:
         """
         route = Route("POST", "/stage-instances")
 
-        payload: JsonCompatible = {"channel_id": channel_id, "topic": topic}
+        payload: dict[str, Any] = {"channel_id": channel_id, "topic": topic}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -7032,7 +7041,7 @@ class HTTPClient:
         """
         route = Route("PATCH", "/stage-instances/{channel_id}", channel_id=channel_id)
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -7286,7 +7295,7 @@ class HTTPClient:
         """
         route = Route("PATCH", "/guilds/{guild_id}/stickers/{sticker_id}", guild_id=guild_id, sticker_id=sticker_id)
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -7461,7 +7470,7 @@ class HTTPClient:
         """
         route = Route("PATCH", "/users/@me")
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -7765,7 +7774,7 @@ class HTTPClient:
         """
         route = Route("POST", "/channels/{channel_id}/webhooks", channel_id=channel_id)
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -7970,7 +7979,7 @@ class HTTPClient:
         """
         route = Route("PATCH", "/webhooks/{webhook_id}", webhook_id=webhook_id)
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -8038,7 +8047,7 @@ class HTTPClient:
             "PATCH", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token
         )
 
-        payload: JsonCompatible = {}
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -8353,7 +8362,7 @@ class HTTPClient:
 
     async def get_current_authorization_information(
         self, authentication: BotAuthentication | BearerAuthentication, *, global_priority: int = 0
-    ) -> JsonCompatible:  # TODO: Narrow typing
+    ) -> dict[str, Any]:  # TODO: Narrow typing
         """Gets the bots application
 
         See the `documentation <https://discord.dev/topics/oauth2#get-current-bot-application-information>`__
