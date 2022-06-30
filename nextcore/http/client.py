@@ -95,6 +95,7 @@ if TYPE_CHECKING:
         WebhookData,
         WelcomeChannelData,
         WelcomeScreenData,
+        ApplicationData
     )
     from discord_typings.interactions.commands import Locales
     from discord_typings.resources.audit_log import AuditLogEvents
@@ -562,7 +563,7 @@ class HTTPClient:
                 If the name is already taken by a existing application command with the same name and type
                 it will update the exisiting command.
             .. note::
-                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming>`__
+                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.dev/interactions/application-commands#application-command-object-application-command-naming>`__
         description:
             The description of the command
 
@@ -575,7 +576,7 @@ class HTTPClient:
             The localizations for the name
 
             .. note::
-                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming>`__
+                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.dev/interactions/application-commands#application-command-object-application-command-naming>`__
         description_localizations:
             The localizations for the description
 
@@ -728,12 +729,12 @@ class HTTPClient:
                 If the name is already taken by a existing application command with the same name and type
                 it will update the exisiting command.
             .. note::
-                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming>`__
+                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.dev/interactions/application-commands#application-command-object-application-command-naming>`__
         name_localizations:
             The localizations for the name
 
             .. note::
-                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming>`__
+                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.dev/interactions/application-commands#application-command-object-application-command-naming>`__
         description:
             The description of the command
 
@@ -1004,7 +1005,7 @@ class HTTPClient:
                 If the name is already taken by a existing application command with the same name and type
                 it will update the exisiting command.
             .. note::
-                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming>`__
+                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.dev/interactions/application-commands#application-command-object-application-command-naming>`__
         description:
             The description of the command
 
@@ -1017,7 +1018,7 @@ class HTTPClient:
             The localizations for the name
 
             .. note::
-                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming>`__
+                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.dev/interactions/application-commands#application-command-object-application-command-naming>`__
         description_localizations:
             The localizations for the description
 
@@ -1174,12 +1175,12 @@ class HTTPClient:
                 If the name is already taken by a existing application command with the same name and type
                 it will update the exisiting command.
             .. note::
-                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming>`__
+                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.dev/interactions/application-commands#application-command-object-application-command-naming>`__
         name_localizations:
             The localizations for the name
 
             .. note::
-                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming>`__
+                This has to be between 1-32 characters long and follow the `naming conventions <https://discord.dev/interactions/application-commands#application-command-object-application-command-naming>`__
         description:
             The description of the command
 
@@ -1434,7 +1435,7 @@ class HTTPClient:
 
             .. note::
                 You can only get commands for your current application
-        application_id:
+        command_id:
             The id of the command to fetch
         guild_id:
             The guild to get permissions from
@@ -1465,6 +1466,188 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     # TODO: Add Edit Application Command Permissions
+
+    # Responding to application commands (Receiving and responding)
+    # TODO: Add Create Interaction Response
+    async def get_original_interaction_response(
+        self,
+        application_id: str | int,
+        interaction_token: str,
+        *,
+        global_priority: int = 0,
+    ) -> MessageData:
+        """Gets the first response sent to a interaction
+
+        See the `documentation <https://discord.dev/interactions/receiving-and-responding#get-original-interaction-response>`__
+
+        Parameters
+        ----------
+        application_id:
+            The application id/client id of the current application
+
+            .. note::
+                You can only get commands for your current application
+        interaction_token:
+            The token of the interaction
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.MessageData
+            The message
+        """
+        route = Route(
+            "GET",
+            "/webhooks/{application_id}/{interaction_token}/messages/@original",
+            application_id=application_id,
+            interaction_token=interaction_token,
+        )
+
+        r = await self._request(
+            route,
+            ratelimit_key=None,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+
+    # TODO: Add Edit Original Interaction Response
+
+    async def delete_original_interaction_response(
+        self,
+        application_id: str | int,
+        interaction_token: str,
+        *,
+        global_priority: int = 0,
+    ) -> None:
+        """Deletes the first response sent to a interaction
+
+        See the `documentation <https://discord.dev/interactions/receiving-and-responding#delete-original-interaction-response>`__
+
+        Parameters
+        ----------
+        application_id:
+            The application id/client id of the current application
+
+            .. note::
+                You can only get commands for your current application
+        interaction_token:
+            The token of the interaction
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route(
+            "DELETE",
+            "/webhooks/{application_id}/{interaction_token}/messages/@original",
+            application_id=application_id,
+            interaction_token=interaction_token,
+        )
+
+        await self._request(
+            route,
+            ratelimit_key=None,
+            global_priority=global_priority,
+        )
+
+    # TODO: Add Create Followup Message
+
+    async def get_followup_message(
+        self,
+        application_id: str | int,
+        interaction_token: str,
+        message_id: str | int,
+        *,
+        global_priority: int = 0,
+    ) -> MessageData:
+        """Gets a response sent to a interaction by message id
+
+        See the `documentation <https://discord.dev/interactions/receiving-and-responding#get-followup-message>`__
+
+        Parameters
+        ----------
+        application_id:
+            The application id/client id of the current application
+
+            .. note::
+                You can only get commands for your current application
+        interaction_token:
+            The token of the interaction
+        message_id:
+            The id of the message to fetch
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.MessageData
+            The message that was fetched
+        """
+        route = Route(
+            "GET",
+            "/webhooks/{application_id}/{interaction_token}/messages/{message_id}",
+            application_id=application_id,
+            interaction_token=interaction_token,
+            message_id=message_id
+        )
+
+        r = await self._request(
+            route,
+            ratelimit_key=None,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    # TODO: Add Edit Followup Message
+    async def delete_followup_message(
+        self,
+        application_id: str | int,
+        interaction_token: str,
+        message_id: str | int,
+        *,
+        global_priority: int = 0,
+    ) -> MessageData:
+        """Deletes a response sent to a interaction by message id
+
+        See the `documentation <https://discord.dev/interactions/receiving-and-responding#delete-followup-message>`__
+
+        Parameters
+        ----------
+        application_id:
+            The application id/client id of the current application
+
+            .. note::
+                You can only get commands for your current application
+        interaction_token:
+            The token of the interaction
+        message_id:
+            The id of the message to delete
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        """
+        route = Route(
+            "DELETE",
+            "/webhooks/{application_id}/{interaction_token}/messages/{message_id}",
+            application_id=application_id,
+            interaction_token=interaction_token,
+            message_id=message_id
+        )
+
+        r = await self._request(
+            route,
+            ratelimit_key=None,
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+
+
 
     # Audit log
     async def get_guild_audit_log(
@@ -8118,9 +8301,6 @@ class HTTPClient:
 
             bot_info = await http_client.get_gateway_bot(token)
 
-        .. note::
-            This endpoint requires a bot token.
-
         Parameters
         ----------
         authentication:
@@ -8130,11 +8310,8 @@ class HTTPClient:
 
         Returns
         -------
-        :class:`dict`
+        discord_typings.GetGatewayBotData
             Gateway connection info.
-
-            .. hint::
-                A list of fields are available in the documentation.
         """
         route = Route("GET", "/gateway/bot")
         r = await self._request(
@@ -8146,3 +8323,68 @@ class HTTPClient:
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
+
+    # OAuth2
+    async def get_current_bot_application_information(
+        self, authentication: BotAuthentication, *, global_priority: int = 0
+    ) -> ApplicationData:
+        """Gets the bots application
+
+        See the `documentation <https://discord.dev/topics/oauth2#get-current-bot-application-information>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.ApplicationData
+            The application the bot is connected to
+        """
+        route = Route("GET", "/oauth2/applications/@me")
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+    async def get_current_authorization_information(
+        self, authentication: BotAuthentication | BearerAuthentication, *, global_priority: int = 0
+    ) -> JsonCompatible: # TODO: Narrow typing
+        """Gets the bots application
+
+        See the `documentation <https://discord.dev/topics/oauth2#get-current-bot-application-information>`__
+
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+
+        Returns
+        -------
+        discord_typings.???
+            Info about the current logged in user/bot
+        """
+        route = Route("GET", "/oauth2/@me")
+
+        r = await self._request(
+            route,
+            ratelimit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            global_priority=global_priority,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+
