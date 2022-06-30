@@ -97,6 +97,7 @@ if TYPE_CHECKING:
         WelcomeScreenData,
         ApplicationData
     )
+    from discord_typings.shared import Snowflake
     from discord_typings.interactions.commands import Locales
     from discord_typings.resources.audit_log import AuditLogEvents
 
@@ -482,7 +483,7 @@ class HTTPClient:
     async def get_global_application_commands(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
+        application_id: Snowflake,
         *,
         with_localizations: bool | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -531,7 +532,7 @@ class HTTPClient:
     async def create_global_application_command(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
+        application_id: Snowflake,
         name: str,
         description: str,
         *,
@@ -648,8 +649,8 @@ class HTTPClient:
     async def get_global_application_command(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
-        command_id: str | int,
+        application_id: Snowflake,
+        command_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
@@ -696,8 +697,8 @@ class HTTPClient:
     async def edit_global_application_command(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
-        command_id: str | int,
+        application_id: Snowflake,
+        command_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         name_localizations: dict[Locales, str] | None | UndefinedType = UNDEFINED,
@@ -823,8 +824,8 @@ class HTTPClient:
     async def delete_global_application_command(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
-        command_id: str | int,
+        application_id: Snowflake,
+        command_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> None:
@@ -866,7 +867,7 @@ class HTTPClient:
     async def bulk_overwrite_global_application_commands(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
+        application_id: Snowflake,
         *commands: ApplicationCommandPayload,
         global_priority: int = 0,
     ) -> list[ApplicationCommandData]:  # TODO: Narrow typing to never include guild_id
@@ -912,8 +913,8 @@ class HTTPClient:
     async def get_guild_application_commands(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
-        guild_id: str | int,
+        application_id: Snowflake,
+        guild_id: Snowflake,
         *,
         with_localizations: bool | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -971,8 +972,8 @@ class HTTPClient:
     async def create_guild_application_command(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
-        guild_id: str | int,
+        application_id: Snowflake,
+        guild_id: Snowflake,
         name: str,
         description: str,
         *,
@@ -1088,9 +1089,9 @@ class HTTPClient:
     async def get_guild_application_command(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
-        guild_id: str | int,
-        command_id: str | int,
+        application_id: Snowflake,
+        guild_id: Snowflake,
+        command_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
@@ -1140,9 +1141,9 @@ class HTTPClient:
     async def edit_guild_application_command(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
-        guild_id: str | int,
-        command_id: str | int,
+        application_id: Snowflake,
+        guild_id: Snowflake,
+        command_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         name_localizations: dict[Locales, str] | None | UndefinedType = UNDEFINED,
@@ -1263,9 +1264,9 @@ class HTTPClient:
     async def delete_guild_application_command(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
-        guild_id: str | int,
-        command_id: str | int,
+        application_id: Snowflake,
+        guild_id: Snowflake,
+        command_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> None:
@@ -1312,8 +1313,8 @@ class HTTPClient:
     async def bulk_overwrite_guild_application_commands(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
-        guild_id: str | int,
+        application_id: Snowflake,
+        guild_id: Snowflake,
         *commands: ApplicationCommandPayload,
         global_priority: int = 0,
     ) -> list[ApplicationCommandData]:  # TODO: Narrow typing to always include guild_id
@@ -1366,8 +1367,8 @@ class HTTPClient:
     async def get_guild_application_command_permissions(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
-        guild_id: str | int,
+        application_id: Snowflake,
+        guild_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> list[GuildApplicationCommandPermissionData]:
@@ -1416,9 +1417,9 @@ class HTTPClient:
     async def get_application_command_permissions(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        application_id: str | int,
-        guild_id: str | int,
-        command_id: str | int,
+        application_id: Snowflake,
+        guild_id: Snowflake,
+        command_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> GuildApplicationCommandPermissionData:
@@ -1471,7 +1472,7 @@ class HTTPClient:
     # TODO: Add Create Interaction Response
     async def get_original_interaction_response(
         self,
-        application_id: str | int,
+        application_id: Snowflake,
         interaction_token: str,
         *,
         global_priority: int = 0,
@@ -1518,7 +1519,7 @@ class HTTPClient:
 
     async def delete_original_interaction_response(
         self,
-        application_id: str | int,
+        application_id: Snowflake,
         interaction_token: str,
         *,
         global_priority: int = 0,
@@ -1556,9 +1557,9 @@ class HTTPClient:
 
     async def get_followup_message(
         self,
-        application_id: str | int,
+        application_id: Snowflake,
         interaction_token: str,
-        message_id: str | int,
+        message_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> MessageData:
@@ -1605,9 +1606,9 @@ class HTTPClient:
     # TODO: Add Edit Followup Message
     async def delete_followup_message(
         self,
-        application_id: str | int,
+        application_id: Snowflake,
         interaction_token: str,
-        message_id: str | int,
+        message_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> MessageData:
@@ -1653,7 +1654,7 @@ class HTTPClient:
     async def get_guild_audit_log(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *,
         user_id: int | None = None,
         action_type: AuditLogEvents | None = None,
@@ -1730,7 +1731,7 @@ class HTTPClient:
 
     # Channel
     async def get_channel(
-        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> ChannelData:
         """Gets a channel by ID.
 
@@ -1768,7 +1769,7 @@ class HTTPClient:
     async def modify_group_dm(
         self,
         authentication: BearerAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         icon: str | None | UndefinedType = UNDEFINED,
@@ -1833,7 +1834,7 @@ class HTTPClient:
     async def modify_guild_channel(
         self,
         authentication: BearerAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         channel_type: Literal[0, 5] | UndefinedType = UNDEFINED,
@@ -1844,7 +1845,7 @@ class HTTPClient:
         bitrate: int | None | UndefinedType = UNDEFINED,
         user_limit: int | None | UndefinedType = UNDEFINED,
         permission_overwrites: list[dict[Any, Any]] | None | UndefinedType = UNDEFINED,  # TODO: implement a partial
-        parent_id: int | str | UndefinedType = UNDEFINED,
+        parent_id: Snowflake | UndefinedType = UNDEFINED,
         rtc_region: str | None | UndefinedType = UNDEFINED,
         video_quality_mode: Literal[1, 2] | None | UndefinedType = UNDEFINED,  # TODO: Implement VideoQualityMode
         default_auto_archive_duration: Literal[60, 1440, 4320, 10080] | None | UndefinedType = UNDEFINED,
@@ -1988,7 +1989,7 @@ class HTTPClient:
     async def modify_thread(
         self,
         authentication: BotAuthentication,
-        thread_id: int | str,
+        thread_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         archived: bool | UndefinedType = UNDEFINED,
@@ -2072,7 +2073,7 @@ class HTTPClient:
     async def delete_channel(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        channel_id: int | str,
+        channel_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -2107,7 +2108,7 @@ class HTTPClient:
     async def get_channel_messages(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
+        channel_id: Snowflake,
         *,
         around: int,
         limit: int | UndefinedType,
@@ -2119,7 +2120,7 @@ class HTTPClient:
     async def get_channel_messages(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
+        channel_id: Snowflake,
         *,
         before: int,
         limit: int | UndefinedType,
@@ -2131,7 +2132,7 @@ class HTTPClient:
     async def get_channel_messages(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
+        channel_id: Snowflake,
         *,
         after: int,
         limit: int | UndefinedType,
@@ -2141,14 +2142,14 @@ class HTTPClient:
 
     @overload
     async def get_channel_messages(
-        self, authentication: BotAuthentication, channel_id: int | str, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> list[MessageData]:
         ...
 
     async def get_channel_messages(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
+        channel_id: Snowflake,
         *,
         around: int | UndefinedType = UNDEFINED,
         before: int | UndefinedType = UNDEFINED,
@@ -2228,7 +2229,7 @@ class HTTPClient:
     async def create_message(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
+        channel_id: Snowflake,
         *,
         content: str | UndefinedType = UNDEFINED,
         tts: bool | UndefinedType = UNDEFINED,
@@ -2355,8 +2356,8 @@ class HTTPClient:
     async def crosspost_message(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
-        message_id: int | str,
+        channel_id: Snowflake,
+        message_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> MessageData:
@@ -2403,8 +2404,8 @@ class HTTPClient:
     async def create_reaction(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
-        message_id: int | str,
+        channel_id: Snowflake,
+        message_id: Snowflake,
         emoji: str,
         *,
         global_priority: int = 0,
@@ -2449,8 +2450,8 @@ class HTTPClient:
     async def delete_own_reaction(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
-        message_id: int | str,
+        channel_id: Snowflake,
+        message_id: Snowflake,
         emoji: str,
         *,
         global_priority: int = 0,
@@ -2490,10 +2491,10 @@ class HTTPClient:
     async def delete_user_reaction(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
-        message_id: int | str,
+        channel_id: Snowflake,
+        message_id: Snowflake,
         emoji: str,
-        user_id: int | str,
+        user_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> None:
@@ -2541,11 +2542,11 @@ class HTTPClient:
     async def get_reactions(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
-        message_id: int | str,
+        channel_id: Snowflake,
+        message_id: Snowflake,
         emoji: str,
         *,
-        after: str | int | UndefinedType = UNDEFINED,
+        after: Snowflake | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> list[UserData]:
@@ -2604,8 +2605,8 @@ class HTTPClient:
     async def delete_all_reactions(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
-        message_id: int | str,
+        channel_id: Snowflake,
+        message_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> None:
@@ -2645,8 +2646,8 @@ class HTTPClient:
     async def delete_all_reactions_for_emoji(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
-        message_id: int | str,
+        channel_id: Snowflake,
+        message_id: Snowflake,
         emoji: str,
         *,
         global_priority: int = 0,
@@ -2692,8 +2693,8 @@ class HTTPClient:
     async def edit_message(
         self,
         authentication: BotAuthentication,
-        channel_id: int | str,
-        message_id: int | str,
+        channel_id: Snowflake,
+        message_id: Snowflake,
         *,
         content: str | None | UndefinedType = UNDEFINED,
         embeds: list[EmbedData] | None | UndefinedType = UNDEFINED,
@@ -2804,8 +2805,8 @@ class HTTPClient:
     async def delete_message(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
-        message_id: str | int,
+        channel_id: Snowflake,
+        message_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -2853,8 +2854,8 @@ class HTTPClient:
     async def bulk_delete_messages(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
-        messages: list[str] | list[int] | list[str | int],
+        channel_id: Snowflake,
+        messages: list[str] | list[int] | list[Snowflake],
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -2914,9 +2915,9 @@ class HTTPClient:
     async def edit_channel_permissions(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         target_type: Literal[0, 1],
-        target_id: str | int,
+        target_id: Snowflake,
         *,
         allow: str | None | UndefinedType = UNDEFINED,
         deny: str | None | UndefinedType = UNDEFINED,
@@ -2994,7 +2995,7 @@ class HTTPClient:
         )
 
     async def get_channel_invites(
-        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> list[InviteMetadata]:
         """Gets the invites for a channel.
 
@@ -3031,14 +3032,14 @@ class HTTPClient:
     async def create_channel_invite(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         *,
         max_age: int | UndefinedType = UNDEFINED,
         max_uses: int | UndefinedType = UNDEFINED,
         temporary: bool | UndefinedType = UNDEFINED,
         unique: bool | UndefinedType = UNDEFINED,
         target_type: Literal[0],
-        target_user_id: str | int,
+        target_user_id: Snowflake,
         target_application_id: UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> InviteData:
@@ -3048,7 +3049,7 @@ class HTTPClient:
     async def create_channel_invite(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         *,
         max_age: int | UndefinedType = UNDEFINED,
         max_uses: int | UndefinedType = UNDEFINED,
@@ -3056,7 +3057,7 @@ class HTTPClient:
         unique: bool | UndefinedType = UNDEFINED,
         target_type: Literal[1],
         target_user_id: UndefinedType = UNDEFINED,
-        target_application_id: str | int,
+        target_application_id: Snowflake,
         global_priority: int = 0,
     ) -> InviteData:
         ...
@@ -3065,7 +3066,7 @@ class HTTPClient:
     async def create_channel_invite(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         *,
         max_age: int | UndefinedType = UNDEFINED,
         max_uses: int | UndefinedType = UNDEFINED,
@@ -3081,15 +3082,15 @@ class HTTPClient:
     async def create_channel_invite(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         *,
         max_age: int | UndefinedType = UNDEFINED,
         max_uses: int | UndefinedType = UNDEFINED,
         temporary: bool | UndefinedType = UNDEFINED,
         unique: bool | UndefinedType = UNDEFINED,
         target_type: Literal[0, 1] | UndefinedType = UNDEFINED,
-        target_user_id: str | int | UndefinedType = UNDEFINED,
-        target_application_id: str | int | UndefinedType = UNDEFINED,
+        target_user_id: Snowflake | UndefinedType = UNDEFINED,
+        target_application_id: Snowflake | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> InviteData:
         """Creates an invite for a channel.
@@ -3174,8 +3175,8 @@ class HTTPClient:
     async def delete_channel_permission(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
-        target_id: str | int,
+        channel_id: Snowflake,
+        target_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -3212,8 +3213,8 @@ class HTTPClient:
     async def follow_news_channel(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
-        webhook_channel_id: str | int,
+        channel_id: Snowflake,
+        webhook_channel_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> FollowedChannelData:
@@ -3256,7 +3257,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def trigger_typing_indicator(
-        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> None:
         """Triggers a typing indicator.
 
@@ -3279,7 +3280,7 @@ class HTTPClient:
         )
 
     async def get_pinned_messages(
-        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> list[MessageData]:
         """Gets the pinned messages of a channel.
 
@@ -3315,8 +3316,8 @@ class HTTPClient:
     async def pin_message(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
-        message_id: str | int,
+        channel_id: Snowflake,
+        message_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -3360,8 +3361,8 @@ class HTTPClient:
     async def unpin_message(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
-        message_id: str | int,
+        channel_id: Snowflake,
+        message_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> None:
@@ -3395,8 +3396,8 @@ class HTTPClient:
     async def group_dm_add_recipient(
         self,
         authentication: BearerAuthentication,
-        channel_id: str | int,
-        user_id: str | int,
+        channel_id: Snowflake,
+        user_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> None:
@@ -3425,8 +3426,8 @@ class HTTPClient:
     async def group_dm_remove_recipient(
         self,
         authentication: BearerAuthentication,
-        channel_id: str | int,
-        user_id: str | int,
+        channel_id: Snowflake,
+        user_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> None:
@@ -3455,8 +3456,8 @@ class HTTPClient:
     async def start_thread_from_message(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
-        message_id: str | int,
+        channel_id: Snowflake,
+        message_id: Snowflake,
         name: str,
         *,
         auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = UNDEFINED,
@@ -3527,7 +3528,7 @@ class HTTPClient:
     async def start_thread_without_message(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         name: str,
         *,
         auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = UNDEFINED,
@@ -3609,7 +3610,7 @@ class HTTPClient:
     # TODO: Add start thread in forum channel here!
 
     async def join_thread(
-        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> None:
         """Joins a thread.
 
@@ -3632,7 +3633,7 @@ class HTTPClient:
         )
 
     async def add_thread_member(
-        self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, user_id: str | int, *, global_priority: int = 0
     ) -> None:
         """Adds a member to a thread
 
@@ -3660,7 +3661,7 @@ class HTTPClient:
         )
 
     async def leave_thread(
-        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> None:
         """Leaves a thread
 
@@ -3686,7 +3687,7 @@ class HTTPClient:
         )
 
     async def remove_thread_member(
-        self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, user_id: str | int, *, global_priority: int = 0
     ) -> None:
         """Removes a member from a thread
 
@@ -3721,7 +3722,7 @@ class HTTPClient:
         )
 
     async def get_thread_member(
-        self, authentication: BotAuthentication, channel_id: str | int, user_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, user_id: str | int, *, global_priority: int = 0
     ) -> ThreadMemberData:
         """Gets a thread member.
 
@@ -3754,7 +3755,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def list_thread_members(
-        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> list[ThreadMemberData]:
         """Gets all thread members
 
@@ -3785,7 +3786,7 @@ class HTTPClient:
     async def list_public_archived_threads(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         *,
         before: str | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
@@ -3834,7 +3835,7 @@ class HTTPClient:
     async def list_private_archived_threads(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         *,
         before: str | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
@@ -3883,7 +3884,7 @@ class HTTPClient:
     async def list_private_joined_archived_threads(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         *,
         before: str | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
@@ -3931,7 +3932,7 @@ class HTTPClient:
 
     # Emoji
     async def list_guild_emojis(
-        self, authentication: BotAuthentication, guild_id: int | str, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
     ) -> list[EmojiData]:
         """List all emojis in a guild.
 
@@ -3959,7 +3960,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_guild_emoji(
-        self, authentication: BotAuthentication, guild_id: int | str, emoji_id: int | str, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, emoji_id: int | str, *, global_priority: int = 0
     ) -> list[EmojiData]:
         """Get emoji info
 
@@ -3993,11 +3994,11 @@ class HTTPClient:
     async def modify_guild_emoji(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
-        emoji_id: int | str,
+        guild_id: Snowflake,
+        emoji_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
-        roles: list[int | str] | UndefinedType = UNDEFINED,
+        roles: list[Snowflake] | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> EmojiData:
@@ -4058,7 +4059,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_guild_emoji(
-        self, authentication: BotAuthentication, guild_id: int | str, emoji_id: int | str, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, emoji_id: int | str, *, global_priority: int = 0
     ) -> list[EmojiData]:
         """Delete a emoji
 
@@ -4113,9 +4114,9 @@ class HTTPClient:
         explicit_content_filter: Literal[0, 1, 2] | UndefinedType = UNDEFINED,
         roles: list[RoleData] | UndefinedType = UNDEFINED,
         channels: list[PartialChannelData] | UndefinedType = UNDEFINED,
-        afk_channel_id: str | int | UndefinedType = UNDEFINED,
+        afk_channel_id: Snowflake | UndefinedType = UNDEFINED,
         afk_timeout: int | UndefinedType = UNDEFINED,
-        system_channel_id: str | int | UndefinedType = UNDEFINED,
+        system_channel_id: Snowflake | UndefinedType = UNDEFINED,
         system_channel_flags: int | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> GuildData:
@@ -4228,7 +4229,7 @@ class HTTPClient:
     async def get_guild(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *,
         with_counts: bool | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -4267,7 +4268,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def guild_guild_preview(
-        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
     ) -> GuildPreviewData:
         """Gets a guild preview by ID
 
@@ -4300,7 +4301,7 @@ class HTTPClient:
     # TODO: Implement modify guild here
 
     async def delete_guild(
-        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
     ) -> None:
         """Deletes a guild
 
@@ -4331,7 +4332,7 @@ class HTTPClient:
         )
 
     async def get_guild_channels(
-        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
     ) -> list[ChannelData]:
         """Gets all channels in a guild
 
@@ -4363,7 +4364,7 @@ class HTTPClient:
     async def modify_guild_channel_positions(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *position_updates: ChannelPositionData,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -4405,7 +4406,7 @@ class HTTPClient:
     async def list_active_guild_threads(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> HasMoreListThreadsData:  # TODO: This is not the correct type
@@ -4435,7 +4436,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_guild_member(
-        self, authentication: BotAuthentication, guild_id: str | int, user_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, user_id: str | int, *, global_priority: int = 0
     ) -> GuildMemberData:
         """Gets a member
 
@@ -4467,7 +4468,7 @@ class HTTPClient:
     async def list_guild_members(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *,
         after: int | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
@@ -4526,7 +4527,7 @@ class HTTPClient:
     async def search_guild_members(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         query: str,
         *,
         limit: int | UndefinedType = UNDEFINED,
@@ -4576,11 +4577,11 @@ class HTTPClient:
         self,
         bot_authentication: BotAuthentication,
         user_authentication: BearerAuthentication,
-        guild_id: str | int,
-        user_id: str | int,
+        guild_id: Snowflake,
+        user_id: Snowflake,
         *,
         nick: str | UndefinedType = UNDEFINED,
-        roles: list[str | int] | UndefinedType = UNDEFINED,
+        roles: list[Snowflake] | UndefinedType = UNDEFINED,
         mute: bool | UndefinedType = UNDEFINED,
         deaf: bool | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -4665,14 +4666,14 @@ class HTTPClient:
     async def modify_guild_member(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        user_id: str | int,
+        guild_id: Snowflake,
+        user_id: Snowflake,
         *,
         nick: str | None | UndefinedType = UNDEFINED,
-        roles: list[str | int] | None | UndefinedType = UNDEFINED,
+        roles: list[Snowflake] | None | UndefinedType = UNDEFINED,
         mute: bool | None | UndefinedType = UNDEFINED,
         deaf: bool | None | UndefinedType = UNDEFINED,
-        channel_id: str | int | None | UndefinedType = UNDEFINED,
+        channel_id: Snowflake | None | UndefinedType = UNDEFINED,
         communication_disabled_until: str | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -4771,8 +4772,8 @@ class HTTPClient:
     async def modify_current_member(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        user_id: str | int,
+        guild_id: Snowflake,
+        user_id: Snowflake,
         *,
         nick: str | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
@@ -4832,9 +4833,9 @@ class HTTPClient:
     async def add_guild_member_role(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        user_id: str | int,
-        role_id: str | int,
+        guild_id: Snowflake,
+        user_id: Snowflake,
+        role_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -4881,9 +4882,9 @@ class HTTPClient:
     async def remove_guild_member_role(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        user_id: str | int,
-        role_id: str | int,
+        guild_id: Snowflake,
+        user_id: Snowflake,
+        role_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -4930,8 +4931,8 @@ class HTTPClient:
     async def remove_guild_member(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        user_id: str | int,
+        guild_id: Snowflake,
+        user_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -4971,7 +4972,7 @@ class HTTPClient:
     async def get_guild_bans(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         *,
         before: int,
         limit: int | UndefinedType,
@@ -4983,7 +4984,7 @@ class HTTPClient:
     async def get_guild_bans(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         *,
         after: int,
         limit: int | UndefinedType,
@@ -4995,7 +4996,7 @@ class HTTPClient:
     async def get_guild_bans(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> list[BanData]:
@@ -5004,7 +5005,7 @@ class HTTPClient:
     async def get_guild_bans(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         *,
         before: int | UndefinedType = UNDEFINED,
         after: int | UndefinedType = UNDEFINED,
@@ -5073,8 +5074,8 @@ class HTTPClient:
     async def get_guild_ban(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
-        user_id: int | str,
+        guild_id: Snowflake,
+        user_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> BanData:
@@ -5112,8 +5113,8 @@ class HTTPClient:
     async def create_guild_ban(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        user_id: str | int,
+        guild_id: Snowflake,
+        user_id: Snowflake,
         *,
         delete_message_days: int | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
@@ -5168,8 +5169,8 @@ class HTTPClient:
     async def remove_guild_ban(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        user_id: str | int,
+        guild_id: Snowflake,
+        user_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -5211,7 +5212,7 @@ class HTTPClient:
         )
 
     async def get_guild_roles(
-        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
     ) -> list[RoleData]:
         """Gets all roles in a guild
 
@@ -5247,7 +5248,7 @@ class HTTPClient:
     async def create_guild_role(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         permissions: str | UndefinedType = UNDEFINED,
@@ -5263,7 +5264,7 @@ class HTTPClient:
     async def create_guild_role(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         permissions: str | UndefinedType = UNDEFINED,
@@ -5280,7 +5281,7 @@ class HTTPClient:
     async def create_guild_role(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         permissions: str | UndefinedType = UNDEFINED,
@@ -5296,7 +5297,7 @@ class HTTPClient:
     async def create_guild_role(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         permissions: str | UndefinedType = UNDEFINED,
@@ -5391,7 +5392,7 @@ class HTTPClient:
     async def modify_guild_role_positions(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *position_updates: RolePositionData,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -5434,8 +5435,8 @@ class HTTPClient:
     async def modify_guild_role(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        role_id: str | int,
+        guild_id: Snowflake,
+        role_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         permissions: str | UndefinedType = UNDEFINED,
@@ -5452,8 +5453,8 @@ class HTTPClient:
     async def modify_guild_role(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        role_id: str | int,
+        guild_id: Snowflake,
+        role_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         permissions: str | UndefinedType = UNDEFINED,
@@ -5469,8 +5470,8 @@ class HTTPClient:
     async def modify_guild_role(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        role_id: str | int,
+        guild_id: Snowflake,
+        role_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         permissions: str | UndefinedType = UNDEFINED,
@@ -5567,8 +5568,8 @@ class HTTPClient:
     async def delete_guild_role(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
-        role_id: int | str,
+        guild_id: Snowflake,
+        role_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -5602,7 +5603,7 @@ class HTTPClient:
     async def get_guild_prune_count(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *,
         days: int | UndefinedType = UNDEFINED,
         include_roles: list[str] | UndefinedType = UNDEFINED,
@@ -5655,7 +5656,7 @@ class HTTPClient:
     async def begin_guild_prune(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *,
         days: int | UndefinedType = UNDEFINED,
         compute_prune_count: bool | UndefinedType = UNDEFINED,
@@ -5720,7 +5721,7 @@ class HTTPClient:
     async def get_guild_voice_regions(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> list[VoiceRegionData]:
@@ -5751,7 +5752,7 @@ class HTTPClient:
     async def get_guild_invites(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> list[InviteMetadata]:
@@ -5785,7 +5786,7 @@ class HTTPClient:
     async def get_guild_integrations(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> list[IntegrationData]:
@@ -5819,8 +5820,8 @@ class HTTPClient:
     async def delete_guild_integration(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        guild_id: int | str,
-        integration_id: int | str,
+        guild_id: Snowflake,
+        integration_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -5867,7 +5868,7 @@ class HTTPClient:
     async def get_guild_widget_settings(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> GuildWidgetSettingsData:
@@ -5901,10 +5902,10 @@ class HTTPClient:
     async def modify_guild_widget_settings(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         *,
         enabled: bool | UndefinedType = UNDEFINED,
-        channel_id: str | int | None | UndefinedType = UNDEFINED,
+        channel_id: Snowflake | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> GuildWidgetSettingsData:
@@ -5955,7 +5956,7 @@ class HTTPClient:
 
     async def get_guild_widget(
         self,
-        guild_id: int | str,
+        guild_id: Snowflake,
     ) -> GuildWidgetData:
         """Gets a widget from a guild id
 
@@ -5978,7 +5979,7 @@ class HTTPClient:
     async def get_guild_vanity_url(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> GuildWidgetSettingsData:
@@ -6014,7 +6015,7 @@ class HTTPClient:
     async def get_guild_welcome_screen(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         *,
         global_priority: int = 0,
     ) -> WelcomeScreenData:
@@ -6048,7 +6049,7 @@ class HTTPClient:
     async def modify_guild_welcome_screen(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         *,
         enabled: bool | None | UndefinedType = UNDEFINED,
         welcome_channels: list[WelcomeChannelData] | None | UndefinedType = UNDEFINED,
@@ -6109,8 +6110,8 @@ class HTTPClient:
     async def modify_current_user_voice_state(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
-        channel_id: str | int,
+        guild_id: Snowflake,
+        channel_id: Snowflake,
         *,
         suppress: bool | UndefinedType = UNDEFINED,
         request_to_speak_timestamp: str | None | UndefinedType = UNDEFINED,
@@ -6165,9 +6166,9 @@ class HTTPClient:
     async def modify_user_voice_state(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
-        channel_id: str | int,
-        user_id: str | int,
+        guild_id: Snowflake,
+        channel_id: Snowflake,
+        user_id: Snowflake,
         *,
         suppress: bool | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -6215,7 +6216,7 @@ class HTTPClient:
     async def list_scheduled_events_for_guild(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         *,
         with_user_count: bool | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -6256,7 +6257,7 @@ class HTTPClient:
     async def create_guild_scheduled_event(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         name: str,
         privacy_level: Literal[2],
         scheduled_start_time: str,
@@ -6275,13 +6276,13 @@ class HTTPClient:
     async def create_guild_scheduled_event(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         name: str,
         privacy_level: Literal[2],
         scheduled_start_time: str,
         entity_type: Literal[1, 2],
         *,
-        channel_id: str | int,
+        channel_id: Snowflake,
         scheduled_end_time: str | UndefinedType = UNDEFINED,
         description: str | UndefinedType = UNDEFINED,
         image: str | UndefinedType = UNDEFINED,
@@ -6293,13 +6294,13 @@ class HTTPClient:
     async def create_guild_scheduled_event(
         self,
         authentication: BotAuthentication,
-        guild_id: int | str,
+        guild_id: Snowflake,
         name: str,
         privacy_level: Literal[2],
         scheduled_start_time: str,
         entity_type: Literal[1, 2, 3],
         *,
-        channel_id: str | int | None | UndefinedType = UNDEFINED,
+        channel_id: Snowflake | None | UndefinedType = UNDEFINED,
         entity_metadata: GuildScheduledEventEntityMetadata | UndefinedType = UNDEFINED,
         scheduled_end_time: str | UndefinedType = UNDEFINED,
         description: str | UndefinedType = UNDEFINED,
@@ -6394,8 +6395,8 @@ class HTTPClient:
     async def get_scheduled_event(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        guild_scheduled_event_id: str | int,
+        guild_id: Snowflake,
+        guild_scheduled_event_id: Snowflake,
         *,
         with_user_count: bool | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -6444,8 +6445,8 @@ class HTTPClient:
     async def delete_guild_scheduled_event(
         self,
         authentication: BotAuthentication | BearerAuthentication,
-        guild_id: int | str,
-        guild_scheduled_event_id: int | str,
+        guild_id: Snowflake,
+        guild_scheduled_event_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -6574,7 +6575,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_guild_templates(
-        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
     ) -> list[GuildTemplateData]:
         """Gets all templates in a guild
 
@@ -6608,7 +6609,7 @@ class HTTPClient:
     async def create_guild_template(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         name: str,
         *,
         description: str | UndefinedType = UNDEFINED,
@@ -6667,7 +6668,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def sync_guild_template(
-        self, authentication: BotAuthentication, guild_id: str | int, template_code: str, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, template_code: str, *, global_priority: int = 0
     ) -> None:
         """Updates a template with the updated-guild.
 
@@ -6704,7 +6705,7 @@ class HTTPClient:
     async def modify_guild_template(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
+        guild_id: Snowflake,
         template_code: str,
         *,
         name: str | UndefinedType = UNDEFINED,
@@ -6763,7 +6764,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_guild_template(
-        self, authentication: BotAuthentication, guild_id: str | int, template_code: str, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, template_code: str, *, global_priority: int = 0
     ) -> GuildTemplateData:
         """Deletes a template
 
@@ -6877,7 +6878,7 @@ class HTTPClient:
     async def create_stage_instance(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         topic: str,
         *,
         privacy_level: Literal[1, 2] | UndefinedType = UNDEFINED,
@@ -6957,7 +6958,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_stage_instance(
-        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> StageInstanceData:
         """Gets a stage instance from a stage channel id
 
@@ -6991,7 +6992,7 @@ class HTTPClient:
     async def modify_stage_instance(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         *,
         topic: str | UndefinedType = UNDEFINED,
         privacy_level: Literal[1, 2] | UndefinedType = UNDEFINED,
@@ -7064,7 +7065,7 @@ class HTTPClient:
     async def delete_stage_instance(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -7108,7 +7109,7 @@ class HTTPClient:
 
     # Sticker
     async def get_sticker(
-        self, authentication: BotAuthentication, sticker_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, sticker_id: Snowflake, *, global_priority: int = 0
     ) -> StickerData:
         """Gets a sticker from a sticker id.
 
@@ -7162,7 +7163,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def list_guild_stickers(
-        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
     ) -> list[StickerData]:
         """Gets all custom stickers added by a guild
 
@@ -7198,7 +7199,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_guild_sticker(
-        self, authentication: BotAuthentication, guild_id: str | int, sticker_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, sticker_id: str | int, *, global_priority: int = 0
     ) -> StickerData:
         """Get a custom sticker
 
@@ -7240,8 +7241,8 @@ class HTTPClient:
     async def modify_guild_sticker(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        sticker_id: str | int,
+        guild_id: Snowflake,
+        sticker_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         description: str | UndefinedType = UNDEFINED,
@@ -7320,8 +7321,8 @@ class HTTPClient:
     async def delete_guild_sticker(
         self,
         authentication: BotAuthentication,
-        guild_id: str | int,
-        sticker_id: str | int,
+        guild_id: Snowflake,
+        sticker_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
@@ -7401,7 +7402,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_user(
-        self, authentication: BotAuthentication | BearerAuthentication, user_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication | BearerAuthentication, user_id: Snowflake, *, global_priority: int = 0
     ) -> UserData:
         """Gets a user by id
 
@@ -7486,8 +7487,8 @@ class HTTPClient:
         self,
         authentication: BotAuthentication | BearerAuthentication,
         *,
-        before: str | int,
-        after: str | int,
+        before: Snowflake,
+        after: Snowflake,
         limit: int,
         global_priority: int = 0,
     ) -> list[GuildData]:  # TODO: Replace with partial guild data
@@ -7552,7 +7553,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_current_user_guild_member(
-        self, authentication: BotAuthentication | BearerAuthentication, guild_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication | BearerAuthentication, guild_id: Snowflake, *, global_priority: int = 0
     ) -> GuildMemberData:
         """Gets the current users member in a guild
 
@@ -7588,7 +7589,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def leave_guild(
-        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
     ) -> None:
         """Leave a guild
 
@@ -7618,7 +7619,7 @@ class HTTPClient:
         )
 
     async def create_dm(
-        self, authentication: BotAuthentication, recipient_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, recipient_id: Snowflake, *, global_priority: int = 0
     ) -> DMChannelData:
         """Creates a DM channel
 
@@ -7728,7 +7729,7 @@ class HTTPClient:
     async def create_webhook(
         self,
         authentication: BotAuthentication,
-        channel_id: str | int,
+        channel_id: Snowflake,
         name: str,
         *,
         avatar: str | None | UndefinedType = UNDEFINED,
@@ -7795,7 +7796,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_channel_webhooks(
-        self, authentication: BotAuthentication, channel_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> list[WebhookData]:
         """Gets all webhooks in a channel
 
@@ -7831,7 +7832,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_guild_webhooks(
-        self, authentication: BotAuthentication, guild_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
     ) -> list[WebhookData]:
         """Gets all webhooks in a guild
 
@@ -7867,7 +7868,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_webhook(
-        self, authentication: BotAuthentication, webhook_id: str | int, *, global_priority: int = 0
+        self, authentication: BotAuthentication, webhook_id: Snowflake, *, global_priority: int = 0
     ) -> WebhookData:
         """Gets a webhook by webhook id
 
@@ -7900,7 +7901,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_webhook_with_token(
-        self, webhook_id: str | int, webhook_token: str, *, global_priority: int = 0
+        self, webhook_id: Snowflake, webhook_token: str, *, global_priority: int = 0
     ) -> WebhookData:
         """Gets a webhook by webhook id and token
 
@@ -7938,11 +7939,11 @@ class HTTPClient:
     async def modify_webhook(
         self,
         authentication: BotAuthentication,
-        webhook_id: str | int,
+        webhook_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
         avatar: str | None | UndefinedType = UNDEFINED,
-        channel_id: str | int | UndefinedType = UNDEFINED,
+        channel_id: Snowflake | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> WebhookData:
@@ -8003,12 +8004,12 @@ class HTTPClient:
 
     async def modify_webhook_with_token(
         self,
-        webhook_id: str | int,
+        webhook_id: Snowflake,
         webhook_token: str,
         *,
         name: str | UndefinedType = UNDEFINED,
         avatar: str | None | UndefinedType = UNDEFINED,
-        channel_id: str | int | UndefinedType = UNDEFINED,
+        channel_id: Snowflake | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
         global_priority: int = 0,
     ) -> WebhookData:
@@ -8070,7 +8071,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_webhook(
-        self, authentication: BotAuthentication, webhook_id: str | int, *, reason: str, global_priority: int = 0
+        self, authentication: BotAuthentication, webhook_id: Snowflake, *, reason: str, global_priority: int = 0
     ) -> None:
         """Deletes a webhook
 
@@ -8110,7 +8111,7 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_webhook_with_token(
-        self, webhook_id: str | int, webhook_token: str, *, reason: str, global_priority: int = 0
+        self, webhook_id: Snowflake, webhook_token: str, *, reason: str, global_priority: int = 0
     ) -> None:
         """Deletes a webhook
 
@@ -8155,11 +8156,11 @@ class HTTPClient:
 
     async def get_webhook_message(
         self,
-        webhook_id: str | int,
+        webhook_id: Snowflake,
         webhook_token: str,
-        message_id: str | int,
+        message_id: Snowflake,
         *,
-        thread_id: str | int,
+        thread_id: Snowflake,
         global_priority: int = 0,
     ) -> MessageData:
         """Gets a message sent by the webhook
@@ -8213,11 +8214,11 @@ class HTTPClient:
 
     async def delete_webhook_message(
         self,
-        webhook_id: str | int,
+        webhook_id: Snowflake,
         webhook_token: str,
-        message_id: str | int,
+        message_id: Snowflake,
         *,
-        thread_id: str | int,
+        thread_id: Snowflake,
         global_priority: int = 0,
     ) -> None:
         """Deletes a message sent by the webhook
