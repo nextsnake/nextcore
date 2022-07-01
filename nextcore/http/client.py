@@ -25,7 +25,6 @@ from logging import getLogger
 from time import time
 from typing import TYPE_CHECKING, overload
 from urllib.parse import quote
-from warnings import warn
 
 from aiohttp import ClientSession, FormData
 
@@ -4121,7 +4120,6 @@ class HTTPClient:
         authentication: BotAuthentication,
         name: str,
         *,
-        region: str | None | UndefinedType = UNDEFINED,
         icon: str | UndefinedType = UNDEFINED,
         verification_level: Literal[0, 1, 2, 3, 4] | UndefinedType = UNDEFINED,
         default_message_notifications: Literal[0, 1] | UndefinedType = UNDEFINED,
@@ -4150,11 +4148,6 @@ class HTTPClient:
             The auth info
         name:
             The guild name
-        region:
-            The region of voice channels
-
-            .. warning::
-                This is deprecated by discord and may be removed in a future version of the Discord API.
         icon:
             A base64 encoded 128x128px icon of the guild.
         verification_level:
@@ -4206,9 +4199,6 @@ class HTTPClient:
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        if region is not UNDEFINED:
-            warn(FutureWarning("Guild wide voice regions and may be removed in a future Discord API version."))
-            payload["region"] = region
         if icon is not UNDEFINED:
             payload["icon"] = icon
         if verification_level is not UNDEFINED:
