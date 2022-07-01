@@ -26,6 +26,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import ClassVar, Final, Literal
 
+    from discord_typings.shared import Snowflake
+
 __all__: Final[tuple[str, ...]] = ("Route",)
 
 
@@ -90,11 +92,10 @@ class Route:
         path: str,
         *,
         ignore_global: bool = False,
-        guild_id: str | int | None = None,
-        channel_id: str | int | None = None,
-        webhook_id: str | int | None = None,
-
-        **parameters: str | int,
+        guild_id: Snowflake | None = None,
+        channel_id: Snowflake | None = None,
+        webhook_id: Snowflake | None = None,
+        **parameters: Snowflake,
     ) -> None:
         self.method: str = method
         self.route: str = path
