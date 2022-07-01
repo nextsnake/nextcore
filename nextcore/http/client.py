@@ -2307,7 +2307,7 @@ class HTTPClient:
 
         # We use payload_json here as the format is more strictly defined than form data.
         # This means we don't have to manually format the data.
-        payload: dict[str, Any] = {}  
+        payload: dict[str, Any] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
@@ -4863,7 +4863,7 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> None:
         """Add a role to a member
-        
+
         Read the `documentation <https://discord.dev/resources/guild#add-guild-member-role>`__
 
         .. note::
@@ -6522,7 +6522,7 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> None:
         """Deletes scheduled event.
-        
+
         Read the `documentation <https://discord.dev/resources/guild-scheduled-event#delete-guild-scheduled-event>`__
 
         .. note::
@@ -8141,7 +8141,12 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_webhook(
-        self, authentication: BotAuthentication, webhook_id: Snowflake, *, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        webhook_id: Snowflake,
+        *,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
     ) -> None:
         """Deletes a webhook
 
@@ -8181,7 +8186,12 @@ class HTTPClient:
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_webhook_with_token(
-        self, webhook_id: Snowflake, webhook_token: str, *, reason: str | UndefinedType = UNDEFINED, global_priority: int = 0
+        self,
+        webhook_id: Snowflake,
+        webhook_token: str,
+        *,
+        reason: str | UndefinedType = UNDEFINED,
+        global_priority: int = 0,
     ) -> None:
         """Deletes a webhook
 
