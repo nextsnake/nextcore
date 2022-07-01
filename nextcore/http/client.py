@@ -3075,8 +3075,8 @@ class HTTPClient:
         target_type:
             The type of the target.
 
-            0: Role
-            1: User
+            - ``0``: Role
+            - ``1``: User
         target_id:
             The id of the target to edit permissions for.
         allow:
@@ -3254,8 +3254,8 @@ class HTTPClient:
         target_type:
             The type of the target.
 
-            0: A user's stream
-            1: ``EMBEDDED`` Activity
+            - ``0``: A user's stream
+            - ``1``: ``EMBEDDED`` Activity
         target_user_id:
             The id of the user streaming to invite to.
 
