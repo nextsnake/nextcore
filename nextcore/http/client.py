@@ -259,7 +259,7 @@ class HTTPClient:
         ------
         :exc:`CloudflareBanError`
             You have been temporarily banned from the Discord API for 1 hour due to too many requests.
-            See the `documentation <https://discord.dev/opics/rate-limits#invalid-request-limit-aka-cloudflare-bans>`__ for more information.
+            Read the `documentation <https://discord.dev/opics/rate-limits#invalid-request-limit-aka-cloudflare-bans>`__ for more information.
         :exc:`BadRequestError`
             The request data was invalid.
         :exc:`UnauthorizedError`
@@ -489,7 +489,7 @@ class HTTPClient:
     ) -> list[ApplicationCommandData]:  # TODO: Narrow typing to never include guild_id and localization overload
         """Gets all global commands
 
-        See the `documentation <https://discord.dev/interactions/application-commands#get-global-application-commands>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#get-global-application-commands>`__
 
         Parameters
         ----------
@@ -545,7 +545,7 @@ class HTTPClient:
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Creates or updates a global application command
 
-        See the `documentation <https://discord.dev/interactions/application-commands#create-global-application-command>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#create-global-application-command>`__
 
         Parameters
         ----------
@@ -655,7 +655,7 @@ class HTTPClient:
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Gets a global command
 
-        See the `documentation <https://discord.dev/interactions/application-commands#get-global-application-command>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#get-global-application-command>`__
 
         Parameters
         ----------
@@ -711,7 +711,7 @@ class HTTPClient:
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Updates a global application command
 
-        See the `documentation <https://discord.dev/interactions/application-commands#edit-global-application-command>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#edit-global-application-command>`__
 
         Parameters
         ----------
@@ -830,7 +830,7 @@ class HTTPClient:
     ) -> None:
         """Deletes a global command
 
-        See the `documentation <https://discord.dev/interactions/application-commands#delete-global-application-command>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#delete-global-application-command>`__
 
         Parameters
         ----------
@@ -872,7 +872,7 @@ class HTTPClient:
     ) -> list[ApplicationCommandData]:  # TODO: Narrow typing to never include guild_id
         """Creates or updates a global application command
 
-        See the `documentation <https://discord.dev/interactions/application-commands#bulk-overwrite-global-application-commands>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#bulk-overwrite-global-application-commands>`__
 
         .. warning::
             This will replace all your global commands. Include the old commands to keep them
@@ -922,7 +922,7 @@ class HTTPClient:
     ]:  # TODO: Narrow typing to always include guild_id and localization overload and never dm_permission
         """Gets all commands in a guild
 
-        See the `documentation <https://discord.dev/interactions/application-commands#get-guild-application-commands>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#get-guild-application-commands>`__
 
         Parameters
         ----------
@@ -985,7 +985,7 @@ class HTTPClient:
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Creates or updates a guild command
 
-        See the `documentation <https://discord.dev/interactions/application-commands#create-guild-application-command>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#create-guild-application-command>`__
 
         Parameters
         ----------
@@ -1096,7 +1096,7 @@ class HTTPClient:
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Gets a guild command
 
-        See the `documentation <https://discord.dev/interactions/application-commands#get-guild-application-command>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#get-guild-application-command>`__
 
         Parameters
         ----------
@@ -1155,7 +1155,7 @@ class HTTPClient:
     ) -> ApplicationCommandData:  # TODO: Narrow typing
         """Updates a guild application command
 
-        See the `documentation <https://discord.dev/interactions/application-commands#edit-guild-application-command>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#edit-guild-application-command>`__
 
         Parameters
         ----------
@@ -1271,7 +1271,7 @@ class HTTPClient:
     ) -> None:
         """Deletes a guild command
 
-        See the `documentation <https://discord.dev/interactions/application-commands#delete-guild-application-command>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#delete-guild-application-command>`__
 
         Parameters
         ----------
@@ -1319,7 +1319,7 @@ class HTTPClient:
     ) -> list[ApplicationCommandData]:  # TODO: Narrow typing to always include guild_id
         """Bulk overwrite guild commands
 
-        See the `documentation <https://discord.dev/interactions/application-commands#bulk-overwrite-global-application-commands>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#bulk-overwrite-guild-application-commands>`__
 
         .. warning::
             This will replace all your global commands. Include the old commands to keep them
@@ -1373,7 +1373,7 @@ class HTTPClient:
     ) -> list[GuildApplicationCommandPermissionData]:
         """Gets all application command permissions in a guild
 
-        See the `documentation <https://discord.dev/interactions/application-commands#get-guild-application-command-permissions>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#get-guild-application-command-permissions>`__
 
         Parameters
         ----------
@@ -1424,7 +1424,7 @@ class HTTPClient:
     ) -> GuildApplicationCommandPermissionData:
         """Gets permissions for a command in a guild
 
-        See the `documentation <https://discord.dev/interactions/application-commands#get-guild-application-command-permissions>`__
+        Read the `documentation <https://discord.dev/interactions/application-commands#get-application-command-permissions>`__
 
         Parameters
         ----------
@@ -1478,7 +1478,7 @@ class HTTPClient:
     ) -> MessageData:
         """Gets the first response sent to a interaction
 
-        See the `documentation <https://discord.dev/interactions/receiving-and-responding#get-original-interaction-response>`__
+        Read the `documentation <https://discord.dev/interactions/receiving-and-responding#get-original-interaction-response>`__
 
         Parameters
         ----------
@@ -1524,7 +1524,7 @@ class HTTPClient:
     ) -> None:
         """Deletes the first response sent to a interaction
 
-        See the `documentation <https://discord.dev/interactions/receiving-and-responding#delete-original-interaction-response>`__
+        Read the `documentation <https://discord.dev/interactions/receiving-and-responding#delete-original-interaction-response>`__
 
         Parameters
         ----------
@@ -1563,7 +1563,7 @@ class HTTPClient:
     ) -> MessageData:
         """Gets a response sent to a interaction by message id
 
-        See the `documentation <https://discord.dev/interactions/receiving-and-responding#get-followup-message>`__
+        Read the `documentation <https://discord.dev/interactions/receiving-and-responding#get-followup-message>`__
 
         Parameters
         ----------
@@ -1612,7 +1612,7 @@ class HTTPClient:
     ) -> MessageData:
         """Deletes a response sent to a interaction by message id
 
-        See the `documentation <https://discord.dev/interactions/receiving-and-responding#delete-followup-message>`__
+        Read the `documentation <https://discord.dev/interactions/receiving-and-responding#delete-followup-message>`__
 
         Parameters
         ----------
@@ -1659,7 +1659,7 @@ class HTTPClient:
     ) -> AuditLogData:
         """Gets the guild audit log.
 
-        See the `documentation <https://discord.dev/resources/audit-log#get-guild-audit-log>`__
+        Read the `documentation <https://discord.dev/resources/audit-log#get-guild-audit-log>`__
 
         .. note::
             This requires the ``VIEW_AUDIT_LOG`` permission.
@@ -1731,7 +1731,7 @@ class HTTPClient:
     ) -> ChannelData:
         """Gets a channel by ID.
 
-        See the `documentation <https://discord.dev/resources/channels#get-channel>`__
+        Read the `documentation <https://discord.dev/resources/channels#get-channel>`__
 
         Parameters
         ----------
@@ -1774,7 +1774,7 @@ class HTTPClient:
     ) -> ChannelData:
         """Modifies the group dm.
 
-        See the `docoumentation <https://discord.dev/resources/channel#modify-channel>`__
+        Read the `docoumentation <https://discord.dev/resources/channel#modify-group-dm>`__
 
         .. warning::
             This shares ratelimits with :attr:`HTTPClient.modify_guild_channel` and :attr:`HTTPClient.modify_thread`.
@@ -1850,7 +1850,7 @@ class HTTPClient:
     ) -> ChannelData:
         """Modifies a guild channel.
 
-        See the `docoumentation <https://discord.dev/resources/channel#modify-channel>`__
+        Read the `docoumentation <https://discord.dev/resources/channel#modify-channel>`__
 
 
         .. warning::
@@ -1998,7 +1998,7 @@ class HTTPClient:
     ) -> ThreadChannelData:
         """Modifies a thread.
 
-        See the `docoumentation <https://discord.dev/resources/channel#modify-channel>`__
+        Read the `docoumentation <https://discord.dev/resources/channel#modify-channel>`__
 
         .. warning::
             This shares ratelimits with :attr:`HTTPClient.modify_group_dm` and :attr:`HTTPClient.modify_guild_channel`.
@@ -2075,6 +2075,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> None:
         """Deletes a channel.
+
+        Read the `documentation <https://discord.dev/resources/channel#deleteclose-channel>`__
 
         Parameters
         ----------
@@ -2155,7 +2157,7 @@ class HTTPClient:
     ) -> list[MessageData]:
         """Gets messages from a channel.
 
-        See the `documentation <https://discord.dev/resources/channel#get-channel-messages>`__
+        Read the `documentation <https://discord.dev/resources/channel#get-channel-messages>`__
 
         .. note::
             This requires the ``view_channel`` permission..
@@ -2241,7 +2243,7 @@ class HTTPClient:
     ) -> MessageData:
         """Creates a message in a channel.
 
-        See the `documentation <https://discord.dev/resources/channel#create-message>`__
+        Read the `documentation <https://discord.dev/resources/channel#create-message>`__
 
         .. note::
             This requires the ``view_channel`` and ``send_messages`` permission.
@@ -2268,7 +2270,7 @@ class HTTPClient:
             .. note::
                 There is a maximum 6,000 character limit across all embeds.
 
-                See the `embed limits documentation <https://discord.dev/resources/channel#embed-object-embed-limits>`__ for more info.
+                Read the `embed limits documentation <https://discord.dev/resources/channel#embed-object-embed-limits>`__ for more info.
         allowed_mentions:
             The allowed mentions for the message.
         message_reference:
@@ -2359,7 +2361,7 @@ class HTTPClient:
     ) -> MessageData:
         """Crossposts a message from another channel.
 
-        See the `documentation <https://discord.dev/resources/channel#crosspost-message>`__
+        Read the `documentation <https://discord.dev/resources/channel#crosspost-message>`__
 
         .. note::
             This requires the ``send_messages`` permission when trying to crosspost a message sent by the current user.
@@ -2408,7 +2410,7 @@ class HTTPClient:
     ) -> None:
         """Creates a reaction to a message.
 
-        See the `documentation <https://discord.dev/resources/channel#create-reaction>`__
+        Read the `documentation <https://discord.dev/resources/channel#create-reaction>`__
 
         .. note::
             This requires the ``read_message_history`` permission.
@@ -2454,7 +2456,7 @@ class HTTPClient:
     ) -> None:
         """Deletes a reaction from a message.
 
-        See the `documentation <https://discord.dev/resources/channel#delete-own-reaction>`__
+        Read the `documentation <https://discord.dev/resources/channel#delete-own-reaction>`__
 
         Parameters
         ----------
@@ -2496,7 +2498,7 @@ class HTTPClient:
     ) -> None:
         """Deletes a reaction from a message from another user.
 
-        See the `documentation <https://discord.dev/resources/channel#delete-user-reaction>`__
+        Read the `documentation <https://discord.dev/resources/channel#delete-user-reaction>`__
 
         .. note::
             This requires the ``manage_messages`` permission.
@@ -2548,7 +2550,7 @@ class HTTPClient:
     ) -> list[UserData]:
         """Gets the reactions to a message.
 
-        See the `documentation <https://discord.dev/resources/channel#get-reactions>`__
+        Read the `documentation <https://discord.dev/resources/channel#get-reactions>`__
 
         .. note::
             This requires the ``read_message_history`` permission.
@@ -2608,7 +2610,7 @@ class HTTPClient:
     ) -> None:
         """Deletes all reactions from a message.
 
-        See the `documentation <https://discord.dev/resources/channel#delete-all-reactions>`__
+        Read the `documentation <https://discord.dev/resources/channel#delete-all-reactions>`__
 
         .. note::
             This requires the ``manage_messages`` permission.
@@ -2650,7 +2652,7 @@ class HTTPClient:
     ) -> None:
         """Deletes all reactions from a message with a specific emoji.
 
-        See the `documentation <https://discord.dev/resources/channel#delete-all-reactions-for-emoji>`__
+        Read the `documentation <https://discord.dev/resources/channel#delete-all-reactions-for-emoji>`__
 
         .. note::
             This requires the ``manage_messages`` permission.
@@ -2703,7 +2705,7 @@ class HTTPClient:
     ) -> MessageData:
         """Edits a message.
 
-        See the `documentation <https://discord.dev/resources/channel#edit-message>`__
+        Read the `documentation <https://discord.dev/resources/channel#edit-message>`__
 
         .. note::
             This requires the ``manage_messages`` permission.
@@ -2809,7 +2811,7 @@ class HTTPClient:
     ) -> None:
         """Deletes a message.
 
-        See the `documentation <https://discord.dev/resources/channel#delete-message>`__
+        Read the `documentation <https://discord.dev/resources/channel#delete-message>`__
 
         .. note::
             This requires the ``manage_messages`` permission.
@@ -2858,7 +2860,7 @@ class HTTPClient:
     ) -> None:
         """Deletes multiple messages.
 
-        See the `documentation <https://discord.dev/resources/channel#delete-message>`__
+        Read the `documentation <https://discord.dev/resources/channel#bulk-delete-messages>`__
 
         .. note::
             This requires the ``manage_messages`` permission.
@@ -2922,7 +2924,7 @@ class HTTPClient:
     ) -> None:
         """Edits the permissions of a channel.
 
-        See the `documentation <https://discord.dev/resources/channel#edit-channel-permissions>`__
+        Read the `documentation <https://discord.dev/resources/channel#edit-channel-permissions>`__
 
         .. note::
             This requires the ``manage_roles`` permission.
@@ -2995,7 +2997,7 @@ class HTTPClient:
     ) -> list[InviteMetadata]:
         """Gets the invites for a channel.
 
-        See the `documentation <https://discord.dev/resources/channel#get-channel-invites>`__
+        Read the `documentation <https://discord.dev/resources/channel#get-channel-invites>`__
 
         .. note::
             This requires the ``manage_channels`` permission.
@@ -3633,6 +3635,8 @@ class HTTPClient:
     ) -> None:
         """Adds a member to a thread
 
+        Read the `documentation <https://discord.dev/resources/channel#add-thread-member>`__
+
         .. note::
             This will dispatch a ``THREAD_MEMBERS_UPDATE`` event.
 
@@ -3661,6 +3665,8 @@ class HTTPClient:
     ) -> None:
         """Leaves a thread
 
+        Read the `documentation <https://discord.dev/resources/channel#leave-thread>`__
+
         .. note::
             This will dispatch a ``THREAD_MEMBERS_UPDATE`` event.
 
@@ -3686,6 +3692,8 @@ class HTTPClient:
         self, authentication: BotAuthentication, channel_id: Snowflake, user_id: str | int, *, global_priority: int = 0
     ) -> None:
         """Removes a member from a thread
+
+        Read the `documentation <https://discord.dev/resources/channel#remove-thread-member>`__
 
         .. note::
             This will dispatch a ``THREAD_MEMBERS_UPDATE`` event.
@@ -3722,6 +3730,8 @@ class HTTPClient:
     ) -> ThreadMemberData:
         """Gets a thread member.
 
+        Read the `documentation <https://discord.dev/resources/channel#get-thread-member>`__
+
         Parameters
         ----------
         authentication:
@@ -3754,6 +3764,8 @@ class HTTPClient:
         self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> list[ThreadMemberData]:
         """Gets all thread members
+
+        Read the `documentation <https://discord.dev/resources/channel#list-thread-members>`__
 
         .. warning::
             You need the ``GUILD_MEMBERS`` privileged intent!
@@ -3877,7 +3889,7 @@ class HTTPClient:
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
-    async def list_private_joined_archived_threads(
+    async def list_joined_private_archived_threads(
         self,
         authentication: BotAuthentication,
         channel_id: Snowflake,
@@ -4124,7 +4136,7 @@ class HTTPClient:
     ) -> GuildData:
         """Create a guild
 
-        See the `documentation <https://discord.dev/resources/guild#create-guild>`__.
+        Read the `documentation <https://discord.dev/resources/guild#create-guild>`__.
 
         .. note::
             This can only be used by bots in less than 10 guilds.
@@ -4270,7 +4282,7 @@ class HTTPClient:
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
-    async def guild_guild_preview(
+    async def get_guild_preview(
         self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
     ) -> GuildPreviewData:
         """Gets a guild preview by ID
@@ -4686,6 +4698,8 @@ class HTTPClient:
     ) -> GuildMemberData:
         """Modifies a member
 
+        Read the `documentation <https://discord.dev/resources/guild#modify-guild-member>`__
+
         Parameters
         ----------
         authentication:
@@ -4787,6 +4801,8 @@ class HTTPClient:
     ) -> GuildMemberData:
         """Modifies a member
 
+        Read the `documentation <https://discord.dev/resources/guild#modify-current-member>`__
+
         Parameters
         ----------
         authentication:
@@ -4847,6 +4863,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> None:
         """Add a role to a member
+        
+        Read the `documentation <https://discord.dev/resources/guild#add-guild-member-role>`__
 
         .. note::
             This requires the ``MANAGE_ROLES`` permission
@@ -4897,6 +4915,8 @@ class HTTPClient:
     ) -> None:
         """Removes a role from a member
 
+        Read the `documentation <https://discord.dev/resources/guild#remove-guild-member-role>`__
+
         .. note::
             This requires the ``MANAGE_ROLES`` permission
 
@@ -4944,6 +4964,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> None:
         """Removes a member from a guild
+
+        Read the `documentation <https://discord.dev/resources/guild#remove-guild-member>`__
 
         .. note::
             This requires the ``KICK_MEMBERS`` permission and that the bot is higher in the role hierarchy than the member you are trying to kick
@@ -5020,7 +5042,7 @@ class HTTPClient:
     ) -> list[BanData]:
         """Gets a list of bans in a guild.
 
-        See the `documentation <https://discord.dev/resources/guild#get-guild-bans>`__
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-bans>`__
 
         .. note::
             This requires the ``BAN_MEMBERS`` permission..
@@ -5087,7 +5109,7 @@ class HTTPClient:
     ) -> BanData:
         """Gets a ban
 
-        See the `documentation <https://discord.dev/resources/guild#get-guild-ban>`__
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-ban>`__
 
         .. note::
             This requires the ``BAN_MEMBERS`` permission..
@@ -5317,6 +5339,8 @@ class HTTPClient:
     ) -> RoleData:
         """Creates a role
 
+        Read the `documentation <https://discord.dev/resources/guild#create-guild-role>`__
+
         .. note::
             This requires the ``MANAGE_ROLES`` permission
 
@@ -5405,6 +5429,8 @@ class HTTPClient:
     ) -> list[RoleData]:
         """Modifies role positions
 
+        Read the `documentation <https://discord.dev/resources/guild#modify-guild-role-positions>`__
+
         .. note::
             This requires the ``MANAGE_ROLES`` permission
 
@@ -5490,6 +5516,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> RoleData:
         """Modifies a role
+
+        Read the `documentation <https://discord.dev/resources/guild#modify-guild-role>`__
 
         .. note::
             This requires the ``MANAGE_ROLES`` permission
@@ -5582,6 +5610,8 @@ class HTTPClient:
     ) -> None:
         """Deletes a channel.
 
+        Read the `documentation <https://discord.dev/resources/guild#delete-guild-role>`__
+
         Parameters
         ----------
         authentication:
@@ -5616,6 +5646,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> dict[str, Any]:  # TODO: Replace return type
         """Gets the amount of members that would be pruned
+
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-prune-count>`
 
         .. note::
             This requires the ``KICK_MEMBERS`` permission
@@ -5671,6 +5703,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> dict[str, Any]:  # TODO: Replace return type
         """Gets the amount of members that would be pruned
+
+        Read the `documentation <https://discord.dev/resources/guild#begin-guild-prune>`__
 
         .. note::
             This requires the ``KICK_MEMBERS`` permission
@@ -5733,6 +5767,8 @@ class HTTPClient:
     ) -> list[VoiceRegionData]:
         """Gets voice regions for a guild.
 
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-voice-regions>`__
+
         Parameters
         ----------
         authentication:
@@ -5763,6 +5799,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> list[InviteMetadata]:
         """Gets all guild invites
+
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-invites>`__
 
         .. note::
             This requires the ``MANAGE_GUILD`` permission
@@ -5797,6 +5835,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> list[IntegrationData]:
         """Gets guild integrations
+
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-integrations>`__
 
         .. note::
             This requires the ``MANAGE_GUILD`` permission
@@ -5833,6 +5873,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> None:
         """Deletes a integration
+
+        Read the `documentation <https://discord.dev/resources/guild#delete-guild-integration>`__
 
         .. note::
             This will delete any associated webhooks and kick any associated bots.
@@ -5880,6 +5922,8 @@ class HTTPClient:
     ) -> GuildWidgetSettingsData:
         """Gets widget settings for a guild
 
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-widget-settings>`__
+
         .. note::
             This requires the ``MANAGE_GUILD`` permission
 
@@ -5905,7 +5949,7 @@ class HTTPClient:
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-    async def modify_guild_widget_settings(
+    async def modify_guild_widget(
         self,
         authentication: BotAuthentication,
         guild_id: Snowflake,
@@ -5916,6 +5960,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> GuildWidgetSettingsData:
         """Modifies a guilds widget settings
+
+        Read the `documentation <https://discord.dev/resources/guild#modify-guild-widget>`__
 
         .. note::
             This requires the ``MANAGE_GUILD`` permission
@@ -5966,6 +6012,8 @@ class HTTPClient:
     ) -> GuildWidgetData:
         """Gets a widget from a guild id
 
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-widget>`__
+
         Parameters
         ----------
         guild_id:
@@ -5990,6 +6038,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> GuildWidgetSettingsData:
         """Gets the vanity invite from a guild
+
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-vanity-url>`__
 
         .. note::
             This requires the ``MANAGE_GUILD`` permission
@@ -6026,6 +6076,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> WelcomeScreenData:
         """Gets the welcome screen for a guild
+
+        Read the `documentation <https://discord.dev/resources/guild#get-guild-welcome-screen>`__
 
         .. note::
             This requires the ``MANAGE_GUILD`` permission
@@ -6064,6 +6116,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> WelcomeScreenData:
         """Modifies a guilds welcome screen
+
+        Read the `documentation <https://discord.dev/resources/guild#modify-guild-welcome-screen>`__
 
         .. note::
             This requires the ``MANAGE_GUILD`` permission
@@ -6125,6 +6179,8 @@ class HTTPClient:
     ) -> None:
         """Modifies the voice state of the bot
 
+        Read the `documentation <https://discord.dev/resources/guild#modify-current-user-voice-state>`__
+
         Parameters
         ----------
         authentication:
@@ -6181,6 +6237,8 @@ class HTTPClient:
     ) -> None:
         """Modifies the voice state of the bot
 
+        Read the `documentation <https://discord.dev/resources/guild#modify-user-voice-state>`__
+
         Parameters
         ----------
         authentication:
@@ -6228,6 +6286,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> list[GuildScheduledEventData]:  # TODO: Narrow type more with a overload with_user_count
         """Gets all scheduled events for a guild
+
+        Read the `documentation <https://discord.dev/resources/guild-scheduled-event#list-scheduled-events-for-guild>`__
 
         Parameters
         ----------
@@ -6316,6 +6376,8 @@ class HTTPClient:
     ) -> GuildScheduledEventData:
         """Create a scheduled event
 
+        Read the `documentation <https://discord.dev/resources/guild-scheduled-event#create-guild-scheduled-event>`__
+
         Parameters
         ----------
         authentication:
@@ -6398,7 +6460,7 @@ class HTTPClient:
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-    async def get_scheduled_event(
+    async def get_guild_scheduled_event(
         self,
         authentication: BotAuthentication,
         guild_id: Snowflake,
@@ -6408,6 +6470,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> GuildScheduledEventData:  # TODO: Narrow type more with a overload with_user_count
         """Gets a scheduled event by id
+
+        Read the `documentation <https://discord.dev/resources/guild-scheduled-event#get-guild-scheduled-event>`__
 
         Parameters
         ----------
@@ -6458,6 +6522,8 @@ class HTTPClient:
         global_priority: int = 0,
     ) -> None:
         """Deletes scheduled event.
+        
+        Read the `documentation <https://discord.dev/resources/guild-scheduled-event#delete-guild-scheduled-event>`__
 
         .. note::
             This requires the ``MANAGE_EVENTS`` guild permission.
@@ -6499,7 +6565,7 @@ class HTTPClient:
     ) -> GuildTemplateData:
         """Gets a template by code
 
-        See the `documentation <https://discord.dev/resources/guild-template#get-guild-templates>`__
+        Read the `documentation <https://discord.dev/resources/guild-template#get-guild-templates>`__
 
         Parameters
         ----------
@@ -6537,7 +6603,7 @@ class HTTPClient:
     ) -> GuildData:
         """Creates a guild from a template
 
-        See the `documentation <https://discord.dev/resources/guild-template#create-guild-from-guild-template>`__
+        Read the `documentation <https://discord.dev/resources/guild-template#create-guild-from-guild-template>`__
 
         .. warning::
             This will fail if the bot is in more than 10 guilds.
@@ -6585,7 +6651,7 @@ class HTTPClient:
     ) -> list[GuildTemplateData]:
         """Gets all templates in a guild
 
-        See the `documentation <https://discord.dev/resources/guild-template#get-guild-templates>`__
+        Read the `documentation <https://discord.dev/resources/guild-template#get-guild-templates>`__
 
         Parameters
         ----------
@@ -6623,7 +6689,7 @@ class HTTPClient:
     ) -> GuildTemplateData:  # TODO: Narrow typing to overload description.
         """Creates a template from a guild
 
-        See the `documentation <https://discord.dev/resources/guild-template#create-guild-template>`__
+        Read the `documentation <https://discord.dev/resources/guild-template#create-guild-template>`__
 
         .. note::
             This requires the ``MANAGE_GUILD`` permission
@@ -6678,7 +6744,7 @@ class HTTPClient:
     ) -> None:
         """Updates a template with the updated-guild.
 
-        See the `documentation <https://discord.dev/resources/guild-template#sync-guild-templates>`__
+        Read the `documentation <https://discord.dev/resources/guild-template#sync-guild-templates>`__
 
         .. note::
             This requires the ``MANAGE_GUILD`` permission
@@ -6720,7 +6786,7 @@ class HTTPClient:
     ) -> None:
         """Updates a template.
 
-        See the `documentation <https://discord.dev/resources/guild-template#modify-guild-templates>`__
+        Read the `documentation <https://discord.dev/resources/guild-template#modify-guild-templates>`__
 
         .. note::
             This requires the ``MANAGE_GUILD`` permission
@@ -6774,7 +6840,7 @@ class HTTPClient:
     ) -> GuildTemplateData:
         """Deletes a template
 
-        See the `documentation <https://discord.dev/resources/guild-template#delete-guild-template>`__
+        Read the `documentation <https://discord.dev/resources/guild-template#delete-guild-template>`__
 
         .. note::
             This requires the ``MANAGE_GUILD`` permission
@@ -6815,7 +6881,7 @@ class HTTPClient:
     ) -> InviteData:
         """Gets a invite from a invite code
 
-        See the `documentation <https://discord.dev/resources/invite#get-invite>`__
+        Read the `documentation <https://discord.dev/resources/invite#get-invite>`__
 
         Parameters
         ----------
@@ -6847,7 +6913,7 @@ class HTTPClient:
     ) -> InviteData:
         """Gets a invite from a invite code
 
-        See the `documentation <https://discord.dev/resources/invite#get-invite>`__
+        Read the `documentation <https://discord.dev/resources/invite#delete-invite>`__
 
         .. note::
             This requires the ``MANAGE_CHANNELS`` permission in the channel the invite is from or the ``MANAGE_GUILD`` permission.
@@ -6894,7 +6960,7 @@ class HTTPClient:
     ) -> StageInstanceData:
         """Creates a stage instance
 
-        See the `documentation <https://discord.dev/resources/stage-instance#create-stage-instance>`__
+        Read the `documentation <https://discord.dev/resources/stage-instance#create-stage-instance>`__
 
         .. note::
             This requires the ``MANAGE_CHANNELS``, ``MUTE_MEMBERS`` and ``MOVE_MEMBERS`` permission.
@@ -6968,7 +7034,7 @@ class HTTPClient:
     ) -> StageInstanceData:
         """Gets a stage instance from a stage channel id
 
-        See the `documentation <https://discord.dev/resources/stage-instance#get-stage-instance>`__
+        Read the `documentation <https://discord.dev/resources/stage-instance#get-stage-instance>`__
 
         Parameters
         ----------
@@ -7007,7 +7073,7 @@ class HTTPClient:
     ) -> StageInstanceData:
         """Modifies a stage instance
 
-        See the `documentation <https://discord.dev/resources/stage-instance#modify-stage-instance>`__
+        Read the `documentation <https://discord.dev/resources/stage-instance#modify-stage-instance>`__
 
         .. note::
             This requires the ``MANAGE_CHANNELS``, ``MUTE_MEMBERS`` and ``MOVE_MEMBERS`` permission.
@@ -7078,7 +7144,7 @@ class HTTPClient:
     ) -> None:
         """Modifies a stage instance
 
-        See the `documentation <https://discord.dev/resources/stage-instance#delete-stage-instance>`__
+        Read the `documentation <https://discord.dev/resources/stage-instance#delete-stage-instance>`__
 
         .. note::
             This requires the ``MANAGE_CHANNELS``, ``MUTE_MEMBERS`` and ``MOVE_MEMBERS`` permission.
@@ -7119,7 +7185,7 @@ class HTTPClient:
     ) -> StickerData:
         """Gets a sticker from a sticker id.
 
-        See the `documentation <https://discord.dev/resources/sticker#get-sticker>`__
+        Read the `documentation <https://discord.dev/resources/sticker#get-sticker>`__
 
         Parameters
         ----------
@@ -7146,12 +7212,12 @@ class HTTPClient:
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-    async def get_nitro_sticker_packs(
+    async def list_nitro_sticker_packs(
         self, *, global_priority: int = 0
     ) -> dict[Literal["sticker_packs"], list[StickerPackData]]:
         """Gets all nitro sticker packs
 
-        See the `documentation <https://discord.dev/resources/sticker#list-nitro-sticker-packs>`__
+        Read the `documentation <https://discord.dev/resources/sticker#list-nitro-sticker-packs>`__
 
         Parameters
         ----------
@@ -7173,7 +7239,7 @@ class HTTPClient:
     ) -> list[StickerData]:
         """Gets all custom stickers added by a guild
 
-        See the `documentation <https://discord.dev/resources/sticker#list-guild-stickers>`__
+        Read the `documentation <https://discord.dev/resources/sticker#list-guild-stickers>`__
 
         .. note::
             The ``user`` field will be provided if you have the ``MANAGE_EMOJIS_AND_STICKERS`` permission
@@ -7209,7 +7275,7 @@ class HTTPClient:
     ) -> StickerData:
         """Get a custom sticker
 
-        See the `documentation <https://discord.dev/resources/sticker#get-guild-sticker>`__
+        Read the `documentation <https://discord.dev/resources/sticker#get-guild-sticker>`__
 
         .. note::
             The ``user`` field will be provided if you have the ``MANAGE_EMOJIS_AND_STICKERS`` permission
@@ -7258,7 +7324,7 @@ class HTTPClient:
     ) -> StickerData:  # TODO: Make StickerData always include user
         """Modifies a sticker
 
-        See the `documentation <https://discord.dev/resources/sticker#modify-guild-sticker>`__
+        Read the `documentation <https://discord.dev/resources/sticker#modify-guild-sticker>`__
 
         .. note::
             This requires the ``MANAGE_EMOJIS_AND_STICKERS`` permission.
@@ -7335,7 +7401,7 @@ class HTTPClient:
     ) -> None:
         """Modifies a stage instance
 
-        See the `documentation <https://discord.dev/resources/stage-instance#delete-stage-instance>`__
+        Read the `documentation <https://discord.dev/resources/sticker#delete-guild-sticker>`__
 
         .. note::
             This requires the ``MANAGE_CHANNELS``, ``MUTE_MEMBERS`` and ``MOVE_MEMBERS`` permission.
@@ -7376,7 +7442,7 @@ class HTTPClient:
     ) -> UserData:
         """Gets the current user
 
-        See the `documentation <https://discord.dev/resources/user#get-current-user>`__
+        Read the `documentation <https://discord.dev/resources/user#get-current-user>`__
 
         .. note::
             If you are using :class:`BearerAuthentication` you need the ``IDENTIFY`` scope.
@@ -7412,7 +7478,7 @@ class HTTPClient:
     ) -> UserData:
         """Gets a user by id
 
-        See the `documentation <https://discord.dev/resources/user#get-user>`__
+        Read the `documentation <https://discord.dev/resources/user#get-user>`__
 
         Parameters
         ----------
@@ -7450,7 +7516,7 @@ class HTTPClient:
     ) -> UserData:
         """Modifies the current user
 
-        See the `documentation <https://discord.dev/resources/user#modify-current-user>`__
+        Read the `documentation <https://discord.dev/resources/user#modify-current-user>`__
 
         Parameters
         ----------
@@ -7500,7 +7566,7 @@ class HTTPClient:
     ) -> list[GuildData]:  # TODO: Replace with partial guild data
         """Gets the guilds the current user is in
 
-        See the `documentation <https://discord.dev/resources/user#get-current-user-guilds>`__
+        Read the `documentation <https://discord.dev/resources/user#get-current-user-guilds>`__
 
         .. note::
             If you are using :class:`BearerAuthentication` you need the ``guilds`` scope.
@@ -7563,7 +7629,7 @@ class HTTPClient:
     ) -> GuildMemberData:
         """Gets the current users member in a guild
 
-        See the `documentation <https://discord.dev/resources/user#get-current-user-guild-member>`__
+        Read the `documentation <https://discord.dev/resources/user#get-current-user-guild-member>`__
 
         .. note::
             This requires the ``guilds.members.read`` scope
@@ -7599,7 +7665,7 @@ class HTTPClient:
     ) -> None:
         """Leave a guild
 
-        See the `documentation <https://discord.dev/resources/user#leave-guild>`__
+        Read the `documentation <https://discord.dev/resources/user#leave-guild>`__
 
         Parameters
         ----------
@@ -7629,7 +7695,7 @@ class HTTPClient:
     ) -> DMChannelData:
         """Creates a DM channel
 
-        See the `documentation <https://discord.dev/resources/user#create-dm>`__
+        Read the `documentation <https://discord.dev/resources/user#create-dm>`__
 
         .. warning::
             You should not use this endpoint to DM everyone in a server about something. DMs should generally be initiated by a user action.
@@ -7670,7 +7736,7 @@ class HTTPClient:
     ) -> list[dict[str, Any]]:  # TODO: This should be more strict
         """Gets the users connections
 
-        See the `documentation <https://discord.dev/resources/user#get-user-connections>`__
+        Read the `documentation <https://discord.dev/resources/user#get-user-connections>`__
 
         .. note::
             This requires the ``connections`` scope
@@ -7705,7 +7771,7 @@ class HTTPClient:
     ) -> list[VoiceRegionData]:  # TODO: This should be more strict
         """Gets the users connections
 
-        See the `documentation <https://discord.dev/resources/voice#list-voice-regions>`__
+        Read the `documentation <https://discord.dev/resources/voice#list-voice-regions>`__
 
         Parameters
         ----------
@@ -7744,7 +7810,7 @@ class HTTPClient:
     ) -> WebhookData:
         """Creates a webhook
 
-        See the `documentation <https://discord.dev/resources/webhook#create-webhook>`__
+        Read the `documentation <https://discord.dev/resources/webhook#create-webhook>`__
 
         .. note::
             This requires the ``MANAGE_WEBHOOKS`` permission
@@ -7804,7 +7870,7 @@ class HTTPClient:
     ) -> list[WebhookData]:
         """Gets all webhooks in a channel
 
-        See the `documentation <https://discord.dev/resources/webhook#get-channel-webhooks>`__
+        Read the `documentation <https://discord.dev/resources/webhook#get-channel-webhooks>`__
 
         .. note::
             This requires the ``MANAGE_WEBHOOKS`` permission
@@ -7840,7 +7906,7 @@ class HTTPClient:
     ) -> list[WebhookData]:
         """Gets all webhooks in a guild
 
-        See the `documentation <https://discord.dev/resources/webhook#get-guild-webhooks>`__
+        Read the `documentation <https://discord.dev/resources/webhook#get-guild-webhooks>`__
 
         .. note::
             This requires the ``MANAGE_WEBHOOKS`` permission
@@ -7876,7 +7942,7 @@ class HTTPClient:
     ) -> WebhookData:
         """Gets a webhook by webhook id
 
-        See the `documentation <https://discord.dev/resources/webhook#get-webhook>`__
+        Read the `documentation <https://discord.dev/resources/webhook#get-webhook>`__
 
         Parameters
         ----------
@@ -7909,7 +7975,7 @@ class HTTPClient:
     ) -> WebhookData:
         """Gets a webhook by webhook id and token
 
-        See the `documentation <https://discord.dev/resources/webhook#get-webhook-with-token>`__
+        Read the `documentation <https://discord.dev/resources/webhook#get-webhook-with-token>`__
 
         Parameters
         ----------
@@ -7953,7 +8019,7 @@ class HTTPClient:
     ) -> WebhookData:
         """Modifies a webhook
 
-        See the `documentation <https://discord.dev/resources/webhook#modify-webhook>`__
+        Read the `documentation <https://discord.dev/resources/webhook#modify-webhook>`__
 
         Parameters
         ----------
@@ -8019,7 +8085,7 @@ class HTTPClient:
     ) -> WebhookData:
         """Modifies a webhook
 
-        See the `documentation <https://discord.dev/resources/webhook#modify-webhook-with-token>`__
+        Read the `documentation <https://discord.dev/resources/webhook#modify-webhook-with-token>`__
 
         Parameters
         ----------
@@ -8079,7 +8145,7 @@ class HTTPClient:
     ) -> None:
         """Deletes a webhook
 
-        See the `documentation <https://discord.dev/resources/webhook#delete-webhook>`__
+        Read the `documentation <https://discord.dev/resources/webhook#delete-webhook>`__
 
         Parameters
         ----------
@@ -8119,7 +8185,7 @@ class HTTPClient:
     ) -> None:
         """Deletes a webhook
 
-        See the `documentation <https://discord.dev/resources/webhook#delete-webhook-with-token>`__
+        Read the `documentation <https://discord.dev/resources/webhook#delete-webhook-with-token>`__
 
         Parameters
         ----------
@@ -8169,7 +8235,7 @@ class HTTPClient:
     ) -> MessageData:
         """Gets a message sent by the webhook
 
-        See the `documentation <https://discord.dev/resources/webhook#get-webhook>`__
+        Read the `documentation <https://discord.dev/resources/webhook#get-webhook-message>`__
 
         Parameters
         ----------
@@ -8227,7 +8293,7 @@ class HTTPClient:
     ) -> None:
         """Deletes a message sent by the webhook
 
-        See the `documentation <https://discord.dev/resources/webhook#delete-webhook-message>`__
+        Read the `documentation <https://discord.dev/resources/webhook#delete-webhook-message>`__
 
         Parameters
         ----------
@@ -8271,7 +8337,7 @@ class HTTPClient:
     async def get_gateway(self) -> GetGatewayData:
         """Gets gateway connection info.
 
-        See the `documentation <https://discord.dev/topics/gateway#get-gateway>`__ for more info.
+        Read the `documentation <https://discord.dev/topics/gateway#get-gateway>`__ for more info.
 
         **Example usage:**
 
@@ -8295,7 +8361,7 @@ class HTTPClient:
     ) -> GetGatewayBotData:
         """Gets gateway connection information.
 
-        See the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`__
+        Read the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`__
 
         **Example usage:**
 
@@ -8332,7 +8398,7 @@ class HTTPClient:
     ) -> ApplicationData:
         """Gets the bots application
 
-        See the `documentation <https://discord.dev/topics/oauth2#get-current-bot-application-information>`__
+        Read the `documentation <https://discord.dev/topics/oauth2#get-current-bot-application-information>`__
 
         Parameters
         ----------
@@ -8363,7 +8429,7 @@ class HTTPClient:
     ) -> dict[str, Any]:  # TODO: Narrow typing
         """Gets the bots application
 
-        See the `documentation <https://discord.dev/topics/oauth2#get-current-bot-application-information>`__
+        Read the `documentation <https://discord.dev/topics/oauth2#get-current-authorization-information>`__
 
         Parameters
         ----------
