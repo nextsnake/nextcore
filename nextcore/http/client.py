@@ -1508,6 +1508,15 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
 
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            The guild was not found
+
         Returns
         -------
         list[discord_typings.GuildApplicationCommandPermissionData]
@@ -1558,6 +1567,15 @@ class HTTPClient:
             The guild to get permissions from
         global_priority:
             The priority of the request for the global rate-limiter.
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            The guild or command was not found
 
         Returns
         -------
