@@ -26,6 +26,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import ClassVar, Final, Literal
 
+    from discord_typings.shared import Snowflake
+
 __all__: Final[tuple[str, ...]] = ("Route",)
 
 
@@ -40,11 +42,12 @@ class Route:
         The path of the route. This can include python formatting strings ({var_here}) from kwargs
     ignore_global:
         If this route bypasses the global ratelimit.
+    guild_id:
+    channel_id:
+    webhook_id:
+        Major parameters which will be included in ``parameters`` and count towards the ratelimit.
     parameters:
         The parameters of the route. These will be used to format the path.
-
-        If ``guild_id``, ``channel_id`` or ``webhook_id`` is in the parameters,
-        they will be used to change the major parameters of the route.
 
         This will be included in :attr:`Route.bucket`
 
@@ -89,17 +92,15 @@ class Route:
         path: str,
         *,
         ignore_global: bool = False,
-        **parameters: str | int,
+        guild_id: Snowflake | None = None,
+        channel_id: Snowflake | None = None,
+        webhook_id: Snowflake | None = None,
+        **parameters: Snowflake,
     ) -> None:
         self.method: str = method
         self.route: str = path
-        self.path: str = path.format(**parameters)
+        self.path: str = path.format(guild_id=guild_id, channel_id=channel_id, webhook_id=webhook_id, **parameters)
         self.ignore_global: bool = ignore_global
-
-        # Bucket
-        guild_id: str | int | None = parameters.get("guild_id")
-        channel_id: str | int | None = parameters.get("channel_id")
-        webhook_id: str | int | None = parameters.get("webhook_id")
 
         self.bucket: str | int = f"{guild_id}{channel_id}{webhook_id}{method}{path}"
 
