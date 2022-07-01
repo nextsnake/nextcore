@@ -256,20 +256,20 @@ class HTTPClient:
 
         Raises
         ------
-        :exc:`CloudflareBanError`
+        CloudflareBanError
             You have been temporarily banned from the Discord API for 1 hour due to too many requests.
             Read the `documentation <https://discord.dev/opics/rate-limits#invalid-request-limit-aka-cloudflare-bans>`__ for more information.
-        :exc:`BadRequestError`
+        BadRequestError
             The request data was invalid.
-        :exc:`UnauthorizedError`
+        UnauthorizedError
             No token was provided on a endpoint that requires a token.
-        :exc:`ForbiddenError`
+        ForbiddenError
             The token was valid but you do not have permission to use do this.
-        :exc:`NotFoundError`
+        NotFoundError
             The endpoint you requested was not found or a route parameter was invalid.
-        :exc:`InternalServerError`
+        InternalServerError
             Discord is having issues. Try again later.
-        :exc:`HTTPRequestStatusError`
+        HTTPRequestStatusError
             A non-200 status code was returned.
         """
         # Make a ClientSession if we don't have one
@@ -502,6 +502,13 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
 
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+
         Returns
         -------
         list[discord_typings.ApplicationCommandData]
@@ -609,6 +616,15 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
 
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        BadRequestError
+            You did not follow the requirements for some of the fields.
+
         Returns
         -------
         discord_typings.ApplicationCommandData
@@ -669,6 +685,16 @@ class HTTPClient:
             The id of the command to fetch
         global_priority:
             The priority of the request for the global rate-limiter.
+
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            ``command_id`` was not a id of a valid existing command
 
         Returns
         -------
@@ -775,6 +801,16 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
 
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            ``command_id`` was not a id of a valid exiting command
+
         Returns
         -------
         discord_typings.ApplicationCommandData
@@ -830,6 +866,15 @@ class HTTPClient:
         """Deletes a global command
 
         Read the `documentation <https://discord.dev/interactions/application-commands#delete-global-application-command>`__
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            The ``command_id`` was not a id of a valid existing command
 
         Parameters
         ----------
@@ -887,8 +932,21 @@ class HTTPClient:
                 You can only update commands for your current application
         commands:
             The global commands to overwrite the current global commands with
+
+            .. note::
+                Some fields have additional restrictions. See :meth:`HTTPClient.create_global_application_command`'s arguments for more information.
         global_priority:
             The priority of the request for the global rate-limiter.
+
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        BadRequestError
+            You did not follow the requirements for commands to be valid.
 
         Returns
         -------
@@ -936,6 +994,14 @@ class HTTPClient:
             The guild to get commands from.
         global_priority:
             The priority of the request for the global rate-limiter.
+
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
 
         Returns
         -------
@@ -1046,6 +1112,15 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
 
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            The guild was not found
+
         Returns
         -------
         discord_typings.ApplicationCommandData
@@ -1112,6 +1187,15 @@ class HTTPClient:
             The id of the command to fetch
         global_priority:
             The priority of the request for the global rate-limiter.
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            The guild or the command was not found
 
         Returns
         -------
@@ -1216,6 +1300,17 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
 
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            The guild or the command was not found
+        BadRequestError
+            You did not follow the restrictions for some fields.
+
         Returns
         -------
         discord_typings.ApplicationCommandData
@@ -1289,6 +1384,15 @@ class HTTPClient:
             The command to delete
         global_priority:
             The priority of the request for the global rate-limiter.
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            The command or guild was not found
         """
         route = Route(
             "GET",
@@ -1336,8 +1440,22 @@ class HTTPClient:
             The guild to overwrite commands in
         commands:
             The commands to overwrite the current commands with
+
+            .. note::
+                There is some extra limits. See the params of :meth:`HTTPClient.edit_guild_application_command` for more info.
         global_priority:
             The priority of the request for the global rate-limiter.
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            The guild was not found
+        BadRequestError
+            You did not follow the restrictions
 
         Returns
         -------
