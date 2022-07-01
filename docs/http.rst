@@ -20,11 +20,17 @@ HTTP reference
 .. autoclass:: BucketMetadata
     :members:
 
-.. autoclass:: GlobalLock
-    :members:
-
 .. autoclass:: RequestSession
     :members:
+
+.. autoclass:: BaseGlobalRateLimiter
+   :members:
+
+.. autoclass:: LimitedGlobalRateLimiter
+   :members:
+
+.. autoclass:: UnlimitedGlobalRateLimiter
+   :members:
 
 .. autoclass:: File
     :members:
