@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from typing import ClassVar, Final, Literal
 
     from discord_typings.shared import Snowflake
+    from typing_extensions import LiteralString
 
 __all__: Final[tuple[str, ...]] = ("Route",)
 
@@ -89,7 +90,7 @@ class Route:
             "TRACE",
             "PATCH",
         ],
-        path: str,
+        path: LiteralString,
         *,
         ignore_global: bool = False,
         guild_id: Snowflake | None = None,
