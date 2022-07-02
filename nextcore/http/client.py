@@ -1648,6 +1648,15 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
 
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            You have not responded or the response was ephemeral or a defer that has not been completed yet.
+
         Returns
         -------
         discord_typings.MessageData
@@ -1682,6 +1691,9 @@ class HTTPClient:
 
         Read the `documentation <https://discord.dev/interactions/receiving-and-responding#delete-original-interaction-response>`__
 
+        .. note::
+            You can not delete ephemeral responses
+
         Parameters
         ----------
         application_id:
@@ -1693,6 +1705,15 @@ class HTTPClient:
             The token of the interaction
         global_priority:
             The priority of the request for the global rate-limiter.
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            No response has been sent or a ephemeral response was sent.
         """
         route = Route(
             "DELETE",
@@ -1734,6 +1755,15 @@ class HTTPClient:
             The id of the message to fetch
         global_priority:
             The priority of the request for the global rate-limiter.
+        
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            A invalid ``message_id`` was provided or it was not a follow-up from this interaction.
 
         Returns
         -------
@@ -1783,6 +1813,16 @@ class HTTPClient:
             The id of the message to delete
         global_priority:
             The priority of the request for the global rate-limiter.
+
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            A invalid ``message_id`` was provided or it was not a follow-up from this interaction.
         """
         route = Route(
             "DELETE",
@@ -1848,6 +1888,15 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
 
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        ForbiddenError
+            You do not have the ``VIEW_AUDIT_LOG`` permission
+
         Returns
         -------
         AuditLogData
@@ -1897,6 +1946,16 @@ class HTTPClient:
             The channel ID to get.
         global_priority:
             The priority of the request for the global rate-limiter.
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        NotFound
+            The channel could not be found
+
 
         Returns
         -------
@@ -1955,6 +2014,18 @@ class HTTPClient:
                 This has to be between 1 and 512 characters
         global_priority:
             The priority of the request for the global rate-limiter.
+
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        NotFoundError
+            Could not find the group dm
+        BadRequestError
+            You did not follow the requirements for the parameters
         """
         route = Route("PATCH", "/channels/{channel_id}", channel_id=channel_id)
         payload: dict[str, Any] = {}  # TODO: Use a typehint for payload
@@ -2088,6 +2159,18 @@ class HTTPClient:
             The reason to put in the audit log.
         global_priority:
             The priority of the request for the global rate-limiter.
+
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        NotFoundError
+            The channel was not found
+        BadRequestError
+            You did not follow the requirements for some of the parameters
         """
 
         route = Route("PATCH", "/channels/{channel_id}", channel_id=channel_id)
@@ -2186,6 +2269,17 @@ class HTTPClient:
             The reason to put in the audit log.
         global_priority:
             The priority of the request for the global rate-limiter.
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        NotFoundError
+            The thread wasnt found
+        BadRequestError
+            You did not follow the requirements for some of the parameters
         """
 
         route = Route("PATCH", "/channels/{channel_id}", channel_id=thread_id)
@@ -2234,6 +2328,14 @@ class HTTPClient:
 
         Read the `documentation <https://discord.dev/resources/channel#deleteclose-channel>`__
 
+        .. note::
+            This requires the ``MANAGE_CHANNELS`` for channels and ``MANAGE_THREADS`` for threads
+
+            DMs does not require any permissions to close
+
+        .. warning::
+            Deleting a category will not delete the channels under it.
+
         Parameters
         ----------
         authentication:
@@ -2244,6 +2346,18 @@ class HTTPClient:
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        ForbiddenError
+            You did not have the correct permissions
+        NotFoundError
+            Can't find the channel
         """
 
         route = Route("DELETE", "/channels/{channel_id}", channel_id=channel_id)
@@ -2351,6 +2465,20 @@ class HTTPClient:
                 If this is not provided it will default to ``50``.
         global_priority:
             The priority of the request for the global rate-limiter.
+
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        NotFoundError
+            The channel was not found
+        ForbiddenError
+            You did not have the neccesary permissions
+        BadRequestError
+            You did not give the correct types or did not follow the requirements for some of the parameters
         """
 
         route = Route("GET", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -2453,6 +2581,20 @@ class HTTPClient:
         global_priority:
             The priority of the request for the global rate-limiter.
 
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        NotFoundError
+            The channel was not found
+        ForbiddenError
+            Missing permissions
+        BadRequestError
+            You did not follow the requirements for some parameters
+
         Returns
         -------
         discord_typings.MessageData
@@ -2515,7 +2657,7 @@ class HTTPClient:
         *,
         global_priority: int = 0,
     ) -> MessageData:
-        """Crossposts a message from another channel.
+        """Publishes a message in a news channel
 
         Read the `documentation <https://discord.dev/resources/channel#crosspost-message>`__
 
@@ -2534,6 +2676,17 @@ class HTTPClient:
             The id of the message to crosspost.
         global_priority:
             The priority of the request for the global rate-limiter.
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        ForbiddenError
+            Missing permissions or you tried to publish a message in a non-news channel
+        NotFoundError
+            Could not find the message to publish
 
         Returns
         -------
@@ -2587,6 +2740,22 @@ class HTTPClient:
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
         global_priority:
             The priority of the request for the global rate-limiter.
+
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        NotFoundError
+            Could not find the message
+        BadRequestError
+            Could not find the emoji to react with or you are not in the server that owns that emoji
+        BadRequestError
+            You are not in the server that owns this emoji
+        BadRequestError
+            You did not URL-encode the unicode emoji
         """
         route = Route(
             "PUT",
