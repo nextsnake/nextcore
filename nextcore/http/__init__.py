@@ -35,10 +35,10 @@ from .bucket_metadata import BucketMetadata
 from .client import HTTPClient
 from .errors import *
 from .file import File
+from .global_rate_limiter import *
 from .ratelimit_storage import RatelimitStorage
 from .request_session import RequestSession
 from .route import Route
-from .global_rate_limiter import *
 
 if TYPE_CHECKING:
     from typing import Final

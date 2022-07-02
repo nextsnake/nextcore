@@ -25,9 +25,10 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Literal, Final
+    from typing import Final, Literal
 
 __all__: Final[tuple[str, ...]] = ("UndefinedType", "UNDEFINED")
+
 
 class UndefinedType(Enum):
     """A second :data:`None` for specifying that it should not be provided.
@@ -44,6 +45,8 @@ class UndefinedType(Enum):
         if thing is UNDEFINED:
             print("Thing is undefined!")
     """
+
     UNDEFINED = None
+
 
 UNDEFINED: Literal[UndefinedType.UNDEFINED] = UndefinedType.UNDEFINED

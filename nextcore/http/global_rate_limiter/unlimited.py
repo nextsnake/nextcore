@@ -20,12 +20,14 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
+
+from asyncio import Future, Lock, create_task, sleep
 from collections import deque
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING, AsyncIterator
-from .base import BaseGlobalRateLimiter
-from asyncio import Future, Lock, create_task, sleep
 from logging import getLogger
+from typing import TYPE_CHECKING, AsyncIterator
+
+from .base import BaseGlobalRateLimiter
 
 if TYPE_CHECKING:
     from typing import Final
@@ -33,6 +35,7 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("UnlimitedGlobalRateLimiter",)
 
 logger = getLogger(__name__)
+
 
 class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
     """A global rate-limiting implementation
@@ -48,6 +51,7 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
 
         There is some extra delay due to ping due to this.
     """
+
     def __init__(self) -> None:
         self._pending_requests: deque[Future[None]] = deque()
         self._pending_release: Lock = Lock()
@@ -68,7 +72,7 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
         :class:`typing.AsyncContextManager`
             A context manager that will wait in __aenter__ until a request should be made.
         """
-        del priority # Unused
+        del priority  # Unused
         if self._pending_release.locked():
             # Add to queue
             future: Future[None] = Future()
@@ -101,7 +105,7 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
             logger.debug("Resetting global lock after %ss", retry_after)
             await sleep(retry_after)
             logger.debug("Resetting global lock!")
-        
+
         # Let all requests run again.
         for future in self._pending_requests:
             # Remove it

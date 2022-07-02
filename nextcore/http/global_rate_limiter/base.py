@@ -20,15 +20,17 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Final, TypeVar, AsyncContextManager
+    from typing import AsyncContextManager, Final, TypeVar
 
     ExceptionT = TypeVar("ExceptionT", bound=BaseException)
 
 __all__: Final[tuple[str, ...]] = ("BaseGlobalRateLimiter",)
+
 
 class BaseGlobalRateLimiter(ABC):
     """A base implementation of a rate-limiter for global-scoped rate-limits.
@@ -38,6 +40,7 @@ class BaseGlobalRateLimiter(ABC):
 
         You are probably looking for :class:`LimitedGlobalRateLimiter` or :class:`UnlimitedGlobalRateLimiter`
     """
+
     @abstractmethod
     def acquire(self, *, priority: int = 0) -> AsyncContextManager[None]:
         """Use a spot in the rate-limit.
@@ -56,6 +59,7 @@ class BaseGlobalRateLimiter(ABC):
             A context manager that will wait in __aenter__ until a request should be made.
         """
         ...
+
     @abstractmethod
     def update(self, retry_after: float) -> None:
         """Updates the rate-limiter with info from a global scoped 429.
@@ -69,4 +73,3 @@ class BaseGlobalRateLimiter(ABC):
                 The JSON field has more precision than the header.
         """
         ...
-

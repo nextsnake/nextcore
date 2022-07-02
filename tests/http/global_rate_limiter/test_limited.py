@@ -6,6 +6,7 @@ from pytest import mark
 from nextcore.http.global_rate_limiter import LimitedGlobalRateLimiter
 from tests.utils import match_time
 
+
 @mark.asyncio
 @match_time(0, 0.1)
 async def test_with_limit() -> None:
