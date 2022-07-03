@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import ClassVar, Final, Literal
 
-    from discord_typings.shared import Snowflake
+    from discord_typings import Snowflake
     from typing_extensions import LiteralString
 
 __all__: Final[tuple[str, ...]] = ("Route",)
