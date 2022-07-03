@@ -588,9 +588,9 @@ class Shard:
                 "token": self.token,
                 "intents": self.intents,
                 "properties": {
-                    "$os": platform,
-                    "$browser": self.library_name,
-                    "$device": self.library_name,
+                    "os": platform,
+                    "browser": self.library_name,
+                    "device": self.library_name,
                 },
                 "compress": True,
                 "shard": [self.shard_id, self.shard_count],
