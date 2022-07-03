@@ -95,10 +95,10 @@ if TYPE_CHECKING:
         WebhookData,
         WelcomeChannelData,
         WelcomeScreenData,
+        Snowflake,
     )
     from discord_typings.interactions.commands import Locales
     from discord_typings.resources.audit_log import AuditLogEvents
-    from discord_typings.shared import Snowflake
 
     from .authentication import BearerAuthentication, BotAuthentication
     from .file import File
