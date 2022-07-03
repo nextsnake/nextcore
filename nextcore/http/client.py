@@ -42,7 +42,7 @@ from .errors import (
     RateLimitingFailedError,
     UnauthorizedError,
 )
-from .ratelimit_storage import RatelimitStorage
+from .rate_limit_storage import RateLimitStorage
 from .route import Route
 
 if TYPE_CHECKING:
@@ -115,19 +115,19 @@ class HTTPClient:
     ----------
     trust_local_time:
         Whether to trust local time.
-        If this is not set HTTP ratelimiting will be a bit slower but may be a bit more accurate on systems where the local time is off.
+        If this is not set HTTP rate limiting will be a bit slower but may be a bit more accurate on systems where the local time is off.
     timeout:
         The default request timeout in seconds.
-    max_ratelimit_retries:
-        How many times to attempt to retry a request after ratelimiting failed.
+    max_rate_limit_retries:
+        How many times to attempt to retry a request after rate limiting failed.
 
     Attributes
     ----------
     trust_local_time:
-        If this is enabled, the ratelimiter will use the local time instead of the discord provided time. This may improve your bot's speed slightly.
+        If this is enabled, the rate limiter will use the local time instead of the discord provided time. This may improve your bot's speed slightly.
 
         .. warning::
-            If your time is not correct, and this is set to :data:`True`, this may result in more ratelimits being hit.
+            If your time is not correct, and this is set to :data:`True`, this may result in more rate limits being hit.
 
             .. tab:: Ubuntu
 
@@ -177,14 +177,14 @@ class HTTPClient:
     default_headers:
         The default headers to pass to every request.
     max_retries:
-        How many times to attempt to retry a request after ratelimiting failed.
+        How many times to attempt to retry a request after rate limiting failed.
 
         .. note::
             This does not retry server errors.
-    ratelimit_storages:
-        Classes to store ratelimit information.
+    rate_limit_storages:
+        Classes to store rate limit information.
 
-        The key here is the ratelimit_key (often a user ID).
+        The key here is the rate_limit_key (often a user ID).
     dispatcher:
         Events from the HTTPClient. See the :ref:`events<HTTPClient dispatcher>`
     """
@@ -194,7 +194,7 @@ class HTTPClient:
         "timeout",
         "default_headers",
         "max_retries",
-        "ratelimit_storages",
+        "rate_limit_storages",
         "dispatcher",
         "_session",
     )
@@ -204,15 +204,15 @@ class HTTPClient:
         *,
         trust_local_time: bool = True,
         timeout: float = 60,
-        max_ratelimit_retries: int = 10,
+        max_rate_limit_retries: int = 10,
     ) -> None:
         self.trust_local_time: bool = trust_local_time
         self.timeout: float = timeout
         self.default_headers: dict[str, str] = {
             "User-Agent": f"DiscordBot (https://github.com/nextsnake/nextcore, {nextcore_version})"
         }
-        self.max_retries: int = max_ratelimit_retries
-        self.ratelimit_storages: dict[str | None, RatelimitStorage] = {}  # User ID -> RatelimitStorage
+        self.max_retries: int = max_rate_limit_retries
+        self.rate_limit_storages: dict[str | None, RateLimitStorage] = {}  # User ID -> RateLimitStorage
         self.dispatcher: Dispatcher[Literal["request_response"]] = Dispatcher()
 
         # Internals
@@ -221,7 +221,7 @@ class HTTPClient:
     async def _request(
         self,
         route: Route,
-        ratelimit_key: str | None,
+        rate_limit_key: str | None,
         *,
         headers: dict[str, str] | None = None,
         global_priority: int = 0,
@@ -233,8 +233,8 @@ class HTTPClient:
         ----------
         route:
             The route to request
-        ratelimit_key:
-            A ID used for differentiating ratelimits.
+        rate_limit_key:
+            A ID used for differentiating rate limits.
             This should be a bot or oauth2 token.
 
             .. note::
@@ -277,12 +277,12 @@ class HTTPClient:
         await self._ensure_session()
         assert self._session is not None, "Session was not set after HTTPClient._ensure_session()"
 
-        # Get the per user ratelimit storage
-        ratelimit_storage = self.ratelimit_storages.get(ratelimit_key)
-        if ratelimit_storage is None:
+        # Get the per user rate limit storage
+        rate_limit_storage = self.rate_limit_storages.get(rate_limit_key)
+        if rate_limit_storage is None:
             # None exists, create one
-            ratelimit_storage = RatelimitStorage()
-            self.ratelimit_storages[ratelimit_key] = ratelimit_storage
+            rate_limit_storage = RateLimitStorage()
+            self.rate_limit_storages[rate_limit_key] = rate_limit_storage
 
         # Ensure headers exists
         if headers is None:
@@ -294,21 +294,21 @@ class HTTPClient:
         retries = max(self.max_retries + 1, 1)
 
         for _ in range(retries):
-            bucket = await self._get_bucket(route, ratelimit_storage)
+            bucket = await self._get_bucket(route, rate_limit_storage)
             async with bucket.acquire():
                 if not route.ignore_global:
-                    async with ratelimit_storage.global_rate_limiter.acquire(priority=global_priority):
+                    async with rate_limit_storage.global_rate_limiter.acquire(priority=global_priority):
                         logger.info("Requesting %s %s", route.method, route.path)
                         response = await self._session.request(
                             route.method, route.BASE_URL + route.path, headers=headers, timeout=self.timeout, **kwargs
                         )
                 else:
-                    # Interactions are immune to global ratelimits, ignore them here.
+                    # Interactions are immune to global rate limits, ignore them here.
                     logger.info("Requesting (NO-GLOBAL) %s %s", route.method, route.path)
                     response = await self._session.request(
                         route.method, route.BASE_URL + route.path, headers=headers, timeout=self.timeout, **kwargs
                     )
-                await self._update_bucket(response, route, bucket, ratelimit_storage)
+                await self._update_bucket(response, route, bucket, rate_limit_storage)
 
                 logger.debug("Response status: %s", response.status)
                 await self.dispatcher.dispatch("request_response", response)
@@ -318,11 +318,11 @@ class HTTPClient:
                     # Ok!
                     return response
 
-                await self._handle_response_error(route, response, ratelimit_storage)
+                await self._handle_response_error(route, response, rate_limit_storage)
 
         raise RateLimitingFailedError(self.max_retries, response)  # pyright: ignore [reportUnboundVariable]
 
-    async def _handle_response_error(self, route: Route, response: ClientResponse, storage: RatelimitStorage) -> None:
+    async def _handle_response_error(self, route: Route, response: ClientResponse, storage: RateLimitStorage) -> None:
         if response.status == 429:
             await self._handle_rate_limited_error(route, response, storage)
         else:
@@ -340,7 +340,7 @@ class HTTPClient:
             raise HTTPRequestStatusError(error, response)
 
     async def _handle_rate_limited_error(
-        self, route: Route, response: ClientResponse, storage: RatelimitStorage
+        self, route: Route, response: ClientResponse, storage: RateLimitStorage
     ) -> None:
         # Cloudflare bans arent proxied so via is not sent
         # These bans are usually 1h, however they can be permenant due to repeat offense.
@@ -370,7 +370,7 @@ class HTTPClient:
                 # This will be logged by the global rate-limiter the user chose
                 storage.global_rate_limiter.update(error["retry_after"])
             else:
-                logger.warning("Received unknown ratelimiting scope %s", scope)
+                logger.warning("Received unknown rate limiting scope %s", scope)
         else:
             logger.debug("Received rate-limited response with no scope header")
             is_global = error["global"]
@@ -379,7 +379,7 @@ class HTTPClient:
                 storage.global_rate_limiter.update(error["retry_after"])
             else:
                 logger.warning(
-                    "Received rate-limited response from a shared or bucket ratelimit! No header was present. Bucket: %s",
+                    "Received rate-limited response from a shared or bucket rate limit! No header was present. Bucket: %s",
                     route.bucket,
                 )
 
@@ -418,7 +418,7 @@ class HTTPClient:
         if self._session is None:
             self._session = ClientSession(json_serialize=json_dumps)
 
-    async def _get_bucket(self, route: Route, ratelimit_storage: RatelimitStorage) -> Bucket:
+    async def _get_bucket(self, route: Route, rate_limit_storage: RateLimitStorage) -> Bucket:
         """Gets a bucket object for a route.
 
         Strategy:
@@ -430,36 +430,36 @@ class HTTPClient:
         ----------
         route:
             The route to get the bucket for.
-        ratelimit_storage:
-            The user's ratelimits.
+        rate_limit_storage:
+            The user's rate limits.
         """
         # TODO: Can this be written better?
-        bucket = await ratelimit_storage.get_bucket_by_nextcore_id(route.bucket)
+        bucket = await rate_limit_storage.get_bucket_by_nextcore_id(route.bucket)
         if bucket is not None:
             # Bucket already exists
             return bucket
 
-        metadata = await ratelimit_storage.get_bucket_metadata(route.route)
+        metadata = await rate_limit_storage.get_bucket_metadata(route.route)
 
         if metadata is not None:
             # Create a new bucket with info from the metadata
             bucket = Bucket(metadata)
-            await ratelimit_storage.store_bucket_by_nextcore_id(route.bucket, bucket)
+            await rate_limit_storage.store_bucket_by_nextcore_id(route.bucket, bucket)
             return bucket
 
         # Create a new bucket with no info
         # Create metadata
         metadata = BucketMetadata()
-        await ratelimit_storage.store_metadata(route.route, metadata)
+        await rate_limit_storage.store_metadata(route.route, metadata)
 
         # Create the bucket
         bucket = Bucket(metadata)
-        await ratelimit_storage.store_bucket_by_nextcore_id(route.bucket, bucket)
+        await rate_limit_storage.store_bucket_by_nextcore_id(route.bucket, bucket)
 
         return bucket
 
     async def _update_bucket(
-        self, response: ClientResponse, route: Route, bucket: Bucket, ratelimit_storage: RatelimitStorage
+        self, response: ClientResponse, route: Route, bucket: Bucket, rate_limit_storage: RateLimitStorage
     ) -> None:
         """Updates the bucket and metadata from the info received from the API."""
         headers = response.headers
@@ -470,9 +470,9 @@ class HTTPClient:
             reset_at = float(headers["X-RateLimit-Reset"])
             bucket_hash = headers["X-RateLimit-Bucket"]
         except KeyError:
-            # No ratelimit headers
+            # No rate limit headers
             if response.status < 300:
-                # No ratelimit headers and no error, this is likely a route with no ratelimits.
+                # No rate limit headers and no error, this is likely a route with no rate limits.
                 bucket.metadata.unlimited = True
                 await bucket.update(unlimited=True)
             return
@@ -489,13 +489,13 @@ class HTTPClient:
         bucket.metadata.unlimited = False
 
         # Auto-link buckets based on bucket_hash
-        linked_bucket = await ratelimit_storage.get_bucket_by_discord_id(bucket_hash)
+        linked_bucket = await rate_limit_storage.get_bucket_by_discord_id(bucket_hash)
         if linked_bucket is not None:
             # TODO: Migrate pending requests to the linked bucket
-            await ratelimit_storage.store_bucket_by_nextcore_id(route.bucket, linked_bucket)
+            await rate_limit_storage.store_bucket_by_nextcore_id(route.bucket, linked_bucket)
         else:
             # Automatically linking them
-            await ratelimit_storage.store_bucket_by_discord_id(bucket_hash, bucket)
+            await rate_limit_storage.store_bucket_by_discord_id(bucket_hash, bucket)
 
     # Wrapper functions for requests
     # Application commands
@@ -546,7 +546,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
             global_priority=global_priority,
@@ -672,7 +672,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=payload,
             global_priority=global_priority,
@@ -731,7 +731,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -867,7 +867,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=payload,
             global_priority=global_priority,
@@ -920,7 +920,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -978,7 +978,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=commands,
             global_priority=global_priority,
@@ -1045,7 +1045,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
             global_priority=global_priority,
@@ -1171,7 +1171,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=payload,
             global_priority=global_priority,
@@ -1233,7 +1233,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -1366,7 +1366,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=payload,
             global_priority=global_priority,
@@ -1425,7 +1425,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -1492,7 +1492,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=commands,
             global_priority=global_priority,
@@ -1552,7 +1552,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -1613,7 +1613,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -1671,7 +1671,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=None,
+            rate_limit_key=None,
             global_priority=global_priority,
         )
 
@@ -1724,7 +1724,7 @@ class HTTPClient:
 
         await self._request(
             route,
-            ratelimit_key=None,
+            rate_limit_key=None,
             global_priority=global_priority,
         )
 
@@ -1755,7 +1755,7 @@ class HTTPClient:
             The id of the message to fetch
         global_priority:
             The priority of the request for the global rate-limiter.
-        
+
         Raises
         ------
         aiohttp.ClientConnectorError
@@ -1780,7 +1780,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=None,
+            rate_limit_key=None,
             global_priority=global_priority,
         )
 
@@ -1834,7 +1834,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=None,
+            rate_limit_key=None,
             global_priority=global_priority,
         )
 
@@ -1892,7 +1892,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         ForbiddenError
             You do not have the ``VIEW_AUDIT_LOG`` permission
@@ -1921,7 +1921,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             query=query,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
@@ -1951,7 +1951,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         NotFound
             The channel could not be found
@@ -1968,7 +1968,7 @@ class HTTPClient:
         route = Route("GET", "/channels/{channel_id}", channel_id=channel_id)
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -1992,7 +1992,7 @@ class HTTPClient:
         Read the `docoumentation <https://discord.dev/resources/channel#modify-group-dm>`__
 
         .. warning::
-            This shares ratelimits with :attr:`HTTPClient.modify_guild_channel` and :attr:`HTTPClient.modify_thread`.
+            This shares rate limits with :attr:`HTTPClient.modify_guild_channel` and :attr:`HTTPClient.modify_thread`.
 
         Parameters
         ----------
@@ -2020,7 +2020,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         NotFoundError
             Could not find the group dm
@@ -2045,7 +2045,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -2081,7 +2081,7 @@ class HTTPClient:
 
 
         .. warning::
-            This shares ratelimits with :attr:`HTTPClient.modify_group_dm` and :attr:`HTTPClient.modify_thread`.
+            This shares rate limits with :attr:`HTTPClient.modify_group_dm` and :attr:`HTTPClient.modify_thread`.
 
         Parameters
         ----------
@@ -2165,7 +2165,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         NotFoundError
             The channel was not found
@@ -2212,7 +2212,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -2240,7 +2240,7 @@ class HTTPClient:
         Read the `docoumentation <https://discord.dev/resources/channel#modify-channel>`__
 
         .. warning::
-            This shares ratelimits with :attr:`HTTPClient.modify_group_dm` and :attr:`HTTPClient.modify_guild_channel`.
+            This shares rate limits with :attr:`HTTPClient.modify_group_dm` and :attr:`HTTPClient.modify_guild_channel`.
 
         Parameters
         ----------
@@ -2274,7 +2274,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         NotFoundError
             The thread wasnt found
@@ -2307,7 +2307,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -2352,7 +2352,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         ForbiddenError
             You did not have the correct permissions
@@ -2369,7 +2369,7 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+            route, headers=headers, rate_limit_key=authentication.rate_limit_key, global_priority=global_priority
         )
 
     @overload
@@ -2471,7 +2471,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         NotFoundError
             The channel was not found
@@ -2499,7 +2499,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             query=query,
             global_priority=global_priority,
@@ -2586,7 +2586,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         NotFoundError
             The channel was not found
@@ -2640,7 +2640,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             data=form,
             global_priority=global_priority,
@@ -2681,7 +2681,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         ForbiddenError
             Missing permissions or you tried to publish a message in a non-news channel
@@ -2702,7 +2702,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         r = await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
         # TODO: Make this verify the payload from discord?
@@ -2746,7 +2746,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         NotFoundError
             Could not find the message
@@ -2767,7 +2767,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def delete_own_reaction(
@@ -2802,7 +2802,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         NotFoundError
             You had not reacted with that emoji
@@ -2821,7 +2821,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def delete_user_reaction(
@@ -2866,7 +2866,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         NotFoundError
             The user had not reacted with that emoji
@@ -2886,7 +2886,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def get_reactions(
@@ -2936,7 +2936,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         NotFoundError
             The channel was not found
@@ -2975,7 +2975,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             query=query,
             global_priority=global_priority,
@@ -3018,7 +3018,7 @@ class HTTPClient:
         ------
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
-        UnauthorizedError 
+        UnauthorizedError
             A invalid token was provided
         NotFoundError
             Could not find the channel
@@ -3026,7 +3026,7 @@ class HTTPClient:
             Could not find the message
         ForbiddenError
             You did not have the ``MANAGE_MESSAGES`` permission
-            
+
         """
         route = Route(
             "DELETE",
@@ -3037,7 +3037,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def delete_all_reactions_for_emoji(
@@ -3084,7 +3084,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def edit_message(
@@ -3190,7 +3190,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             data=form,
             global_priority=global_priority,
@@ -3245,7 +3245,7 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def bulk_delete_messages(
@@ -3303,7 +3303,7 @@ class HTTPClient:
 
         await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json={"messages": messages},
             global_priority=global_priority,
@@ -3385,7 +3385,7 @@ class HTTPClient:
 
         await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -3419,7 +3419,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         r = await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
         # TODO: Make this verify the data from Discord
@@ -3560,7 +3560,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -3604,7 +3604,7 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def follow_news_channel(
@@ -3644,7 +3644,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -3673,7 +3673,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def get_pinned_messages(
@@ -3704,7 +3704,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         r = await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
         # TODO: Make this verify the data from Discord
@@ -3753,7 +3753,7 @@ class HTTPClient:
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        await self._request(route, ratelimit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, rate_limit_key=authentication.rate_limit_key, headers=headers)
 
     async def unpin_message(
         self,
@@ -3787,7 +3787,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def group_dm_add_recipient(
@@ -3817,7 +3817,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def group_dm_remove_recipient(
@@ -3847,7 +3847,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def start_thread_from_message(
@@ -3913,7 +3913,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -3995,7 +3995,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -4026,7 +4026,7 @@ class HTTPClient:
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def add_thread_member(
@@ -4054,7 +4054,7 @@ class HTTPClient:
 
         await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4082,7 +4082,7 @@ class HTTPClient:
 
         await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4119,7 +4119,7 @@ class HTTPClient:
 
         await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4151,7 +4151,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4182,7 +4182,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4230,7 +4230,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
             global_priority=global_priority,
@@ -4279,7 +4279,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
             global_priority=global_priority,
@@ -4328,7 +4328,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
             global_priority=global_priority,
@@ -4358,7 +4358,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4388,7 +4388,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4456,7 +4456,7 @@ class HTTPClient:
 
         r = self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -4506,7 +4506,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4622,7 +4622,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
             json=payload,
@@ -4663,7 +4663,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
             global_priority=global_priority,
@@ -4695,7 +4695,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4731,7 +4731,7 @@ class HTTPClient:
 
         await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4756,7 +4756,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4803,7 +4803,7 @@ class HTTPClient:
         await self._request(
             route,
             json=position_updates,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4832,7 +4832,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4862,7 +4862,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -4920,7 +4920,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
             global_priority=global_priority,
@@ -4970,7 +4970,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=url_query,
             global_priority=global_priority,
@@ -5060,7 +5060,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=bot_authentication.rate_limit_key,
+            rate_limit_key=bot_authentication.rate_limit_key,
             headers={"Authorization": str(bot_authentication)},
             json=payload,
             global_priority=global_priority,
@@ -5170,7 +5170,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -5232,7 +5232,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -5290,7 +5290,7 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def remove_guild_member_role(
@@ -5341,7 +5341,7 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     async def remove_guild_member(
@@ -5383,7 +5383,7 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
         )
 
     @overload
@@ -5480,7 +5480,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             query=query,
             global_priority=global_priority,
@@ -5520,7 +5520,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -5578,7 +5578,7 @@ class HTTPClient:
 
         await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             global_priority=global_priority,
             json=payload,
@@ -5624,7 +5624,7 @@ class HTTPClient:
 
         await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             global_priority=global_priority,
         )
@@ -5654,7 +5654,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -5800,7 +5800,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -5847,7 +5847,7 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         r = await self._request(
-            route, ratelimit_key=authentication.rate_limit_key, json=position_updates, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, json=position_updates, global_priority=global_priority
         )
 
         # TODO: Make this verify the payload from discord?
@@ -5980,7 +5980,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -6023,7 +6023,7 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+            route, headers=headers, rate_limit_key=authentication.rate_limit_key, global_priority=global_priority
         )
 
     async def get_guild_prune_count(
@@ -6074,7 +6074,7 @@ class HTTPClient:
             route,
             headers={"Authorization": str(authentication)},
             query=query,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6141,7 +6141,7 @@ class HTTPClient:
             route,
             headers={"Authorization": str(authentication)},
             query=query,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6174,7 +6174,7 @@ class HTTPClient:
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6210,7 +6210,7 @@ class HTTPClient:
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6246,7 +6246,7 @@ class HTTPClient:
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6300,7 +6300,7 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+            route, headers=headers, rate_limit_key=authentication.rate_limit_key, global_priority=global_priority
         )
 
     async def get_guild_widget_settings(
@@ -6332,7 +6332,7 @@ class HTTPClient:
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6389,7 +6389,7 @@ class HTTPClient:
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6414,7 +6414,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=None,
+            rate_limit_key=None,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -6449,7 +6449,7 @@ class HTTPClient:
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6487,7 +6487,7 @@ class HTTPClient:
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6550,7 +6550,7 @@ class HTTPClient:
         r = await self._request(
             route,
             headers=headers,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6611,7 +6611,7 @@ class HTTPClient:
             route,
             headers={"Authorization": str(authentication)},
             json=payload,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6661,7 +6661,7 @@ class HTTPClient:
             route,
             headers={"Authorization": str(authentication)},
             json=payload,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6702,7 +6702,7 @@ class HTTPClient:
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6843,7 +6843,7 @@ class HTTPClient:
             route,
             headers=headers,
             json=payload,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6893,7 +6893,7 @@ class HTTPClient:
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             global_priority=global_priority,
         )
 
@@ -6946,7 +6946,7 @@ class HTTPClient:
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, headers=headers, ratelimit_key=authentication.rate_limit_key, global_priority=global_priority
+            route, headers=headers, rate_limit_key=authentication.rate_limit_key, global_priority=global_priority
         )
 
     # TODO: Add Get Guild Scheduled Event Users
@@ -6974,7 +6974,7 @@ class HTTPClient:
         route = Route("GET", "/guilds/templates/{template_code}", template_code=template_code)
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7027,7 +7027,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=payload,
             global_priority=global_priority,
@@ -7060,7 +7060,7 @@ class HTTPClient:
         route = Route("GET", "/guilds/{guild_id}/templates", guild_id=guild_id)
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7120,7 +7120,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=payload,
             global_priority=global_priority,
@@ -7156,7 +7156,7 @@ class HTTPClient:
 
         await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7217,7 +7217,7 @@ class HTTPClient:
 
         await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7257,7 +7257,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7290,7 +7290,7 @@ class HTTPClient:
         route = Route("GET", "/invites/{invite_code}", invite_code=invite_code)
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7328,7 +7328,7 @@ class HTTPClient:
         route = Route("DELETE", "/invites/{invite_code}", invite_code=invite_code)
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7410,7 +7410,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -7443,7 +7443,7 @@ class HTTPClient:
         route = Route("GET", "/stage-instances/{channel_id}", channel_id=channel_id)
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7515,7 +7515,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -7561,7 +7561,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             global_priority=global_priority,
         )
@@ -7594,7 +7594,7 @@ class HTTPClient:
         route = Route("GET", "/stickers/{sticker_id}", sticker_id=sticker_id)
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7617,7 +7617,7 @@ class HTTPClient:
         route = Route("GET", "/sticker-packs")
         r = await self._request(
             route,
-            ratelimit_key=None,
+            rate_limit_key=None,
             global_priority=global_priority,
         )
 
@@ -7652,7 +7652,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7690,7 +7690,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7771,7 +7771,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -7818,7 +7818,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             global_priority=global_priority,
         )
@@ -7855,7 +7855,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7888,7 +7888,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -7937,7 +7937,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -8005,7 +8005,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
             global_priority=global_priority,
@@ -8042,7 +8042,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -8075,7 +8075,7 @@ class HTTPClient:
 
         await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -8110,7 +8110,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json={"recipient_id": recipient_id},
             global_priority=global_priority,
@@ -8147,7 +8147,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -8179,7 +8179,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -8246,7 +8246,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
             global_priority=global_priority,
@@ -8283,7 +8283,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -8319,7 +8319,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -8352,7 +8352,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -8389,7 +8389,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=None,
+            rate_limit_key=None,
             global_priority=global_priority,
         )
 
@@ -8454,7 +8454,7 @@ class HTTPClient:
         r = await self._request(
             route,
             headers=headers,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             json=payload,
             global_priority=global_priority,
         )
@@ -8522,7 +8522,7 @@ class HTTPClient:
         r = await self._request(
             route,
             headers=headers,
-            ratelimit_key=None,
+            rate_limit_key=None,
             json=payload,
             global_priority=global_priority,
         )
@@ -8567,7 +8567,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             global_priority=global_priority,
         )
@@ -8612,7 +8612,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=None,
+            rate_limit_key=None,
             headers=headers,
             global_priority=global_priority,
         )
@@ -8675,7 +8675,7 @@ class HTTPClient:
         if thread_id is not UNDEFINED:
             query["thread_id"] = thread_id
 
-        r = await self._request(route, ratelimit_key=None, global_priority=global_priority, query=query)
+        r = await self._request(route, rate_limit_key=None, global_priority=global_priority, query=query)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -8728,7 +8728,7 @@ class HTTPClient:
         if thread_id is not UNDEFINED:
             query["thread_id"] = thread_id
 
-        r = await self._request(route, ratelimit_key=None, global_priority=global_priority, query=query)
+        r = await self._request(route, rate_limit_key=None, global_priority=global_priority, query=query)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -8751,7 +8751,7 @@ class HTTPClient:
             The gateway info.
         """
         route = Route("GET", "/gateway", ignore_global=True)
-        r = await self._request(route, ratelimit_key=None)
+        r = await self._request(route, rate_limit_key=None)
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -8784,7 +8784,7 @@ class HTTPClient:
         route = Route("GET", "/gateway/bot")
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -8816,7 +8816,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )
@@ -8847,7 +8847,7 @@ class HTTPClient:
 
         r = await self._request(
             route,
-            ratelimit_key=authentication.rate_limit_key,
+            rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             global_priority=global_priority,
         )

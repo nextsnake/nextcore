@@ -35,7 +35,7 @@ __all__: Final[tuple[str, ...]] = ("TimesPer",)
 
 
 class TimesPer:
-    """A simple ratelimiting implementation
+    """A simple rate limiting implementation
 
     .. note::
         This does not reserve when you call :meth:`TimesPer.wait`, for that use :class:`Bucket`
@@ -76,8 +76,8 @@ class TimesPer:
         self._lock: Lock = Lock()
 
     async def wait(self) -> None:
-        """Waits until the ratelimit is available
-        This will return immediately if the ratelimit is available
+        """Waits until the rate limit is available
+        This will return immediately if the rate limit is available
         """
         async with self._lock:
             current_time = time()
@@ -91,12 +91,12 @@ class TimesPer:
 
     @property
     def reset_at(self) -> float | None:
-        """When the ratelimit will reset
+        """When the rate limit will reset
 
         Returns
         -------
         :class:`float`
-            Unix timestamp of when the ratelimit will reset.
+            Unix timestamp of when the rate limit will reset.
         :data:`None`
             There is no reset scheduled.
         """
@@ -109,12 +109,12 @@ class TimesPer:
 
     @property
     def reset_after(self) -> float | None:
-        """How many seconds until the ratelimit will reset
+        """How many seconds until the rate limit will reset
 
         Returns
         -------
         :class:`float`
-            The number of seconds until the ratelimit will reset
+            The number of seconds until the rate limit will reset
         :data:`None`
             There is no reset scheduled.
         """

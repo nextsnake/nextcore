@@ -36,11 +36,11 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
-__all__: Final[tuple[str, ...]] = ("RatelimitStorage",)
+__all__: Final[tuple[str, ...]] = ("RateLimitStorage",)
 
 
-class RatelimitStorage:
-    """Storage for ratelimits for a user.
+class RateLimitStorage:
+    """Storage for rate limits for a user.
 
     One of these should be created for each user.
 
@@ -50,7 +50,7 @@ class RatelimitStorage:
     Attributes
     ----------
     global_lock:
-        The users per user global ratelimit.
+        The users per user global rate limit.
     """
 
     __slots__ = ("_nextcore_buckets", "_discord_buckets", "_bucket_metadata", "global_rate_limiter")
@@ -69,7 +69,7 @@ class RatelimitStorage:
     # These are async and not just public dicts because we want to support custom implementations that use asyncio.
     # This does introduce some overhead, but it's not too bad.
     async def get_bucket_by_nextcore_id(self, nextcore_id: str | int) -> Bucket | None:
-        """Get a ratelimit bucket from a nextcore created id.
+        """Get a rate limit bucket from a nextcore created id.
 
         Parameters
         ----------
@@ -79,7 +79,7 @@ class RatelimitStorage:
         return self._nextcore_buckets.get(nextcore_id)
 
     async def store_bucket_by_nextcore_id(self, nextcore_id: str | int, bucket: Bucket) -> None:
-        """Store a ratelimit bucket by nextcore generated id.
+        """Store a rate limit bucket by nextcore generated id.
 
         Parameters
         ----------
@@ -91,7 +91,7 @@ class RatelimitStorage:
         self._nextcore_buckets[nextcore_id] = bucket
 
     async def get_bucket_by_discord_id(self, discord_id: str) -> Bucket | None:
-        """Get a ratelimit bucket from the Discord bucket hash.
+        """Get a rate limit bucket from the Discord bucket hash.
 
         This can be obtained via the ``X-Ratelimit-Bucket`` header.
 
@@ -103,7 +103,7 @@ class RatelimitStorage:
         return self._discord_buckets.get(discord_id)
 
     async def store_bucket_by_discord_id(self, discord_id: str, bucket: Bucket) -> None:
-        """Store a ratelimit bucket by the discord bucket hash.
+        """Store a rate limit bucket by the discord bucket hash.
 
         This can be obtained via the ``X-Ratelimit-Bucket`` header.
 
@@ -151,7 +151,7 @@ class RatelimitStorage:
         for bucket_id, bucket in self._nextcore_buckets.copy().items():
             if not bucket.dirty:
                 logger.debug("Cleaning up bucket %s", bucket_id)
-                # Delete the main reference. Other references like RatelimitStorage._discord_buckets should get cleaned up automatically as it is a weakref.
+                # Delete the main reference. Other references like RateLimitStorage._discord_buckets should get cleaned up automatically as it is a weakref.
                 del self._nextcore_buckets[bucket_id]
 
     async def close(self) -> None:

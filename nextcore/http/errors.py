@@ -42,7 +42,7 @@ __all__: Final[tuple[str, ...]] = (
 
 
 class RateLimitingFailedError(Exception):
-    """When ratelimiting has failed more than :attr:`HTTPClient.max_retries` times
+    """When rate limiting has failed more than :attr:`HTTPClient.max_retries` times
 
     .. hint::
         This can be due to a un-syncronized clock.

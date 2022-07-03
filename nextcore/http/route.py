@@ -42,11 +42,11 @@ class Route:
     path:
         The path of the route. This can include python formatting strings ({var_here}) from kwargs
     ignore_global:
-        If this route bypasses the global ratelimit.
+        If this route bypasses the global rate limit.
     guild_id:
     channel_id:
     webhook_id:
-        Major parameters which will be included in ``parameters`` and count towards the ratelimit.
+        Major parameters which will be included in ``parameters`` and count towards the rate limit.
     parameters:
         The parameters of the route. These will be used to format the path.
 
@@ -61,11 +61,11 @@ class Route:
     path:
         The formatted version of :attr:`Route.route`
     ignore_global:
-        If this route bypasses the global ratelimit.
+        If this route bypasses the global rate limit.
 
         This is always :data:`True` for unauthenticated routes.
     bucket:
-        The ratelimit bucket this fits in.
+        The rate limit bucket this fits in.
 
         This is created from :attr:`Route.guild_id`, :attr:`Route.channel_id`, :attr:`Route.webhook_id`, :attr:`Bucket.method` and :attr:`Route.path`
 

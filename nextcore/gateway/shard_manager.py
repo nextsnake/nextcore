@@ -100,7 +100,7 @@ class ShardManager:
         "max_concurrency",
         "_active_shard_count",
         "_pending_shard_count",
-        "_identify_ratelimits",
+        "_identify_rate_limits",
         "_http_client",
     )
 
@@ -133,7 +133,7 @@ class ShardManager:
         # Privates
         self._active_shard_count: int | None = self.shard_count
         self._pending_shard_count: int | None = None
-        self._identify_ratelimits: defaultdict[int, TimesPer] = defaultdict(lambda: TimesPer(1, 5))
+        self._identify_rate_limits: defaultdict[int, TimesPer] = defaultdict(lambda: TimesPer(1, 5))
         self._http_client: HTTPClient = http_client
 
         # Checks
@@ -179,14 +179,14 @@ class ShardManager:
 
     def _spawn_shard(self, shard_id: int, shard_count: int) -> Shard:
         assert self.max_concurrency is not None, "max_concurrency is not set. This is set in connect"
-        ratelimiter = self._identify_ratelimits[shard_id % self.max_concurrency]
+        rate_limiter = self._identify_rate_limits[shard_id % self.max_concurrency]
 
         shard = Shard(
             shard_id,
             shard_count,
             self.intents,
             self.authentication.token,
-            ratelimiter,
+            rate_limiter,
             self._http_client,
             presence=self.presence,
         )

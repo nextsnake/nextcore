@@ -4,13 +4,13 @@ import sys
 from pytest import mark
 
 from nextcore.http import Bucket, BucketMetadata
-from nextcore.http.ratelimit_storage import RatelimitStorage
+from nextcore.http.rate_limit_storage import RateLimitStorage
 
 
 # Garbage collection
 @mark.asyncio
 async def test_does_gc_collect_unused_buckets() -> None:
-    storage = RatelimitStorage()
+    storage = RateLimitStorage()
 
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
@@ -23,7 +23,7 @@ async def test_does_gc_collect_unused_buckets() -> None:
 
 @mark.asyncio
 async def test_does_not_collect_dirty_buckets() -> None:
-    storage = RatelimitStorage()
+    storage = RateLimitStorage()
 
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
@@ -38,7 +38,7 @@ async def test_does_not_collect_dirty_buckets() -> None:
 
 @mark.asyncio
 async def test_cleans_up_gc_hook() -> None:
-    storage = RatelimitStorage()
+    storage = RateLimitStorage()
 
     before_callbacks_length = len(gc.callbacks)
 
@@ -53,7 +53,7 @@ async def test_cleans_up_gc_hook() -> None:
 # Getting and storing buckets
 @mark.asyncio
 async def test_stores_and_get_nextcore_id() -> None:
-    storage = RatelimitStorage()
+    storage = RateLimitStorage()
 
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
@@ -66,7 +66,7 @@ async def test_stores_and_get_nextcore_id() -> None:
 
 @mark.asyncio
 async def test_stores_and_get_discord_id() -> None:
-    storage = RatelimitStorage()
+    storage = RateLimitStorage()
 
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
