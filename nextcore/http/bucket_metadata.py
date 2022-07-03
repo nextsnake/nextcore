@@ -55,6 +55,6 @@ class BucketMetadata:
 
     __slots__ = ("limit", "unlimited")
 
-    def __init__(self, limit: int | None = None, *, unlimited: bool = False):
+    def __init__(self, limit: int | None = None, *, unlimited: bool = False) -> None:
         self.limit: int | None = limit
         self.unlimited: bool = unlimited

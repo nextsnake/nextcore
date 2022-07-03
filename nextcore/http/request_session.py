@@ -52,6 +52,6 @@ class RequestSession:
 
     __slots__: Final[tuple[str, ...]] = ("pending_future", "unlimited")
 
-    def __init__(self, unlimited: bool):
+    def __init__(self, unlimited: bool) -> None:
         self.pending_future: Future[None] = Future()
         self.unlimited: bool = unlimited

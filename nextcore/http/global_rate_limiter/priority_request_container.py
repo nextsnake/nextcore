@@ -50,7 +50,7 @@ class PriorityRequestContainer:
 
     __slots__: tuple[str, ...] = ("priority", "future")
 
-    def __init__(self, priority: int, future: Future[None]):
+    def __init__(self, priority: int, future: Future[None]) -> None:
         self.priority: int = priority
         self.future: Future[None] = future
 

@@ -45,7 +45,7 @@ class BaseAuthentication:
 
     __slots__ = ("prefix", "token", "rate_limit_key")
 
-    def __init__(self, prefix: str, token: str):
+    def __init__(self, prefix: str, token: str) -> None:
         self.prefix: str = prefix
         self.token: str = token
         self.rate_limit_key: str = token
