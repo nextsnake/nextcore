@@ -5,7 +5,7 @@ on:
     branches: ["master"]
 jobs:
   black:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
@@ -19,7 +19,7 @@ jobs:
       - name: Run tests
         run: poetry run task black_check
   isort:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
@@ -33,7 +33,7 @@ jobs:
       - name: Run tests
         run: poetry run task isort_check
   pyright:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
@@ -55,7 +55,7 @@ jobs:
       - name: Run pyright
         run: poetry run pyright nextcore/
   style-guide:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
@@ -79,7 +79,7 @@ jobs:
       - name: Run pylint
         run: poetry run pylint -d all -e asyncio-best-practices,license,outdated-typing --load-plugins=nextstyle nextcore/
   slots-check:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
