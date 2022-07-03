@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Final
+    from discord_typings import HTTPErrorResponseData
 
     from aiohttp import ClientResponse
 
@@ -141,13 +142,13 @@ class HTTPRequestStatusError(Exception):
         The error json from the body.
     """
 
-    def __init__(self, error: HTTPErrorTyping, response: ClientResponse) -> None:
+    def __init__(self, error: HTTPErrorResponseData, response: ClientResponse) -> None:
         self.response: ClientResponse = response
 
         self.error_code: int = error["code"]
         self.message: str = error["message"]
 
-        self.error: HTTPErrorTyping = error
+        self.error: HTTPErrorResponseData = error
 
         super().__init__(f"({self.error_code}) {self.message}")
 
