@@ -2,7 +2,7 @@ name: Upload docs
 on: [push]
 jobs:
   upload-docs:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
