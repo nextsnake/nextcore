@@ -4,7 +4,7 @@ import sys
 from pytest import mark
 
 from nextcore.http import Bucket, BucketMetadata
-from nextcore.http.ratelimit_storage import RateLimitStorage
+from nextcore.http.rate_limit_storage import RateLimitStorage
 
 
 # Garbage collection

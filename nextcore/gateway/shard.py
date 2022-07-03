@@ -90,8 +90,8 @@ class Shard:
         The intents to connect with.
     token:
         The bot's token to connect with.
-    identify_ratelimiter:
-        The ratelimiter for IDENTIFYing the bot.
+    identify_rate_limiter:
+        The rate limiter for IDENTIFYing the bot.
     http_client:
         HTTP client used to connect to Discord's gateway.
     presence:
@@ -148,8 +148,8 @@ class Shard:
         "session_id",
         "session_sequence_number",
         "should_reconnect",
-        "_identify_ratelimiter",
-        "_send_ratelimit",
+        "_identify_rate_limiter",
+        "_send_rate_limit",
         "_ws",
         "_decompressor",
         "_logger",
@@ -167,7 +167,7 @@ class Shard:
         shard_count: int,
         intents: int,
         token: str,
-        identify_ratelimiter: TimesPer,
+        identify_rate_limiter: TimesPer,
         http_client: HTTPClient,
         *,
         presence: UpdatePresenceData | None = None,
@@ -196,10 +196,10 @@ class Shard:
 
         # User's internals
         # Should generally only be set once
-        self._identify_ratelimiter: TimesPer = identify_ratelimiter
+        self._identify_rate_limiter: TimesPer = identify_rate_limiter
 
         # Internals
-        self._send_ratelimit = TimesPer(60 - 3, 120)
+        self._send_rate_limit = TimesPer(60 - 3, 120)
         self._ws: ClientWebSocketResponse | None = None
         self._decompressor: Decompressor = Decompressor()
         self._logger: Logger = getLogger(f"{__name__}.{self.shard_id}")
@@ -267,11 +267,11 @@ class Shard:
             if not self.should_reconnect:
                 raise ReconnectCheckFailedError
             # No session stored, create a new one.
-            await self._identify_ratelimiter.wait()
+            await self._identify_rate_limiter.wait()
             await self.identify()
         else:
             # Session stored, resume it.
-            # Resumes don't use up the IDENTIFY ratelimit so we should prefer using it.
+            # Resumes don't use up the IDENTIFY rate limit so we should prefer using it.
             await self.resume()
 
             # Discord does not provide a "session resume ok" event, they only do it after resuming every event which can take a long time.
@@ -318,10 +318,10 @@ class Shard:
             self._logger.debug("Waiting until ready")
             await self.ready.wait()
 
-        # Take up a space in the ratelimit
+        # Take up a space in the rate limit
         # Yes there is a small chance that we would get disconnected here due to fluctuating latency,
         # however this is basically unavoidable.
-        await self._send_ratelimit.wait()
+        await self._send_rate_limit.wait()
 
         assert self._ws is not None, "Websocket is not connected"
         assert self._ws.closed is False, "Websocket is closed"
@@ -359,7 +359,7 @@ class Shard:
 
         # Here we create our own reference to the current websocket as we override self._ws on reconnect so there may be a chance that it gets overriden before the loop exists
         # This prevents multiple heartbeat loops from running at the same time.
-        # This also allows us to bypass the ratelimit.
+        # This also allows us to bypass the rate limit.
         ws = self._ws
 
         # Discord requires us to wait a random amount up to heartbeat_interval on the first interval

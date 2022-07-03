@@ -7,19 +7,19 @@ from tests.utils import match_time
 @mark.asyncio
 @match_time(0, 0.1)
 async def test_should_not_sleep():
-    ratelimiter = TimesPer(5, 5)
+    rate_limiter = TimesPer(5, 5)
 
     for _ in range(5):
-        await ratelimiter.wait()
+        await rate_limiter.wait()
 
 
 @mark.asyncio
 @match_time(0.1, 0.01)
 async def test_should_sleep():
-    ratelimiter = TimesPer(5, 0.1)
+    rate_limiter = TimesPer(5, 0.1)
 
     for _ in range(10):
-        await ratelimiter.wait()
+        await rate_limiter.wait()
 
 
 def test_repr():

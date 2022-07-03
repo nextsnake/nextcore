@@ -50,7 +50,7 @@ class BucketMetadata:
 
             This will also be :data:`None` if no limit has been fetched yet.
     unlimited:
-        Wheter the bucket has no ratelimiting enabled.
+        Wheter the bucket has no rate limiting enabled.
     """
 
     __slots__ = ("limit", "unlimited")
