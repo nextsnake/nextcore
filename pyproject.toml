@@ -39,7 +39,7 @@ types-frozendict = "^2.0.6" # Could we extend the version requirement
 typing-extensions = "^4.1.1" # Same as above
 orjson = {version = "^3.6.8", optional = true}
 types-orjson = {version = "^3.6.2", optional = true}
-discord-typings = "^0.4.0"
+discord-typings = "^0.5.0"
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.4.0"
