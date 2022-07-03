@@ -24,16 +24,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Dict  # pylint: disable=outdated-typing-dict
-    from typing import List  # pylint: disable=outdated-typing-list
-    from typing import Union  # pylint: disable=outdated-typing-union
-    from typing import Final
-
-    from typing_extensions import TypeAlias
-
-    JsonCompatible: TypeAlias = Union[
-        str, int, float, None, Dict[Union[str, int, float, None], "JsonCompatible"], List["JsonCompatible"]
-    ]
+    from typing import Any, Final
 
 try:
     import orjson
@@ -47,8 +38,8 @@ except ImportError:
 
 __all__: Final[tuple[str, ...]] = ("json_loads", "json_dumps")
 
-
-def json_loads(data: str) -> JsonCompatible:
+# TODO: Any should be narrowed down, however for now thats not really possible in a sane way.
+def json_loads(data: str) -> Any:
     """Loads a json string into a python object.
 
     Parameters
@@ -68,7 +59,7 @@ def json_loads(data: str) -> JsonCompatible:
     return json.loads(data)
 
 
-def json_dumps(to_dump: JsonCompatible) -> str:
+def json_dumps(to_dump: Any) -> str:
     """Dumps a python object into a json string.
 
     Parameters
