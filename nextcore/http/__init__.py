@@ -36,7 +36,7 @@ from .client import HTTPClient
 from .errors import *
 from .file import File
 from .global_rate_limiter import *
-from .ratelimit_storage import RatelimitStorage
+from .ratelimit_storage import RateLimitStorage
 from .request_session import RequestSession
 from .route import Route
 
@@ -55,7 +55,7 @@ __all__: Final[tuple[str, ...]] = (
     "NotFoundError",
     "InternalServerError",
     "CloudflareBanError",
-    "RatelimitStorage",
+    "RateLimitStorage",
     "RequestSession",
     "Route",
     "File",

@@ -11,7 +11,7 @@ HTTP reference
 .. autoclass:: Route
     :members:
 
-.. autoclass:: RatelimitStorage
+.. autoclass:: RateLimitStorage
     :members:
 
 .. autoclass:: Bucket

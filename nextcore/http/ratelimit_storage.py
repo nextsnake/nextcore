@@ -36,10 +36,10 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
-__all__: Final[tuple[str, ...]] = ("RatelimitStorage",)
+__all__: Final[tuple[str, ...]] = ("RateLimitStorage",)
 
 
-class RatelimitStorage:
+class RateLimitStorage:
     """Storage for ratelimits for a user.
 
     One of these should be created for each user.
@@ -151,7 +151,7 @@ class RatelimitStorage:
         for bucket_id, bucket in self._nextcore_buckets.copy().items():
             if not bucket.dirty:
                 logger.debug("Cleaning up bucket %s", bucket_id)
-                # Delete the main reference. Other references like RatelimitStorage._discord_buckets should get cleaned up automatically as it is a weakref.
+                # Delete the main reference. Other references like RateLimitStorage._discord_buckets should get cleaned up automatically as it is a weakref.
                 del self._nextcore_buckets[bucket_id]
 
     async def close(self) -> None:

@@ -43,7 +43,7 @@ from .errors import (
     RateLimitingFailedError,
     UnauthorizedError,
 )
-from .ratelimit_storage import RatelimitStorage
+from .ratelimit_storage import RateLimitStorage
 from .route import Route
 
 if TYPE_CHECKING:
@@ -181,7 +181,7 @@ class HTTPClient:
             "User-Agent": f"DiscordBot (https://github.com/nextsnake/nextcore, {nextcore_version})"
         }
         self.max_retries: int = max_ratelimit_retries
-        self.ratelimit_storages: dict[str | None, RatelimitStorage] = {}  # User ID -> RatelimitStorage
+        self.ratelimit_storages: dict[str | None, RateLimitStorage] = {}  # User ID -> RateLimitStorage
         self.dispatcher: Dispatcher[Literal["request_response"]] = Dispatcher()
 
         # Internals
@@ -250,7 +250,7 @@ class HTTPClient:
         ratelimit_storage = self.ratelimit_storages.get(ratelimit_key)
         if ratelimit_storage is None:
             # None exists, create one
-            ratelimit_storage = RatelimitStorage()
+            ratelimit_storage = RateLimitStorage()
             self.ratelimit_storages[ratelimit_key] = ratelimit_storage
 
         # Ensure headers exists
@@ -291,7 +291,7 @@ class HTTPClient:
 
         raise RateLimitingFailedError(self.max_retries, response)  # pyright: ignore [reportUnboundVariable]
 
-    async def _handle_response_error(self, route: Route, response: ClientResponse, storage: RatelimitStorage) -> None:
+    async def _handle_response_error(self, route: Route, response: ClientResponse, storage: RateLimitStorage) -> None:
         if response.status == 429:
             await self._handle_rate_limited_error(route, response, storage)
         else:
@@ -309,7 +309,7 @@ class HTTPClient:
             raise HTTPRequestStatusError(error, response)
 
     async def _handle_rate_limited_error(
-        self, route: Route, response: ClientResponse, storage: RatelimitStorage
+        self, route: Route, response: ClientResponse, storage: RateLimitStorage
     ) -> None:
         # Cloudflare bans arent proxied so via is not sent
         # These bans are usually 1h, however they can be permenant due to repeat offense.
@@ -387,7 +387,7 @@ class HTTPClient:
         if self._session is None:
             self._session = ClientSession(json_serialize=json_dumps)
 
-    async def _get_bucket(self, route: Route, ratelimit_storage: RatelimitStorage) -> Bucket:
+    async def _get_bucket(self, route: Route, ratelimit_storage: RateLimitStorage) -> Bucket:
         """Gets a bucket object for a route.
 
         Strategy:
@@ -428,7 +428,7 @@ class HTTPClient:
         return bucket
 
     async def _update_bucket(
-        self, response: ClientResponse, route: Route, bucket: Bucket, ratelimit_storage: RatelimitStorage
+        self, response: ClientResponse, route: Route, bucket: Bucket, ratelimit_storage: RateLimitStorage
     ) -> None:
         """Updates the bucket and metadata from the info received from the API."""
         headers = response.headers
