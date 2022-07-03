@@ -60,6 +60,6 @@ class File:
 
     __slots__ = ("name", "contents")
 
-    def __init__(self, name: str, contents: Contents):
+    def __init__(self, name: str, contents: Contents) -> None:
         self.name: Final[str] = name
         self.contents: Contents = contents

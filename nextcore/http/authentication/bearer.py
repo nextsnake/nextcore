@@ -49,7 +49,7 @@ class BearerAuthentication(BaseAuthentication):
 
     __slots__: tuple[str, ...] = ()
 
-    def __init__(self, token: str):
+    def __init__(self, token: str) -> None:
         self.prefix: Literal["Bearer"] = "Bearer"
         self.token: str = token
         self.rate_limit_key: str = f"{self.prefix} {self.token}"
