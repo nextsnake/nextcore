@@ -85,6 +85,7 @@ if TYPE_CHECKING:
         PartialChannelData,
         RoleData,
         RolePositionData,
+        Snowflake,
         StageInstanceData,
         StickerData,
         StickerPackData,
@@ -95,7 +96,6 @@ if TYPE_CHECKING:
         WebhookData,
         WelcomeChannelData,
         WelcomeScreenData,
-        Snowflake,
     )
     from discord_typings.interactions.commands import Locales
     from discord_typings.resources.audit_log import AuditLogEvents

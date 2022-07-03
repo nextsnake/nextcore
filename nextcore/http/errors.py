@@ -25,9 +25,9 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Final
-    from discord_typings import HTTPErrorResponseData
 
     from aiohttp import ClientResponse
+    from discord_typings import HTTPErrorResponseData
 
 __all__: Final[tuple[str, ...]] = (
     "RateLimitingFailedError",
