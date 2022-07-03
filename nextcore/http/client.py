@@ -1905,7 +1905,7 @@ class HTTPClient:
             .. hint::
                 A list of fields are available in the documentation.
         """
-        route = Route("GET", f"/guilds/{guild_id}/audit-logs", guild_id=guild_id)
+        route = Route("GET", "/guilds/{guild_id}/audit-logs", guild_id=guild_id)
         query: dict[str, str] = {}
 
         # They are NotRequired but can't be None.
