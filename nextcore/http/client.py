@@ -174,7 +174,7 @@ class HTTPClient:
         trust_local_time: bool = True,
         timeout: float = 60,
         max_ratelimit_retries: int = 10,
-    ):
+    ) -> None:
         self.trust_local_time: bool = trust_local_time
         self.timeout: float = timeout
         self.default_headers: dict[str, str] = {

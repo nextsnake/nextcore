@@ -62,7 +62,7 @@ class Bucket:
         "__weakref__",
     )
 
-    def __init__(self, metadata: BucketMetadata):
+    def __init__(self, metadata: BucketMetadata) -> None:
         self.metadata: BucketMetadata = metadata
         self._remaining: int | None = self.metadata.limit
         self._reserved: list[RequestSession] = []  # Requests currently being processed

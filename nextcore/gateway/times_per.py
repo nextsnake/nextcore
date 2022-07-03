@@ -67,7 +67,7 @@ class TimesPer:
 
     __slots__ = ("total", "remaining", "per", "_reset_at", "_lock")
 
-    def __init__(self, total: int, per: float):
+    def __init__(self, total: int, per: float) -> None:
         self.total: int = total
         self.remaining: int = total
         self.per: float = per
