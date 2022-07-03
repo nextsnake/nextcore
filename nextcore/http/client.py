@@ -2751,7 +2751,7 @@ class HTTPClient:
         NotFoundError
             Could not find the message
         BadRequestError
-            Could not find the emoji to react with or you are not in the server that owns that emoji
+            Could not find the emoji to react with
         BadRequestError
             You are not in the server that owns this emoji
         BadRequestError
@@ -2797,6 +2797,19 @@ class HTTPClient:
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
         global_priority:
             The priority of the request for the global rate-limiter.
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        NotFoundError
+            You had not reacted with that emoji
+        NotFoundError
+            You did not follow the format for the emoji
+        NotFoundError
+            The message was not found
         """
         route = Route(
             "DELETE",
@@ -2847,6 +2860,20 @@ class HTTPClient:
             The id of the user to remove the reaction from.
         global_priority:
             The priority of the request for the global rate-limiter.
+
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        NotFoundError
+            The user had not reacted with that emoji
+        NotFoundError
+            You did not follow the format for the emoji
+        NotFoundError
+            The message was not found
         """
         route = Route(
             "DELETE",
@@ -2878,7 +2905,7 @@ class HTTPClient:
         Read the `documentation <https://discord.dev/resources/channel#get-reactions>`__
 
         .. note::
-            This requires the ``read_message_history`` permission.
+            This requires the ``READ_MESSAGE_HISTORY`` permission.
 
         Parameters
         ----------
@@ -2888,8 +2915,40 @@ class HTTPClient:
             The id of the channel where the message is located.
         message_id:
             The id of the message to get the reactions from.
+        emoji:
+            The emoji to get reactions for
+        after:
+            A snowflake of that the reaction id has to be higher than to be included
+
+            .. note::
+                This does not have to be a valid snowflake
+        limit:
+            The max amount of reactions to return
+
+            .. note::
+                This has to be between ``1`` and ``100``
+            .. note::
+                This defaults to ``25``
         global_priority:
             The priority of the request for the global rate-limiter.
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        NotFoundError
+            The channel was not found
+        NotFoundError
+            The message was not found
+        NotFoundError
+            There was no reactions for that emoji
+        NotFoundError
+            The emoji format was not followed
+        ForbiddenError
+            You did not have the ``READ_MESSAGE_HISTORY`` permission
+
 
         Returns
         -------
@@ -2938,7 +2997,7 @@ class HTTPClient:
         Read the `documentation <https://discord.dev/resources/channel#delete-all-reactions>`__
 
         .. note::
-            This requires the ``manage_messages`` permission.
+            This requires the ``MANAGE_MESSAGES`` permission.
 
         .. note::
             This will cause a ``MESSAGE_REACTION_REMOVE_ALL`` dispatch event.
@@ -2953,6 +3012,21 @@ class HTTPClient:
             The id of the message to remove all reactions from.
         global_priority:
             The priority of the request for the global rate-limiter.
+
+
+        Raises
+        ------
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError 
+            A invalid token was provided
+        NotFoundError
+            Could not find the channel
+        NotFoundError
+            Could not find the message
+        ForbiddenError
+            You did not have the ``MANAGE_MESSAGES`` permission
+            
         """
         route = Route(
             "DELETE",
