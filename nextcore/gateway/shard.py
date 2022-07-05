@@ -158,7 +158,6 @@ class Shard:
         "_heartbeat_sent_at",
         "_latency",
     )
-    GATEWAY_URL: ClassVar[str] = "wss://gateway.discord.gg?v=10&compress=zlib-stream"
     """The gateway URL to connect to"""
 
     def __init__(
@@ -256,12 +255,12 @@ class Shard:
         # TODO: Weird mypy bug?
         async for _ in ExponentialBackoff(0.5, 2, 10):  # type: ignore [attr-defined]
             try:
-                self._ws = await self._http_client.ws_connect(Shard.GATEWAY_URL)
+                self._ws = await self._http_client.connect_to_gateway(version=10, encoding="json", compress="zlib-stream")
                 break
             except ClientConnectorError:
-                self._logger.error("Failed to connect to gateway? Check your internet connection.")
+                self._logger.error("Failed to connect to gateway? Check your internet connection.", exc_info=True)
             except WSServerHandshakeError:
-                self._logger.exception("Failed to connect to gateway?")
+                self._logger.exception("Failed to connect to gateway?", exc_info=True)
 
         if self.session_id is None and self.session_sequence_number is None:
             if not self.should_reconnect:
