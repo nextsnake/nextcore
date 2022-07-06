@@ -52,6 +52,8 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
         There is some extra delay due to ping due to this.
     """
 
+    __slots__ = ("_pending_requests", "_pending_release")
+
     def __init__(self) -> None:
         self._pending_requests: deque[Future[None]] = deque()
         self._pending_release: Lock = Lock()
