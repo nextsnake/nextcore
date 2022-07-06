@@ -383,7 +383,13 @@ class HTTPClient:
                     route.bucket,
                 )
 
-    async def connect_to_gateway(self, *, version: Literal[6, 7, 8, 9, 10] | UndefinedType = UNDEFINED, encoding: Literal["json", "etf"] | UndefinedType = UNDEFINED, compress: Literal["zlib-stream"] | UndefinedType = UNDEFINED) -> ClientWebSocketResponse:
+    async def connect_to_gateway(
+        self,
+        *,
+        version: Literal[6, 7, 8, 9, 10] | UndefinedType = UNDEFINED,
+        encoding: Literal["json", "etf"] | UndefinedType = UNDEFINED,
+        compress: Literal["zlib-stream"] | UndefinedType = UNDEFINED,
+    ) -> ClientWebSocketResponse:
         """Connects to the gateway
 
         **Example usage:**
@@ -412,7 +418,7 @@ class HTTPClient:
         """
         await self._ensure_session()
         assert self._session is not None, "Session was not set after HTTPClient._ensure_session()"
-        
+
         params = {}
 
         # These have different behaviour when not provided and set to None.
@@ -423,9 +429,9 @@ class HTTPClient:
             params["encoding"] = encoding
         if compress is not UNDEFINED:
             params["compress"] = compress
-        
+
         # TODO: Aiohttp bug
-        return await self._session.ws_connect("wss://gateway.discord.gg", params=params) # type: ignore [reportUnknownMemberType]
+        return await self._session.ws_connect("wss://gateway.discord.gg", params=params)  # type: ignore [reportUnknownMemberType]
 
     async def _ensure_session(self) -> None:
         """Makes sure :attr:`HTTPClient._session` is set.

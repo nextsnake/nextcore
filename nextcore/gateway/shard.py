@@ -254,7 +254,9 @@ class Shard:
         # TODO: Weird mypy bug?
         async for _ in ExponentialBackoff(0.5, 2, 10):  # type: ignore [attr-defined]
             try:
-                self._ws = await self._http_client.connect_to_gateway(version=10, encoding="json", compress="zlib-stream")
+                self._ws = await self._http_client.connect_to_gateway(
+                    version=10, encoding="json", compress="zlib-stream"
+                )
                 break
             except ClientConnectorError:
                 self._logger.error("Failed to connect to gateway? Check your internet connection.", exc_info=True)
@@ -473,7 +475,9 @@ class Shard:
         if self.should_reconnect:
             assert self._ws is not None, "_ws is not set?"
             if self._ws.closed:
-                self._ws = await self._http_client.connect_to_gateway(version=10, encoding="json", compress="zlib-stream")
+                self._ws = await self._http_client.connect_to_gateway(
+                    version=10, encoding="json", compress="zlib-stream"
+                )
 
             # Discord expects us to wait for up to 5s before resuming?
             jitter = random()
