@@ -67,7 +67,7 @@ if TYPE_CHECKING:
         ResumeCommand,
         UpdatePresenceData,
         UpdateVoiceStateCommand,
-        UpdateVoiceStateData
+        UpdateVoiceStateData,
     )
     from discord_typings.gateway import ReadyData, UpdatePresenceData
 
@@ -739,6 +739,6 @@ class Shard:
         if nonce is not UNDEFINED:
             data["nonce"] = nonce
 
-        payload: RequestGuildMembersCommand = {"op": GatewayOpcode.REQUEST_GUILD_MEMBERS.value, "d": data} # type: ignore [reportGeneralTypeIssues]
+        payload: RequestGuildMembersCommand = {"op": GatewayOpcode.REQUEST_GUILD_MEMBERS.value, "d": data}  # type: ignore [reportGeneralTypeIssues]
 
         await self._send(payload)
