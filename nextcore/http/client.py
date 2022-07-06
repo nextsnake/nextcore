@@ -423,8 +423,9 @@ class HTTPClient:
             params["encoding"] = encoding
         if compress is not UNDEFINED:
             params["compress"] = compress
-
-        return await self._session.ws_connect("wss://gateway.discord.gg", params=params)
+        
+        # TODO: Aiohttp bug
+        return await self._session.ws_connect("wss://gateway.discord.gg", params=params) # type: ignore [reportUnknownMemberType]
 
     async def _ensure_session(self) -> None:
         """Makes sure :attr:`HTTPClient._session` is set.
