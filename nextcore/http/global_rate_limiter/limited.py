@@ -47,7 +47,7 @@ class LimitedGlobalRateLimiter(BaseGlobalRateLimiter):
         The amount of requests that can be made per second.
     """
 
-    __slots__ = ("limit", "remaining", "_remaining_requests", "_reserved_requests", "_pending_reset")
+    __slots__ = ("limit", "remaining", "_pending_requests", "_reserved_requests", "_pending_reset")
 
     def __init__(self, limit: int = 50) -> None:
         self.limit: int = limit
