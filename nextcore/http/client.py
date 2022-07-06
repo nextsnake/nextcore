@@ -383,31 +383,49 @@ class HTTPClient:
                     route.bucket,
                 )
 
-    async def ws_connect(self, url: str, **kwargs: Any) -> ClientWebSocketResponse:
-        """Connects to a websocket.
+    async def connect_to_gateway(self, *, version: Literal[6, 7, 8, 9, 10] | UndefinedType = UNDEFINED, encoding: Literal["json", "etf"] | UndefinedType = UNDEFINED, compress: Literal["zlib-stream"] | UndefinedType = UNDEFINED) -> ClientWebSocketResponse:
+        """Connects to the gateway
 
         **Example usage:**
 
         .. code-block:: python
 
-            ws = await http_client.ws_connect("wss://gateway.discord.gg")
+            ws = await http_client.connect_to_gateway()
 
 
         Parameters
         ----------
-        url:
-            The url to connect to.
-        kwargs:
-            Keyword arguments to pass to :meth:`aiohttp.ClientSession.ws_connect`
+        version:
+            The major API version to use
+
+            .. hint::
+                It is a good idea to pin this to make sure something doesn't unexpectedly change
+        encoding:
+            Whether to use json or etf for payloads
+        compress:
+            Payload compression from data sent from Discord.
 
         Returns
         -------
         aiohttp.ClientWebSocketResponse
-            The websocket response.
+            The gateway websocket
         """
         await self._ensure_session()
         assert self._session is not None, "Session was not set after HTTPClient._ensure_session()"
-        return await self._session.ws_connect(url, heartbeat=None, **kwargs)
+        
+        params = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if version is not UNDEFINED:
+            params["version"] = version
+        if encoding is not UNDEFINED:
+            params["encoding"] = encoding
+        if compress is not UNDEFINED:
+            params["compress"] = compress
+        
+        # TODO: Aiohttp bug
+        return await self._session.ws_connect("wss://gateway.discord.gg", params=params) # type: ignore [reportUnknownMemberType]
 
     async def _ensure_session(self) -> None:
         """Makes sure :attr:`HTTPClient._session` is set.
