@@ -41,6 +41,8 @@ class BaseGlobalRateLimiter(ABC):
         You are probably looking for :class:`LimitedGlobalRateLimiter` or :class:`UnlimitedGlobalRateLimiter`
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def acquire(self, *, priority: int = 0) -> AsyncContextManager[None]:
         """Use a spot in the rate-limit.
