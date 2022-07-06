@@ -64,11 +64,10 @@ if TYPE_CHECKING:
         InvalidSessionEvent,
         ReconnectEvent,
         RequestGuildMembersCommand,
-        RequestGuildMembersData,
         ResumeCommand,
         UpdatePresenceData,
-        VoiceUpdateCommand,
-        VoiceUpdateData,
+        UpdateVoiceStateCommand,
+        UpdateVoiceStateData
     )
     from discord_typings.gateway import ReadyData, UpdatePresenceData
 
@@ -617,13 +616,13 @@ class Shard:
 
         await self._send(payload)
 
-    async def voice_state_update(self, update: VoiceUpdateData):
+    async def voice_state_update(self, update: UpdateVoiceStateData):
         """Updates the voice state of the logged in user.
 
         This is per guild.
         """
 
-        payload: VoiceUpdateCommand = {"op": GatewayOpcode.VOICE_STATE_UPDATE.value, "d": update}
+        payload: UpdateVoiceStateCommand = {"op": GatewayOpcode.VOICE_STATE_UPDATE.value, "d": update}
 
         await self._send(payload)
 
@@ -728,10 +727,7 @@ class Shard:
 
                 If it is longer it will be ignored.
         """
-        # TODO: Pyright hates this!
-        # Seems like pyright ignores overloads
-        # and data not having all fields needed on initalization.
-        data: RequestGuildMembersData = {"guild_id": guild_id}
+        data: dict[str, Any] = {"guild_id": guild_id}
         if query is not UNDEFINED:
             data["query"] = query
         if limit is not UNDEFINED:
@@ -743,6 +739,6 @@ class Shard:
         if nonce is not UNDEFINED:
             data["nonce"] = nonce
 
-        payload: RequestGuildMembersCommand = {"op": GatewayOpcode.REQUEST_GUILD_MEMBERS.value, "d": data}
+        payload: RequestGuildMembersCommand = {"op": GatewayOpcode.REQUEST_GUILD_MEMBERS.value, "d": data} # type: ignore [reportGeneralTypeIssues]
 
         await self._send(payload)
