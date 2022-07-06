@@ -53,7 +53,7 @@ from .op_code import GatewayOpcode
 from .times_per import TimesPer
 
 if TYPE_CHECKING:
-    from typing import Any, ClassVar, Final, Literal
+    from typing import Any, Final, Literal
 
     from discord_typings import (
         DispatchEvent,
