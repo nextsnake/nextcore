@@ -67,6 +67,7 @@ if TYPE_CHECKING:
         UpdatePresenceData,
         UpdateVoiceStateCommand,
         UpdateVoiceStateData,
+        UpdatePresenceCommand
     )
     from discord_typings.gateway import ReadyData, UpdatePresenceData
 
