@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from asyncio import Future, get_running_loop
+from asyncio import Future, get_running_loop, CancelledError
 from contextlib import asynccontextmanager
 from logging import getLogger
 from queue import PriorityQueue
@@ -82,7 +82,12 @@ class LimitedGlobalRateLimiter(BaseGlobalRateLimiter):
             self._pending_requests.put_nowait(item)
 
             logger.debug("Added request to queue with priority %s", priority)
-            await future
+            try:
+                await future
+            except CancelledError:
+                logger.debug("Removing request from queue due to cancelled task")
+                self._pending_requests.queue.remove(item)
+                raise # Don't continue
             logger.debug("Out of queue, doing request")
 
         self._reserved_requests += 1
