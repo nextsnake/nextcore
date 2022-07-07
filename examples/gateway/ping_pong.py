@@ -57,6 +57,8 @@ async def on_message(message: MessageData):
 
 
 async def main():
+    await http_client.setup()
+
     # This should return once all shards have started to connect.
     # This does not mean they are connected.
     await shard_manager.connect()
