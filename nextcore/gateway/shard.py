@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from asyncio import Event, get_running_loop, sleep
+from asyncio import Event, create_task, get_running_loop, sleep
 from logging import Logger, getLogger
 from random import random
 from sys import platform
@@ -34,7 +34,6 @@ from aiohttp import (
     WSMsgType,
     WSServerHandshakeError,
 )
-from discord_typings.gateway import UpdatePresenceCommand
 from frozendict import frozendict
 
 from ..common import UNDEFINED, Dispatcher, UndefinedType, json_dumps, json_loads
@@ -68,6 +67,7 @@ if TYPE_CHECKING:
         UpdatePresenceData,
         UpdateVoiceStateCommand,
         UpdateVoiceStateData,
+        UpdatePresenceCommand
     )
     from discord_typings.gateway import ReadyData, UpdatePresenceData
 
@@ -227,59 +227,61 @@ class Shard:
         self.dispatcher.add_listener(self._handle_disconnect, "disconnect")
 
     async def connect(self) -> None:
-        """Connect to the gateway.
+        """Connect to the gateway
 
-        This will automatically RESUME if a session is set.
+        .. note::
+            This will try to automatically resume if a session is set.
 
         Raises
         ------
-        :exc:`ReconnectCheckFailedError`
-            :attr:`Shard.should_reconnect` was false and a :meth:`Shard.identify` call was needed.
+        ReconnectCheckFailedError
+            :attr:`Shard.should_reconnect` was set to :data:`False` and a :meth:`Shard.identify` call was needed.
         """
-        # Clear state
-        self._decompressor = Decompressor()
-        self._received_heartbeat_ack = True
+        async for _ in ExponentialBackoff(0.5, 2, 10):
+            try:
+                ws = await self._http_client.connect_to_gateway(version=10, encoding="json", compress="zlib-stream")
+            except ClientConnectorError:
+                self._logger.exception("Failed to connect to the gateway? Check your internet connection")
+            except WSServerHandshakeError:
+                self._logger.exception("Failed to connect to the gateway")
+            finally:
+                break
 
-        # Connect to gateway
+        # Disconnect previously connected ws
         if self._ws is not None and not self._ws.closed:
+            self.ready.clear()
+            await self._ws.close(code=999)
             # Notify that we disconnected the ws, as the normal disconnect is for disconnects from discord.
             # Disconnects from discord also include a error code, which we don't.
             # This does include a bool if we closed the session.
             await self.dispatcher.dispatch("client_disconnect", False)
 
-            # This is to keep the session alive.
-            await self._ws.close(code=999)
+        # Use the ws we connected with
+        self._ws = ws  # type: ignore [reportUnboundVariable] # This is always bound.
 
-        # Retry connection
-        # TODO: Weird mypy bug?
-        async for _ in ExponentialBackoff(0.5, 2, 10):  # type: ignore [attr-defined]
-            try:
-                self._ws = await self._http_client.connect_to_gateway(
-                    version=10, encoding="json", compress="zlib-stream"
-                )
-                break
-            except ClientConnectorError:
-                self._logger.error("Failed to connect to gateway? Check your internet connection.", exc_info=True)
-            except WSServerHandshakeError:
-                self._logger.exception("Failed to connect to gateway?", exc_info=True)
-
-        if self.session_id is None and self.session_sequence_number is None:
-            if not self.should_reconnect:
-                raise ReconnectCheckFailedError
-            # No session stored, create a new one.
-            await self._identify_rate_limiter.wait()
-            await self.identify()
-        else:
-            # Session stored, resume it.
-            # Resumes don't use up the IDENTIFY rate limit so we should prefer using it.
+        # Identify/Resume
+        if self.session_id is not None and self.session_sequence_number is not None:
+            # Resuming
             await self.resume()
 
-            # Discord does not provide a "session resume ok" event, they only do it after resuming every event which can take a long time.
-            # We really have to hope that discord does not consume multiple events at once.
+            # Manually set the ready flag as Discord does not send a resume acknowledge
+            # However it does send a RESUMED event, which is unfortunatly only sent when all events have been repeated.
+            # Which is too late for us.
             self.ready.set()
+        else:
+            # Clean up session_id and session_sequence_number
+            self.session_sequence_number = None
+            self.session_id = None
 
-        loop = get_running_loop()
-        loop.create_task(self._receive_loop())
+            if not self.should_reconnect:
+                # We should not re-IDENTIFY when should_reconnect is false.
+                raise ReconnectCheckFailedError()
+
+            # Identify
+            await self._identify_rate_limiter.wait()
+            await self.identify()
+
+        create_task(self._receive_loop())
 
     async def close(self) -> None:
         """Close the connection to the gateway and destroy the session.
