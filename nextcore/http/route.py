@@ -97,7 +97,7 @@ class Route:
         guild_id: Snowflake | None = None,
         channel_id: Snowflake | None = None,
         webhook_id: Snowflake | None = None,
-        webhook_token: Snowflake | None = None,
+        webhook_token: str | None = None,
         **parameters: Snowflake,
     ) -> None:
         self.method: str = method
