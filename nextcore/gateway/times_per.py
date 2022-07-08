@@ -85,8 +85,17 @@ class TimesPer:
                 # Time expired, reset.
                 self._reset_at = current_time + self.per
                 self.remaining = self.total
+                logger.debug("Resetting!")
             if self.remaining == 0:
+                logger.debug("Ran out of the rate limit! Waiting!")
                 await sleep(self._reset_at - current_time)
+                logger.debug("Done waiting!")
+
+                # Reset
+                current_time = time()
+                self.remaining = self.total
+                self._reset_at = current_time + self.per
+            logger.debug("Allowing through the rate limit")
             self.remaining -= 1
 
     @property
