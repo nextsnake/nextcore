@@ -64,10 +64,10 @@ if TYPE_CHECKING:
         ReconnectEvent,
         RequestGuildMembersCommand,
         ResumeCommand,
+        UpdatePresenceCommand,
         UpdatePresenceData,
         UpdateVoiceStateCommand,
         UpdateVoiceStateData,
-        UpdatePresenceCommand
     )
     from discord_typings.gateway import ReadyData, UpdatePresenceData
 
@@ -237,6 +237,9 @@ class Shard:
         ReconnectCheckFailedError
             :attr:`Shard.should_reconnect` was set to :data:`False` and a :meth:`Shard.identify` call was needed.
         """
+        # Reset session
+        self._decompressor = Decompressor()
+
         async for _ in ExponentialBackoff(0.5, 2, 10):
             try:
                 ws = await self._http_client.connect_to_gateway(version=10, encoding="json", compress="zlib-stream")
@@ -246,6 +249,10 @@ class Shard:
                 self._logger.exception("Failed to connect to the gateway")
             finally:
                 break
+
+        self._logger.debug("Connected to websocket")
+
+        create_task(self._receive_loop())
 
         # Disconnect previously connected ws
         if self._ws is not None and not self._ws.closed:
@@ -280,8 +287,6 @@ class Shard:
             # Identify
             await self._identify_rate_limiter.wait()
             await self.identify()
-
-        create_task(self._receive_loop())
 
     async def close(self) -> None:
         """Close the connection to the gateway and destroy the session.
@@ -486,7 +491,7 @@ class Shard:
             resume_after = 5 * jitter
             self._logger.debug("Resuming after %s seconds", resume_after)
             await sleep(resume_after)
-            
+
             await self._identify_rate_limiter.wait()
             await self.identify()
 

@@ -21,11 +21,10 @@
 
 from __future__ import annotations
 
+from asyncio import CancelledError, gather, get_running_loop
 from collections import defaultdict
 from logging import getLogger
 from typing import TYPE_CHECKING
-from asyncio import get_running_loop, CancelledError, gather
-
 
 from ..common.dispatcher import Dispatcher
 from .errors import InvalidShardCountError
@@ -33,7 +32,7 @@ from .shard import Shard
 from .times_per import TimesPer
 
 if TYPE_CHECKING:
-    from typing import Any, Final, Coroutine
+    from typing import Any, Coroutine, Final
 
     from discord_typings import GatewayEvent
     from discord_typings.gateway import UpdatePresenceData
@@ -226,7 +225,7 @@ class ShardManager:
             raise RuntimeError("rescale_shards can only be ran once at a time")
         if self.max_concurrency is None:
             raise RuntimeError("You need to use ShardManager.connect first")
-        
+
         # Set properties
         self._pending_shard_count = shard_count
         self.pending_shards.clear()
@@ -249,15 +248,15 @@ class ShardManager:
                 self._http_client,
                 presence=self.presence,
             )
-            
+
             shard_connects.append(shard.connect())
-            
+
             self.pending_shards.append(shard)
         try:
             await gather(*shard_connects)
         except CancelledError:
             logger.info("Shard re-scale was cancelled!")
-            
+
             # Reset all pending info
             # Close all shards
             await gather(*[shard.close() for shard in self.pending_shards])
@@ -287,8 +286,6 @@ class ShardManager:
         # Cleanup
         self.pending_shards = []
         self._pending_shard_count = None
-
-            
 
     # Handlers
     async def _on_raw_shard_receive(self, opcode: int, data: GatewayEvent) -> None:
