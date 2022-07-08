@@ -484,7 +484,8 @@ class Shard:
             resume_after = 5 * jitter
             self._logger.debug("Resuming after %s seconds", resume_after)
             await sleep(resume_after)
-
+            
+            await self._identify_rate_limiter.wait()
             await self.identify()
 
     async def _handle_dispatch(self, data: DispatchEvent) -> None:
@@ -583,6 +584,8 @@ class Shard:
 
         .. note::
             See the `documentation <https://discord.dev/topics/gateway#identify>`__
+        .. warning::
+            This does not handle rate-limiting
         """
         payload: IdentifyCommand = {
             "op": GatewayOpcode.IDENTIFY.value,
