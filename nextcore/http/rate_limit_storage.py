@@ -56,7 +56,7 @@ class RateLimitStorage:
     __slots__ = ("_nextcore_buckets", "_discord_buckets", "_bucket_metadata", "global_rate_limiter")
 
     def __init__(self) -> None:
-        self._nextcore_buckets: dict[str | int, Bucket] = {}
+        self._nextcore_buckets: dict[str, Bucket] = {}
         self._discord_buckets: WeakValueDictionary[str, Bucket] = WeakValueDictionary()
         self._bucket_metadata: dict[
             str, BucketMetadata
@@ -68,7 +68,7 @@ class RateLimitStorage:
 
     # These are async and not just public dicts because we want to support custom implementations that use asyncio.
     # This does introduce some overhead, but it's not too bad.
-    async def get_bucket_by_nextcore_id(self, nextcore_id: str | int) -> Bucket | None:
+    async def get_bucket_by_nextcore_id(self, nextcore_id: str) -> Bucket | None:
         """Get a rate limit bucket from a nextcore created id.
 
         Parameters
@@ -78,7 +78,7 @@ class RateLimitStorage:
         """
         return self._nextcore_buckets.get(nextcore_id)
 
-    async def store_bucket_by_nextcore_id(self, nextcore_id: str | int, bucket: Bucket) -> None:
+    async def store_bucket_by_nextcore_id(self, nextcore_id: str, bucket: Bucket) -> None:
         """Store a rate limit bucket by nextcore generated id.
 
         Parameters

@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from asyncio import Future, Lock, create_task, sleep
+from asyncio import CancelledError, Future, Lock, create_task, sleep
 from collections import deque
 from contextlib import asynccontextmanager
 from logging import getLogger
@@ -81,7 +81,12 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
             self._pending_requests.append(future)
 
             # Wait
-            await future
+            try:
+                await future
+            except CancelledError:
+                logger.debug("Ratelimit use was cancelled while it was pending. Cancelling!")
+                self._pending_requests.remove(future)
+                raise  # Don't continue
         yield None
 
     def update(self, retry_after: float) -> None:

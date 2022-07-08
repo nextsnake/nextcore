@@ -69,9 +69,6 @@ class Route:
         The rate limit bucket this fits in.
 
         This is created from :attr:`Route.guild_id`, :attr:`Route.channel_id`, :attr:`Route.webhook_id`, :attr:`Bucket.method` and :attr:`Route.path`
-
-        .. note::
-            This will be :class:`int` if :data:`__debug__` is :data:`True`
     """
 
     __slots__ = ("method", "route", "path", "ignore_global", "bucket")
@@ -107,7 +104,4 @@ class Route:
         )
         self.ignore_global: bool = ignore_global
 
-        self.bucket: str | int = f"{guild_id}{channel_id}{webhook_id}{webhook_token}{method}{path}"
-
-        if not __debug__:
-            self.bucket = hash(self.bucket)
+        self.bucket: str = f"{guild_id}{channel_id}{webhook_id}{webhook_token}{method}{path}"
