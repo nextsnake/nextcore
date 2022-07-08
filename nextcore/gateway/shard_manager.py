@@ -298,7 +298,15 @@ class ShardManager:
 
     async def _on_shard_critical(self, error: Exception):
         if isinstance(error, InvalidShardCountError):
-            raise NotImplementedError("Re-scaling of shards is not implemented yet.")
+            if self.shard_count is not None:
+                raise InvalidShardCountError()
+
+            logger.info("Automatically re-scaling due to too few shards!")
+
+            gateway = await self._http_client.get_gateway_bot(self.authentication)
+            recommended_shard_count = gateway["shards"]
+
+            await self.rescale_shards(recommended_shard_count)
 
         await self.dispatcher.dispatch("critical", error)
 
