@@ -286,7 +286,7 @@ class HTTPClient:
         Raises
         ------
         RuntimeError
-            :meth:`HTTPClient.setup` was not called yet
+            :meth:`HTTPClient.setup` was not called yet.
         RuntimeError
             HTTPClient was closed.
         CloudflareBanError
@@ -448,7 +448,7 @@ class HTTPClient:
         Raises
         ------
         RuntimeError
-            :meth:`HTTPClient.setup` was not called yet
+            :meth:`HTTPClient.setup` was not called yet.
         RuntimeError
             HTTPClient was closed.
 
