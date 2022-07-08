@@ -210,16 +210,16 @@ class ShardManager:
         Parameters
         ----------
         shard_count:
-            The shard count to change to
+            The shard count to change to.
         shard_ids:
             Shards to start. If it is set to :data:`None`, this will use all shards up to the shard count.
 
         Raises
         ------
         RuntimeError
-            You can only run rescale_shards once at a time
+            You can only run rescale_shards once at a time.
         RuntimeError
-            You need to use :meth:`ShardManager.connect` first
+            You need to use :meth:`ShardManager.connect` first.
         """
         if self._pending_shard_count is not None:
             raise RuntimeError("rescale_shards can only be ran once at a time")
