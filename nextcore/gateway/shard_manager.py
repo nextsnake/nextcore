@@ -24,17 +24,16 @@ from __future__ import annotations
 from collections import defaultdict
 from logging import getLogger
 from typing import TYPE_CHECKING
+from asyncio import get_running_loop, CancelledError, gather
 
-from aiohttp.helpers import get_running_loop
-
-from nextcore.gateway.times_per import TimesPer
 
 from ..common.dispatcher import Dispatcher
 from .errors import InvalidShardCountError
 from .shard import Shard
+from .times_per import TimesPer
 
 if TYPE_CHECKING:
-    from typing import Any, Final
+    from typing import Any, Final, Coroutine
 
     from discord_typings import GatewayEvent
     from discord_typings.gateway import UpdatePresenceData
@@ -153,14 +152,18 @@ class ShardManager:
         """
         if self.active_shards:
             raise RuntimeError("Already connected!")
+
+        # Get max concurrency and recommended shard count
         connection_info = await self._http_client.get_gateway_bot(self.authentication)
         session_start_limits = connection_info["session_start_limit"]
         self.max_concurrency = session_start_limits["max_concurrency"]
 
         if self._active_shard_count is None:
+            # No shard count provided, use the recommended amount by Discord.
             self._active_shard_count = connection_info["shards"]
 
         if self.shard_ids is None:
+            # Use all shards if shard_ids is not specified
             shard_ids = list(range(self._active_shard_count))
         else:
             shard_ids = self.shard_ids
@@ -196,6 +199,96 @@ class ShardManager:
         loop.create_task(shard.connect())
 
         return shard
+
+    async def rescale_shards(self, shard_count: int, shard_ids: list[int] | None = None) -> None:
+        """Change the shard count without restarting
+
+        This slowly changes the shard count.
+
+        .. warning::
+            You can only change the shard count once at a time
+
+        Parameters
+        ----------
+        shard_count:
+            The shard count to change to
+        shard_ids:
+            Shards to start. If it is set to :data:`None`, this will use all shards up to the shard count.
+
+        Raises
+        ------
+        RuntimeError
+            You can only run rescale_shards once at a time
+        RuntimeError
+            You need to use :meth:`ShardManager.connect` first
+        """
+        if self._pending_shard_count is not None:
+            raise RuntimeError("rescale_shards can only be ran once at a time")
+        if self.max_concurrency is None:
+            raise RuntimeError("You need to use ShardManager.connect first")
+        
+        # Set properties
+        self._pending_shard_count = shard_count
+        self.pending_shards.clear()
+
+        # Get the shard ids
+        if shard_ids is None:
+            shard_ids = list(range(shard_count))
+
+        shard_connects: list[Coroutine[Any, Any, None]] = []
+
+        for shard_id in shard_ids:
+            rate_limiter = self._identify_rate_limits[shard_id % self.max_concurrency]
+
+            shard = Shard(
+                shard_id,
+                shard_count,
+                self.intents,
+                self.authentication.token,
+                rate_limiter,
+                self._http_client,
+                presence=self.presence,
+            )
+            
+            shard_connects.append(shard.connect())
+            
+            self.pending_shards.append(shard)
+        try:
+            await gather(*shard_connects)
+        except CancelledError:
+            logger.info("Shard re-scale was cancelled!")
+            
+            # Reset all pending info
+            # Close all shards
+            await gather(*[shard.close() for shard in self.pending_shards])
+
+            self.pending_shards.clear()
+            self._pending_shard_count = None
+            return
+
+        logger.info("Shard re-scaling finished!")
+
+        # Replace current shard set with the pending shard set
+
+        # Close all active shards
+        await gather(*[shard.close() for shard in self.active_shards])
+
+        # Register event listeners
+        for shard in self.pending_shards:
+            shard.raw_dispatcher.add_listener(self._on_raw_shard_receive)
+            shard.event_dispatcher.add_listener(self._on_shard_dispatch)
+            shard.dispatcher.add_listener(self._on_shard_critical, "critical")
+
+        # Replace the shard set
+        self.active_shards.clear()
+        self.active_shards = self.pending_shards
+        self._active_shard_count = shard_count
+
+        # Cleanup
+        self.pending_shards = []
+        self._pending_shard_count = None
+
+            
 
     # Handlers
     async def _on_raw_shard_receive(self, opcode: int, data: GatewayEvent) -> None:
