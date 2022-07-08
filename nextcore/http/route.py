@@ -46,6 +46,7 @@ class Route:
     guild_id:
     channel_id:
     webhook_id:
+    webhhook_token:
         Major parameters which will be included in ``parameters`` and count towards the rate limit.
     parameters:
         The parameters of the route. These will be used to format the path.
@@ -96,14 +97,17 @@ class Route:
         guild_id: Snowflake | None = None,
         channel_id: Snowflake | None = None,
         webhook_id: Snowflake | None = None,
+        webhook_token: Snowflake | None = None,
         **parameters: Snowflake,
     ) -> None:
         self.method: str = method
         self.route: str = path
-        self.path: str = path.format(guild_id=guild_id, channel_id=channel_id, webhook_id=webhook_id, **parameters)
+        self.path: str = path.format(
+            guild_id=guild_id, channel_id=channel_id, webhook_id=webhook_id, webhook_token=webhook_token, **parameters
+        )
         self.ignore_global: bool = ignore_global
 
-        self.bucket: str | int = f"{guild_id}{channel_id}{webhook_id}{method}{path}"
+        self.bucket: str | int = f"{guild_id}{channel_id}{webhook_id}{webhook_token}{method}{path}"
 
         if not __debug__:
             self.bucket = hash(self.bucket)
