@@ -41,8 +41,8 @@ async def test_exceeds_limit_concurrent() -> None:
         logger.debug("Created task %s", i)
         create_task(use_rate_limiter())
     await sleep(1)  # No clue why .1 is needed here...
-    pending_requests = rate_limiter._pending_requests.qsize()
+    pending_requests = rate_limiter._pending.qsize()
     assert pending_requests == 1, f"Expected 1 pending request, got {pending_requests}"
 
     # Cancel the remaining task for a clean output
-    rate_limiter._pending_requests.get_nowait().future.set_result(None)
+    rate_limiter._pending.get_nowait().future.set_result(None)
