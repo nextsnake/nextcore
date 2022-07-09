@@ -49,7 +49,7 @@ from .errors import (
 )
 from .exponential_backoff import ExponentialBackoff
 from .op_code import GatewayOpcode
-from .times_per import TimesPer
+from ..common import TimesPer
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
@@ -287,8 +287,8 @@ class Shard:
                 raise ReconnectCheckFailedError()
 
             # Identify
-            await self._identify_rate_limiter.wait()
-            await self.identify()
+            async with self._identify_rate_limiter.acquire():
+                await self.identify()
 
     async def close(self) -> None:
         """Close the connection to the gateway and destroy the session.
@@ -327,18 +327,14 @@ class Shard:
             self._logger.debug("Waiting until ready")
             await self.ready.wait()
 
-        # Take up a space in the rate limit
-        # Yes there is a small chance that we would get disconnected here due to fluctuating latency,
-        # however this is basically unavoidable.
-        await self._send_rate_limit.wait()
+        async with self._send_rate_limit.acquire():
+            assert self._ws is not None, "Websocket is not connected"
+            assert self._ws.closed is False, "Websocket is closed"
 
-        assert self._ws is not None, "Websocket is not connected"
-        assert self._ws.closed is False, "Websocket is closed"
+            await self._ws.send_json(data, dumps=json_dumps)
 
-        self._logger.debug("Sent: %s", data)
-        await self.dispatcher.dispatch("sent", data)
-
-        await self._ws.send_json(data, dumps=json_dumps)
+            self._logger.debug("Sent: %s", data)
+            await self.dispatcher.dispatch("sent", data)
 
     # Loops
     async def _receive_loop(self) -> None:
@@ -491,11 +487,11 @@ class Shard:
             # Discord expects us to wait for up to 5s before resuming?
             jitter = random()
             resume_after = 5 * jitter
-            self._logger.debug("Resuming after %s seconds", resume_after)
+            self._logger.debug("Re-identifying after %s seconds", resume_after)
             await sleep(resume_after)
-
-            await self._identify_rate_limiter.wait()
-            await self.identify()
+            
+            async with self._identify_rate_limiter.acquire():
+                await self.identify()
 
     async def _handle_dispatch(self, data: DispatchEvent) -> None:
         # Save sequence number for resuming.

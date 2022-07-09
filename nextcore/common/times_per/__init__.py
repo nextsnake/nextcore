@@ -19,40 +19,15 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+"""Common utility functions for the library"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from .times_per import *
+
 if TYPE_CHECKING:
-    from asyncio import Future
     from typing import Final
 
-__all__: Final[tuple[str, ...]] = ("PriorityRequestContainer",)
-
-
-class PriorityRequestContainer:
-    """A container for requests for :class:`queue.PriorityQueue` to ignore the future when comparing greater than and less than
-
-    Parameters
-    ----------
-    priority:
-        The request priority. This will be compared!
-    future:
-        The future for when the request is done
-
-    Attributes
-    ----------
-    priority:
-        The request priority. This will be compared!
-    future:
-        The future for when the request is done
-    """
-
-    __slots__: tuple[str, ...] = ("priority", "future")
-
-    def __init__(self, priority: int, future: Future[None]) -> None:
-        self.priority: int = priority
-        self.future: Future[None] = future
-
-    def __gt__(self, other: PriorityRequestContainer):
-        return self.priority > other.priority
+__all__: Final[tuple[str, ...]] = ("TimesPer",)

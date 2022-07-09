@@ -26,10 +26,9 @@ from collections import defaultdict
 from logging import getLogger
 from typing import TYPE_CHECKING
 
-from ..common.dispatcher import Dispatcher
+from ..common import Dispatcher, TimesPer
 from .errors import InvalidShardCountError
 from .shard import Shard
-from .times_per import TimesPer
 
 if TYPE_CHECKING:
     from typing import Any, Coroutine, Final

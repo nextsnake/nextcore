@@ -21,14 +21,11 @@
 
 from __future__ import annotations
 
-from asyncio import Future, get_running_loop
-from contextlib import asynccontextmanager
 from logging import getLogger
-from queue import PriorityQueue
-from typing import TYPE_CHECKING, AsyncIterator
+from typing import TYPE_CHECKING
 
 from .base import BaseGlobalRateLimiter
-from .priority_request_container import PriorityRequestContainer
+from ...common import TimesPer
 
 if TYPE_CHECKING:
     from typing import Final
@@ -38,7 +35,7 @@ __all__: Final[tuple[str, ...]] = ("LimitedGlobalRateLimiter",)
 logger = getLogger(__name__)
 
 
-class LimitedGlobalRateLimiter(BaseGlobalRateLimiter):
+class LimitedGlobalRateLimiter(TimesPer, BaseGlobalRateLimiter):
     """A limited global rate-limiter.
 
     Parameters
@@ -47,78 +44,10 @@ class LimitedGlobalRateLimiter(BaseGlobalRateLimiter):
         The amount of requests that can be made per second.
     """
 
-    __slots__ = ("limit", "remaining", "_pending_requests", "_reserved_requests", "_pending_reset")
+    __slots__ = ()
 
     def __init__(self, limit: int = 50) -> None:
-        self.limit: int = limit
-        self.remaining: int = limit
-        self._pending_requests: PriorityQueue[PriorityRequestContainer] = PriorityQueue()
-        self._reserved_requests: int = 0
-        self._pending_reset: bool = False
-
-    @asynccontextmanager
-    async def acquire(self, *, priority: int = 0) -> AsyncIterator[None]:
-        """Use a spot in the rate-limit.
-
-        Parameters
-        ----------
-        priority:
-            The request priority. **Lower** number means it will be requested earlier.
-
-        Returns
-        -------
-        :class:`typing.AsyncContextManager`
-            A context manager that will wait in __aenter__ until a request should be made.
-        """
-
-        calculated_remaining = self.remaining - self._reserved_requests
-        logger.debug("Calculated remaining: %s", calculated_remaining)
-        logger.debug("Reserved requests: %s", self._reserved_requests)
-
-        if calculated_remaining == 0:
-            future: Future[None] = Future()
-            item = PriorityRequestContainer(priority, future)
-
-            self._pending_requests.put_nowait(item)
-
-            logger.debug("Added request to queue with priority %s", priority)
-            await future
-            logger.debug("Out of queue, doing request")
-
-        self._reserved_requests += 1
-        try:
-            yield None
-        finally:
-            # Start a reset task
-            if not self._pending_reset:
-                self._pending_reset = True
-                loop = get_running_loop()
-                loop.call_later(1, self._reset)
-
-            self._reserved_requests -= 1
-            self.remaining -= 1
-
-    def _reset(self) -> None:
-        self._pending_reset = False
-
-        self.remaining = self.limit
-
-        to_release = min(self._pending_requests.qsize(), self.remaining - self._reserved_requests)
-        logger.debug("Releasing %s requests", to_release)
-        for _ in range(to_release):
-            container = self._pending_requests.get_nowait()
-            future = container.future
-
-            # Mark it as completed, good practice (and saves a bit of memory due to a infinitly expanding int)
-            self._pending_requests.task_done()
-
-            # Release it and allow further requests
-            future.set_result(None)
-        if self._pending_requests.qsize():
-            self._pending_reset = True
-
-            loop = get_running_loop()
-            loop.call_later(1, self._reset)
+        TimesPer.__init__(self, limit, 1)
 
     def update(self, retry_after: float) -> None:
         """A function that gets called whenever the global rate-limit gets exceeded

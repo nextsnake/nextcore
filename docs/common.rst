@@ -7,6 +7,9 @@ Common
 .. autoclass:: Dispatcher
    :members:
 
+.. autoclass:: TimesPer
+   :members:
+
 .. autoclass:: UndefinedType
    :members:
 
