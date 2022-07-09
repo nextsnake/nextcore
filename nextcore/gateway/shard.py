@@ -237,8 +237,6 @@ class Shard:
         ReconnectCheckFailedError
             :attr:`Shard.should_reconnect` was set to :data:`False` and a :meth:`Shard.identify` call was needed.
         """
-        # Reset session
-        self._decompressor = Decompressor()
 
         async for _ in ExponentialBackoff(0.5, 2, 10):
             try:
@@ -252,8 +250,6 @@ class Shard:
 
         self._logger.debug("Connected to websocket")
 
-        create_task(self._receive_loop())
-
         # Disconnect previously connected ws
         if self._ws is not None and not self._ws.closed:
             self.ready.clear()
@@ -263,8 +259,14 @@ class Shard:
             # This does include a bool if we closed the session.
             await self.dispatcher.dispatch("client_disconnect", False)
 
+        # Reset session
+        self._decompressor = Decompressor()
+        self._received_heartbeat_ack = True
+
         # Use the ws we connected with
         self._ws = ws  # type: ignore [reportUnboundVariable] # This is always bound.
+
+        create_task(self._receive_loop())
 
         # Identify/Resume
         if self.session_id is not None and self.session_sequence_number is not None:
