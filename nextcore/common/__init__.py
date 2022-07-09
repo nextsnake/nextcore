@@ -28,8 +28,8 @@ from typing import TYPE_CHECKING
 from .dispatcher import Dispatcher
 from .json import *
 from .maybe_coro import *
-from .undefined import *
 from .times_per import *
+from .undefined import *
 
 if TYPE_CHECKING:
     from typing import Final

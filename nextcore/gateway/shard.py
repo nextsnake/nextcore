@@ -36,7 +36,14 @@ from aiohttp import (
 )
 from frozendict import frozendict
 
-from ..common import UNDEFINED, Dispatcher, UndefinedType, json_dumps, json_loads
+from ..common import (
+    UNDEFINED,
+    Dispatcher,
+    TimesPer,
+    UndefinedType,
+    json_dumps,
+    json_loads,
+)
 from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .errors import (
@@ -49,7 +56,6 @@ from .errors import (
 )
 from .exponential_backoff import ExponentialBackoff
 from .op_code import GatewayOpcode
-from ..common import TimesPer
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
@@ -489,7 +495,7 @@ class Shard:
             resume_after = 5 * jitter
             self._logger.debug("Re-identifying after %s seconds", resume_after)
             await sleep(resume_after)
-            
+
             async with self._identify_rate_limiter.acquire():
                 await self.identify()
 

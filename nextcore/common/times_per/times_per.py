@@ -102,7 +102,7 @@ class TimesPer:
                 # Release it and allow further requests
                 future.set_result(None)
 
-            raise # Re-raise exception
+            raise  # Re-raise exception
         finally:
             # Start a reset task
             if not self._pending_reset:
@@ -114,7 +114,6 @@ class TimesPer:
 
         # This only gets called if no exception got raised.
         self.remaining -= 1
-
 
     def _reset(self) -> None:
         self._pending_reset = False

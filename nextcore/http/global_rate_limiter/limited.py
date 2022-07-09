@@ -24,8 +24,8 @@ from __future__ import annotations
 from logging import getLogger
 from typing import TYPE_CHECKING
 
-from .base import BaseGlobalRateLimiter
 from ...common import TimesPer
+from .base import BaseGlobalRateLimiter
 
 if TYPE_CHECKING:
     from typing import Final
