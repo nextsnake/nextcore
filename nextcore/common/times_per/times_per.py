@@ -50,7 +50,7 @@ class TimesPer:
 
     __slots__ = ("limit", "per", "remaining", "_pending", "_in_progress", "_pending_reset")
 
-    def __init__(self, limit: int, per: int) -> None:
+    def __init__(self, limit: int, per: float) -> None:
         self.limit: int = limit
         self.per: float = per
         self.remaining: int = limit
