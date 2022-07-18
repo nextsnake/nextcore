@@ -300,7 +300,14 @@ class ShardManager:
     async def _on_shard_critical(self, error: Exception):
         if isinstance(error, InvalidShardCountError):
             if self.shard_count is not None:
-                raise InvalidShardCountError()
+                await self.dispatcher.dispatch("critical", InvalidShardCountError())
+                return
+
+            if self._pending_shard_count:
+                # Already re-scaling to a (hopefully) proper shard count.
+                # To avoid duplication, we avoid calling it multiple times
+                logger.debug("Already re-scaling, ignoring invalid shard count")
+                return
 
             logger.info("Automatically re-scaling due to too few shards!")
 
