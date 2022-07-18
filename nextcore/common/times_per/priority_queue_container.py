@@ -21,37 +21,38 @@
 
 from __future__ import annotations
 
-from logging import getLogger
 from typing import TYPE_CHECKING
 
-from ...common import TimesPer
-from .base import BaseGlobalRateLimiter
-
 if TYPE_CHECKING:
+    from asyncio import Future
     from typing import Final
 
-__all__: Final[tuple[str, ...]] = ("LimitedGlobalRateLimiter",)
-
-logger = getLogger(__name__)
+__all__: Final[tuple[str, ...]] = ("PriorityQueueContainer",)
 
 
-class LimitedGlobalRateLimiter(TimesPer, BaseGlobalRateLimiter):
-    """A limited global rate-limiter.
+class PriorityQueueContainer:
+    """A container for times per uses for :class:`queue.PriorityQueue` to ignore the future when comparing greater than and less than
 
     Parameters
     ----------
-    limit:
-        The amount of requests that can be made per second.
+    priority:
+        The request priority. This will be compared!
+    future:
+        The future for when the request is done
+
+    Attributes
+    ----------
+    priority:
+        The request priority. This will be compared!
+    future:
+        The future for when the request is done
     """
 
-    __slots__ = ()
+    __slots__: tuple[str, ...] = ("priority", "future")
 
-    def __init__(self, limit: int = 50) -> None:
-        TimesPer.__init__(self, limit, 1)
+    def __init__(self, priority: int, future: Future[None]) -> None:
+        self.priority: int = priority
+        self.future: Future[None] = future
 
-    def update(self, retry_after: float) -> None:
-        """A function that gets called whenever the global rate-limit gets exceeded
-
-        This just makes a warning log.
-        """
-        logger.warning("Exceeded global rate-limit! (Retry after: %s)", retry_after)
+    def __gt__(self, other: PriorityQueueContainer):
+        return self.priority > other.priority
