@@ -18,8 +18,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed"
 ]
-# Uncomment after #32 has been merged
-# readme = "README.md"
+readme = "README.md"
 homepage = "https://nextcord.dev" # TODO: Replace this?
 repository = "https://github.com/nextsnake/nextcore"
 documentation = "https://docs.nextcord.gay" # TODO: Replace this
