@@ -111,6 +111,19 @@ __all__: Final[tuple[str, ...]] = ("HTTPClient",)
 class HTTPClient:
     """The HTTP client to interface with the Discord API.
 
+    **Example usage**
+
+    .. code-block:: python3
+
+        http_client = HTTPClient()
+        await http_client.setup()
+
+        gateway = await http_client.get_gateway()
+
+        print(gateway["url"])
+
+        await http_client.close()
+
     Parameters
     ----------
     trust_local_time:
@@ -218,6 +231,21 @@ class HTTPClient:
         # Internals
         self._session: ClientSession | None = None
 
+    async def setup(self) -> None:
+        """Sets up the HTTP session
+
+        .. warning::
+            This has to be called before :meth:`HTTPClient._request` or :meth:`HTTPClient.connect_to_gateway`
+
+        Raises
+        ------
+        RuntimeError
+            This can only be called once
+        """
+        if self._session is not None:
+            raise RuntimeError("This method can only be called once!")
+        self._session = ClientSession()
+
     async def _request(
         self,
         route: Route,
@@ -257,6 +285,10 @@ class HTTPClient:
 
         Raises
         ------
+        RuntimeError
+            :meth:`HTTPClient.setup` was not called yet.
+        RuntimeError
+            HTTPClient was closed.
         CloudflareBanError
             You have been temporarily banned from the Discord API for 1 hour due to too many requests.
             Read the `documentation <https://discord.dev/opics/rate-limits#invalid-request-limit-aka-cloudflare-bans>`__ for more information.
@@ -273,9 +305,11 @@ class HTTPClient:
         HTTPRequestStatusError
             A non-200 status code was returned.
         """
-        # Make a ClientSession if we don't have one
-        await self._ensure_session()
-        assert self._session is not None, "Session was not set after HTTPClient._ensure_session()"
+        # Make sure we have a session
+        if self._session is None:
+            raise RuntimeError("HTTPClient.setup has to be called before request")
+        if self._session.closed:
+            raise RuntimeError("HTTPClient is closed")
 
         # Get the per user rate limit storage
         rate_limit_storage = self.rate_limit_storages.get(rate_limit_key)
@@ -411,13 +445,23 @@ class HTTPClient:
         compress:
             Payload compression from data sent from Discord.
 
+        Raises
+        ------
+        RuntimeError
+            :meth:`HTTPClient.setup` was not called yet.
+        RuntimeError
+            HTTPClient was closed.
+
         Returns
         -------
         aiohttp.ClientWebSocketResponse
             The gateway websocket
         """
-        await self._ensure_session()
-        assert self._session is not None, "Session was not set after HTTPClient._ensure_session()"
+
+        if self._session is None:
+            raise RuntimeError("HTTPClient.setup was not called yet!")
+        if self._session.closed:
+            raise RuntimeError("HTTPClient is closed!")
 
         params = {}
 
@@ -432,15 +476,6 @@ class HTTPClient:
 
         # TODO: Aiohttp bug
         return await self._session.ws_connect("wss://gateway.discord.gg", params=params)  # type: ignore [reportUnknownMemberType]
-
-    async def _ensure_session(self) -> None:
-        """Makes sure :attr:`HTTPClient._session` is set.
-
-        This is made due to :class:`aiohttp.ClientSession` requring to being created in a async context.
-        """
-        # Maybe merge this into _request?
-        if self._session is None:
-            self._session = ClientSession(json_serialize=json_dumps)
 
     async def _get_bucket(self, route: Route, rate_limit_storage: RateLimitStorage) -> Bucket:
         """Gets a bucket object for a route.
