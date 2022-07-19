@@ -251,7 +251,7 @@ class Shard:
                 self._logger.exception("Failed to connect to the gateway? Check your internet connection")
             except WSServerHandshakeError:
                 self._logger.exception("Failed to connect to the gateway")
-            finally:
+            else:
                 break
 
         self._logger.debug("Connected to websocket")
