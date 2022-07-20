@@ -7,6 +7,7 @@ HTTP reference
 --------------
 .. autoclass:: HTTPClient
     :members:
+    :inherited-members:
 
 .. autoclass:: Route
     :members:
