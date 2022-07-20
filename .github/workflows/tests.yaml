@@ -1,16 +1,19 @@
 name: Tests
-on: [pull_request, push]
+on:
+  pull_request: {}
+  push:
+    branches: ["master"]
 jobs:
   pytest:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "pypy-3.8", "pypy-3.9"]
     name: Pytest (${{ matrix.python-version }})
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install poetry
@@ -19,51 +22,3 @@ jobs:
         run: poetry install
       - name: Run tests
         run: poetry run task tests
-  black:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v1
-        with:
-          python-version: "3.10"
-      - name: Install poetry
-        run: pip install poetry
-      - name: Install dependencies
-        run: poetry install
-      - name: Run tests
-        run: poetry run task black_check
-  isort:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v1
-        with:
-          python-version: "3.10"
-      - name: Install poetry
-        run: pip install poetry
-      - name: Install dependencies
-        run: poetry install
-      - name: Run tests
-        run: poetry run task isort_check
-  pyright:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v1
-        with:
-          python-version: "3.10"
-      - name: Install poetry
-        run: pip install poetry
-      - name: Install dependencies
-        run: poetry install
-      - uses: actions/setup-node@v2
-        name: Install node
-        with:
-          node-version: '14'
-      - name: Install pyright
-        run: npm install -g pyright
-      - name: Run pyright
-        run: poetry run pyright nextcore/

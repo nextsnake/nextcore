@@ -19,9 +19,39 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__version__ = "1.0.0a"
-__all__ = ("__version__",)
+from __future__ import annotations
 
-from .common import *
-from .gateway import *
-from .http import *
+from asyncio import iscoroutine
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any, Callable
+
+__all__ = ("maybe_coro",)
+
+
+async def maybe_coro(coro: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+    """Execute a sync or async function
+
+    Parameters
+    ----------
+    coro: Callable[..., :data:`Any`]
+        The function to execute
+    args: :data:`typing.Any`
+        The arguments to pass to the function
+    kwargs: :data:`Any`
+        The keyword arguments to pass to the function
+
+    Returns
+    -------
+    :data:`typing.Any`
+        The result of the function
+    """
+    result = coro(*args, **kwargs)
+
+    if iscoroutine(result):
+        # coro was a async function
+        return await result
+
+    # Not a async function, just return the result
+    return result

@@ -19,9 +19,47 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__version__ = "1.0.0a"
-__all__ = ("__version__",)
+from __future__ import annotations
 
-from .common import *
-from .gateway import *
-from .http import *
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any
+
+try:
+    import orjson
+
+    _has_orjson: bool = True
+except ImportError:
+    import json
+
+    _has_orjson: bool = False
+
+
+__all__ = ("json_loads", "json_dumps")
+
+
+def json_loads(data: str) -> Any:
+    """Loads a json string into a python object.
+
+    Parameters
+    ----------
+    data: :class:`str`
+        The json string to load.
+    """
+    if _has_orjson:
+        return orjson.loads(data)
+    return json.loads(data)
+
+
+def json_dumps(to_dump: Any) -> str:
+    """Dumps a python object into a json string.
+
+    Parameters
+    ----------
+    to_dump: :class:`typing.Any`
+        The python object to dump.
+    """
+    if _has_orjson:
+        return orjson.dumps(to_dump).decode("utf-8")
+    return json.dumps(to_dump)

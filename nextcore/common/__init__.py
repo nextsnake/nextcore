@@ -19,9 +19,11 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-__version__ = "1.0.0a"
-__all__ = ("__version__",)
+"""Common utility functions for the library"""
 
-from .common import *
-from .gateway import *
-from .http import *
+from .dispatcher import Dispatcher
+from .json import *
+from .maybe_coro import *
+from .undefined import *
+
+__all__ = ("Dispatcher", "json_loads", "json_dumps", "maybe_coro", "Undefined", "UndefinedType")
