@@ -36,20 +36,20 @@ class BearerAuthentication(BaseAuthentication):
 
     Parameters
     ----------
-    token: :class:`str`
+    token:
         The bot token.
 
     Attributes
     ----------
-    prefix: Literal["Bearer"]
+    prefix:
         The prefix of the token.
-    token: :class:`str`
+    token:
         The bot token
     """
 
     __slots__: tuple[str, ...] = ()
 
-    def __init__(self, token: str):
+    def __init__(self, token: str) -> None:
         self.prefix: Literal["Bearer"] = "Bearer"
         self.token: str = token
         self.rate_limit_key: str = f"{self.prefix} {self.token}"

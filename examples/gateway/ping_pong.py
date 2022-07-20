@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 #
-# Copyright (c) 2022-present nextcore
+# Copyright (c) 2022-present nextcore developers
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -27,6 +27,7 @@ This will respond with "pong" every time someone sends "ping" in the chat.
 
 import asyncio
 from os import environ
+from typing import cast
 
 from discord_typings import MessageData
 
@@ -56,16 +57,16 @@ async def on_message(message: MessageData):
 
 
 async def main():
+    await http_client.setup()
+
     # This should return once all shards have started to connect.
     # This does not mean they are connected.
     await shard_manager.connect()
 
-    # We need to wait so asyncio doesn't cleanup the bot.
-    # This will wait forever.
-    # TODO: Replace this with wait until a critical error occurs.
+    # Raise a error and exit whenever a critical error occurs
+    error = await shard_manager.dispatcher.wait_for(lambda: True, "critical")
 
-    future: asyncio.Future[None] = asyncio.Future()
-    await future
+    raise cast(Exception, error)
 
 
 asyncio.run(main())

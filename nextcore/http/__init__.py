@@ -25,18 +25,25 @@ This module includes a HTTP client that handles rate limits for you,
 and gives you convinient methods around the API.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from .authentication import *
 from .bucket import Bucket
 from .bucket_metadata import BucketMetadata
 from .client import HTTPClient
 from .errors import *
 from .file import File
-from .global_lock import GlobalLock
-from .ratelimit_storage import RatelimitStorage
+from .global_rate_limiter import *
+from .rate_limit_storage import RateLimitStorage
 from .request_session import RequestSession
 from .route import Route
 
-__all__ = (
+if TYPE_CHECKING:
+    from typing import Final
+
+__all__: Final[tuple[str, ...]] = (
     "Bucket",
     "BucketMetadata",
     "HTTPClient",
@@ -48,12 +55,14 @@ __all__ = (
     "NotFoundError",
     "InternalServerError",
     "CloudflareBanError",
-    "GlobalLock",
-    "RatelimitStorage",
+    "RateLimitStorage",
     "RequestSession",
     "Route",
     "File",
     "BaseAuthentication",
     "BotAuthentication",
     "BearerAuthentication",
+    "BaseGlobalRateLimiter",
+    "UnlimitedGlobalRateLimiter",
+    "LimitedGlobalRateLimiter",
 )

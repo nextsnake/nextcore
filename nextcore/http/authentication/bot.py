@@ -26,9 +26,9 @@ from typing import TYPE_CHECKING
 from .base import BaseAuthentication
 
 if TYPE_CHECKING:
-    from typing import Literal
+    from typing import Final, Literal
 
-__all__ = ("BotAuthentication",)
+__all__: Final[tuple[str, ...]] = ("BotAuthentication",)
 
 
 class BotAuthentication(BaseAuthentication):
@@ -36,20 +36,20 @@ class BotAuthentication(BaseAuthentication):
 
     Parameters
     ----------
-    token: :class:`str`
+    token:
         The bot token.
 
     Attributes
     ----------
-    prefix: Literal["Bot"]
+    prefix:
         The prefix of the token.
-    token: :class:`str`
+    token:
         The bot token
     """
 
     __slots__: tuple[str, ...] = ()
 
-    def __init__(self, token: str):
+    def __init__(self, token: str) -> None:
         self.prefix: Literal["Bot"] = "Bot"
         self.token: str = token
         self.rate_limit_key: str = f"{self.prefix} {self.token}"

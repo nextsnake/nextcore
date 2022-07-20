@@ -1,8 +1,13 @@
 name: Upload docs
+
+permissions:
+  contents: read
+
 on: [push]
+
 jobs:
   upload-docs:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python 3.10
@@ -29,7 +34,7 @@ jobs:
           git init
           git add .
           git commit -m "Update from nextcore build"
-          git branch -M ${{ github.ref_name }}
-          git remote add origin git@github.com:nextsnake/nextcore-docs.git
-          git push -u origin ${{ github.ref_name }} --force
+          git branch -M core-${{ github.ref_name }}
+          git remote add origin git@github.com:nextsnake/nextsnake-docs.git
+          git push -u origin core-${{ github.ref_name }} --force
         working-directory: docs/_build/html

@@ -24,7 +24,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Final
 
 try:
     import orjson
@@ -33,19 +33,26 @@ try:
 except ImportError:
     import json
 
-    _has_orjson: bool = False
+    _has_orjson = False
 
 
-__all__ = ("json_loads", "json_dumps")
+__all__: Final[tuple[str, ...]] = ("json_loads", "json_dumps")
 
-
+# TODO: Any should be narrowed down, however for now thats not really possible in a sane way.
 def json_loads(data: str) -> Any:
     """Loads a json string into a python object.
 
     Parameters
     ----------
-    data: :class:`str`
+    data:
         The json string to load.
+
+    Raises
+    ------
+    :exc:`ValueError`
+        The text provided is not valid json
+    :exc:`TypeError`
+        data must be a :class:`str`
     """
     if _has_orjson:
         return orjson.loads(data)
@@ -57,7 +64,7 @@ def json_dumps(to_dump: Any) -> str:
 
     Parameters
     ----------
-    to_dump: :class:`typing.Any`
+    to_dump:
         The python object to dump.
     """
     if _has_orjson:

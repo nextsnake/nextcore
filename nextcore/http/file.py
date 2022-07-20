@@ -24,9 +24,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from typing import Union  # pylint: disable=outdated-typing-union
     from typing import BinaryIO, Final, TextIO
 
-__all__ = ("File",)
+    from typing_extensions import TypeAlias
+
+    Contents: TypeAlias = Final[Union[str, bytes, bytearray, BinaryIO, TextIO]]
+
+__all__: Final[tuple[str, ...]] = ("File",)
 
 # This is not a attr.dataclass because it does not support slots.
 class File:
@@ -34,27 +39,27 @@ class File:
 
     Parameters
     ----------
-    name: :class:`str`
+    name:
         The name of the file.
 
         .. warning::
             Only files ending with a `supported file extension <https://discord.dev/reference#image-formatting-image-formats>`__ can be included in embeds.
-    contents: :class:`str` | :class:`bytes` | :class:`bytearray` | :class:`BinaryIO` | :class:`TextIO`
+    contents:
         The contents of the file.
 
     Attributes
     ----------
-    name: :class:`str`
+    name:
         The name of the file.
 
         .. warning::
             Only files ending with a `supported file extension <https://discord.dev/reference#image-formatting-image-formats>`__ can be included in embeds.
-    contents: :class:`str` | :class:`bytes` | :class:`bytearray` | :class:`BinaryIO` | :class:`TextIO`
+    contents:
         The contents of the file.
     """
 
     __slots__ = ("name", "contents")
 
-    def __init__(self, name: str, contents: str | bytes | bytearray | BinaryIO | TextIO):
+    def __init__(self, name: str, contents: Contents) -> None:
         self.name: Final[str] = name
-        self.contents: Final[str | bytes | bytearray | BinaryIO | TextIO] = contents
+        self.contents: Contents = contents

@@ -19,36 +19,15 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+"""Common utility functions for the library"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from .times_per import *
+
 if TYPE_CHECKING:
     from typing import Final
 
-__all__: Final[tuple[str, ...]] = ("BaseAuthentication",)
-
-
-class BaseAuthentication:
-    """A wrapper around discord credentials.
-
-    .. warning::
-        This is a base class. You should probably use :class:`BotAuthentication` or :class:`BearerAuthentication` instead.
-
-    Attributes
-    ----------
-    prefix:
-        The prefix of the authentication.
-    token:
-        The bot's token.
-    """
-
-    __slots__ = ("prefix", "token", "rate_limit_key")
-
-    def __init__(self, prefix: str, token: str) -> None:
-        self.prefix: str = prefix
-        self.token: str = token
-        self.rate_limit_key: str = token
-
-    def __str__(self) -> str:
-        return f"{self.prefix} {self.token}"
+__all__: Final[tuple[str, ...]] = ("TimesPer",)

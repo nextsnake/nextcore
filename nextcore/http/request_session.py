@@ -19,9 +19,15 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from asyncio.futures import Future
+from __future__ import annotations
 
-__all__ = ("RequestSession",)
+from asyncio import Future
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Final
+
+__all__: Final[tuple[str, ...]] = ("RequestSession",)
 
 
 class RequestSession:
@@ -29,23 +35,23 @@ class RequestSession:
 
     Parameters
     ----------
-    unlimited: :class:`bool`
+    unlimited:
         If this request was made when the bucket was unlimited.
 
         This exists to make sure that there is no bad state when switching between unlimited and limited.
 
     Attributes
     ----------
-    unlimited: :class:`bool`
+    unlimited:
         If this request was made when the bucket was unlimited.
 
         This exists to make sure that there is no bad state when switching between unlimited and limited.
-    pending_future: :class:`asyncio.Future`
+    pending_future:
         The future that when set will execute the request.
     """
 
-    __slots__ = ("pending_future", "unlimited")
+    __slots__: Final[tuple[str, ...]] = ("pending_future", "unlimited")
 
-    def __init__(self, unlimited: bool):
+    def __init__(self, unlimited: bool) -> None:
         self.pending_future: Future[None] = Future()
         self.unlimited: bool = unlimited

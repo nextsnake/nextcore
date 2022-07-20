@@ -3,7 +3,7 @@
 
 Events
 ======
-This is a document showing you the arguments from the different instances of :class:`Dispatcher <common.Dispatcher>` in the library.
+This is a document showing you the arguments from the different instances of :class:`common.Dispatcher` in the library.
 
 Raw Dispatcher
 --------------
@@ -12,12 +12,12 @@ These are the raw dispatchers that just relay raw events from the discord websoc
 
 The event name here is the gateway `opcode <https://discord.dev/docs/topics/gateway#gateway-opcodes>`__.
 
-Example usage:
+**Example usage:**
 
 .. code-block:: python
 
     @shard.listen(GatewayOpcode.HEARTBEAT_ACK)
-    async def on_ready(data):
+    async def on_heartbeat_ack(data):
         print("<3")
 
 Event Dispatcher
@@ -27,7 +27,7 @@ These dispatchers dispatch the data inside the ``d`` key of a :attr:`GatewayOpco
 
 The event name is the Dispatch `event name <https://discord.dev/topics/gateway#commands-and-events-gateway-events>`__.
 
-Example usage:
+**Example usage:**
 
 .. code-block:: python
    
@@ -40,16 +40,14 @@ Shard dispatcher
 Can be found on :attr:`Shard.dispatcher <gateway.Shard.dispatcher>`.
 A dispatcher for shard changes that is not a event sent by Discord.
 
-The event name is a :class:`str` representing the event name.
-
 disconnect
 ^^^^^^^^^^
-Whenever Discord disconnects us from the discord gateway.
+Whenever Discord disconnects us from the gateway.
 
 .. note::
    This does not dispatch closes made by the :class:`gateway.Shard` itself.
 
-Example usage:
+**Example usage:**
 
 .. code-block:: python
 
@@ -57,11 +55,27 @@ Example usage:
    async def on_disconnect(close_code: int):
       print(f"Disconnected with close code {close_code}")
 
+client_disconnect
+^^^^^^^^^^^^^^^^^
+Whenever we disconnect from the Discord gateway.
+
+**Example usage:**
+
+.. code-block:: python
+
+   @shard.listen("client_disconnect")
+   async def on_client_disconnect(close: bool) -> None:
+      if close:
+         print("We deleted and deleted the session! We should not be able to resume.")
+      else:
+         print("We disconnected and can still resume!")
+
+
 sent
 ^^^^
 Whenever we send a message to Discord over the websocket.
 
-Example usage:
+**Example usage:**
 
 .. code-block:: python
 
@@ -73,7 +87,7 @@ critical
 ^^^^^^^^
 Whenever a critical event happens, this event is dispatched. The first argument will be a :class:`Exception` object of what happened.
 
-Example usage:
+**Example usage:**
 
 .. code-block:: python
 
@@ -91,7 +105,7 @@ request_response
 ^^^^^^^^^^^^^^^^
 Whenever a response to a request to Discord has been received, this event is dispatcher. The first argument will be the :class:`aiohttp.ClientResponse` object.
 
-Example usage:
+**Example usage:**
 
 .. code-block:: python
 

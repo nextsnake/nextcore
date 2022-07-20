@@ -18,16 +18,19 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
+from __future__ import annotations
 
 from enum import IntEnum
+from typing import TYPE_CHECKING
 
-__all__ = ("GatewayOpcode",)
+if TYPE_CHECKING:
+    from typing import Final
+
+__all__: Final[tuple[str, ...]] = ("GatewayOpcode",)
 
 
 class GatewayOpcode(IntEnum):
-    """
-    Enum of all opcodes that can be sent/received to/from the gateway.
-    """
+    """Enum of all opcodes that can be sent/received to/from the gateway."""
 
     DISPATCH = 0
     """Can be received"""
@@ -35,7 +38,7 @@ class GatewayOpcode(IntEnum):
     """Can be sent/received"""
     IDENTIFY = 2
     """Can be sent"""
-    PRESENCE_UPDAATE = 3
+    PRESENCE_UPDATE = 3
     """Can be sent"""
     VOICE_STATE_UPDATE = 4
     """Can be sent"""

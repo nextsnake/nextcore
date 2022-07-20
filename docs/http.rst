@@ -1,56 +1,64 @@
+.. currentmodule:: nextcore.http
+
 HTTP
 ====
 
 HTTP reference
--------------
-.. autoclass:: nextcore.http.HTTPClient
+--------------
+.. autoclass:: HTTPClient
     :members:
 
-.. autoclass:: nextcore.http.Route
+.. autoclass:: Route
     :members:
 
-.. autoclass:: nextcore.http.RatelimitStorage
+.. autoclass:: RateLimitStorage
     :members:
 
-.. autoclass:: nextcore.http.Bucket
+.. autoclass:: Bucket
     :members:
 
-.. autoclass:: nextcore.http.BucketMetadata
+.. autoclass:: BucketMetadata
     :members:
 
-.. autoclass:: nextcore.http.GlobalLock
+.. autoclass:: RequestSession
     :members:
 
-.. autoclass:: nextcore.http.RequestSession
-    :members:
+.. autoclass:: BaseGlobalRateLimiter
+   :members:
 
-.. autoclass:: nextcore.http.File
+.. autoclass:: LimitedGlobalRateLimiter
+   :members:
+
+.. autoclass:: UnlimitedGlobalRateLimiter
+   :members:
+
+.. autoclass:: File
     :members:
 
 
 HTTP errors
 -----------
-.. autoexception:: nextcore.http.RateLimitingFailedError
+.. autoexception:: RateLimitingFailedError
     :members:
 
-.. autoexception:: nextcore.http.CloudflareBanError
+.. autoexception:: CloudflareBanError
     :members:
 
-.. autoexception:: nextcore.http.HTTPRequestStatusError
+.. autoexception:: HTTPRequestStatusError
     :members:
 
-.. autoexception:: nextcore.http.BadRequestError
+.. autoexception:: BadRequestError
     :members:
 
-.. autoexception:: nextcore.http.NotFoundError
+.. autoexception:: NotFoundError
     :members:
 
-.. autoexception:: nextcore.http.UnauthorizedError
+.. autoexception:: UnauthorizedError
     :members:
 
-.. autoexception:: nextcore.http.ForbiddenError
+.. autoexception:: ForbiddenError
     :members:
 
-.. autoexception:: nextcore.http.InternalServerError
+.. autoexception:: InternalServerError
     :members:
 

@@ -21,7 +21,12 @@
 
 from __future__ import annotations
 
-__all__ = ("BucketMetadata",)
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Final
+
+__all__: Final[tuple[str, ...]] = ("BucketMetadata",)
 
 
 class BucketMetadata:
@@ -29,17 +34,27 @@ class BucketMetadata:
 
     Parameters
     ----------
-    limit: :class:`int` | :class:`None`
+    limit:
         The maximum number of requests that can be made in the given time period.
-    unlimited: :class:`bool`
+    unlimited:
         Whether the bucket has an unlimited number of requests. If this is :class:`True`,
         limit has to be None.
+
+    Attributes
+    ----------
+    limit:
+        The maximum number of requests that can be made in the given time period.
+
+        .. note::
+            This will be :data:`None` if :attr:`BucketMetadata.unlimited` is :data:`True`.
+
+            This will also be :data:`None` if no limit has been fetched yet.
+    unlimited:
+        Wheter the bucket has no rate limiting enabled.
     """
 
     __slots__ = ("limit", "unlimited")
 
-    def __init__(self, limit: int | None = None, *, unlimited: bool = False):
+    def __init__(self, limit: int | None = None, *, unlimited: bool = False) -> None:
         self.limit: int | None = limit
-        """The maximum number of requests that can be made in the given time period."""
         self.unlimited: bool = unlimited
-        """Whether the bucket has an unlimited number of requests."""

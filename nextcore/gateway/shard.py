@@ -21,18 +21,29 @@
 
 from __future__ import annotations
 
-from asyncio import Event, get_running_loop, sleep
+from asyncio import Event, create_task, get_running_loop, sleep
 from logging import Logger, getLogger
 from random import random
 from sys import platform
 from time import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
-from aiohttp import ClientConnectorError, ClientWebSocketResponse, WSMsgType
+from aiohttp import (
+    ClientConnectorError,
+    ClientWebSocketResponse,
+    WSMsgType,
+    WSServerHandshakeError,
+)
 from frozendict import frozendict
 
-from ..common import json_dumps, json_loads
-from ..common.dispatcher import Dispatcher
+from ..common import (
+    UNDEFINED,
+    Dispatcher,
+    TimesPer,
+    UndefinedType,
+    json_dumps,
+    json_loads,
+)
 from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .errors import (
@@ -45,7 +56,6 @@ from .errors import (
 )
 from .exponential_backoff import ExponentialBackoff
 from .op_code import GatewayOpcode
-from .times_per import TimesPer
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
@@ -58,13 +68,18 @@ if TYPE_CHECKING:
         IdentifyCommand,
         InvalidSessionEvent,
         ReconnectEvent,
+        RequestGuildMembersCommand,
         ResumeCommand,
+        UpdatePresenceCommand,
+        UpdatePresenceData,
+        UpdateVoiceStateCommand,
+        UpdateVoiceStateData,
     )
     from discord_typings.gateway import ReadyData, UpdatePresenceData
 
     from ..http import HTTPClient
 
-__all__ = ("Shard",)
+__all__: Final[tuple[str, ...]] = ("Shard",)
 
 
 class Shard:
@@ -72,54 +87,54 @@ class Shard:
 
     Parameters
     ----------
-    shard_id: :class:`int`
+    shard_id:
         The ID of this shard.
-    shard_count: :class:`int`
+    shard_count:
         How many shards is in this shard set. Used for splitting events on Discord's side.
-    intents: :class:`int`
+    intents:
         The intents to connect with.
-    token: :class:`str`
+    token:
         The bot's token to connect with.
-    identify_ratelimiter: :class:`TimesPer`
-        The ratelimiter for IDENTIFYing the bot.
-    http_client: :class:`HTTPClient<nextcore.http.HTTPClient>`
+    identify_rate_limiter:
+        The rate limiter for IDENTIFYing the bot.
+    http_client:
         HTTP client used to connect to Discord's gateway.
-    presence: `UpdatePresence <https://discord.dev/topics/gateway#update-presence>`__
+    presence:
         The initial presence info to send when connecting.
-    large_threshold: :class:`int`
+    large_threshold:
         A value between 50 and 250 that determines how many members a guild needs for the gateway to stop sending offline members in the guild member list.
-    library_name: :class:`str`
+    library_name:
         The name of the library that is using this gateway. This should be set if you are making your own library on top of nextcore.
 
     Attributes
     ----------
-    shard_id: :class:`int`
+    shard_id:
         The ID of this shard.
-    shard_count: :class:`int`
+    shard_count:
         How many shards are in this shard set. Used for splitting events on Discord's side.
-    intents: :class:`int`
+    intents:
         The intents to connect with.
-    token: :class:`str`
+    token:
         The bot's token to connect with. If this is changed, the session will be invalidated.
-    presence: `UpdatePresence <https://discord.dev/topics/gateway#update-presence>`__
+    presence:
         The initial presence info to send when connecting.
-    large_threshold: :class:`int`
+    large_threshold:
         A value between 50 and 250 that determines how many members a guild needs for the gateway to stop sending offline members in the guild member list.
-    library_name: :class:`str`
+    library_name:
         The name of the library that is using this gateway. This should be set if you are making your own library on top of nextcore.
-    ready: :class:`asyncio.Event`
+    ready:
         Fires when the gateway has connected and received the READY event.
-    raw_dispatcher: :class:`Dispatcher<nextcore.common.Dispatcher>`
+    raw_dispatcher:
         A dispatcher with raw payloads sent by discord. The event name is the opcode, and the value is the raw data.
-    event_dispatcher: :class:`Dispatcher<nextcore.common.Dispatcher>`
+    event_dispatcher:
         A dispatcher for DISPATCH events sent by discord. The event name is the event name, and the value is the inner payload.
-    dispatcher: :class:`Dispatcher<nextcore.common.Dispatcher>`
+    dispatcher:
         A dispatcher for internal events.
-    session_id: :class:`str`
+    session_id:
         The ID of the current session.
-    session_sequence_number: :class:`int`
+    session_sequence_number:
         The last sequence number of the current session.
-    should_reconnect: :class:`bool`
+    should_reconnect:
         Whether the gateway should reconnect or not.
     """
 
@@ -138,8 +153,8 @@ class Shard:
         "session_id",
         "session_sequence_number",
         "should_reconnect",
-        "_identify_ratelimiter",
-        "_send_ratelimit",
+        "_identify_rate_limiter",
+        "_send_rate_limit",
         "_ws",
         "_decompressor",
         "_logger",
@@ -148,7 +163,6 @@ class Shard:
         "_heartbeat_sent_at",
         "_latency",
     )
-    GATEWAY_URL: Final[str] = "wss://gateway.discord.gg?v=10&compress=zlib-stream"
     """The gateway URL to connect to"""
 
     def __init__(
@@ -157,7 +171,7 @@ class Shard:
         shard_count: int,
         intents: int,
         token: str,
-        identify_ratelimiter: TimesPer,
+        identify_rate_limiter: TimesPer,
         http_client: HTTPClient,
         *,
         presence: UpdatePresenceData | None = None,
@@ -177,7 +191,7 @@ class Shard:
         self.ready: Event = Event()
         self.raw_dispatcher: Dispatcher[int] = Dispatcher()
         self.event_dispatcher: Dispatcher[str] = Dispatcher()
-        self.dispatcher: Dispatcher[Literal["disconnect", "sent", "critical"]] = Dispatcher()
+        self.dispatcher: Dispatcher[Literal["disconnect", "sent", "critical", "client_disconnect"]] = Dispatcher()
 
         # Session related
         self.session_id: str | None = None
@@ -186,10 +200,10 @@ class Shard:
 
         # User's internals
         # Should generally only be set once
-        self._identify_ratelimiter: TimesPer = identify_ratelimiter
+        self._identify_rate_limiter: TimesPer = identify_rate_limiter
 
         # Internals
-        self._send_ratelimit = TimesPer(60 - 3, 120)
+        self._send_rate_limit = TimesPer(60 - 3, 120)
         self._ws: ClientWebSocketResponse | None = None
         self._decompressor: Decompressor = Decompressor()
         self._logger: Logger = getLogger(f"{__name__}.{self.shard_id}")
@@ -219,45 +233,81 @@ class Shard:
         self.dispatcher.add_listener(self._handle_disconnect, "disconnect")
 
     async def connect(self) -> None:
-        """Connect to the gateway.
+        """Connect to the gateway
 
-        This will automatically RESUME if a session is set.
+        .. note::
+            This will try to automatically resume if a session is set.
+
+        Raises
+        ------
+        ReconnectCheckFailedError
+            :attr:`Shard.should_reconnect` was set to :data:`False` and a :meth:`Shard.identify` call was needed.
         """
-        # Clear state
+
+        async for _ in ExponentialBackoff(0.5, 2, 10):
+            try:
+                ws = await self._http_client.connect_to_gateway(version=10, encoding="json", compress="zlib-stream")
+            except ClientConnectorError:
+                self._logger.exception("Failed to connect to the gateway? Check your internet connection")
+            except WSServerHandshakeError:
+                self._logger.exception("Failed to connect to the gateway")
+            finally:
+                break
+
+        self._logger.debug("Connected to websocket")
+
+        # Disconnect previously connected ws
+        if self._ws is not None and not self._ws.closed:
+            self.ready.clear()
+            await self._ws.close(code=999)
+            # Notify that we disconnected the ws, as the normal disconnect is for disconnects from discord.
+            # Disconnects from discord also include a error code, which we don't.
+            # This does include a bool if we closed the session.
+            await self.dispatcher.dispatch("client_disconnect", False)
+
+        # Reset session
         self._decompressor = Decompressor()
         self._received_heartbeat_ack = True
 
-        # Connect to gateway
-        if self._ws is not None and not self._ws.closed:
-            # This is to keep the session alive.
-            await self._ws.close(code=999)
+        # Use the ws we connected with
+        self._ws = ws  # type: ignore [reportUnboundVariable] # This is always bound.
 
-        # Retry connection
-        # TODO: Weird mypy bug?
-        async for _ in ExponentialBackoff(0.5, 2, 10):  # type: ignore [attr-defined]
-            try:
-                self._ws = await self._http_client.ws_connect(Shard.GATEWAY_URL)
-                break
-            except ClientConnectorError:
-                self._logger.error("Failed to connect to gateway? Check your internet connection.")
+        create_task(self._receive_loop())
 
-        if self.session_id is None and self.session_sequence_number is None:
-            if not self.should_reconnect:
-                raise ReconnectCheckFailedError
-            # No session stored, create a new one.
-            await self._identify_ratelimiter.wait()
-            await self.identify()
-        else:
-            # Session stored, resume it.
-            # Resumes don't use up the IDENTIFY ratelimit so we should prefer using it.
+        # Identify/Resume
+        if self.session_id is not None and self.session_sequence_number is not None:
+            # Resuming
             await self.resume()
 
-            # Discord does not provide a "session resume ok" event, they only do it after resuming every event which can take a long time.
-            # We really have to hope that discord does not consume multiple events at once.
+            # Manually set the ready flag as Discord does not send a resume acknowledge
+            # However it does send a RESUMED event, which is unfortunatly only sent when all events have been repeated.
+            # Which is too late for us.
             self.ready.set()
+        else:
+            # Clean up session_id and session_sequence_number
+            self.session_sequence_number = None
+            self.session_id = None
 
-        loop = get_running_loop()
-        loop.create_task(self._receive_loop())
+            if not self.should_reconnect:
+                # We should not re-IDENTIFY when should_reconnect is false.
+                raise ReconnectCheckFailedError()
+
+            # Identify
+            async with self._identify_rate_limiter.acquire():
+                await self.identify()
+
+    async def close(self) -> None:
+        """Close the connection to the gateway and destroy the session.
+
+        .. note::
+            This will dispatch a ``client_disconnect`` event.
+        """
+        if self._ws is not None:
+            # We are destroying the session
+            await self.dispatcher.dispatch("client_disconnect", True)
+
+            await self._ws.close()
+        self._ws = None  # Clear it to save some ram
 
     @property
     def latency(self) -> float:
@@ -283,18 +333,14 @@ class Shard:
             self._logger.debug("Waiting until ready")
             await self.ready.wait()
 
-        # Take up a space in the ratelimit
-        # Yes there is a small chance that we would get disconnected here due to fluctuating latency,
-        # however this is basically unavoidable.
-        await self._send_ratelimit.wait()
+        async with self._send_rate_limit.acquire():
+            assert self._ws is not None, "Websocket is not connected"
+            assert self._ws.closed is False, "Websocket is closed"
 
-        assert self._ws is not None, "Websocket is not connected"
-        assert self._ws.closed is False, "Websocket is closed"
+            await self._ws.send_json(data, dumps=json_dumps)
 
-        self._logger.debug("Sent: %s", data)
-        await self.dispatcher.dispatch("sent", data)
-
-        await self._ws.send_json(data, dumps=json_dumps)
+            self._logger.debug("Sent: %s", data)
+            await self.dispatcher.dispatch("sent", data)
 
     # Loops
     async def _receive_loop(self) -> None:
@@ -324,8 +370,17 @@ class Shard:
 
         # Here we create our own reference to the current websocket as we override self._ws on reconnect so there may be a chance that it gets overriden before the loop exists
         # This prevents multiple heartbeat loops from running at the same time.
-        # This also allows us to bypass the ratelimit.
+        # This also allows us to bypass the rate limit.
         ws = self._ws
+
+        # Discord requires us to wait a random amount up to heartbeat_interval on the first interval
+        jitter = random()
+        initial_heartbeat = heartbeat_interval * jitter
+
+        self._logger.debug(
+            "Starting heartbeat with interval %s with initial heartbeat %s", heartbeat_interval, initial_heartbeat
+        )
+        await sleep(initial_heartbeat)
 
         while not ws.closed:
             payload: HeartbeatCommand = {
@@ -405,15 +460,6 @@ class Shard:
     async def _handle_hello(self, data: HelloEvent) -> None:
         heartbeat_interval = data["d"]["heartbeat_interval"] / 1000  # Convert from ms to seconds
 
-        # Discord requires us to wait a random amount up to heartbeat_interval.
-        jitter = random()
-        initial_heartbeat = heartbeat_interval * jitter
-
-        self._logger.debug(
-            "Starting heartbeat with interval %s with initial heartbeat %s", heartbeat_interval, initial_heartbeat
-        )
-        await sleep(initial_heartbeat)
-
         loop = get_running_loop()
         loop.create_task(self._heartbeat_loop(heartbeat_interval))
 
@@ -440,15 +486,18 @@ class Shard:
         if self.should_reconnect:
             assert self._ws is not None, "_ws is not set?"
             if self._ws.closed:
-                self._ws = await self._http_client.ws_connect(Shard.GATEWAY_URL)
+                self._ws = await self._http_client.connect_to_gateway(
+                    version=10, encoding="json", compress="zlib-stream"
+                )
 
             # Discord expects us to wait for up to 5s before resuming?
             jitter = random()
             resume_after = 5 * jitter
-            self._logger.debug("Resuming after %s seconds", resume_after)
+            self._logger.debug("Re-identifying after %s seconds", resume_after)
             await sleep(resume_after)
 
-            await self.identify()
+            async with self._identify_rate_limiter.acquire():
+                await self.identify()
 
     async def _handle_dispatch(self, data: DispatchEvent) -> None:
         # Save sequence number for resuming.
@@ -528,13 +577,13 @@ class Shard:
             # TODO: Should this be merged into the else block?
             await self.dispatcher.dispatch("critical", UnhandledCloseCodeError(close_code))
         elif close_code == GatewayCloseCode.INVALID_API_VERSION:
-            self._logger.critical("Received invalid api version. Please update nextcore!")
+            self._logger.debug("Received invalid api version. Please update nextcore!")
             await self.dispatcher.dispatch("critical", InvalidApiVersionError())
         elif close_code == GatewayCloseCode.INVALID_INTENTS:
-            self._logger.critical("Sent invalid intents. This should never happen!")
+            self._logger.debug("Sent invalid intents.")
             await self.dispatcher.dispatch("critical", InvalidIntentsError())
         elif close_code == GatewayCloseCode.DISALLOWED_INTENTS:
-            self._logger.critical("Sent disallowed intents. This should be enabled in the settings.")
+            self._logger.debug("Sent disallowed intents. This should be enabled in the settings.")
             await self.dispatcher.dispatch("critical", DisallowedIntentsError())
         else:
             await self.dispatcher.dispatch("critical", UnhandledCloseCodeError(close_code))
@@ -546,6 +595,8 @@ class Shard:
 
         .. note::
             See the `documentation <https://discord.dev/topics/gateway#identify>`__
+        .. warning::
+            This does not handle rate-limiting
         """
         payload: IdentifyCommand = {
             "op": GatewayOpcode.IDENTIFY.value,
@@ -553,9 +604,9 @@ class Shard:
                 "token": self.token,
                 "intents": self.intents,
                 "properties": {
-                    "$os": platform,
-                    "$browser": self.library_name,
-                    "$device": self.library_name,
+                    "os": platform,
+                    "browser": self.library_name,
+                    "device": self.library_name,
                 },
                 "compress": True,
                 "shard": [self.shard_id, self.shard_count],
@@ -568,6 +619,29 @@ class Shard:
             payload["d"]["presence"] = self.presence
 
         await self._send(payload, wait_until_ready=False)
+
+    async def presence_update(self, presence: UpdatePresenceData) -> None:
+        """Changes the bot's presence for the current session.
+
+        .. warning::
+            This will not persist across sessions!
+
+            Use the ``presence`` parameter to :class:`Shard`
+
+        """
+        payload: UpdatePresenceCommand = {"op": GatewayOpcode.PRESENCE_UPDATE.value, "d": presence}
+
+        await self._send(payload)
+
+    async def voice_state_update(self, update: UpdateVoiceStateData):
+        """Updates the voice state of the logged in user.
+
+        This is per guild.
+        """
+
+        payload: UpdateVoiceStateCommand = {"op": GatewayOpcode.VOICE_STATE_UPDATE.value, "d": update}
+
+        await self._send(payload)
 
     async def resume(self) -> None:
         """Resume the session
@@ -592,3 +666,96 @@ class Shard:
             },
         }
         await self._send(payload, wait_until_ready=False)
+
+    @overload
+    async def request_guild_members(
+        self,
+        guild_id: str | int,
+        *,
+        query: str,
+        limit: int,
+        presences: bool | UndefinedType = UNDEFINED,
+        user_ids: str | int | list[str | int] | UndefinedType = UNDEFINED,
+        nonce: str | UndefinedType = UNDEFINED,
+    ) -> None:
+        ...
+
+    @overload
+    async def request_guild_members(
+        self,
+        guild_id: str | int,
+        *,
+        limit: int | UndefinedType = UNDEFINED,
+        presences: bool | UndefinedType = UNDEFINED,
+        user_ids: str | int | list[str | int],
+        nonce: str | UndefinedType = UNDEFINED,
+    ) -> None:
+        ...
+
+    async def request_guild_members(
+        self,
+        guild_id: str | int,
+        *,
+        query: str | UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
+        presences: bool | UndefinedType = UNDEFINED,
+        user_ids: str | int | list[str | int] | UndefinedType = UNDEFINED,
+        nonce: str | UndefinedType = UNDEFINED,
+    ) -> None:
+        """Request info about the members in this guild.
+
+        .. note::
+            This will dispatch ``GUILD_MEMBERS_CHUNK`` events as a response.
+
+        .. warning::
+            This may be cancelled if the shard disconnects while chunking.
+
+        Parameters
+        ----------
+        guild_id:
+            The guild to request members from
+        query:
+            What the members username have to start with to be returned
+
+            .. note::
+                If this is not empty limit will be max 100.
+        limit:
+            The max amount of members to return.
+
+            .. note::
+                This can be 0 when used with a empty query.
+
+                If this is 0, this would require the ``GUILD_MEMBERS`` intent
+        presences:
+            Whether to include presences for members requested.
+
+            .. note::
+                This requires the ``GUILD_PRESENCES`` intent.
+        user_ids:
+            The ID of the members to query.
+
+            .. note::
+                This has a limit of 100 members.
+        nonce:
+            A string which will be provided in the ``guild members chunk`` response to identify this request.
+
+            .. note::
+                This is max 32 characters.
+
+                If it is longer it will be ignored.
+        """
+        data: dict[str, Any] = {"guild_id": guild_id}
+        if query is not UNDEFINED:
+            data["query"] = query
+        if limit is not UNDEFINED:
+            data["limit"] = limit
+        if presences is not UNDEFINED:
+            data["presences"] = presences
+        if user_ids is not UNDEFINED:
+            data["user_ids"] = user_ids
+        if nonce is not UNDEFINED:
+            data["nonce"] = nonce
+
+        payload: RequestGuildMembersCommand = {"op": GatewayOpcode.REQUEST_GUILD_MEMBERS.value, "d": data}  # type: ignore [reportGeneralTypeIssues]
+
+        await self._send(payload)

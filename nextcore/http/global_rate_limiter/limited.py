@@ -21,34 +21,37 @@
 
 from __future__ import annotations
 
+from logging import getLogger
 from typing import TYPE_CHECKING
+
+from ...common import TimesPer
+from .base import BaseGlobalRateLimiter
 
 if TYPE_CHECKING:
     from typing import Final
 
-__all__: Final[tuple[str, ...]] = ("BaseAuthentication",)
+__all__: Final[tuple[str, ...]] = ("LimitedGlobalRateLimiter",)
+
+logger = getLogger(__name__)
 
 
-class BaseAuthentication:
-    """A wrapper around discord credentials.
+class LimitedGlobalRateLimiter(TimesPer, BaseGlobalRateLimiter):
+    """A limited global rate-limiter.
 
-    .. warning::
-        This is a base class. You should probably use :class:`BotAuthentication` or :class:`BearerAuthentication` instead.
-
-    Attributes
+    Parameters
     ----------
-    prefix:
-        The prefix of the authentication.
-    token:
-        The bot's token.
+    limit:
+        The amount of requests that can be made per second.
     """
 
-    __slots__ = ("prefix", "token", "rate_limit_key")
+    __slots__ = ()
 
-    def __init__(self, prefix: str, token: str) -> None:
-        self.prefix: str = prefix
-        self.token: str = token
-        self.rate_limit_key: str = token
+    def __init__(self, limit: int = 50) -> None:
+        TimesPer.__init__(self, limit, 1)
 
-    def __str__(self) -> str:
-        return f"{self.prefix} {self.token}"
+    def update(self, retry_after: float) -> None:
+        """A function that gets called whenever the global rate-limit gets exceeded
+
+        This just makes a warning log.
+        """
+        logger.warning("Exceeded global rate-limit! (Retry after: %s)", retry_after)

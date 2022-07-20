@@ -19,9 +19,15 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from enum import IntEnum
+from __future__ import annotations
 
-__all__ = ("GatewayCloseCode",)
+from enum import IntEnum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Final
+
+__all__: Final[tuple[str, ...]] = ("GatewayCloseCode",)
 
 
 class GatewayCloseCode(IntEnum):
@@ -38,7 +44,7 @@ class GatewayCloseCode(IntEnum):
     DECODE_ERROR = 4002
     """We sent a invalid payload."""
     NOT_AUTHENTICATED = 4003
-    """We sent a payload before you were authenticated."""
+    """We sent a payload before we were authenticated."""
     AUTHENTICATION_FAILED = 4004
     """We sent a invalid token."""
     ALREADY_AUTHENTICATED = 4005
@@ -50,12 +56,12 @@ class GatewayCloseCode(IntEnum):
     SESSION_TIMEOUT = 4009
     """Your session timed out."""
     INVALID_SHARD = 4010
-    """We sent a invalid shard id or our shard count is too low."""
+    """We sent an invalid shard id or our shard count is too low."""
     SHARDING_REQUIRED = 4011
     """Sharding is required to continue."""
     INVALID_API_VERSION = 4012
-    """We sent a invalid api version."""
+    """We sent an invalid api version."""
     INVALID_INTENTS = 4013
-    """We sent a invalid intents."""
+    """We sent invalid intents."""
     DISALLOWED_INTENTS = 4014
-    """We sent a intents that are not allowed to use."""
+    """We sent intents that are not allowed to use."""

@@ -21,17 +21,32 @@
 
 from __future__ import annotations
 
+from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Final
+    from typing import Final, Literal
 
-__all__ = ("Undefined", "UndefinedType")
-
-
-class UndefinedType:
-    def __repr__(self) -> str:
-        return "Undefined"
+__all__: Final[tuple[str, ...]] = ("UndefinedType", "UNDEFINED")
 
 
-Undefined: Final[UndefinedType] = UndefinedType()
+class UndefinedType(Enum):
+    """A second :data:`None` for specifying that it should not be provided.
+
+
+    **Example usage:**
+
+    .. code-block:: python3
+        :emphasize-lines: 4,5
+
+        from nextcore.common import UndefinedType, UNDEFINED
+        thing = UNDEFINED
+
+        if thing is UNDEFINED:
+            print("Thing is undefined!")
+    """
+
+    UNDEFINED = None
+
+
+UNDEFINED: Literal[UndefinedType.UNDEFINED] = UndefinedType.UNDEFINED

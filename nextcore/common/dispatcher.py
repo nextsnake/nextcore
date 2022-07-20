@@ -34,7 +34,7 @@ EventNameT = TypeVar("EventNameT", bound=Hashable)
 if TYPE_CHECKING:
     from typing import Tuple  # pylint: disable=outdated-typing-tuple
     from typing import Union  # pylint: disable=outdated-typing-union
-    from typing import Any, Awaitable, Callable
+    from typing import Any, Awaitable, Callable, Final
 
     from typing_extensions import Unpack
 
@@ -56,7 +56,7 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
-__all__ = ("Dispatcher",)
+__all__: Final[tuple[str, ...]] = ("Dispatcher",)
 
 
 class Dispatcher(Generic[EventNameT]):
@@ -73,7 +73,7 @@ class Dispatcher(Generic[EventNameT]):
     There is also "global" events. This makes all handlers get every event.
     This will also provide a :class:`EventNameT` parameter to the handler (and check if you are using :meth:`Dispatcher.wait_for`).
 
-    Example usage:
+    **Example usage:**
 
     .. code-block:: python
 
@@ -116,7 +116,7 @@ class Dispatcher(Generic[EventNameT]):
     ]:
         """Decorator to register a event listener.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -126,7 +126,7 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        event_name: :class:`EventNameT` | :data:`None`
+        event_name:
             The event name to register the listener to. If this is :data:`None`, the listener is considered a global event.
         """
 
@@ -160,7 +160,7 @@ class Dispatcher(Generic[EventNameT]):
     ) -> None:
         """Add a event listener.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -171,9 +171,9 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        callback: :class:`EventCallback` | :class:`GlobalEventCallback`
+        callback:
             The event callback to register.
-        event_name: :class:`EventNameT` | :data:`None`
+        event_name:
             The event name to listen to. If this is :data:`None`,
             this is considered a global event and all events will be sent to the callback.
         """
@@ -199,7 +199,7 @@ class Dispatcher(Generic[EventNameT]):
     ) -> None:
         """Removes a event listener.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -207,9 +207,9 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        callback: :class:`EventCallback` | :class:`GlobalEventCallback`
+        callback:
             The event callback to remove.
-        event_name: :class:`EventNameT` | :data:`None`
+        event_name:
             The event name to remove. If this is :data:`None`, the listener is considered a global event.
 
             .. warning::
@@ -254,7 +254,7 @@ class Dispatcher(Generic[EventNameT]):
         .. note::
             If no listener is registered, the error will be logged.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -262,6 +262,16 @@ class Dispatcher(Generic[EventNameT]):
                 print("Oops!")
 
             dispatcher.add_error_handler(error_handler, "join")
+
+        Parameters
+        ----------
+        callback:
+            The callback to be called whenever a error occurs
+        event_name:
+            The event to restrict the error handler to.
+
+            .. note::
+                Passing this will make callback not be given the event name.
         """
         if event_name is None:
             if TYPE_CHECKING:
@@ -285,7 +295,7 @@ class Dispatcher(Generic[EventNameT]):
     ) -> None:
         """Removes an error handler.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -293,9 +303,9 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        callback: :class:`ExceptionHandler` | :class:`GlobalExceptionHandler`
+        callback:
             The error handler to remove.
-        event_name: :class:`EventNameT` | :data:`None`
+        event_name:
             The event name to remove. If this is :data:`None`, the listener is considered a global event.
 
             .. warning::
@@ -337,7 +347,7 @@ class Dispatcher(Generic[EventNameT]):
     ) -> WaitForReturn | GlobalWaitForReturn[EventNameT]:
         """Wait for an event to occur.
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -349,9 +359,9 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        check: :class:`WaitForCheck` | :class:`GlobalWaitForCheck`
+        check:
             Check for it to return.
-        event_name: :class:`EventNameT` | :data:`None`
+        event_name:
             The event name to wait for. If this is :data:`None`,
             it is considered global and will return when any event is received and include a :class:`EventNameT` as the first event argument.
 
@@ -402,7 +412,7 @@ class Dispatcher(Generic[EventNameT]):
     async def dispatch(self, event_name: EventNameT, *args: Any) -> None:
         """Dispatch a event
 
-        Example usage:
+        **Example usage:**
 
         .. code-block:: python
 
@@ -410,9 +420,9 @@ class Dispatcher(Generic[EventNameT]):
 
         Parameters
         ----------
-        event_name: :class:`EventNameT`
+        event_name:
             The event name to dispatch to.
-        args: :data:`typing.Any`
+        args:
             The event arguments. This will be passed to the listeners.
         """
         logger.debug("Dispatching event %s", event_name)

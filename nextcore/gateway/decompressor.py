@@ -21,16 +21,33 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from zlib import decompressobj
 from zlib import error as zlib_error
 
-ZLIB_SUFFIX = b"\x00\x00\xff\xff"
+if TYPE_CHECKING:
+    from typing import ClassVar, Final
+
+__all__: Final[tuple[str, ...]] = ("Decompressor",)
 
 
 class Decompressor:
+    """A wrapper around zlib to handle partial payloads
+
+    **Example usage**
+
+    .. code-block::
+
+        from nextcore.gateway import Decompressor
+
+        decompressor = Decompressor()
+
+        data = decompressor.decompress(zlib_data) # bytes from the Discord gateway
+
+        print(data.decode("utf-8"))
     """
-    A simple wrapper around zlib to handle spreading a payload over multiple messages
-    """
+
+    ZLIB_SUFFIX: ClassVar[bytes] = b"\x00\x00\xff\xff"
 
     __slots__ = ("_decompressor", "_buffer")
 
@@ -39,13 +56,33 @@ class Decompressor:
         self._buffer: bytearray = bytearray()
 
     def decompress(self, data: bytes) -> bytes | None:
-        """
-        Decompress zlib data.
+        """Decompress zlib data.
+
+        **Example usage:**
+
+        .. code-block::
+            :emphasize-lines: 5
+
+            from nextcore.gateway import Decompressor
+
+            decompressor = Decompressor()
+
+            data = decompressor.decompress(zlib_data) # bytes from the Discord gateway
+
+            print(data.decode("utf-8"))
+
+
+        Parameters
+        ----------
+        data:
+            The zlib compressed bytes.
 
         Returns
         -------
         :class:`bytes` | :data:`None`:
-            The decompressed data. This is :data:`None` if this is a partial payload.
+            The decompressed data.
+
+            This is :data:`None` if this is a partial payload.
 
         Raises
         ------
@@ -54,7 +91,7 @@ class Decompressor:
         """
         self._buffer.extend(data)
 
-        if len(data) < 4 or data[-4:] != ZLIB_SUFFIX:
+        if len(data) < 4 or data[-4:] != Decompressor.ZLIB_SUFFIX:
             # Not a full payload, try again next time
             return None
 

@@ -29,26 +29,26 @@ from typing import TYPE_CHECKING
 from .request_session import RequestSession
 
 if TYPE_CHECKING:
-    from typing import AsyncIterator
+    from typing import AsyncIterator, Final
 
     from .bucket_metadata import BucketMetadata
 
 logger = getLogger(__name__)
 
-__all__ = ("Bucket",)
+__all__: Final[tuple[str, ...]] = ("Bucket",)
 
 
 class Bucket:
-    """A discord ratelimit implementation around a bucket.
+    """A discord rate limit implementation around a bucket.
 
     Parameters
     ----------
-    metadata: :class:`BucketMetadata`
+    metadata:
         The metadata for the bucket.
 
     Attributes
     ----------
-    metadata: :class:`BucketMetadata`
+    metadata:
         The metadata for the bucket.
     """
 
@@ -58,26 +58,34 @@ class Bucket:
         "_reserved",
         "_pending",
         "_pending_reset",
-        "_fetched_ratelimit_info",
+        "_fetched_rate_limit_info",
         "__weakref__",
     )
 
-    def __init__(self, metadata: BucketMetadata):
+    def __init__(self, metadata: BucketMetadata) -> None:
         self.metadata: BucketMetadata = metadata
         self._remaining: int | None = self.metadata.limit
         self._reserved: list[RequestSession] = []  # Requests currently being processed
         self._pending: list[RequestSession] = []  # Requests waiting for a spot
         self._pending_reset: bool = False  # Waiting for the bucket to reset
-        self._fetched_ratelimit_info: bool = False  # Initial fetch of ratelimit info
+        self._fetched_rate_limit_info: bool = False  # Initial fetch of rate limit info
 
     @asynccontextmanager
     async def acquire(self) -> AsyncIterator[None]:  # TODO: Fix type
-        """Reserve a spot in the bucket to do a request."""
+        """Reserve a spot in the bucket to do a request.
+
+        **Example usage**
+
+        .. code-block:: python
+
+            async with bucket.acquire():
+                # Do request
+                await bucket.update(...)
+        """
         session = await self._aenter()
         try:
             yield None
         finally:
-            # Exit
             await self._aexit(session)
 
     async def _aenter(self) -> RequestSession:
@@ -85,7 +93,7 @@ class Bucket:
         session = RequestSession(self.metadata.unlimited)
 
         if self._remaining is None:
-            # No info! Let's do one request at once to fetch ratelimits.
+            # No info! Let's do one request at once to fetch rate limits.
             remaining = 1
         else:
             # Info gathered, let's use it.
@@ -95,7 +103,7 @@ class Bucket:
         if not self.metadata.unlimited and remaining - self._reserved_count == 0:
             # No more spots, add it as a pending request
             logger.debug(
-                "No more spots in ratelimit, waiting! Remaining: %s, reserved: %s", remaining, self._reserved_count
+                "No more spots in rate limit, waiting! Remaining: %s, reserved: %s", remaining, self._reserved_count
             )
             self._pending.append(session)
             await session.pending_future
@@ -110,24 +118,24 @@ class Bucket:
 
         Parameters
         ----------
-        session: :class:`RequestSession`
+        session:
             The session to clean up.
         """
         self._reserved.remove(session)
 
-        if not self._fetched_ratelimit_info:
+        if not self._fetched_rate_limit_info:
             if self.metadata.unlimited:
                 # Unlimited, this is handled in Bucket.update
                 pass
             elif self._remaining is not None:
                 # Info fetched, let this buckets requests through
-                self._fetched_ratelimit_info = True
+                self._fetched_rate_limit_info = True
                 self._release_pending(self._remaining)
             else:
                 # Request failed, attempt another one!
                 self._release_pending(1)
 
-            self._fetched_ratelimit_info = True
+            self._fetched_rate_limit_info = True
 
     @property
     def _reserved_count(self) -> int:
@@ -147,11 +155,11 @@ class Bucket:
 
         Parameters
         ----------
-        remaining: :class:`int`
+        remaining:
             The number of requests remaining in the bucket.
-        reset_after: :class:`float`
+        reset_after:
             The time in seconds until the bucket resets.
-        unlimited: :class:`bool`
+        unlimited:
             Whether the bucket is unlimited.
         """
         if not unlimited:
@@ -168,7 +176,7 @@ class Bucket:
             if self._remaining is None:
                 self._remaining = remaining
             else:
-                # This fixes a race condition when receiving the ratelimit
+                # This fixes a race condition when receiving the rate limit
                 self._remaining = min(self._remaining, remaining)
             if not self._pending_reset:
                 self._pending_reset = True

@@ -24,11 +24,25 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from typing import Final
+
     from aiohttp import ClientResponse
+    from discord_typings import HTTPErrorResponseData
+
+__all__: Final[tuple[str, ...]] = (
+    "RateLimitingFailedError",
+    "HTTPRequestStatusError",
+    "BadRequestError",
+    "UnauthorizedError",
+    "ForbiddenError",
+    "NotFoundError",
+    "InternalServerError",
+    "CloudflareBanError",
+)
 
 
 class RateLimitingFailedError(Exception):
-    """When ratelimiting has failed more than :attr:`HTTPClient.max_retries` times
+    """When rate limiting has failed more than :attr:`HTTPClient.max_retries` times
 
     .. hint::
         This can be due to a un-syncronized clock.
@@ -85,16 +99,16 @@ class RateLimitingFailedError(Exception):
 
     Parameters
     ----------
-    max_retries: :class:`int`
+    max_retries:
         How many retries the request used that failed.
-    response: :class:`aiohttp.ClientResponse`
+    response:
         The response to the last request that failed.
 
     Attributes
     ----------
-    max_retries: :class:`int`
+    max_retries:
         How many retries the request used that failed.
-    response: :class:`aiohttp.ClientResponse`
+    response:
         The response to the last request that failed.
     """
 
@@ -111,30 +125,30 @@ class HTTPRequestStatusError(Exception):
 
     Parameters
     ----------
-    error: :class:`HTTPErrorTyping`
+    error:
         The error json from the body.
-    response: :class:`ClientResponse`
+    response:
         The response to the request.
 
     Attributes
     ----------
-    response: :class:`ClientResponse`
+    response:
         The response to the request.
-    error_code: :class:`int`
+    error_code:
         The error code.
-    message: :class:`str`
+    message:
         The error message.
-    error: :class:`HTTPErrorTyping`
+    error:
         The error json from the body.
     """
 
-    def __init__(self, error: HTTPErrorTyping, response: ClientResponse) -> None:
+    def __init__(self, error: HTTPErrorResponseData, response: ClientResponse) -> None:
         self.response: ClientResponse = response
 
         self.error_code: int = error["code"]
         self.message: str = error["message"]
 
-        self.error: HTTPErrorTyping = error
+        self.error: HTTPErrorResponseData = error
 
         super().__init__(f"({self.error_code}) {self.message}")
 
