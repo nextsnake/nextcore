@@ -31,6 +31,7 @@ from .wrappers import (
     AuditLogHTTPWrappers,
     ChannelHTTPWrappers,
     EmojiHTTPWrappers,
+    GatewayHTTPWrappers,
     GuildHTTPWrappers,
     GuildScheduledEventHTTPWrappers,
     GuildTemplateHTTPWrappers,
@@ -45,11 +46,7 @@ from .wrappers import (
 if TYPE_CHECKING:
     from typing import Any, Final
 
-    from discord_typings import (
-        ApplicationData,
-        GetGatewayBotData,
-        GetGatewayData,
-    )
+    from discord_typings import ApplicationData
 
     from ..authentication import BearerAuthentication, BotAuthentication
 
@@ -72,6 +69,7 @@ class HTTPClient(
     UserHTTPWrappers,
     VoiceHTTPWrappers,
     WebhookHTTPWrappers,
+    GatewayHTTPWrappers,
     BaseHTTPClient,
 ):
     """The HTTP client to interface with the Discord API.
@@ -182,64 +180,6 @@ class HTTPClient(
     # Voice
     # Webhook
     # Gateway
-    async def get_gateway(self) -> GetGatewayData:
-        """Gets gateway connection info.
-
-        Read the `documentation <https://discord.dev/topics/gateway#get-gateway>`__ for more info.
-
-        **Example usage:**
-
-        .. code-block:: python
-
-            gateway_info = await http_client.get_gateway()
-
-        Returns
-        -------
-        discord_typings.GetGatewayData
-            The gateway info.
-        """
-        route = Route("GET", "/gateway", ignore_global=True)
-        r = await self._request(route, rate_limit_key=None)
-
-        # TODO: Make this verify the payload from discord?
-        return await r.json()  # type: ignore [no-any-return]
-
-    async def get_gateway_bot(
-        self, authentication: BotAuthentication, *, global_priority: int = 0
-    ) -> GetGatewayBotData:
-        """Gets gateway connection information.
-
-        Read the `documentation <https://discord.dev/topics/gateway#gateway-get-gateway-bot>`__
-
-        **Example usage:**
-
-        .. code-block:: python
-
-            bot_info = await http_client.get_gateway_bot(token)
-
-        Parameters
-        ----------
-        authentication:
-            Authentication info.
-        global_priority:
-            The priority of the request for the global rate-limiter.
-
-        Returns
-        -------
-        discord_typings.GetGatewayBotData
-            Gateway connection info.
-        """
-        route = Route("GET", "/gateway/bot")
-        r = await self._request(
-            route,
-            rate_limit_key=authentication.rate_limit_key,
-            headers={"Authorization": str(authentication)},
-            global_priority=global_priority,
-        )
-
-        # TODO: Make this verify the payload from discord?
-        return await r.json()  # type: ignore [no-any-return]
-
     # OAuth2
     async def get_current_bot_application_information(
         self, authentication: BotAuthentication, *, global_priority: int = 0

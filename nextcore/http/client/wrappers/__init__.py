@@ -23,6 +23,7 @@ from .application_commands import *
 from .audit_log import *
 from .channel import *
 from .emoji import *
+from .gateway import *
 from .guild import *
 from .guild_scheduled_events import *
 from .guild_template import *
