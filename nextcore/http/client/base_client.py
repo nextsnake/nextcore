@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from logging import getLogger
 from time import time
 from typing import TYPE_CHECKING
