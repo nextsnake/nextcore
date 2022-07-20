@@ -32,10 +32,10 @@ if TYPE_CHECKING:
     from typing import Any, Final, Literal
 
     from discord_typings import (
+        BanData,
         ChannelData,
         ChannelPositionData,
         GuildData,
-        BanData,
         GuildMemberData,
         GuildPreviewData,
         GuildWidgetData,

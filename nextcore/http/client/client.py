@@ -70,7 +70,8 @@ class HTTPClient(
     ApplicationCommandsHTTPWrappers,
     AuditLogHTTPWrappers,
     ChannelHTTPWrappers,
-    EmojiHTTPWrappers,GuildHTTPWrappers,
+    EmojiHTTPWrappers,
+    GuildHTTPWrappers,
     BaseHTTPClient,
 ):
     """The HTTP client to interface with the Discord API.
