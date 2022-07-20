@@ -35,6 +35,7 @@ from .wrappers import (
     GuildHTTPWrappers,
     GuildScheduledEventHTTPWrappers,
     GuildTemplateHTTPWrappers,
+    InviteHTTPWrappers,
 )
 
 if TYPE_CHECKING:
@@ -73,6 +74,7 @@ class HTTPClient(
     GuildHTTPWrappers,
     GuildScheduledEventHTTPWrappers,
     GuildTemplateHTTPWrappers,
+    InviteHTTPWrappers,
     BaseHTTPClient,
 ):
     """The HTTP client to interface with the Discord API.
@@ -177,76 +179,6 @@ class HTTPClient(
     # Guild Scheduled events
     # Guild Template
     # Invite
-    async def get_invite(
-        self, authentication: BotAuthentication, invite_code: str, *, global_priority: int = 0
-    ) -> InviteData:
-        """Gets a invite from a invite code
-
-        Read the `documentation <https://discord.dev/resources/invite#get-invite>`__
-
-        Parameters
-        ----------
-        authentication:
-            Authentication info.
-        invite_code:
-            The code of the invite to get
-        global_priority:
-            The priority of the request for the global rate-limiter.
-
-        Returns
-        -------
-        discord_typings.InviteData
-            The invite that was fetched
-        """
-        route = Route("GET", "/invites/{invite_code}", invite_code=invite_code)
-        r = await self._request(
-            route,
-            rate_limit_key=authentication.rate_limit_key,
-            headers={"Authorization": str(authentication)},
-            global_priority=global_priority,
-        )
-
-        # TODO: Make this verify the payload from discord?
-        return await r.json()  # type: ignore [no-any-return]
-
-    async def delete_invite(
-        self, authentication: BotAuthentication, invite_code: str, *, global_priority: int = 0
-    ) -> InviteData:
-        """Gets a invite from a invite code
-
-        Read the `documentation <https://discord.dev/resources/invite#delete-invite>`__
-
-        .. note::
-            This requires the ``MANAGE_CHANNELS`` permission in the channel the invite is from or the ``MANAGE_GUILD`` permission.
-
-        .. note::
-            This will dispatch a ``INVITE_DELETE`` event.
-
-        Parameters
-        ----------
-        authentication:
-            Authentication info.
-        invite_code:
-            The code of the invite to delete
-        global_priority:
-            The priority of the request for the global rate-limiter.
-
-        Returns
-        -------
-        discord_typings.InviteData
-            The invite that was deleted
-        """
-        route = Route("DELETE", "/invites/{invite_code}", invite_code=invite_code)
-        r = await self._request(
-            route,
-            rate_limit_key=authentication.rate_limit_key,
-            headers={"Authorization": str(authentication)},
-            global_priority=global_priority,
-        )
-
-        # TODO: Make this verify the payload from discord?
-        return await r.json()  # type: ignore [no-any-return]
-
     # Stage instance
     async def create_stage_instance(
         self,
