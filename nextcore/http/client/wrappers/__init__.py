@@ -28,6 +28,7 @@ from .guild import *
 from .guild_scheduled_events import *
 from .guild_template import *
 from .invite import *
+from .oauth2 import *
 from .stage_instance import *
 from .sticker import *
 from .user import *

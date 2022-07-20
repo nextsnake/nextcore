@@ -24,7 +24,6 @@ from __future__ import annotations
 from logging import getLogger
 from typing import TYPE_CHECKING
 
-from ..route import Route
 from .base_client import BaseHTTPClient
 from .wrappers import (
     ApplicationCommandsHTTPWrappers,
@@ -41,14 +40,11 @@ from .wrappers import (
     UserHTTPWrappers,
     VoiceHTTPWrappers,
     WebhookHTTPWrappers,
+    OAuth2HTTPWrappers,
 )
 
 if TYPE_CHECKING:
-    from typing import Any, Final
-
-    from discord_typings import ApplicationData
-
-    from ..authentication import BearerAuthentication, BotAuthentication
+    from typing import Final
 
 logger = getLogger(__name__)
 
@@ -70,6 +66,7 @@ class HTTPClient(
     VoiceHTTPWrappers,
     WebhookHTTPWrappers,
     GatewayHTTPWrappers,
+    OAuth2HTTPWrappers,
     BaseHTTPClient,
 ):
     """The HTTP client to interface with the Discord API.
@@ -164,81 +161,3 @@ class HTTPClient(
     dispatcher:
         Events from the HTTPClient. See the :ref:`events<HTTPClient dispatcher>`
     """
-
-    # Wrapper functions for requests
-    # Application commands
-    # Audit log
-    # Channel
-    # Emoji
-    # Guild
-    # Guild Scheduled events
-    # Guild Template
-    # Invite
-    # Stage instance
-    # Sticker
-    # User
-    # Voice
-    # Webhook
-    # Gateway
-    # OAuth2
-    async def get_current_bot_application_information(
-        self, authentication: BotAuthentication, *, global_priority: int = 0
-    ) -> ApplicationData:
-        """Gets the bots application
-
-        Read the `documentation <https://discord.dev/topics/oauth2#get-current-bot-application-information>`__
-
-        Parameters
-        ----------
-        authentication:
-            Authentication info.
-        global_priority:
-            The priority of the request for the global rate-limiter.
-
-        Returns
-        -------
-        discord_typings.ApplicationData
-            The application the bot is connected to
-        """
-        route = Route("GET", "/oauth2/applications/@me")
-
-        r = await self._request(
-            route,
-            rate_limit_key=authentication.rate_limit_key,
-            headers={"Authorization": str(authentication)},
-            global_priority=global_priority,
-        )
-
-        # TODO: Make this verify the payload from discord?
-        return await r.json()  # type: ignore [no-any-return]
-
-    async def get_current_authorization_information(
-        self, authentication: BotAuthentication | BearerAuthentication, *, global_priority: int = 0
-    ) -> dict[str, Any]:  # TODO: Narrow typing
-        """Gets the bots application
-
-        Read the `documentation <https://discord.dev/topics/oauth2#get-current-authorization-information>`__
-
-        Parameters
-        ----------
-        authentication:
-            Authentication info.
-        global_priority:
-            The priority of the request for the global rate-limiter.
-
-        Returns
-        -------
-        discord_typings.???
-            Info about the current logged in user/bot
-        """
-        route = Route("GET", "/oauth2/@me")
-
-        r = await self._request(
-            route,
-            rate_limit_key=authentication.rate_limit_key,
-            headers={"Authorization": str(authentication)},
-            global_priority=global_priority,
-        )
-
-        # TODO: Make this verify the payload from discord?
-        return await r.json()  # type: ignore [no-any-return]
