@@ -22,3 +22,4 @@
 from .application_commands import *
 from .audit_log import *
 from .channel import *
+from .emoji import *
