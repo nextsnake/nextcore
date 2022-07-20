@@ -30,3 +30,4 @@ from .invite import *
 from .stage_instance import *
 from .sticker import *
 from .user import *
+from .voice import *

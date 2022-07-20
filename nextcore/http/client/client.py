@@ -39,6 +39,7 @@ from .wrappers import (
     StageInstanceHTTPWrappers,
     StickerHTTPWrappers,
     UserHTTPWrappers,
+    VoiceHTTPWrappers,
 )
 
 if TYPE_CHECKING:
@@ -50,7 +51,6 @@ if TYPE_CHECKING:
         GetGatewayData,
         MessageData,
         Snowflake,
-        VoiceRegionData,
         WebhookData,
     )
 
@@ -73,6 +73,7 @@ class HTTPClient(
     StageInstanceHTTPWrappers,
     StickerHTTPWrappers,
     UserHTTPWrappers,
+    VoiceHTTPWrappers,
     BaseHTTPClient,
 ):
     """The HTTP client to interface with the Discord API.
@@ -181,37 +182,6 @@ class HTTPClient(
     # Sticker
     # User
     # Voice
-    async def list_voice_regions(
-        self, authentication: BotAuthentication, *, global_priority: int = 0
-    ) -> list[VoiceRegionData]:  # TODO: This should be more strict
-        """Gets the users connections
-
-        Read the `documentation <https://discord.dev/resources/voice#list-voice-regions>`__
-
-        Parameters
-        ----------
-        authentication:
-            Authentication info.
-        global_priority:
-            The priority of the request for the global rate-limiter.
-
-        Returns
-        -------
-        list[discord_typings.VoiceRegionData]
-            Voice regions
-        """
-        route = Route("GET", "/voice/regions")
-
-        r = await self._request(
-            route,
-            rate_limit_key=authentication.rate_limit_key,
-            headers={"Authorization": str(authentication)},
-            global_priority=global_priority,
-        )
-
-        # TODO: Make this verify the payload from discord?
-        return await r.json()  # type: ignore [no-any-return]
-
     # Webhook
     async def create_webhook(
         self,
