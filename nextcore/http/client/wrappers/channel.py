@@ -28,7 +28,7 @@ from aiohttp import FormData
 
 from ....common import UNDEFINED, UndefinedType, json_dumps
 from ...route import Route
-from ..base_client import BaseHTTPClient
+from ..base_client import AbstractHTTPClient
 
 if TYPE_CHECKING:
     from typing import Any, Final, Iterable, Literal
@@ -57,7 +57,7 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("ChannelHTTPWrappers",)
 
 
-class ChannelHTTPWrappers(BaseHTTPClient):
+class ChannelHTTPWrappers(AbstractHTTPClient):
     async def get_channel(
         self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> ChannelData:

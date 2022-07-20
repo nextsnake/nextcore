@@ -25,7 +25,7 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 from ...route import Route
-from ..base_client import BaseHTTPClient
+from ..base_client import AbstractHTTPClient
 
 if TYPE_CHECKING:
     from typing import Final
@@ -39,7 +39,7 @@ logger = getLogger(__name__)
 __all__: Final[tuple[str, ...]] = ("GatewayHTTPWrappers",)
 
 
-class GatewayHTTPWrappers(BaseHTTPClient):
+class GatewayHTTPWrappers(AbstractHTTPClient):
     async def get_gateway(self) -> GetGatewayData:
         """Gets gateway connection info.
 

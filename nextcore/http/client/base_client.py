@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from logging import getLogger
 from time import time
 from typing import TYPE_CHECKING
@@ -51,10 +52,68 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
-__all__: Final[tuple[str, ...]] = ("BaseHTTPClient",)
+__all__: Final[tuple[str, ...]] = ("AbstractHTTPClient", "BaseHTTPClient")
 
 
-class BaseHTTPClient:
+class AbstractHTTPClient(ABC):
+    trust_local_time: bool
+    timeout: float
+    default_headers: dict[str, str]
+    max_retries: int
+    rate_limit_storages: dict[str | None, RateLimitStorage]
+    dispatcher: Dispatcher[Literal["request_response"]]
+    _session: ClientSession | None
+
+    def __init__(
+        self,
+        *,
+        trust_local_time: bool = True,
+        timeout: float = 60,
+        max_rate_limit_retries: int = 10,
+    ) -> None:
+        ...
+
+    async def setup(self) -> None:
+        ...
+
+    async def _request(
+        self,
+        route: Route,
+        rate_limit_key: str | None,
+        *,
+        headers: dict[str, str] | None = None,
+        global_priority: int = 0,
+        **kwargs: Any,
+    ) -> ClientResponse:
+        ...
+
+    async def _handle_response_error(self, route: Route, response: ClientResponse, storage: RateLimitStorage) -> None:
+        ...
+
+    async def _handle_rate_limited_error(
+        self, route: Route, response: ClientResponse, storage: RateLimitStorage
+    ) -> None:
+        ...
+
+    async def connect_to_gateway(
+        self,
+        *,
+        version: Literal[6, 7, 8, 9, 10] | UndefinedType = UNDEFINED,
+        encoding: Literal["json", "etf"] | UndefinedType = UNDEFINED,
+        compress: Literal["zlib-stream"] | UndefinedType = UNDEFINED,
+    ) -> ClientWebSocketResponse:
+        ...
+
+    async def _get_bucket(self, route: Route, rate_limit_storage: RateLimitStorage) -> Bucket:
+        ...
+
+    async def _update_bucket(
+        self, response: ClientResponse, route: Route, bucket: Bucket, rate_limit_storage: RateLimitStorage
+    ) -> None:
+        ...
+
+
+class BaseHTTPClient(AbstractHTTPClient):
     __slots__ = (
         "trust_local_time",
         "timeout",

@@ -25,7 +25,7 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 from ...route import Route
-from ..base_client import BaseHTTPClient
+from ..base_client import AbstractHTTPClient
 
 if TYPE_CHECKING:
     from typing import Any, Final
@@ -39,7 +39,7 @@ logger = getLogger(__name__)
 __all__: Final[tuple[str, ...]] = ("OAuth2HTTPWrappers",)
 
 
-class OAuth2HTTPWrappers(BaseHTTPClient):
+class OAuth2HTTPWrappers(AbstractHTTPClient):
     async def get_current_bot_application_information(
         self, authentication: BotAuthentication, *, global_priority: int = 0
     ) -> ApplicationData:

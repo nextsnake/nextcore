@@ -24,7 +24,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ...route import Route
-from ..base_client import BaseHTTPClient
+from ..base_client import AbstractHTTPClient
 
 if TYPE_CHECKING:
     from typing import Final
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("InviteHTTPWrappers",)
 
 
-class InviteHTTPWrappers(BaseHTTPClient):
+class InviteHTTPWrappers(AbstractHTTPClient):
     async def get_invite(
         self, authentication: BotAuthentication, invite_code: str, *, global_priority: int = 0
     ) -> InviteData:

@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, overload
 
 from ....common import UNDEFINED, UndefinedType
 from ...route import Route
-from ..base_client import BaseHTTPClient
+from ..base_client import AbstractHTTPClient
 
 
 if TYPE_CHECKING:
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("GuildScheduledEventHTTPWrappers",)
 
 
-class GuildScheduledEventHTTPWrappers(BaseHTTPClient):
+class GuildScheduledEventHTTPWrappers(AbstractHTTPClient):
     async def list_scheduled_events_for_guild(
         self,
         authentication: BotAuthentication,

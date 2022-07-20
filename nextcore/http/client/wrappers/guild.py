@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, overload
 
 from ....common import UNDEFINED, UndefinedType
 from ...route import Route
-from ..base_client import BaseHTTPClient
+from ..base_client import AbstractHTTPClient
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
@@ -59,7 +59,7 @@ logger = getLogger(__name__)
 __all__: Final[tuple[str, ...]] = ("GuildHTTPWrappers",)
 
 
-class GuildHTTPWrappers(BaseHTTPClient):
+class GuildHTTPWrappers(AbstractHTTPClient):
     async def create_guild(
         self,
         authentication: BotAuthentication,

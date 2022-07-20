@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING
 
 from ....common import UNDEFINED, UndefinedType
 from ...route import Route
-from ..base_client import BaseHTTPClient
+from ..base_client import AbstractHTTPClient
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("StageInstanceHTTPWrappers",)
 
 
-class StageInstanceHTTPWrappers(BaseHTTPClient):
+class StageInstanceHTTPWrappers(AbstractHTTPClient):
     async def create_stage_instance(
         self,
         authentication: BotAuthentication,

@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING
 
 from ....common import UNDEFINED, UndefinedType
 from ...route import Route
-from ..base_client import BaseHTTPClient
+from ..base_client import AbstractHTTPClient
 
 if TYPE_CHECKING:
     from typing import Final
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("AuditLogHTTPWrappers",)
 
 
-class AuditLogHTTPWrappers(BaseHTTPClient):
+class AuditLogHTTPWrappers(AbstractHTTPClient):
     async def get_guild_audit_log(
         self,
         authentication: BotAuthentication,

@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING
 
 from ....common import UNDEFINED, UndefinedType
 from ...route import Route
-from ..base_client import BaseHTTPClient
+from ..base_client import AbstractHTTPClient
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
@@ -49,7 +49,7 @@ logger = getLogger(__name__)
 __all__: Final[tuple[str, ...]] = ("ApplicationCommandsHTTPWrappers",)
 
 
-class ApplicationCommandsHTTPWrappers(BaseHTTPClient):
+class ApplicationCommandsHTTPWrappers(AbstractHTTPClient):
     async def get_global_application_commands(
         self,
         authentication: BotAuthentication | BearerAuthentication,

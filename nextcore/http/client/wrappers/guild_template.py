@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING
 
 from ....common import UNDEFINED, UndefinedType
 from ...route import Route
-from ..base_client import BaseHTTPClient
+from ..base_client import AbstractHTTPClient
 
 if TYPE_CHECKING:
     from typing import Any, Final
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("GuildTemplateHTTPWrappers",)
 
 
-class GuildTemplateHTTPWrappers(BaseHTTPClient):
+class GuildTemplateHTTPWrappers(AbstractHTTPClient):
     async def get_guild_template(
         self, authentication: BotAuthentication, template_code: str, *, global_priority: int = 0
     ) -> GuildTemplateData:

@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING
 
 from ....common import UNDEFINED, UndefinedType
 from ...route import Route
-from ..base_client import BaseHTTPClient
+from ..base_client import AbstractHTTPClient
 
 if TYPE_CHECKING:
     from typing import Any, Final
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("UserHTTPWrappers",)
 
 
-class UserHTTPWrappers(BaseHTTPClient):
+class UserHTTPWrappers(AbstractHTTPClient):
     async def get_current_user(
         self, authentication: BotAuthentication | BearerAuthentication, *, global_priority: int = 0
     ) -> UserData:
