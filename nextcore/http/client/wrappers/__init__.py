@@ -24,3 +24,4 @@ from .audit_log import *
 from .channel import *
 from .emoji import *
 from .guild import *
+from .guild_scheduled_events import *
