@@ -20,3 +20,4 @@
 # DEALINGS IN THE SOFTWARE.
 
 from .application_commands import *
+from .audit_log import *
