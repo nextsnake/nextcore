@@ -31,3 +31,4 @@ from .stage_instance import *
 from .sticker import *
 from .user import *
 from .voice import *
+from .webhook import *
