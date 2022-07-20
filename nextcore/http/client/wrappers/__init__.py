@@ -29,3 +29,4 @@ from .guild_template import *
 from .invite import *
 from .stage_instance import *
 from .sticker import *
+from .user import *
