@@ -25,14 +25,10 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import TYPE_CHECKING
 
-from aiohttp import ClientSession
-
-from ...common import Dispatcher
-from ..rate_limit_storage import RateLimitStorage
 from ..route import Route
 
 if TYPE_CHECKING:
-    from typing import Any, Final, Literal
+    from typing import Any, Final
 
     from aiohttp import ClientResponse
 
@@ -42,29 +38,7 @@ __all__: Final[tuple[str, ...]] = ("AbstractHTTPClient",)
 
 
 class AbstractHTTPClient(ABC):
-    trust_local_time: bool
-    timeout: float
-    default_headers: dict[str, str]
-    max_retries: int
-    rate_limit_storages: dict[str | None, RateLimitStorage]
-    dispatcher: Dispatcher[Literal["request_response"]]
-    _session: ClientSession | None
-
     __slots__ = ()
-
-    @abstractmethod
-    def __init__(
-        self,
-        *,
-        trust_local_time: bool = True,
-        timeout: float = 60,
-        max_rate_limit_retries: int = 10,
-    ) -> None:
-        ...
-
-    @abstractmethod
-    async def setup(self) -> None:
-        ...
 
     @abstractmethod
     async def _request(
