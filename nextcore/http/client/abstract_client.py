@@ -21,21 +21,20 @@
 
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import TYPE_CHECKING
 
 from aiohttp import ClientSession
 
-from ...common import UNDEFINED, Dispatcher, UndefinedType
-from ..bucket import Bucket
+from ...common import Dispatcher
 from ..rate_limit_storage import RateLimitStorage
 from ..route import Route
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
 
-    from aiohttp import ClientResponse, ClientWebSocketResponse
+    from aiohttp import ClientResponse
 
 logger = getLogger(__name__)
 
@@ -51,6 +50,7 @@ class AbstractHTTPClient(ABC):
     dispatcher: Dispatcher[Literal["request_response"]]
     _session: ClientSession | None
 
+    @abstractmethod
     def __init__(
         self,
         *,
@@ -60,9 +60,11 @@ class AbstractHTTPClient(ABC):
     ) -> None:
         ...
 
+    @abstractmethod
     async def setup(self) -> None:
         ...
 
+    @abstractmethod
     async def _request(
         self,
         route: Route,
@@ -72,29 +74,4 @@ class AbstractHTTPClient(ABC):
         global_priority: int = 0,
         **kwargs: Any,
     ) -> ClientResponse:
-        ...
-
-    async def _handle_response_error(self, route: Route, response: ClientResponse, storage: RateLimitStorage) -> None:
-        ...
-
-    async def _handle_rate_limited_error(
-        self, route: Route, response: ClientResponse, storage: RateLimitStorage
-    ) -> None:
-        ...
-
-    async def connect_to_gateway(
-        self,
-        *,
-        version: Literal[6, 7, 8, 9, 10] | UndefinedType = UNDEFINED,
-        encoding: Literal["json", "etf"] | UndefinedType = UNDEFINED,
-        compress: Literal["zlib-stream"] | UndefinedType = UNDEFINED,
-    ) -> ClientWebSocketResponse:
-        ...
-
-    async def _get_bucket(self, route: Route, rate_limit_storage: RateLimitStorage) -> Bucket:
-        ...
-
-    async def _update_bucket(
-        self, response: ClientResponse, route: Route, bucket: Bucket, rate_limit_storage: RateLimitStorage
-    ) -> None:
         ...

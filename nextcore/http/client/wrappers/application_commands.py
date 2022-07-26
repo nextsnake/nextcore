@@ -22,6 +22,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from logging import getLogger
 from typing import TYPE_CHECKING
 
@@ -49,7 +50,14 @@ logger = getLogger(__name__)
 __all__: Final[tuple[str, ...]] = ("ApplicationCommandsHTTPWrappers",)
 
 
-class ApplicationCommandsHTTPWrappers(AbstractHTTPClient):
+class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
+    """HTTP wrappers for application commands API endpoints.
+
+    This is an abstract base class that should not be used directly.
+    """
+
+    __slots__ = ()
+
     async def get_global_application_commands(
         self,
         authentication: BotAuthentication | BearerAuthentication,

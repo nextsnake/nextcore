@@ -21,12 +21,12 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from typing import TYPE_CHECKING
 
 from ....common import UNDEFINED, UndefinedType
 from ...route import Route
 from ..abstract_client import AbstractHTTPClient
-
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
@@ -38,7 +38,14 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("StickerHTTPWrappers",)
 
 
-class StickerHTTPWrappers(AbstractHTTPClient):
+class StickerHTTPWrappers(AbstractHTTPClient, ABC):
+    """HTTP wrappers for sticker API endpoints.
+
+    This is an abstract base class that should not be used directly.
+    """
+
+    __slots__ = ()
+
     async def get_sticker(
         self, authentication: BotAuthentication, sticker_id: Snowflake, *, global_priority: int = 0
     ) -> StickerData:

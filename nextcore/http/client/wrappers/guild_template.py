@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from typing import TYPE_CHECKING
 
 from ....common import UNDEFINED, UndefinedType
@@ -37,7 +38,14 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("GuildTemplateHTTPWrappers",)
 
 
-class GuildTemplateHTTPWrappers(AbstractHTTPClient):
+class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
+    """HTTP wrappers for guild template API endpoints.
+
+    This is an abstract base class that should not be used directly.
+    """
+
+    __slots__ = ()
+
     async def get_guild_template(
         self, authentication: BotAuthentication, template_code: str, *, global_priority: int = 0
     ) -> GuildTemplateData:

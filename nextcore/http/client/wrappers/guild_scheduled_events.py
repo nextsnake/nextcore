@@ -21,12 +21,12 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from typing import TYPE_CHECKING, overload
 
 from ....common import UNDEFINED, UndefinedType
 from ...route import Route
 from ..abstract_client import AbstractHTTPClient
-
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
@@ -42,7 +42,14 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("GuildScheduledEventHTTPWrappers",)
 
 
-class GuildScheduledEventHTTPWrappers(AbstractHTTPClient):
+class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
+    """HTTP wrappers for guild scheduled events API endpoints.
+
+    This is an abstract base class that should not be used directly.
+    """
+
+    __slots__ = ()
+
     async def list_scheduled_events_for_guild(
         self,
         authentication: BotAuthentication,

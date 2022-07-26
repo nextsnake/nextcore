@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from logging import getLogger
 from typing import TYPE_CHECKING
 
@@ -39,7 +40,14 @@ logger = getLogger(__name__)
 __all__: Final[tuple[str, ...]] = ("GatewayHTTPWrappers",)
 
 
-class GatewayHTTPWrappers(AbstractHTTPClient):
+class GatewayHTTPWrappers(AbstractHTTPClient, ABC):
+    """HTTP wrappers for gateway API endpoints.
+
+    This is an abstract base class that should not be used directly.
+    """
+
+    __slots__ = ()
+
     async def get_gateway(self) -> GetGatewayData:
         """Gets gateway connection info.
 

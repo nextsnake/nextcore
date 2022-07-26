@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from logging import getLogger
 from typing import TYPE_CHECKING, overload
 
@@ -59,7 +60,14 @@ logger = getLogger(__name__)
 __all__: Final[tuple[str, ...]] = ("GuildHTTPWrappers",)
 
 
-class GuildHTTPWrappers(AbstractHTTPClient):
+class GuildHTTPWrappers(AbstractHTTPClient, ABC):
+    """HTTP wrappers for guild API endpoints.
+
+    This is an abstract base class that should not be used directly.
+    """
+
+    __slots__ = ()
+
     async def create_guild(
         self,
         authentication: BotAuthentication,

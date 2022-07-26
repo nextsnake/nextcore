@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from typing import TYPE_CHECKING
 
 from ....common import UNDEFINED, UndefinedType
@@ -43,7 +44,14 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("UserHTTPWrappers",)
 
 
-class UserHTTPWrappers(AbstractHTTPClient):
+class UserHTTPWrappers(AbstractHTTPClient, ABC):
+    """HTTP wrappers for user API endpoints.
+
+    This is an abstract base class that should not be used directly.
+    """
+
+    __slots__ = ()
+
     async def get_current_user(
         self, authentication: BotAuthentication | BearerAuthentication, *, global_priority: int = 0
     ) -> UserData:

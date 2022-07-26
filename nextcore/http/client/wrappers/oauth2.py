@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from logging import getLogger
 from typing import TYPE_CHECKING
 
@@ -39,7 +40,14 @@ logger = getLogger(__name__)
 __all__: Final[tuple[str, ...]] = ("OAuth2HTTPWrappers",)
 
 
-class OAuth2HTTPWrappers(AbstractHTTPClient):
+class OAuth2HTTPWrappers(AbstractHTTPClient, ABC):
+    """HTTP wrappers for OAuth2 API endpoints.
+
+    This is an abstract base class that should not be used directly.
+    """
+
+    __slots__ = ()
+
     async def get_current_bot_application_information(
         self, authentication: BotAuthentication, *, global_priority: int = 0
     ) -> ApplicationData:

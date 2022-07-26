@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from typing import TYPE_CHECKING
 
 from ....common import UNDEFINED, UndefinedType
@@ -37,7 +38,14 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("StageInstanceHTTPWrappers",)
 
 
-class StageInstanceHTTPWrappers(AbstractHTTPClient):
+class StageInstanceHTTPWrappers(AbstractHTTPClient, ABC):
+    """HTTP wrappers for stage instance API endpoints.
+
+    This is an abstract base class that should not be used directly.
+    """
+
+    __slots__ = ()
+
     async def create_stage_instance(
         self,
         authentication: BotAuthentication,

@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from typing import TYPE_CHECKING, overload
 from urllib.parse import quote
 
@@ -57,7 +58,14 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("ChannelHTTPWrappers",)
 
 
-class ChannelHTTPWrappers(AbstractHTTPClient):
+class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
+    """HTTP wrappers for channel API endpoints.
+
+    This is an abstract base class that should not be used directly.
+    """
+
+    __slots__ = ()
+
     async def get_channel(
         self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
     ) -> ChannelData:

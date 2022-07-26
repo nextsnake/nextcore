@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from typing import TYPE_CHECKING
 
 from ....common import UNDEFINED, UndefinedType
@@ -37,7 +38,14 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("EmojiHTTPWrappers",)
 
 
-class EmojiHTTPWrappers(AbstractHTTPClient):
+class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
+    """HTTP wrappers for emoji API endpoints.
+
+    This is an abstract base class that should not be used directly.
+    """
+
+    __slots__ = ()
+
     async def list_guild_emojis(
         self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
     ) -> list[EmojiData]:

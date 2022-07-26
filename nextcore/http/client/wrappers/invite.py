@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from typing import TYPE_CHECKING
 
 from ...route import Route
@@ -36,7 +37,14 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("InviteHTTPWrappers",)
 
 
-class InviteHTTPWrappers(AbstractHTTPClient):
+class InviteHTTPWrappers(AbstractHTTPClient, ABC):
+    """HTTP wrappers for invite API endpoints.
+
+    This is an abstract base class that should not be used directly.
+    """
+
+    __slots__ = ()
+
     async def get_invite(
         self, authentication: BotAuthentication, invite_code: str, *, global_priority: int = 0
     ) -> InviteData:
