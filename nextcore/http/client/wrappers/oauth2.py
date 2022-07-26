@@ -25,7 +25,7 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 from ...route import Route
-from ..base_client import AbstractHTTPClient
+from ..abstract_client import AbstractHTTPClient
 
 if TYPE_CHECKING:
     from typing import Any, Final

@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, overload
 
 from ....common import UNDEFINED, UndefinedType
 from ...route import Route
-from ..base_client import AbstractHTTPClient
+from ..abstract_client import AbstractHTTPClient
 
 
 if TYPE_CHECKING:

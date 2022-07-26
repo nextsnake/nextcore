@@ -24,7 +24,7 @@ from __future__ import annotations
 from logging import getLogger
 from typing import TYPE_CHECKING
 
-from .base_client import BaseHTTPClient
+from .abstract_client import BaseHTTPClient
 from .wrappers import (
     ApplicationCommandsHTTPWrappers,
     AuditLogHTTPWrappers,

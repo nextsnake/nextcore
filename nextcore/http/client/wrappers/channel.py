@@ -28,7 +28,7 @@ from aiohttp import FormData
 
 from ....common import UNDEFINED, UndefinedType, json_dumps
 from ...route import Route
-from ..base_client import AbstractHTTPClient
+from ..abstract_client import AbstractHTTPClient
 
 if TYPE_CHECKING:
     from typing import Any, Final, Iterable, Literal
