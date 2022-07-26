@@ -50,6 +50,8 @@ class AbstractHTTPClient(ABC):
     dispatcher: Dispatcher[Literal["request_response"]]
     _session: ClientSession | None
 
+    __slots__ = ()
+
     @abstractmethod
     def __init__(
         self,
