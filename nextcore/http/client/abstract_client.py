@@ -38,6 +38,11 @@ __all__: Final[tuple[str, ...]] = ("AbstractHTTPClient",)
 
 
 class AbstractHTTPClient(ABC):
+    """Abstract base class for HTTP clients.
+
+    This defines :meth:`AbstractHTTPClient._request` for HTTP endpoint wrappers to use.
+    """
+
     __slots__ = ()
 
     @abstractmethod
