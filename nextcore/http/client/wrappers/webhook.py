@@ -20,8 +20,8 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from abc import ABC
 
+from abc import ABC
 from logging import getLogger
 from typing import TYPE_CHECKING
 
