@@ -245,12 +245,12 @@ class Shard:
         ReconnectCheckFailedError
             :attr:`Shard.should_reconnect` was set to :data:`False` and a :meth:`Shard.identify` call was needed.
         RuntimeError
-            Already reconnecting
+            We are already reconnecting.
         asyncio.TimeoutError
             Discord did not respond with a ``READY`` payload in time. Please try again.
         """
         if self._connect_lock.locked():
-            raise RuntimeError("Already reconnecting")
+            raise RuntimeError("We are already reconnecting.")
 
         async with self._connect_lock:
             async for _ in ExponentialBackoff(0.5, 2, 10):
