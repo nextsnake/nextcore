@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from asyncio import Event, create_task, get_running_loop, sleep
+from asyncio import Event, Lock, create_task, get_running_loop, sleep, wait_for
 from logging import Logger, getLogger
 from random import random
 from sys import platform
@@ -155,6 +155,7 @@ class Shard:
         "should_reconnect",
         "_identify_rate_limiter",
         "_send_rate_limit",
+        "_connect_lock",
         "_ws",
         "_decompressor",
         "_logger",
@@ -204,6 +205,7 @@ class Shard:
 
         # Internals
         self._send_rate_limit = TimesPer(60 - 3, 120)
+        self._connect_lock: Lock = Lock()
         self._ws: ClientWebSocketResponse | None = None
         self._decompressor: Decompressor = Decompressor()
         self._logger: Logger = getLogger(f"{__name__}.{self.shard_id}")
@@ -242,59 +244,68 @@ class Shard:
         ------
         ReconnectCheckFailedError
             :attr:`Shard.should_reconnect` was set to :data:`False` and a :meth:`Shard.identify` call was needed.
+        RuntimeError
+            We are already reconnecting.
+        asyncio.TimeoutError
+            Discord did not respond with a ``READY`` payload in time. Please try again.
         """
+        if self._connect_lock.locked():
+            raise RuntimeError("We are already reconnecting.")
 
-        async for _ in ExponentialBackoff(0.5, 2, 10):
-            try:
-                ws = await self._http_client.connect_to_gateway(version=10, encoding="json", compress="zlib-stream")
-            except ClientConnectorError:
-                self._logger.exception("Failed to connect to the gateway? Check your internet connection")
-            except WSServerHandshakeError:
-                self._logger.exception("Failed to connect to the gateway")
+        async with self._connect_lock:
+            async for _ in ExponentialBackoff(0.5, 2, 10):
+                try:
+                    ws = await self._http_client.connect_to_gateway(version=10, encoding="json", compress="zlib-stream")
+                except ClientConnectorError:
+                    self._logger.exception("Failed to connect to the gateway? Check your internet connection")
+                except WSServerHandshakeError:
+                    self._logger.exception("Failed to connect to the gateway")
+                else:
+                    break
+
+            self._logger.debug("Connected to websocket")
+
+            # Disconnect previously connected ws
+            if self._ws is not None and not self._ws.closed:
+                self.ready.clear()
+                await self._ws.close(code=999)
+                # Notify that we disconnected the ws, as the normal disconnect is for disconnects from discord.
+                # Disconnects from discord also include a error code, which we don't.
+                # This does include a bool if we closed the session.
+                await self.dispatcher.dispatch("client_disconnect", False)
+
+            # Reset session
+            self._decompressor = Decompressor()
+            self._received_heartbeat_ack = True
+
+            # Use the ws we connected with
+            self._ws = ws  # type: ignore [reportUnboundVariable] # This is always bound.
+
+            create_task(self._receive_loop())
+
+            # Identify/Resume
+            if self.session_id is not None and self.session_sequence_number is not None:
+                # Resuming
+                await self.resume()
+
+                # Manually set the ready flag as Discord does not send a resume acknowledge
+                # However it does send a RESUMED event, which is unfortunatly only sent when all events have been repeated.
+                # Which is too late for us.
+                self.ready.set()
             else:
-                break
+                # Clean up session_id and session_sequence_number
+                self.session_sequence_number = None
+                self.session_id = None
 
-        self._logger.debug("Connected to websocket")
+                if not self.should_reconnect:
+                    # We should not re-IDENTIFY when should_reconnect is false.
+                    raise ReconnectCheckFailedError()
 
-        # Disconnect previously connected ws
-        if self._ws is not None and not self._ws.closed:
-            self.ready.clear()
-            await self._ws.close(code=999)
-            # Notify that we disconnected the ws, as the normal disconnect is for disconnects from discord.
-            # Disconnects from discord also include a error code, which we don't.
-            # This does include a bool if we closed the session.
-            await self.dispatcher.dispatch("client_disconnect", False)
-
-        # Reset session
-        self._decompressor = Decompressor()
-        self._received_heartbeat_ack = True
-
-        # Use the ws we connected with
-        self._ws = ws  # type: ignore [reportUnboundVariable] # This is always bound.
-
-        create_task(self._receive_loop())
-
-        # Identify/Resume
-        if self.session_id is not None and self.session_sequence_number is not None:
-            # Resuming
-            await self.resume()
-
-            # Manually set the ready flag as Discord does not send a resume acknowledge
-            # However it does send a RESUMED event, which is unfortunatly only sent when all events have been repeated.
-            # Which is too late for us.
-            self.ready.set()
-        else:
-            # Clean up session_id and session_sequence_number
-            self.session_sequence_number = None
-            self.session_id = None
-
-            if not self.should_reconnect:
-                # We should not re-IDENTIFY when should_reconnect is false.
-                raise ReconnectCheckFailedError()
-
-            # Identify
-            async with self._identify_rate_limiter.acquire():
-                await self.identify()
+                # Identify
+                async with self._identify_rate_limiter.acquire():
+                    await self.identify()
+                    await wait_for(self.event_dispatcher.wait_for(lambda _: True, "READY"), timeout=5)
+                self._logger.debug("Done IDENTIFYing")
 
     async def close(self) -> None:
         """Close the connection to the gateway and destroy the session.
