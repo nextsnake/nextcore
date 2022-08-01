@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from asyncio import Event, create_task, get_running_loop, sleep, wait_for, Lock
+from asyncio import Event, Lock, create_task, get_running_loop, sleep, wait_for
 from logging import Logger, getLogger
 from random import random
 from sys import platform
