@@ -27,6 +27,7 @@ from logging import getLogger
 from queue import PriorityQueue
 from typing import TYPE_CHECKING, AsyncIterator
 
+from ..errors import RateLimitedError
 from .priority_queue_container import PriorityQueueContainer
 
 if TYPE_CHECKING:
@@ -59,14 +60,22 @@ class TimesPer:
         self._pending_reset: bool = False
 
     @asynccontextmanager
-    async def acquire(self, *, priority: int = 0) -> AsyncIterator[None]:
+    async def acquire(self, *, priority: int = 0, wait: bool = True) -> AsyncIterator[None]:
         """Use a spot in the rate-limit.
 
         Parameters
         ----------
         priority:
             The priority. **Lower** number means it will be requested earlier.
+        wait:
+            Wait for a spot in the rate limit.
 
+            If this is :data:`False`, this will raise :exc:`RateLimitedError` instead.
+
+        Raises
+        ------
+        RateLimitedError
+            ``wait`` was set to :data:`False` and there was no more spots in the rate limit.
         Returns
         -------
         :class:`typing.AsyncContextManager`
@@ -78,6 +87,10 @@ class TimesPer:
         logger.debug("Reserved requests: %s", self._in_progress)
 
         if calculated_remaining == 0:
+            if not wait:
+                raise RateLimitedError() 
+
+            # Wait for a spot
             future: Future[None] = Future()
             item = PriorityQueueContainer(priority, future)
 
