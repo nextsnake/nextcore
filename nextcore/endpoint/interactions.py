@@ -40,7 +40,6 @@ if TYPE_CHECKING:
     from multidict import CIMultiDictProxy
 
 
-
 logger = getLogger(__name__)
 
 
