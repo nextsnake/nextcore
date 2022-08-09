@@ -2013,7 +2013,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The name of the thread.
         auto_archive_duration:
             The auto archive duration of the thread.
-        rate_limit_per_user: int` | :data:`None` | :class:`UndefinedType
+        rate_limit_per_user:
             The time every member has to wait before sending another message.
 
             .. note::
