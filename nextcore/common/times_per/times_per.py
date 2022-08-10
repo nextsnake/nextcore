@@ -88,7 +88,7 @@ class TimesPer:
 
         if calculated_remaining == 0:
             if not wait:
-                raise RateLimitedError() 
+                raise RateLimitedError()
 
             # Wait for a spot
             future: Future[None] = Future()

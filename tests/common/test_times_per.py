@@ -1,6 +1,6 @@
 from pytest import mark, raises
-from nextcore.common.errors import RateLimitedError
 
+from nextcore.common.errors import RateLimitedError
 from nextcore.common.times_per import TimesPer
 from tests.utils import match_time
 
@@ -41,12 +41,13 @@ async def test_exception_undos():
         except:
             pass
 
+
 @mark.asyncio
 async def test_no_wait():
     rate_limiter = TimesPer(1, 1)
 
     async with rate_limiter.acquire(wait=False):
-        ... # Good!
+        ...  # Good!
 
     with raises(RateLimitedError):
         async with rate_limiter.acquire(wait=False):
