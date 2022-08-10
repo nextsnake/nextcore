@@ -31,5 +31,3 @@ __all__: Final[tuple[str, ...]] = ()
 
 class RateLimitedError(Exception):
     """A error for when a :class:`~nextcore.common.TimesPer` is rate limited and ``wait`` was :data:`False`"""
-
-    __slots__: tuple[str, ...] = ()
