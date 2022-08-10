@@ -23,9 +23,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .times_per import RateLimitedError
-
 if TYPE_CHECKING:
     from typing import Final
 
-__all__: Final[tuple[str, ...]] = ("RateLimitedError",)
+__all__: Final[tuple[str, ...]] = ()
+
+class RateLimitedError(Exception):
+    """A error for when a :class:`~nextcore.common.TimesPer` is rate limited and ``wait`` was :data:`False`"""
