@@ -7,6 +7,7 @@ HTTP reference
 --------------
 .. autoclass:: HTTPClient
     :members:
+    :inherited-members:
 
 .. autoclass:: Route
     :members:
@@ -33,6 +34,54 @@ HTTP reference
    :members:
 
 .. autoclass:: File
+    :members:
+
+HTTP Wrappers
+-------------
+
+.. autoclass:: ApplicationCommandsHTTPWrappers
+    :members:
+
+.. autoclass:: AuditLogHTTPWrappers
+    :members:
+
+.. autoclass:: ChannelHTTPWrappers
+    :members:
+
+.. autoclass:: EmojiHTTPWrappers
+    :members:
+
+.. autoclass:: GatewayHTTPWrappers
+    :members:
+
+.. autoclass:: GuildScheduledEventHTTPWrappers
+    :members:
+
+.. autoclass:: GuildTemplateHTTPWrappers
+    :members:
+
+.. autoclass:: GuildHTTPWrappers
+    :members:
+
+.. autoclass:: InviteHTTPWrappers
+    :members:
+
+.. autoclass:: OAuth2HTTPWrappers
+    :members:
+
+.. autoclass:: StageInstanceHTTPWrappers
+    :members:
+
+.. autoclass:: StickerHTTPWrappers
+    :members:
+
+.. autoclass:: UserHTTPWrappers
+    :members:
+
+.. autoclass:: VoiceHTTPWrappers
+    :members:
+
+.. autoclass:: WebhookHTTPWrappers
     :members:
 
 

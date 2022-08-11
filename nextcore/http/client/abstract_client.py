@@ -19,19 +19,40 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-"""Do requests to Discord over the HTTP API.
+from __future__ import annotations
 
-This module includes a HTTP client that handles rate limits for you,
-and gives you convinient methods around the API.
-"""
+from abc import ABC, abstractmethod
+from logging import getLogger
+from typing import TYPE_CHECKING
 
-from .authentication import *
-from .bucket import *
-from .bucket_metadata import *
-from .client import *
-from .errors import *
-from .file import *
-from .global_rate_limiter import *
-from .rate_limit_storage import *
-from .request_session import *
-from .route import *
+from ..route import Route
+
+if TYPE_CHECKING:
+    from typing import Any, Final
+
+    from aiohttp import ClientResponse
+
+logger = getLogger(__name__)
+
+__all__: Final[tuple[str, ...]] = ("AbstractHTTPClient",)
+
+
+class AbstractHTTPClient(ABC):
+    """Abstract base class for HTTP clients.
+
+    This defines :meth:`AbstractHTTPClient._request` for HTTP endpoint wrappers to use.
+    """
+
+    __slots__ = ()
+
+    @abstractmethod
+    async def _request(
+        self,
+        route: Route,
+        rate_limit_key: str | None,
+        *,
+        headers: dict[str, str] | None = None,
+        global_priority: int = 0,
+        **kwargs: Any,
+    ) -> ClientResponse:
+        ...
