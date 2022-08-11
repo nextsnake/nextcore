@@ -19,19 +19,18 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-"""Do requests to Discord over the HTTP API.
-
-This module includes a HTTP client that handles rate limits for you,
-and gives you convinient methods around the API.
-"""
-
-from .authentication import *
-from .bucket import *
-from .bucket_metadata import *
-from .client import *
-from .errors import *
-from .file import *
-from .global_rate_limiter import *
-from .rate_limit_storage import *
-from .request_session import *
-from .route import *
+from .application_commands import *
+from .audit_log import *
+from .channel import *
+from .emoji import *
+from .gateway import *
+from .guild import *
+from .guild_scheduled_events import *
+from .guild_template import *
+from .invite import *
+from .oauth2 import *
+from .stage_instance import *
+from .sticker import *
+from .user import *
+from .voice import *
+from .webhook import *
