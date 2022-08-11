@@ -52,6 +52,7 @@ class AbstractHTTPClient(ABC):
         rate_limit_key: str | None,
         *,
         headers: dict[str, str] | None = None,
+        bucket_priority: int = 0,
         global_priority: int = 0,
         wait: bool = True,
         **kwargs: Any,

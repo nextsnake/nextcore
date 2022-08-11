@@ -199,6 +199,7 @@ class HTTPClient(BaseHTTPClient):
         rate_limit_key: str | None,
         *,
         headers: dict[str, str] | None = None,
+        bucket_priority: int = 0,
         global_priority: int = 0,
         wait: bool = True,
         **kwargs: Any,
@@ -217,6 +218,8 @@ class HTTPClient(BaseHTTPClient):
                 This should be :data:`None` for unauthenticated routes or webhooks (does not include modifying the webhook via a bot).
         headers:
             Headers to mix with :attr:`HTTPClient.default_headers` to pass to :meth:`aiohttp.ClientSession.request`
+        bucket_priority:
+            The request priority to pass to :class:`Bucket`. **Lower** priority will be picked first.
         global_priority:
             The request priority for global requests. **Lower** priority will be picked first.
 
@@ -282,9 +285,9 @@ class HTTPClient(BaseHTTPClient):
 
         for _ in range(retries):
             bucket = await self._get_bucket(route, rate_limit_storage)
-            async with bucket.acquire():
+            async with bucket.acquire(priority=bucket_priority, wait=wait):
                 if not route.ignore_global:
-                    async with rate_limit_storage.global_rate_limiter.acquire(priority=global_priority):
+                    async with rate_limit_storage.global_rate_limiter.acquire(priority=global_priority, wait=wait):
                         logger.info("Requesting %s %s", route.method, route.path)
                         response = await self._session.request(
                             route.method, route.BASE_URL + route.path, headers=headers, timeout=self.timeout, **kwargs
