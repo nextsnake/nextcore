@@ -43,24 +43,7 @@ from ..errors import (
 )
 from ..rate_limit_storage import RateLimitStorage
 from ..route import Route
-from .abstract_client import AbstractHTTPClient
-from .wrappers import (
-    ApplicationCommandsHTTPWrappers,
-    AuditLogHTTPWrappers,
-    ChannelHTTPWrappers,
-    EmojiHTTPWrappers,
-    GatewayHTTPWrappers,
-    GuildHTTPWrappers,
-    GuildScheduledEventHTTPWrappers,
-    GuildTemplateHTTPWrappers,
-    InviteHTTPWrappers,
-    OAuth2HTTPWrappers,
-    StageInstanceHTTPWrappers,
-    StickerHTTPWrappers,
-    UserHTTPWrappers,
-    VoiceHTTPWrappers,
-    WebhookHTTPWrappers,
-)
+from .base_client import BaseHTTPClient
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
@@ -73,22 +56,7 @@ __all__: Final[tuple[str, ...]] = ("HTTPClient",)
 
 
 class HTTPClient(
-    ApplicationCommandsHTTPWrappers,
-    AuditLogHTTPWrappers,
-    ChannelHTTPWrappers,
-    EmojiHTTPWrappers,
-    GuildHTTPWrappers,
-    GuildScheduledEventHTTPWrappers,
-    GuildTemplateHTTPWrappers,
-    InviteHTTPWrappers,
-    StageInstanceHTTPWrappers,
-    StickerHTTPWrappers,
-    UserHTTPWrappers,
-    VoiceHTTPWrappers,
-    WebhookHTTPWrappers,
-    GatewayHTTPWrappers,
-    OAuth2HTTPWrappers,
-    AbstractHTTPClient,
+    BaseHTTPClient
 ):
     """The HTTP client to interface with the Discord API.
 
