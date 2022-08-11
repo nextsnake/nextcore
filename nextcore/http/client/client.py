@@ -55,9 +55,7 @@ logger = getLogger(__name__)
 __all__: Final[tuple[str, ...]] = ("HTTPClient",)
 
 
-class HTTPClient(
-    BaseHTTPClient
-):
+class HTTPClient(BaseHTTPClient):
     """The HTTP client to interface with the Discord API.
 
     **Example usage**

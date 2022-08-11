@@ -25,11 +25,28 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import TYPE_CHECKING
 
-from .wrappers import ApplicationCommandsHTTPWrappers, AuditLogHTTPWrappers, ChannelHTTPWrappers, EmojiHTTPWrappers, GuildHTTPWrappers, GuildScheduledEventHTTPWrappers, GuildTemplateHTTPWrappers, InviteHTTPWrappers, StageInstanceHTTPWrappers, StickerHTTPWrappers, UserHTTPWrappers, VoiceHTTPWrappers, WebhookHTTPWrappers, GatewayHTTPWrappers, OAuth2HTTPWrappers
-from ...common import UndefinedType, UNDEFINED
+from ...common import UNDEFINED, UndefinedType
+from .wrappers import (
+    ApplicationCommandsHTTPWrappers,
+    AuditLogHTTPWrappers,
+    ChannelHTTPWrappers,
+    EmojiHTTPWrappers,
+    GatewayHTTPWrappers,
+    GuildHTTPWrappers,
+    GuildScheduledEventHTTPWrappers,
+    GuildTemplateHTTPWrappers,
+    InviteHTTPWrappers,
+    OAuth2HTTPWrappers,
+    StageInstanceHTTPWrappers,
+    StickerHTTPWrappers,
+    UserHTTPWrappers,
+    VoiceHTTPWrappers,
+    WebhookHTTPWrappers,
+)
 
 if TYPE_CHECKING:
     from typing import Final, Literal
+
     from aiohttp import ClientWebSocketResponse
 
 logger = getLogger(__name__)
@@ -53,7 +70,7 @@ class BaseHTTPClient(
     WebhookHTTPWrappers,
     GatewayHTTPWrappers,
     OAuth2HTTPWrappers,
-    ABC
+    ABC,
 ):
     """Abstract base class for HTTP clients.
 
@@ -61,7 +78,7 @@ class BaseHTTPClient(
     """
 
     __slots__ = ()
-    
+
     @abstractmethod
     async def setup(self) -> None:
         """Sets up the HTTP session
@@ -75,7 +92,7 @@ class BaseHTTPClient(
             This can only be called once
         """
         ...
-    
+
     @abstractmethod
     async def connect_to_gateway(
         self,
@@ -117,5 +134,3 @@ class BaseHTTPClient(
         aiohttp.ClientWebSocketResponse
             The gateway websocket
         """
-
-
