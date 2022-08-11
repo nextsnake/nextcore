@@ -200,6 +200,7 @@ class HTTPClient(BaseHTTPClient):
         *,
         headers: dict[str, str] | None = None,
         global_priority: int = 0,
+        wait: bool = True,
         **kwargs: Any,
     ) -> ClientResponse:
         """Requests a route from the Discord API
@@ -221,7 +222,10 @@ class HTTPClient(BaseHTTPClient):
 
             .. warning::
                 This may be ignored by your :class:`BaseGlobalRateLimiter`.
+        wait:
+            Wait when rate limited.
 
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         kwargs:
             Keyword arguments to pass to :meth:`aiohttp.ClientSession.request`
 
@@ -229,6 +233,8 @@ class HTTPClient(BaseHTTPClient):
         -------
         ClientResponse
             The response from the request.
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Raises
         ------

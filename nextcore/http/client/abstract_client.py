@@ -53,6 +53,7 @@ class AbstractHTTPClient(ABC):
         *,
         headers: dict[str, str] | None = None,
         global_priority: int = 0,
+        wait: bool = True,
         **kwargs: Any,
     ) -> ClientResponse:
         ...
