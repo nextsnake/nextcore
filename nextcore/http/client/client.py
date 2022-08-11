@@ -236,8 +236,6 @@ class HTTPClient(BaseHTTPClient):
         -------
         ClientResponse
             The response from the request.
-        RateLimitedError
-            You are rate limited, and ``wait`` was set to :data:`False`
 
         Raises
         ------
@@ -260,6 +258,8 @@ class HTTPClient(BaseHTTPClient):
             Discord is having issues. Try again later.
         HTTPRequestStatusError
             A non-200 status code was returned.
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         # Make sure we have a session
         if self._session is None:
