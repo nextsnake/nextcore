@@ -83,7 +83,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         afk_timeout: int | UndefinedType = UNDEFINED,
         system_channel_id: Snowflake | UndefinedType = UNDEFINED,
         system_channel_flags: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildData:
         """Create a guild
 
@@ -146,6 +148,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             A bitwise flag deciding what messages to post in the system channel.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("POST", "/guilds")
         payload: dict[str, Any] = {"name": name}
@@ -177,8 +185,10 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            global_priority=global_priority,
             json=payload,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -190,7 +200,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         guild_id: Snowflake,
         *,
         with_counts: bool | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildData:  # TODO: More spesific typehints due to with_counts
         """Get a guild by ID
 
@@ -204,6 +216,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The guild to get
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("GET", "/guilds/{guild_id}", guild_id=guild_id)
 
@@ -219,14 +237,22 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_guild_preview(
-        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildPreviewData:
         """Gets a guild preview by ID
 
@@ -243,6 +269,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the guild to get
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("GET", "/guilds/{guild_id}/preview", guild_id=guild_id)
 
@@ -250,7 +282,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -259,7 +293,13 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
     # TODO: Implement modify guild here
 
     async def delete_guild(
-        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a guild
 
@@ -279,6 +319,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the guild to delete
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("DELETE", "/guilds/{guild_id}", guild_id=guild_id)
 
@@ -286,11 +332,19 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
     async def get_guild_channels(
-        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[ChannelData]:
         """Gets all channels in a guild
 
@@ -304,6 +358,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The guild to get channels from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("GET", "/guilds/{guild_id}/channels", guild_id=guild_id)
 
@@ -311,7 +371,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -325,7 +387,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         guild_id: Snowflake,
         *position_updates: ChannelPositionData,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Modifies channel positions
 
@@ -343,6 +407,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in the audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("PATCH", "/guilds/{guild_id}/channels", guild_id=guild_id)
 
@@ -358,7 +428,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             json=position_updates,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
     async def list_active_guild_threads(
@@ -366,7 +438,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         authentication: BotAuthentication,
         guild_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> HasMoreListThreadsData:  # TODO: This is not the correct type
         """List active guild threads
 
@@ -380,6 +454,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The guild to get threads from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("GET", "/guilds/{guild_id}/threads/active", guild_id=guild_id)
 
@@ -387,14 +467,23 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_guild_member(
-        self, authentication: BotAuthentication, guild_id: Snowflake, user_id: str | int, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        user_id: str | int,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildMemberData:
         """Gets a member
 
@@ -410,6 +499,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The user to get the member from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("GET", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
 
@@ -417,7 +512,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -430,7 +527,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         after: int | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[GuildMemberData]:
         """Lists members in a guild
 
@@ -459,6 +558,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
                 This defaults to ``1``
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("GET", "/guilds/{guild_id}/members", guild_id=guild_id)
 
@@ -476,7 +581,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -489,7 +596,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         query: str,
         *,
         limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[GuildMemberData]:
         """Searches for members in the guild with a username or nickname that starts with ``query``
 
@@ -510,6 +619,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
                 This has to be between ``1`` and `10,000`
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("GET", "/guilds/{guild_id}/members/search", guild_id=guild_id)
 
@@ -526,7 +641,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=url_query,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -543,7 +660,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         roles: list[Snowflake] | UndefinedType = UNDEFINED,
         mute: bool | UndefinedType = UNDEFINED,
         deaf: bool | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildMemberData | None:
         """Adds a member to a guild
 
@@ -587,6 +706,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
                 Setting this requires the ``DEAFEN_MEMBERS`` permission
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Returns
@@ -616,7 +741,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=bot_authentication.rate_limit_key,
             headers={"Authorization": str(bot_authentication)},
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         if r.status == 201:
@@ -637,7 +764,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         channel_id: Snowflake | None | UndefinedType = UNDEFINED,
         communication_disabled_until: str | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildMemberData:
         """Modifies a member
 
@@ -689,6 +818,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in the audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Returns
         -------
@@ -726,7 +861,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -740,7 +877,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         nick: str | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildMemberData:
         """Modifies a member
 
@@ -761,6 +900,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in the audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Returns
         -------
@@ -788,7 +933,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -803,7 +950,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         role_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Add a role to a member
 
@@ -826,6 +975,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route(
             "PUT",
@@ -843,7 +998,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def remove_guild_member_role(
@@ -854,7 +1014,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         role_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Removes a role from a member
 
@@ -877,6 +1039,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route(
             "DELETE",
@@ -894,7 +1062,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def remove_guild_member(
@@ -904,7 +1077,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         user_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Removes a member from a guild
 
@@ -925,6 +1100,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in the audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("DELETE", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
 
@@ -936,7 +1117,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     @overload
@@ -947,7 +1133,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         before: int,
         limit: int | UndefinedType,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[BanData]:
         ...
 
@@ -959,7 +1147,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         after: int,
         limit: int | UndefinedType,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[BanData]:
         ...
 
@@ -969,7 +1159,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         authentication: BotAuthentication,
         guild_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[BanData]:
         ...
 
@@ -981,7 +1173,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         before: Snowflake | UndefinedType = UNDEFINED,
         after: Snowflake | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[BanData]:
         """Gets a list of bans in a guild.
 
@@ -1015,6 +1209,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
                 If this is not provided it will default to ``50``.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route("GET", "/guilds/{guild_id}/bans", guild_id=guild_id)
@@ -1036,7 +1236,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             query=query,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1048,7 +1250,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         guild_id: Snowflake,
         user_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> BanData:
         """Gets a ban
 
@@ -1067,6 +1271,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The user to get ban info for
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route("GET", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
@@ -1075,7 +1285,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1089,7 +1301,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         delete_message_days: int | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Bans a user from a guild
 
@@ -1112,6 +1326,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in the audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("PUT", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
 
@@ -1133,8 +1353,10 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
-            global_priority=global_priority,
             json=payload,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def remove_guild_ban(
@@ -1144,7 +1366,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         user_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Unbans a user from a guild
 
@@ -1165,6 +1389,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in the audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("DELETE", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
 
@@ -1179,11 +1409,19 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
     async def get_guild_roles(
-        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[RoleData]:
         """Gets all roles in a guild
 
@@ -1197,6 +1435,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The guild to get the roles from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Returns
         -------
@@ -1209,7 +1453,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1227,7 +1473,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         hoist: bool | UndefinedType = UNDEFINED,
         mentionable: bool | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> RoleData:
         ...
 
@@ -1244,7 +1492,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         icon: str | None,
         mentionable: bool | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> RoleData:
         ...
 
@@ -1261,7 +1511,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         unicode_emoji: str | None,
         mentionable: bool | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> RoleData:
         ...
 
@@ -1278,7 +1530,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         unicode_emoji: str | None | UndefinedType = UNDEFINED,
         mentionable: bool | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> RoleData:
         """Creates a role
 
@@ -1317,6 +1571,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Returns
         -------
@@ -1356,7 +1616,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1368,7 +1630,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         guild_id: Snowflake,
         *position_updates: RolePositionData,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[RoleData]:
         """Modifies role positions
 
@@ -1389,6 +1653,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("GET", "/guilds/{guild_id}/roles", guild_id=guild_id)
 
@@ -1400,7 +1670,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             headers["X-Audit-Log-Reason"] = reason
 
         r = await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, json=position_updates, global_priority=global_priority
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            json=position_updates,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1420,7 +1695,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         icon: str | None,
         mentionable: bool | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> RoleData:
         ...
 
@@ -1438,7 +1715,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         unicode_emoji: str | None,
         mentionable: bool | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> RoleData:
         ...
 
@@ -1456,7 +1735,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         unicode_emoji: str | None | UndefinedType = UNDEFINED,
         mentionable: bool | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> RoleData:
         """Modifies a role
 
@@ -1497,6 +1778,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Returns
         -------
@@ -1536,7 +1823,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1549,7 +1838,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         role_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a channel.
 
@@ -1565,6 +1856,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route("DELETE", "/guilds/{guild_id}/roles/{role_id}", guild_id=guild_id, role_id=role_id)
@@ -1576,7 +1873,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, headers=headers, rate_limit_key=authentication.rate_limit_key, global_priority=global_priority
+            route,
+            headers=headers,
+            rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def get_guild_prune_count(
@@ -1586,7 +1888,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         days: int | UndefinedType = UNDEFINED,
         include_roles: list[str] | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> dict[str, Any]:  # TODO: Replace return type
         """Gets the amount of members that would be pruned
 
@@ -1610,6 +1914,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             IDs of roles to be pruned aswell as the default role.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("GET", "/guilds/{guild_id}/prune", guild_id=guild_id)
 
@@ -1628,7 +1938,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             headers={"Authorization": str(authentication)},
             query=query,
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1643,7 +1955,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         compute_prune_count: bool | UndefinedType = UNDEFINED,
         include_roles: list[str] | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> dict[str, Any]:  # TODO: Replace return type
         """Gets the amount of members that would be pruned
 
@@ -1667,6 +1981,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             IDs of roles to be pruned aswell as the default role.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("GET", "/guilds/{guild_id}/prune", guild_id=guild_id)
 
@@ -1695,7 +2015,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             headers={"Authorization": str(authentication)},
             query=query,
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1706,7 +2028,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         authentication: BotAuthentication,
         guild_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[VoiceRegionData]:
         """Gets voice regions for a guild.
 
@@ -1720,6 +2044,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The id of guild to get voice regions from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route("GET", "/guilds/{guild_id}/regions", guild_id=guild_id)
@@ -1728,7 +2058,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             headers={"Authorization": str(authentication)},
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1739,7 +2071,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         authentication: BotAuthentication,
         guild_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[InviteMetadata]:
         """Gets all guild invites
 
@@ -1756,6 +2090,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The id of guild to get invites for
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route("GET", "/guilds/{guild_id}/invites", guild_id=guild_id)
@@ -1764,7 +2104,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             headers={"Authorization": str(authentication)},
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1775,7 +2117,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         authentication: BotAuthentication,
         guild_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[IntegrationData]:
         """Gets guild integrations
 
@@ -1790,8 +2134,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Authentication info.
         guild_id:
             The id of guild to get integrations for
-        global_priority:
-            The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route("GET", "/guilds/{guild_id}/invites", guild_id=guild_id)
@@ -1800,7 +2148,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             headers={"Authorization": str(authentication)},
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1813,7 +2163,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         integration_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a integration
 
@@ -1837,6 +2189,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route(
@@ -1853,7 +2211,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, headers=headers, rate_limit_key=authentication.rate_limit_key, global_priority=global_priority
+            route,
+            headers=headers,
+            rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def get_guild_widget_settings(
@@ -1878,6 +2241,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The id of guild to get the widget settings for
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route("GET", "/guilds/{guild_id}/widget", guild_id=guild_id)
@@ -1886,7 +2255,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             headers={"Authorization": str(authentication)},
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1900,7 +2271,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         enabled: bool | UndefinedType = UNDEFINED,
         channel_id: Snowflake | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildWidgetSettingsData:
         """Modifies a guilds widget settings
 
@@ -1919,6 +2292,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route("PATCH", "/guilds/{guild_id}/widget", guild_id=guild_id)
@@ -1943,7 +2322,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             headers={"Authorization": str(authentication)},
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1978,7 +2359,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         authentication: BotAuthentication,
         guild_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildWidgetSettingsData:
         """Gets the vanity invite from a guild
 
@@ -1995,6 +2378,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The id of guild to get the vanity invite from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route("GET", "/guilds/{guild_id}/vanity-url", guild_id=guild_id)
@@ -2003,7 +2392,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             headers={"Authorization": str(authentication)},
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -2016,7 +2407,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         authentication: BotAuthentication,
         guild_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> WelcomeScreenData:
         """Gets the welcome screen for a guild
 
@@ -2033,6 +2426,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The id of guild to get the welcome screen for
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route("GET", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
@@ -2041,7 +2440,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             headers={"Authorization": str(authentication)},
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -2056,7 +2457,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         welcome_channels: list[WelcomeChannelData] | None | UndefinedType = UNDEFINED,
         description: str | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> WelcomeScreenData:
         """Modifies a guilds welcome screen
 
@@ -2079,6 +2482,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route("PATCH", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
 
@@ -2104,7 +2513,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             headers=headers,
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -2118,7 +2529,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         suppress: bool | UndefinedType = UNDEFINED,
         request_to_speak_timestamp: str | None | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Modifies the voice state of the bot
 
@@ -2147,6 +2560,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
                 You need the ``REQUEST_TO_SPEAK`` to set this to a non-:data:`None` value, however setting it to :data:`None` requires no permission.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route("PATCH", "/guilds/{guild_id}/voice-states/@me", guild_id=guild_id)
@@ -2165,7 +2584,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             headers={"Authorization": str(authentication)},
             json=payload,
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
     async def modify_user_voice_state(
@@ -2176,7 +2597,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         user_id: Snowflake,
         *,
         suppress: bool | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Modifies the voice state of the bot
 
@@ -2199,6 +2622,12 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
                 You need the ``MUTE_MEMBERS`` if you want to set this to :data:`False`, however no permission is required to set it to :data:`False`.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
 
         route = Route("PATCH", "/guilds/{guild_id}/voice-states/{user_id}", guild_id=guild_id, user_id=user_id)
@@ -2215,5 +2644,7 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             headers={"Authorization": str(authentication)},
             json=payload,
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
