@@ -53,7 +53,12 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
     __slots__ = ()
 
     async def get_current_user(
-        self, authentication: BotAuthentication | BearerAuthentication, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication | BearerAuthentication,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> UserData:
         """Gets the current user
 
@@ -70,6 +75,12 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             Authentication info.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Returns
         -------
@@ -82,14 +93,22 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_user(
-        self, authentication: BotAuthentication | BearerAuthentication, user_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication | BearerAuthentication,
+        user_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> UserData:
         """Gets a user by id
 
@@ -103,7 +122,12 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the user to fetch
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
 
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         Returns
         -------
         discord_typings.UserData
@@ -115,7 +139,9 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -127,7 +153,9 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         username: str | UndefinedType = UNDEFINED,
         avatar: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> UserData:
         """Modifies the current user
 
@@ -143,6 +171,12 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             Base64 encoded image to change the current users avatar to
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Returns
         -------
@@ -164,7 +198,9 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -177,7 +213,9 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
         before: Snowflake | UndefinedType = UNDEFINED,
         after: Snowflake | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[GuildData]:  # TODO: Replace with partial guild data
         """Gets the guilds the current user is in
 
@@ -209,6 +247,12 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
                 This defaults to ``200``
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Returns
         -------
@@ -233,14 +277,22 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_current_user_guild_member(
-        self, authentication: BotAuthentication | BearerAuthentication, guild_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication | BearerAuthentication,
+        guild_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildMemberData:
         """Gets the current users member in a guild
 
@@ -257,6 +309,12 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the guild to get the member in
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Returns
         -------
@@ -269,14 +327,22 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def leave_guild(
-        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Leave a guild
 
@@ -290,6 +356,12 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the guild to leave
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Returns
         -------
@@ -302,11 +374,19 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
     async def create_dm(
-        self, authentication: BotAuthentication, recipient_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        recipient_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> DMChannelData:
         """Creates a DM channel
 
@@ -325,6 +405,12 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             The id of user to DM.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Returns
         -------
@@ -347,7 +433,12 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
     # TODO: Add Create Group DM
 
     async def get_user_connections(
-        self, authentication: BearerAuthentication, *, global_priority: int = 0
+        self,
+        authentication: BearerAuthentication,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[dict[str, Any]]:  # TODO: This should be more strict
         """Gets the users connections
 
@@ -362,6 +453,12 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             Authentication info.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Returns
         -------
@@ -374,7 +471,9 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
