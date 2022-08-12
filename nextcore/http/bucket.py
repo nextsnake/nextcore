@@ -24,14 +24,14 @@ from __future__ import annotations
 from asyncio import Event, PriorityQueue, get_running_loop
 from contextlib import asynccontextmanager
 from logging import getLogger
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, overload, cast
 
 from nextcore.common.errors import RateLimitedError
 
 from .request_session import RequestSession
 
 if TYPE_CHECKING:
-    from typing import AsyncIterator, Final
+    from typing import AsyncIterator, Final, Literal
 
     from .bucket_metadata import BucketMetadata
 
@@ -160,12 +160,12 @@ class Bucket:
             yield
 
     @overload
-    async def update(self, *, unlimited: bool = True) -> None:
+    async def update(self, *, unlimited: Literal[True]) -> None:
         ...
 
     @overload
     async def update(
-        self, remaining: int | None = None, reset_after: float | None = None, *, unlimited: bool = False
+        self, remaining: int, reset_after: float, *, unlimited: Literal[False] = False
     ) -> None:
         ...
 
@@ -187,7 +187,7 @@ class Bucket:
             self._resetting = True
 
             # Call the reset callback (after the reset duration)
-            # TODO: @ooliver1 please fix this typing issue
+            reset_after = cast(float, reset_after)
             loop = get_running_loop()
             loop.call_later(reset_after, self._reset_callback)
 
