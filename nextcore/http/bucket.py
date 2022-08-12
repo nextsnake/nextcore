@@ -24,7 +24,7 @@ from __future__ import annotations
 from asyncio import Event, PriorityQueue, get_running_loop
 from contextlib import asynccontextmanager
 from logging import getLogger
-from typing import TYPE_CHECKING, overload, cast
+from typing import TYPE_CHECKING, cast, overload
 
 from nextcore.common.errors import RateLimitedError
 
@@ -164,9 +164,7 @@ class Bucket:
         ...
 
     @overload
-    async def update(
-        self, remaining: int, reset_after: float, *, unlimited: Literal[False] = False
-    ) -> None:
+    async def update(self, remaining: int, reset_after: float, *, unlimited: Literal[False] = False) -> None:
         ...
 
     async def update(
