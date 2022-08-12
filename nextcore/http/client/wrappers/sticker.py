@@ -47,7 +47,13 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
     __slots__ = ()
 
     async def get_sticker(
-        self, authentication: BotAuthentication, sticker_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        sticker_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> StickerData:
         """Gets a sticker from a sticker id.
 
@@ -61,6 +67,17 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the sticker to get.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -72,14 +89,20 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def list_nitro_sticker_packs(
-        self, *, global_priority: int = 0
+        self,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> dict[Literal["sticker_packs"], list[StickerPackData]]:
         """Gets all nitro sticker packs
 
@@ -89,19 +112,38 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
         ----------
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/sticker-packs")
         r = await self._request(
             route,
             rate_limit_key=None,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def list_guild_stickers(
-        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[StickerData]:
         """Gets all custom stickers added by a guild
 
@@ -118,6 +160,17 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
             The id of guild to get stickers from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -130,14 +183,23 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_guild_sticker(
-        self, authentication: BotAuthentication, guild_id: Snowflake, sticker_id: str | int, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        sticker_id: str | int,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> StickerData:
         """Get a custom sticker
 
@@ -156,6 +218,17 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
             The sticker to get
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -168,7 +241,9 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -186,7 +261,9 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
         description: str | UndefinedType = UNDEFINED,
         tags: list[str] | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> StickerData:  # TODO: Make StickerData always include user
         """Modifies a sticker
 
@@ -219,6 +296,17 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -250,7 +338,9 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -263,7 +353,9 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
         sticker_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Modifies a stage instance
 
@@ -282,6 +374,17 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("DELETE", "/guilds/{guild_id}/stickers/{sticker_id}", guild_id=guild_id, sticker_id=sticker_id)
 
@@ -296,7 +399,9 @@ class StickerHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?

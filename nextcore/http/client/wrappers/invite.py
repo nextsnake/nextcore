@@ -46,7 +46,13 @@ class InviteHTTPWrappers(AbstractHTTPClient, ABC):
     __slots__ = ()
 
     async def get_invite(
-        self, authentication: BotAuthentication, invite_code: str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        invite_code: str,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> InviteData:
         """Gets a invite from a invite code
 
@@ -60,6 +66,17 @@ class InviteHTTPWrappers(AbstractHTTPClient, ABC):
             The code of the invite to get
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -71,14 +88,22 @@ class InviteHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_invite(
-        self, authentication: BotAuthentication, invite_code: str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        invite_code: str,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> InviteData:
         """Gets a invite from a invite code
 
@@ -98,6 +123,17 @@ class InviteHTTPWrappers(AbstractHTTPClient, ABC):
             The code of the invite to delete
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -109,7 +145,9 @@ class InviteHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?

@@ -56,7 +56,9 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
         guild_id: Snowflake,
         *,
         with_user_count: bool | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[GuildScheduledEventData]:  # TODO: Narrow type more with a overload with_user_count
         """Gets all scheduled events for a guild
 
@@ -72,6 +74,17 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
             Include :attr:`discord_typings.GuildScheduledEventData.user_count`
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
 
@@ -86,7 +99,9 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             headers={"Authorization": str(authentication)},
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -107,7 +122,9 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
         description: str | UndefinedType = UNDEFINED,
         image: str | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildScheduledEventData:
         ...
 
@@ -126,7 +143,9 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
         description: str | UndefinedType = UNDEFINED,
         image: str | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildScheduledEventData:
         ...
 
@@ -145,7 +164,9 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
         description: str | UndefinedType = UNDEFINED,
         image: str | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildScheduledEventData:
         """Create a scheduled event
 
@@ -187,6 +208,17 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -227,7 +259,9 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
             headers=headers,
             json=payload,
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -240,7 +274,9 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
         guild_scheduled_event_id: Snowflake,
         *,
         with_user_count: bool | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildScheduledEventData:  # TODO: Narrow type more with a overload with_user_count
         """Gets a scheduled event by id
 
@@ -258,6 +294,17 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
             Include :attr:`discord_typings.GuildScheduledEventData.user_count`
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "GET",
@@ -277,7 +324,9 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             headers={"Authorization": str(authentication)},
             rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -292,7 +341,9 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
         guild_scheduled_event_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes scheduled event.
 
@@ -313,6 +364,17 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route(

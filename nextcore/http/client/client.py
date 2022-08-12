@@ -199,7 +199,9 @@ class HTTPClient(BaseHTTPClient):
         rate_limit_key: str | None,
         *,
         headers: dict[str, str] | None = None,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
         **kwargs: Any,
     ) -> ClientResponse:
         """Requests a route from the Discord API
@@ -216,12 +218,17 @@ class HTTPClient(BaseHTTPClient):
                 This should be :data:`None` for unauthenticated routes or webhooks (does not include modifying the webhook via a bot).
         headers:
             Headers to mix with :attr:`HTTPClient.default_headers` to pass to :meth:`aiohttp.ClientSession.request`
+        bucket_priority:
+            The request priority to pass to :class:`Bucket`. **Lower** priority will be picked first.
         global_priority:
             The request priority for global requests. **Lower** priority will be picked first.
 
             .. warning::
                 This may be ignored by your :class:`BaseGlobalRateLimiter`.
+        wait:
+            Wait when rate limited.
 
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         kwargs:
             Keyword arguments to pass to :meth:`aiohttp.ClientSession.request`
 
@@ -251,6 +258,8 @@ class HTTPClient(BaseHTTPClient):
             Discord is having issues. Try again later.
         HTTPRequestStatusError
             A non-200 status code was returned.
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         # Make sure we have a session
         if self._session is None:
@@ -276,9 +285,9 @@ class HTTPClient(BaseHTTPClient):
 
         for _ in range(retries):
             bucket = await self._get_bucket(route, rate_limit_storage)
-            async with bucket.acquire():
+            async with bucket.acquire(priority=bucket_priority, wait=wait):
                 if not route.ignore_global:
-                    async with rate_limit_storage.global_rate_limiter.acquire(priority=global_priority):
+                    async with rate_limit_storage.global_rate_limiter.acquire(priority=global_priority, wait=wait):
                         logger.info("Requesting %s %s", route.method, route.path)
                         response = await self._session.request(
                             route.method, route.BASE_URL + route.path, headers=headers, timeout=self.timeout, **kwargs

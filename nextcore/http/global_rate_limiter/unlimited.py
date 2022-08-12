@@ -27,6 +27,8 @@ from contextlib import asynccontextmanager
 from logging import getLogger
 from typing import TYPE_CHECKING, AsyncIterator
 
+from nextcore.common.errors import RateLimitedError
+
 from .base import BaseGlobalRateLimiter
 
 if TYPE_CHECKING:
@@ -59,7 +61,7 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
         self._pending_release: Lock = Lock()
 
     @asynccontextmanager
-    async def acquire(self, *, priority: int = 0) -> AsyncIterator[None]:
+    async def acquire(self, *, priority: int = 0, wait: bool = True) -> AsyncIterator[None]:
         """Acquire a spot in the rate-limit
 
         Parameters
@@ -67,7 +69,15 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
         priority:
             .. warning::
                 Request priority currently does nothing.
+        wait:
+            Whether to wait for a spot in the rate limit.
 
+            If this is :data:`False`, this will raise :exc:`RateLimitedError` instead.
+
+        Raises
+        ------
+        RateLimitedError
+            ``wait`` was set to :data:`False` and we are rate limited.
 
         Returns
         -------
@@ -76,6 +86,11 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
         """
         del priority  # Unused
         if self._pending_release.locked():
+            # Rate limited!
+
+            if not wait:
+                raise RateLimitedError()
+
             # Add to queue
             future: Future[None] = Future()
             self._pending_requests.append(future)

@@ -49,7 +49,12 @@ class OAuth2HTTPWrappers(AbstractHTTPClient, ABC):
     __slots__ = ()
 
     async def get_current_bot_application_information(
-        self, authentication: BotAuthentication, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> ApplicationData:
         """Gets the bots application
 
@@ -61,6 +66,17 @@ class OAuth2HTTPWrappers(AbstractHTTPClient, ABC):
             Authentication info.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -73,14 +89,21 @@ class OAuth2HTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_current_authorization_information(
-        self, authentication: BotAuthentication | BearerAuthentication, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication | BearerAuthentication,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> dict[str, Any]:  # TODO: Narrow typing
         """Gets the bots application
 
@@ -92,6 +115,17 @@ class OAuth2HTTPWrappers(AbstractHTTPClient, ABC):
             Authentication info.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -104,7 +138,9 @@ class OAuth2HTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?

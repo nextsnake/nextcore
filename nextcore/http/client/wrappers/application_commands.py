@@ -64,7 +64,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         application_id: Snowflake,
         *,
         with_localizations: bool | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[ApplicationCommandData]:  # TODO: Narrow typing to never include guild_id and localization overload
         """Gets all global commands
 
@@ -81,9 +83,17 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
                 You can only get commands for your current application
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -108,7 +118,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -127,7 +139,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         default_member_permissions: str | None | UndefinedType = UNDEFINED,
         dm_permission: bool | None | UndefinedType = UNDEFINED,
         type: Literal[1, 2, 3] | UndefinedType = UNDEFINED,  # TODO: Replace this with a type alias in discord_typings
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Creates or updates a global application command
 
@@ -195,9 +209,17 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             - ``3``: Message context menu
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -234,7 +256,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -246,7 +270,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         application_id: Snowflake,
         command_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Gets a global command
 
@@ -265,10 +291,18 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the command to fetch
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -292,7 +326,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -312,7 +348,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         default_member_permissions: str | None | UndefinedType = UNDEFINED,
         dm_permission: bool | None | UndefinedType = UNDEFINED,
         type: Literal[1, 2, 3] | UndefinedType = UNDEFINED,  # TODO: Replace this with a type alias in discord_typings
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Updates a global application command
 
@@ -380,10 +418,18 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             - ``3``: Message context menu
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -429,7 +475,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -441,7 +489,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         application_id: Snowflake,
         command_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a global command
 
@@ -449,6 +499,8 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -469,6 +521,12 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the command to fetch
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route(
             "GET",
@@ -481,7 +539,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -492,7 +552,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         authentication: BotAuthentication | BearerAuthentication,
         application_id: Snowflake,
         *commands: ApplicationCommandPayload,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[ApplicationCommandData]:  # TODO: Narrow typing to never include guild_id
         """Creates or updates a global application command
 
@@ -517,10 +579,18 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
                 Some fields have additional restrictions. See :meth:`HTTPClient.create_global_application_command`'s arguments for more information.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -540,7 +610,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=commands,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -553,7 +625,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         guild_id: Snowflake,
         *,
         with_localizations: bool | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[
         ApplicationCommandData
     ]:  # TODO: Narrow typing to always include guild_id and localization overload and never dm_permission
@@ -574,10 +648,18 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             The guild to get commands from.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -607,7 +689,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -626,7 +710,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         options: list[ApplicationCommandOptionData] | UndefinedType = UNDEFINED,
         default_member_permissions: str | None | UndefinedType = UNDEFINED,
         type: Literal[1, 2, 3] | UndefinedType = UNDEFINED,  # TODO: Replace this with a type alias in discord_typings
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Creates or updates a guild command
 
@@ -691,9 +777,17 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             - ``3``: Message context menu
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -733,7 +827,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -746,7 +842,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         guild_id: Snowflake,
         command_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> ApplicationCommandData:  # TODO: Narrow typing to never include guild_id
         """Gets a guild command
 
@@ -767,9 +865,17 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the command to fetch
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -794,7 +900,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -814,7 +922,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         options: list[ApplicationCommandOptionData] | UndefinedType = UNDEFINED,
         default_member_permissions: str | None | UndefinedType = UNDEFINED,
         type: Literal[1, 2, 3] | UndefinedType = UNDEFINED,  # TODO: Replace this with a type alias in discord_typings
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> ApplicationCommandData:  # TODO: Narrow typing
         """Updates a guild application command
 
@@ -879,9 +989,17 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             - ``3``: Message context menu
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -928,7 +1046,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -941,7 +1061,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         guild_id: Snowflake,
         command_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a guild command
 
@@ -964,9 +1086,17 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             The command to delete
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -986,7 +1116,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -998,7 +1130,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         application_id: Snowflake,
         guild_id: Snowflake,
         *commands: ApplicationCommandPayload,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[ApplicationCommandData]:  # TODO: Narrow typing to always include guild_id
         """Bulk overwrite guild commands
 
@@ -1025,9 +1159,17 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
                 There is some extra limits. See the params of :meth:`HTTPClient.edit_guild_application_command` for more info.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -1054,7 +1196,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=commands,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1066,7 +1210,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         application_id: Snowflake,
         guild_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[GuildApplicationCommandPermissionData]:
         """Gets all application command permissions in a guild
 
@@ -1087,9 +1233,17 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             The guild to get permissions from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -1113,7 +1267,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1126,7 +1282,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         guild_id: Snowflake,
         command_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildApplicationCommandPermissionData:
         """Gets permissions for a command in a guild
 
@@ -1147,9 +1305,17 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             The guild to get permissions from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -1174,7 +1340,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1189,7 +1357,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         application_id: Snowflake,
         interaction_token: str,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> MessageData:
         """Gets the first response sent to a interaction
 
@@ -1206,9 +1376,17 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             The token of the interaction
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -1231,7 +1409,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         r = await self._request(
             route,
             rate_limit_key=None,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1244,7 +1424,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         application_id: Snowflake,
         interaction_token: str,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes the first response sent to a interaction
 
@@ -1264,9 +1446,17 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             The token of the interaction
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -1284,7 +1474,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         await self._request(
             route,
             rate_limit_key=None,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
     # TODO: Add Create Followup Message
@@ -1295,7 +1487,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         interaction_token: str,
         message_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> MessageData:
         """Gets a response sent to a interaction by message id
 
@@ -1314,9 +1508,17 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the message to fetch
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -1340,7 +1542,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         r = await self._request(
             route,
             rate_limit_key=None,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1353,7 +1557,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         interaction_token: str,
         message_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> MessageData:
         """Deletes a response sent to a interaction by message id
 
@@ -1372,10 +1578,18 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the message to delete
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -1394,7 +1608,9 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         r = await self._request(
             route,
             rate_limit_key=None,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?

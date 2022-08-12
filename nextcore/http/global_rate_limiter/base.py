@@ -44,7 +44,7 @@ class BaseGlobalRateLimiter(ABC):
     __slots__ = ()
 
     @abstractmethod
-    def acquire(self, *, priority: int = 0) -> AsyncContextManager[None]:
+    def acquire(self, *, priority: int = 0, wait: bool = True) -> AsyncContextManager[None]:
         """Use a spot in the rate-limit.
 
         Parameters
@@ -54,6 +54,10 @@ class BaseGlobalRateLimiter(ABC):
                 This can safely be ignored.
 
             The request priority. **Lower** number means it will be requested earlier.
+        wait:
+            Whether to wait for a spot in the rate limit.
+
+            If this is set to :data:`False`, this will raise a :exc:`RateLimitedError`
 
         Returns
         -------

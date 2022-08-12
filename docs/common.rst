@@ -3,6 +3,8 @@
 
 Common
 ======
+Common reference
+----------------
 
 .. autoclass:: Dispatcher
    :members:
@@ -17,3 +19,8 @@ Common
    :type: UndefinedType
    
    A alias for :attr:`UndefinedType.UNDEFINED`
+
+Errors
+------
+.. automodule:: nextcore.common.errors
+   :members:

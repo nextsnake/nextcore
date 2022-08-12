@@ -49,7 +49,12 @@ class VoiceHTTPWrappers(AbstractHTTPClient, ABC):
     __slots__ = ()
 
     async def list_voice_regions(
-        self, authentication: BotAuthentication, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[VoiceRegionData]:  # TODO: This should be more strict
         """Gets the users connections
 
@@ -61,6 +66,17 @@ class VoiceHTTPWrappers(AbstractHTTPClient, ABC):
             Authentication info.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -73,7 +89,9 @@ class VoiceHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?

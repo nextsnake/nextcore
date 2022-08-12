@@ -21,41 +21,13 @@
 
 from __future__ import annotations
 
-from asyncio import Future
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Final
 
-__all__: Final[tuple[str, ...]] = ("RequestSession",)
+__all__: Final[tuple[str, ...]] = ()
 
 
-class RequestSession:
-    """A metadata class about a pending request. This is used by :class:`Bucket`
-
-    Parameters
-    ----------
-    unlimited:
-        If this request was made when the bucket was unlimited.
-
-        This exists to make sure that there is no bad state when switching between unlimited and limited.
-
-    Attributes
-    ----------
-    unlimited:
-        If this request was made when the bucket was unlimited.
-
-        This exists to make sure that there is no bad state when switching between unlimited and limited.
-    pending_future:
-        The future that when set will execute the request.
-    """
-
-    __slots__: Final[tuple[str, ...]] = ("pending_future", "priority", "unlimited")
-
-    def __init__(self, *, priority: int = 0, unlimited: bool = False) -> None:
-        self.pending_future: Future[None] = Future()
-        self.priority: int = priority
-        self.unlimited: bool = unlimited
-
-    def __gt__(self, other: RequestSession):
-        return self.priority > other.priority
+class RateLimitedError(Exception):
+    """A error for when a :class:`~nextcore.common.TimesPer` is rate limited and ``wait`` was :data:`False`"""
