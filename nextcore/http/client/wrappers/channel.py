@@ -67,7 +67,13 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
     __slots__ = ()
 
     async def get_channel(
-        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> ChannelData:
         """Gets a channel by ID.
 
@@ -81,9 +87,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The channel ID to get.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -105,7 +119,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -120,7 +136,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         name: str | UndefinedType = UNDEFINED,
         icon: str | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> ChannelData:
         """Modifies the group dm.
 
@@ -149,10 +167,18 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
                 This has to be between 1 and 512 characters
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -183,7 +209,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -208,7 +236,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         video_quality_mode: Literal[1, 2] | None | UndefinedType = UNDEFINED,  # TODO: Implement VideoQualityMode
         default_auto_archive_duration: Literal[60, 1440, 4320, 10080] | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> ChannelData:
         """Modifies a guild channel.
 
@@ -294,10 +324,18 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in the audit log.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -350,7 +388,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -368,7 +408,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         invitable: bool | UndefinedType = UNDEFINED,
         rate_limit_per_user: int | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> ThreadChannelData:
         """Modifies a thread.
 
@@ -404,9 +446,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in the audit log.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -445,7 +495,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -457,7 +509,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         channel_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a channel.
 
@@ -481,10 +535,18 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -515,7 +577,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         around: int,
         limit: int | UndefinedType,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[MessageData]:
         ...
 
@@ -527,7 +591,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         before: int,
         limit: int | UndefinedType,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[MessageData]:
         ...
 
@@ -539,13 +605,21 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         after: int,
         limit: int | UndefinedType,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[MessageData]:
         ...
 
     @overload
     async def get_channel_messages(
-        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[MessageData]:
         ...
 
@@ -558,7 +632,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         before: int | UndefinedType = UNDEFINED,
         after: int | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[MessageData]:
         """Gets messages from a channel.
 
@@ -600,10 +676,18 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
                 If this is not provided it will default to ``50``.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -637,7 +721,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             query=query,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -658,7 +744,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         files: Iterable[File] | UndefinedType = UNDEFINED,
         attachments: list[AttachmentData] | UndefinedType = UNDEFINED,  # TODO: Partial
         flags: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> MessageData:
         """Creates a message in a channel.
 
@@ -715,10 +803,18 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
                 Only the ``SUPRESS_EMBEDS`` flag can be set.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -778,7 +874,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             data=form,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -790,7 +888,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         channel_id: Snowflake,
         message_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> MessageData:
         """Publishes a message in a news channel
 
@@ -811,9 +911,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the message to crosspost.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -850,7 +958,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         message_id: Snowflake,
         emoji: str,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Creates a reaction to a message.
 
@@ -875,10 +985,18 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -912,7 +1030,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         message_id: Snowflake,
         emoji: str,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a reaction from a message.
 
@@ -932,9 +1052,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -967,7 +1095,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         emoji: str,
         user_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a reaction from a message from another user.
 
@@ -995,10 +1125,18 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the user to remove the reaction from.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -1033,7 +1171,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         after: Snowflake | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[UserData]:
         """Gets the reactions to a message.
 
@@ -1066,9 +1206,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
                 This defaults to ``25``
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -1113,7 +1261,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             query=query,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -1125,7 +1275,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         channel_id: Snowflake,
         message_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes all reactions from a message.
 
@@ -1147,10 +1299,18 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the message to remove all reactions from.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -1182,7 +1342,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         message_id: Snowflake,
         emoji: str,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes all reactions from a message with a specific emoji.
 
@@ -1208,6 +1370,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             This is either a unicode emoji or a custom emoji in the format ``name:id``.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "DELETE",
@@ -1235,7 +1408,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         components: list[ActionRowData] | None | UndefinedType = UNDEFINED,
         files: list[File] | None | UndefinedType = UNDEFINED,
         attachments: list[AttachmentData] | None | UndefinedType = UNDEFINED,  # TODO: Partial
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> MessageData:
         """Edits a message.
 
@@ -1285,6 +1460,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
                 This has to include previous and current attachments or they will be removed.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -1328,7 +1514,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             data=form,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -1341,7 +1529,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         message_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a message.
 
@@ -1368,6 +1558,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
                 If this is set to ``Undefined``, there will be no reason.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "DELETE", "/channels/{channel_id}/messages/{message_id}", channel_id=channel_id, message_id=message_id
@@ -1390,7 +1591,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         messages: list[str] | list[int] | list[Snowflake],
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes multiple messages.
 
@@ -1427,6 +1630,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
                 If this is set to ``Undefined``, there will be no reason.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("POST", "/channels/{channel_id}/messages/bulk-delete", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
@@ -1441,7 +1655,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json={"messages": messages},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
     async def edit_channel_permissions(
@@ -1454,7 +1670,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         allow: str | None | UndefinedType = UNDEFINED,
         deny: str | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Edits the permissions of a channel.
 
@@ -1495,6 +1713,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
                 If this is set to ``Undefined``, there will be no reason.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "PUT",
@@ -1523,11 +1752,19 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
     async def get_channel_invites(
-        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[InviteMetadata]:
         """Gets the invites for a channel.
 
@@ -1544,6 +1781,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the channel to get invites for.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -1573,7 +1821,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         target_type: Literal[0],
         target_user_id: Snowflake,
         target_application_id: UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> InviteData:
         ...
 
@@ -1590,7 +1840,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         target_type: Literal[1],
         target_user_id: UndefinedType = UNDEFINED,
         target_application_id: Snowflake,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> InviteData:
         ...
 
@@ -1607,7 +1859,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         target_type: UndefinedType = UNDEFINED,
         target_user_id: UndefinedType = UNDEFINED,
         target_application_id: UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> InviteData:
         ...
 
@@ -1623,7 +1877,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         target_type: Literal[0, 1] | UndefinedType = UNDEFINED,
         target_user_id: Snowflake | UndefinedType = UNDEFINED,
         target_application_id: Snowflake | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> InviteData:
         """Creates an invite for a channel.
 
@@ -1667,6 +1923,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
                 This can only be set if ``target_type`` is ``1``.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -1698,7 +1965,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -1711,7 +1980,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         target_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a channel permission.
 
@@ -1727,6 +1998,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the user or role to delete the permission from.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "DELETE", "/channels/{channel_id}/permissions/{target_id}", channel_id=channel_id, target_id=target_id
@@ -1748,7 +2030,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         channel_id: Snowflake,
         webhook_channel_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> FollowedChannelData:
         """Follows a news channel.
 
@@ -1767,6 +2051,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the channel to receive posts to.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -1782,14 +2077,22 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
     async def trigger_typing_indicator(
-        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Triggers a typing indicator.
 
@@ -1803,6 +2106,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the channel to trigger the typing indicator on.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("POST", "/channels/{channel_id}/typing", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
@@ -1812,7 +2126,13 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         )
 
     async def get_pinned_messages(
-        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[MessageData]:
         """Gets the pinned messages of a channel.
 
@@ -1829,6 +2149,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the channel to get the pinned messages of.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -1852,7 +2183,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         message_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Pins a message.
 
@@ -1879,6 +2212,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
                 This has to be between 1 and 512 characters.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("PUT", "/channels/{channel_id}/pins/{message_id}", channel_id=channel_id, message_id=message_id)
         headers = {"Authorization": str(authentication)}
@@ -1896,7 +2240,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         channel_id: Snowflake,
         message_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Unpins a message.
 
@@ -1915,6 +2261,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the message to unpin.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "DELETE", "/channels/{channel_id}/pins/{message_id}", channel_id=channel_id, message_id=message_id
@@ -1931,7 +2288,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         channel_id: Snowflake,
         user_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Adds a recipient to a group DM.
 
@@ -1947,6 +2306,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the user to add.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("PUT", "/channels/{channel_id}/recipients/{user_id}", channel_id=channel_id, user_id=user_id)
         headers = {"Authorization": str(authentication)}
@@ -1961,7 +2331,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         channel_id: Snowflake,
         user_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Removes a recipient from a group DM.
 
@@ -1977,6 +2349,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the user to remove.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("DELETE", "/channels/{channel_id}/recipients/{user_id}", channel_id=channel_id, user_id=user_id)
         headers = {"Authorization": str(authentication)}
@@ -1995,7 +2378,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         auto_archive_duration: Literal[60, 1440, 4320, 10080] | UndefinedType = UNDEFINED,
         rate_limit_per_user: int | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> ChannelData:
         """Starts a thread from a message.
 
@@ -2020,6 +2405,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
                 This has to be between 0 and 21600.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "POST",
@@ -2051,7 +2447,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -2068,7 +2466,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         reason: str | UndefinedType = UNDEFINED,
         invitable: bool | UndefinedType = UNDEFINED,
         rate_limit_per_user: int | None | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> ChannelData:
         """Starts a thread without a message
 
@@ -2094,6 +2494,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
                 This has to be between 0 and 21600.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -2133,7 +2544,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -2142,7 +2555,13 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
     # TODO: Add start thread in forum channel here!
 
     async def join_thread(
-        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Joins a thread.
 
@@ -2156,6 +2575,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The thread to join.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("PUT", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
@@ -2165,7 +2595,14 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         )
 
     async def add_thread_member(
-        self, authentication: BotAuthentication, channel_id: Snowflake, user_id: str | int, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        user_id: str | int,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Adds a member to a thread
 
@@ -2184,6 +2621,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the member to add.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("PUT", "/channels/{channel_id}/thread-members/{user_id}", channel_id=channel_id, user_id=user_id)
 
@@ -2191,11 +2639,19 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
     async def leave_thread(
-        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Leaves a thread
 
@@ -2212,6 +2668,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The channel to leave
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("DELETE", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
 
@@ -2219,11 +2686,20 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
     async def remove_thread_member(
-        self, authentication: BotAuthentication, channel_id: Snowflake, user_id: str | int, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        user_id: str | int,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Removes a member from a thread
 
@@ -2247,6 +2723,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the member to add.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "DELETE", "/channels/{channel_id}/thread-members/{user_id}", channel_id=channel_id, user_id=user_id
@@ -2256,11 +2743,20 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
     async def get_thread_member(
-        self, authentication: BotAuthentication, channel_id: Snowflake, user_id: str | int, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        user_id: str | int,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> ThreadMemberData:
         """Gets a thread member.
 
@@ -2276,9 +2772,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The member to get info from.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         :exc:`NotFoundError`
             The member is not part of the thread.
         """
@@ -2288,14 +2792,22 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
     async def list_thread_members(
-        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[ThreadMemberData]:
         """Gets all thread members
 
@@ -2312,6 +2824,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The thread to get members from.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/channels/{channel_id}/thread-members", channel_id=channel_id)
 
@@ -2319,7 +2842,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -2332,7 +2857,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         before: str | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> HasMoreListThreadsData:
         """List public archived threads
 
@@ -2351,6 +2878,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             A ISO8601 timestamp of public threads to get after
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         query: dict[str, str] = {}
 
@@ -2368,7 +2906,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -2381,7 +2921,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         before: str | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> HasMoreListThreadsData:
         """List private archived threads
 
@@ -2400,6 +2942,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             A ISO8601 timestamp of public threads to get after
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         query: dict[str, str] = {}
 
@@ -2417,7 +2970,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -2430,7 +2985,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         before: str | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> HasMoreListThreadsData:
         """List private archived threads the bot has joined.
 
@@ -2449,6 +3006,17 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             A ISO8601 timestamp of public threads to get after
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         query: dict[str, str] = {}
 
@@ -2466,7 +3034,9 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             query=query,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord

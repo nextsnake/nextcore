@@ -47,7 +47,13 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
     __slots__ = ()
 
     async def get_guild_template(
-        self, authentication: BotAuthentication, template_code: str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        template_code: str,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildTemplateData:
         """Gets a template by code
 
@@ -61,6 +67,17 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
             The template code to get the template from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -72,7 +89,9 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -85,7 +104,9 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
         name: str,
         *,
         icon: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildData:
         """Creates a guild from a template
 
@@ -106,6 +127,17 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
             Base64 encoded 128x128px image to set the guild icon to.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -126,14 +158,22 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_guild_templates(
-        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[GuildTemplateData]:
         """Gets all templates in a guild
 
@@ -147,6 +187,17 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
             The guild id to get templates from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -158,7 +209,9 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -171,7 +224,9 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
         name: str,
         *,
         description: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildTemplateData:  # TODO: Narrow typing to overload description.
         """Creates a template from a guild
 
@@ -199,6 +254,17 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
                 This has to be between ``0`` and ``120`` characters long.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -219,14 +285,23 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def sync_guild_template(
-        self, authentication: BotAuthentication, guild_id: Snowflake, template_code: str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        template_code: str,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Updates a template with the updated-guild.
 
@@ -245,6 +320,17 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
             The template to sync
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "PUT", "/guilds/{guild_id}/templates/{template_code}", guild_id=guild_id, template_code=template_code
@@ -254,7 +340,9 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -268,7 +356,9 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         name: str | UndefinedType = UNDEFINED,
         description: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Updates a template.
 
@@ -297,6 +387,17 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
                 This has to be between ``0`` and ``120`` characters long.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "PATCH", "/guilds/{guild_id}/templates/{template_code}", guild_id=guild_id, template_code=template_code
@@ -315,14 +416,23 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def delete_guild_template(
-        self, authentication: BotAuthentication, guild_id: Snowflake, template_code: str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        template_code: str,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildTemplateData:
         """Deletes a template
 
@@ -341,6 +451,17 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
             The code of the template to delete
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -355,7 +476,9 @@ class GuildTemplateHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?

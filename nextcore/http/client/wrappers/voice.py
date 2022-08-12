@@ -73,6 +73,11 @@ class VoiceHTTPWrappers(AbstractHTTPClient, ABC):
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
+
         Returns
         -------
         list[discord_typings.VoiceRegionData]

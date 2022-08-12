@@ -47,7 +47,13 @@ class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
     __slots__ = ()
 
     async def list_guild_emojis(
-        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[EmojiData]:
         """List all emojis in a guild.
 
@@ -61,6 +67,17 @@ class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
             The guild to list emojis from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}/emojis", guild_id=guild_id)
 
@@ -68,14 +85,23 @@ class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_guild_emoji(
-        self, authentication: BotAuthentication, guild_id: Snowflake, emoji_id: int | str, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        emoji_id: int | str,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[EmojiData]:
         """Get emoji info
 
@@ -91,6 +117,17 @@ class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
             The emoji to get
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}/emojis/{emoji_id}", guild_id=guild_id, emoji_id=emoji_id)
 
@@ -98,7 +135,9 @@ class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -115,7 +154,9 @@ class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
         name: str | UndefinedType = UNDEFINED,
         roles: list[Snowflake] | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> EmojiData:
         """Modify a emoji
 
@@ -142,6 +183,17 @@ class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
             Reason to show in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("PATCH", "/guilds/{guild_id}/emojis/{emoji_id}", guild_id=guild_id, emoji_id=emoji_id)
@@ -167,7 +219,9 @@ class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -180,7 +234,9 @@ class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
         emoji_id: int | str,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> list[EmojiData]:
         """Delete a emoji
 
@@ -204,6 +260,17 @@ class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in the audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("DELETE", "/guilds/{guild_id}/emojis/{emoji_id}", guild_id=guild_id, emoji_id=emoji_id)
 
@@ -216,7 +283,9 @@ class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord

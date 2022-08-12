@@ -57,7 +57,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         *,
         avatar: str | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> WebhookData:
         """Creates a webhook
 
@@ -83,6 +85,17 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             Base64 encoded image avatar to use as the default avatar
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -110,14 +123,22 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_channel_webhooks(
-        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[WebhookData]:
         """Gets all webhooks in a channel
 
@@ -134,6 +155,17 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the channel to get webhooks from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -146,14 +178,22 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_guild_webhooks(
-        self, authentication: BotAuthentication, guild_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> list[WebhookData]:
         """Gets all webhooks in a guild
 
@@ -170,6 +210,17 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the guild to get webhooks from
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -182,14 +233,22 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_webhook(
-        self, authentication: BotAuthentication, webhook_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        webhook_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> WebhookData:
         """Gets a webhook by webhook id
 
@@ -203,6 +262,17 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the webhook to fetch
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -215,14 +285,22 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_webhook_with_token(
-        self, webhook_id: Snowflake, webhook_token: str, *, global_priority: int = 0
+        self,
+        webhook_id: Snowflake,
+        webhook_token: str,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> WebhookData:
         """Gets a webhook by webhook id and token
 
@@ -238,6 +316,17 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             The token of the webhook
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -251,7 +340,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         r = await self._request(
             route,
             rate_limit_key=None,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -266,7 +357,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         avatar: str | None | UndefinedType = UNDEFINED,
         channel_id: Snowflake | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> WebhookData:
         """Modifies a webhook
 
@@ -286,6 +379,17 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             The id of a channel to move the webhook to.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -317,7 +421,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             headers=headers,
             rate_limit_key=authentication.rate_limit_key,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -332,7 +438,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         avatar: str | None | UndefinedType = UNDEFINED,
         channel_id: Snowflake | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> WebhookData:
         """Modifies a webhook
 
@@ -352,6 +460,17 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             The id of a channel to move the webhook to.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -385,7 +504,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             headers=headers,
             rate_limit_key=None,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -397,7 +518,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         webhook_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a webhook
 
@@ -411,6 +534,17 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the webhook to delete
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -430,7 +564,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -442,7 +578,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         webhook_token: str,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a webhook
 
@@ -454,6 +592,17 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             The id of the webhook to delete
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -475,7 +624,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=None,
             headers=headers,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -492,7 +643,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         message_id: Snowflake,
         *,
         thread_id: Snowflake | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> MessageData:
         """Gets a message sent by the webhook
 
@@ -515,6 +668,17 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
                 This has to be a thread in the channel the webhook is in
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -536,7 +700,14 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         if thread_id is not UNDEFINED:
             query["thread_id"] = thread_id
 
-        r = await self._request(route, rate_limit_key=None, global_priority=global_priority, query=query)
+        r = await self._request(
+            route,
+            rate_limit_key=None,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
+            query=query,
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
@@ -550,7 +721,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         message_id: Snowflake,
         *,
         thread_id: Snowflake | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Deletes a message sent by the webhook
 
@@ -573,6 +746,17 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
                 This has to be a thread in the channel the webhook is in
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "DELETE",
@@ -589,7 +773,14 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         if thread_id is not UNDEFINED:
             query["thread_id"] = thread_id
 
-        r = await self._request(route, rate_limit_key=None, global_priority=global_priority, query=query)
+        r = await self._request(
+            route,
+            rate_limit_key=None,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
+            query=query,
+        )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]

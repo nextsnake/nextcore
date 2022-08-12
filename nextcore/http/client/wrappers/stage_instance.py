@@ -55,7 +55,9 @@ class StageInstanceHTTPWrappers(AbstractHTTPClient, ABC):
         privacy_level: Literal[1, 2] | UndefinedType = UNDEFINED,
         send_start_notification: bool | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> StageInstanceData:
         """Creates a stage instance
 
@@ -93,6 +95,17 @@ class StageInstanceHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -122,14 +135,22 @@ class StageInstanceHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
     async def get_stage_instance(
-        self, authentication: BotAuthentication, channel_id: Snowflake, *, global_priority: int = 0
+        self,
+        authentication: BotAuthentication,
+        channel_id: Snowflake,
+        *,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
     ) -> StageInstanceData:
         """Gets a stage instance from a stage channel id
 
@@ -143,6 +164,17 @@ class StageInstanceHTTPWrappers(AbstractHTTPClient, ABC):
             The code of the invite to get
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -154,7 +186,9 @@ class StageInstanceHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -168,7 +202,9 @@ class StageInstanceHTTPWrappers(AbstractHTTPClient, ABC):
         topic: str | UndefinedType = UNDEFINED,
         privacy_level: Literal[1, 2] | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> StageInstanceData:
         """Modifies a stage instance
 
@@ -198,6 +234,17 @@ class StageInstanceHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -227,7 +274,9 @@ class StageInstanceHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             json=payload,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -239,7 +288,9 @@ class StageInstanceHTTPWrappers(AbstractHTTPClient, ABC):
         channel_id: Snowflake,
         *,
         reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> None:
         """Modifies a stage instance
 
@@ -258,6 +309,17 @@ class StageInstanceHTTPWrappers(AbstractHTTPClient, ABC):
             The reason to put in audit log
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("DELETE", "/stage-instances/{channel_id}", channel_id=channel_id)
 
@@ -272,7 +334,9 @@ class StageInstanceHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?

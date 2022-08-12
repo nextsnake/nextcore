@@ -154,6 +154,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("POST", "/guilds")
         payload: dict[str, Any] = {"name": name}
@@ -222,6 +227,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}", guild_id=guild_id)
 
@@ -275,6 +285,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}/preview", guild_id=guild_id)
 
@@ -325,6 +340,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("DELETE", "/guilds/{guild_id}", guild_id=guild_id)
 
@@ -364,6 +384,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}/channels", guild_id=guild_id)
 
@@ -413,6 +438,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("PATCH", "/guilds/{guild_id}/channels", guild_id=guild_id)
 
@@ -460,6 +490,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}/threads/active", guild_id=guild_id)
 
@@ -505,6 +540,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
 
@@ -564,6 +604,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}/members", guild_id=guild_id)
 
@@ -625,6 +670,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}/members/search", guild_id=guild_id)
 
@@ -712,6 +762,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
 
         Returns
@@ -825,6 +880,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
+
         Returns
         -------
         discord_typings.GuildMemberData
@@ -907,6 +967,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
+
         Returns
         -------
         discord_typings.GuildMemberData
@@ -981,6 +1046,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "PUT",
@@ -1045,6 +1115,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route(
             "DELETE",
@@ -1106,6 +1181,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("DELETE", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
 
@@ -1215,6 +1295,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("GET", "/guilds/{guild_id}/bans", guild_id=guild_id)
@@ -1277,6 +1362,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("GET", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
@@ -1332,6 +1422,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("PUT", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
 
@@ -1395,6 +1490,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("DELETE", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
 
@@ -1441,6 +1541,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -1578,6 +1683,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
+
         Returns
         -------
         discord_typings.RoleData
@@ -1659,6 +1769,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}/roles", guild_id=guild_id)
 
@@ -1785,6 +1900,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
+
         Returns
         -------
         discord_typings.RoleData
@@ -1862,6 +1982,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("DELETE", "/guilds/{guild_id}/roles/{role_id}", guild_id=guild_id, role_id=role_id)
@@ -1920,6 +2045,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}/prune", guild_id=guild_id)
 
@@ -1987,6 +2117,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("GET", "/guilds/{guild_id}/prune", guild_id=guild_id)
 
@@ -2050,6 +2185,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("GET", "/guilds/{guild_id}/regions", guild_id=guild_id)
@@ -2096,6 +2236,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("GET", "/guilds/{guild_id}/invites", guild_id=guild_id)
@@ -2140,6 +2285,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("GET", "/guilds/{guild_id}/invites", guild_id=guild_id)
@@ -2195,6 +2345,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route(
@@ -2224,7 +2379,9 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         authentication: BotAuthentication,
         guild_id: Snowflake,
         *,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> GuildWidgetSettingsData:
         """Gets widget settings for a guild
 
@@ -2247,6 +2404,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("GET", "/guilds/{guild_id}/widget", guild_id=guild_id)
@@ -2298,6 +2460,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("PATCH", "/guilds/{guild_id}/widget", guild_id=guild_id)
@@ -2384,6 +2551,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("GET", "/guilds/{guild_id}/vanity-url", guild_id=guild_id)
@@ -2432,6 +2604,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("GET", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
@@ -2488,6 +2665,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
         route = Route("PATCH", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
 
@@ -2566,6 +2748,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("PATCH", "/guilds/{guild_id}/voice-states/@me", guild_id=guild_id)
@@ -2628,6 +2815,11 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         """
 
         route = Route("PATCH", "/guilds/{guild_id}/voice-states/{user_id}", guild_id=guild_id, user_id=user_id)

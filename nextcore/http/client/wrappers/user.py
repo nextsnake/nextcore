@@ -82,6 +82,11 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
+
         Returns
         -------
         discord_typings.UserData
@@ -128,6 +133,11 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         Returns
         -------
         discord_typings.UserData
@@ -177,6 +187,11 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -254,6 +269,11 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
+
         Returns
         -------
         list[discord_typings.PartialGuildData]
@@ -316,6 +336,11 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
+
         Returns
         -------
         discord_typings.GuildMemberData
@@ -362,6 +387,11 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------
@@ -412,6 +442,11 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
+
         Returns
         -------
         discord_typings.DMChannelData
@@ -424,7 +459,9 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
             json={"recipient_id": recipient_id},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -459,6 +496,11 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
 
         Returns
         -------

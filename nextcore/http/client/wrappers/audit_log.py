@@ -56,7 +56,9 @@ class AuditLogHTTPWrappers(AbstractHTTPClient, ABC):
         action_type: AuditLogEvents | UndefinedType = UNDEFINED,
         before: int | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
         global_priority: int = 0,
+        wait: bool = True,
     ) -> AuditLogData:
         """Gets the guild audit log.
 
@@ -92,9 +94,17 @@ class AuditLogHTTPWrappers(AbstractHTTPClient, ABC):
                 This defaults to 50.
         global_priority:
             The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
 
         Raises
         ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
             Could not connect due to a problem with your connection
         UnauthorizedError
@@ -129,7 +139,9 @@ class AuditLogHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             query=query,
             headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
             global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the payload from discord?
