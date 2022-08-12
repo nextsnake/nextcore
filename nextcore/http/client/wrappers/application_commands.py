@@ -526,7 +526,7 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         wait:
             Wait when rate limited.
 
-            This will raise :exRc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
         """
         route = Route(
             "GET",
