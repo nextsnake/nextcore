@@ -98,9 +98,9 @@ class InteractionEndpoint:
                 interaction: InteractionData = await request.json()
                 if interaction.get("type") == 1:
                     # logger.debug("Dispatching ping.")
-                    await self.event_dispatcher.dispatch("PING", request, interaction)
+                    await self.event_dispatcher.dispatch("ping", request, interaction)
                 else:
-                    await self.event_dispatcher.dispatch("INTERACTION", request, interaction)
+                    await self.event_dispatcher.dispatch("interaction", request, interaction)
 
                 return None
             else:
@@ -137,7 +137,7 @@ class InteractionEndpoint:
         runner = web.AppRunner(app)
         await runner.setup()
         site = web.TCPSite(runner, "0.0.0.0", port)
-        self.event_dispatcher.add_listener(self._handle_ping, "PING")
+        self.event_dispatcher.add_listener(self._handle_ping, "ping")
         await site.start()
         logger.info("%s listening on %s", self.__class__.__name__, site.name)
 
