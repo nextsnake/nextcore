@@ -144,6 +144,8 @@ class ShardManager:
 
         .. note::
             This will return once all shard have started connecting.
+        .. note::
+            This will do a request to :class:`HTTPClient.get_gateway_bot`
 
         Raises
         ------
