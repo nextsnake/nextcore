@@ -26,8 +26,11 @@ from collections import defaultdict
 from logging import getLogger
 from typing import TYPE_CHECKING
 
+from aiohttp import ClientConnectionError
+
 from ..common import Dispatcher, TimesPer
 from .errors import InvalidShardCountError
+from .exponential_backoff import ExponentialBackoff
 from .shard import Shard
 
 if TYPE_CHECKING:
@@ -156,7 +159,19 @@ class ShardManager:
             raise RuntimeError("Already connected!")
 
         # Get max concurrency and recommended shard count
-        connection_info = await self._http_client.get_gateway_bot(self.authentication)
+        # Exponential backoff for get_gateway_bot
+        async for _ in ExponentialBackoff(0.5, 2, 10):
+            try:
+                connection_info = await self._http_client.get_gateway_bot(self.authentication)
+            except ClientConnectionError:
+                logger.exception("Failed to connect to the gateway? Check your internet connection")
+            else:
+                break
+
+        # This is marked as possibly unbound because the ExponentialBackoff iterator might end. This will never happen
+        # TODO: Rewrite ExponentialBackoff to use await .wait() instead.
+        connection_info = connection_info  # type: ignore [reportUnboundVariable]
+
         session_start_limits = connection_info["session_start_limit"]
         self.max_concurrency = session_start_limits["max_concurrency"]
 
