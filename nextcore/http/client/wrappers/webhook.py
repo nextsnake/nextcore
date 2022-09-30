@@ -25,16 +25,18 @@ from abc import ABC
 from logging import getLogger
 from typing import TYPE_CHECKING
 
-from ....common import UNDEFINED, UndefinedType
+from ....common import UNDEFINED, UndefinedType, json_dumps
 from ...route import Route
 from ..abstract_client import AbstractHTTPClient
+from aiohttp import FormData
 
 if TYPE_CHECKING:
-    from typing import Any, Final
+    from typing import Any, Final, Iterable
 
-    from discord_typings import MessageData, Snowflake, WebhookData
+    from discord_typings import MessageData, Snowflake, WebhookData, AllowedMentionsData, EmbedData, MessageReferenceData, ActionRowData, AttachmentData
 
     from ...authentication import BotAuthentication
+    from ...file import File
 
 logger = getLogger(__name__)
 
@@ -632,7 +634,201 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
-    # TODO: @ooliver1 should implement execute webhook
+    async def execute_webhook(
+        self,
+        authentication: BotAuthentication,
+        webhook_id: Snowflake,
+        webhook_token: str,
+        *,
+        discord_wait: bool | UndefinedType = UNDEFINED,
+        thread_id: Snowflake | UndefinedType = UNDEFINED,
+        content: str | UndefinedType = UNDEFINED,
+        username: str | UndefinedType = UNDEFINED,
+        avatar_url: str | UndefinedType = UNDEFINED,
+        tts: bool | UndefinedType = UNDEFINED,
+        embeds: list[EmbedData] | UndefinedType = UNDEFINED,
+        allowed_mentions: AllowedMentionsData | UndefinedType = UNDEFINED,
+        message_reference: MessageReferenceData | UndefinedType = UNDEFINED,
+        componenets: list[ActionRowData] | UndefinedType = UNDEFINED,
+        sticker_ids: list[int] | UndefinedType = UNDEFINED,
+        files: Iterable[File] | UndefinedType = UNDEFINED,
+        attachments: list[AttachmentData] | UndefinedType = UNDEFINED,  # TODO: Partial
+        flags: int | UndefinedType = UNDEFINED,
+        thread_name: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
+    ) -> MessageData:
+        """Sends a message to a webhook
+
+        Read the `documentation <https://discord.dev/resources/webhook#execute-webhook>`__
+        
+        Parameters
+        ----------
+        authentication:
+            Authentication info.
+        webhook_id:
+            The id of the webhook.
+        webhook_token:
+            The token of the webhook
+
+            .. warning::
+                You should keep this private!
+        discord_wait:
+            Whether to wait for the message to be fully sent on Discord's end
+        thread_id:
+            The id of the thread to post the message in.
+
+            .. warning::
+                This will unarchive any thread
+        content:
+            The content of the message.
+        username:
+            The name of the user. If not provided this will use the webhook default
+        avatar_url:
+            The url of the avatar. If not provided this will use the webhook default.
+        tts:
+            Whether the ``content`` should be spoken out by the Discord client upon send.
+
+            .. note::
+                This will still set ``Message.tts`` to :data:`True` even if ``content`` is not provided.
+        embeds:
+            The embeds to send with the message.
+
+            .. hint::
+                The fields are in the `Embed <https://discord.dev/resources/channel#embed-object>`__ documentation.
+
+            .. note::
+                There is a maximum 6,000 character limit across all embeds.
+
+                Read the `embed limits documentation <https://discord.dev/resources/channel#embed-object-embed-limits>`__ for more info.
+        allowed_mentions:
+            The allowed mentions for the message.
+        message_reference:
+            The message to reply to.
+        componenets:
+            The components to send with the message.
+
+            .. note::
+                The webhook must have been created by a bot for this to work.
+        sticker_ids:
+            A list of sticker ids to attach to the message.
+
+            .. note::
+                This has a max of 3 stickers.
+        files:
+            The files to send with the message.
+        attachments:
+            Metadata about the ``files`` parameter.
+
+            .. note::
+                This only includes the ``filename`` and ``description`` fields.
+        flags:
+            Bitwise flags to send with the message.
+
+            .. note::
+                Only the ``SUPRESS_EMBEDS`` flag can be set.
+        thread_name:
+            The name of the thread to create
+
+            .. warning::
+                This can only be provided when the webhook is for a forum channel.
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`.
+        aiohttp.ClientConnectorError
+            Could not connect due to a problem with your connection
+        UnauthorizedError
+            A invalid token was provided
+        NotFoundError
+            The channel was not found
+        ForbiddenError
+            Missing permissions
+        BadRequestError
+            You did not follow the requirements for some parameters
+
+        Returns
+        -------
+        discord_typings.MessageData
+            The message that was sent.
+        """
+        route = Route("POST", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token)
+        headers = {"Authorization": str(authentication)}
+
+        query: dict[str, str] = {}
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if discord_wait is not UNDEFINED:
+            query["wait"] = str(discord_wait)
+        if thread_id is not UNDEFINED:
+            query["thread_id"] = str(thread_id)
+
+        # We use payload_json here as the format is more strictly defined than form data.
+        # This means we don't have to manually format the data.
+        payload: dict[str, Any] = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if content is not UNDEFINED:
+            payload["content"] = content
+        if username is not UNDEFINED:
+            payload["username"] = username 
+        if avatar_url is not UNDEFINED:
+            payload["avatar_url"] = avatar_url 
+        if tts is not UNDEFINED:
+            payload["tts"] = tts
+        if embeds is not UNDEFINED:
+            payload["embeds"] = embeds
+        if allowed_mentions is not UNDEFINED:
+            payload["allowed_mentions"] = allowed_mentions
+        if message_reference is not UNDEFINED:
+            payload["message_reference"] = message_reference
+        if componenets is not UNDEFINED:
+            payload["componenets"] = componenets
+        if sticker_ids is not UNDEFINED:
+            payload["sticker_ids"] = sticker_ids
+        if attachments is not UNDEFINED:
+            payload["attachments"] = attachments
+        if flags is not UNDEFINED:
+            payload["flags"] = flags
+        if thread_name is not UNDEFINED:
+            payload["thread_name"] = thread_name
+
+        # Create a form data response as files cannot be uploaded via json.
+        form = FormData()
+        form.add_field("payload_json", json_dumps(payload))
+
+        # Add files
+        if files is not UNDEFINED:
+            for file_id, file in enumerate(files):
+                # Content type seems to have no effect here.
+                form.add_field(f"file[{file_id}]", file.contents, filename=file.name)
+
+        r = await self._request(
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            data=form,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
+        )
+
+        # TODO: Make this verify the payload from discord?
+        return await r.json()  # type: ignore [no-any-return]
+
+
     # TODO: @ooliver1 should implement execute slack-compatible webhook
     # TODO: @ooliver1 should implement execute github-compatible webhook
 
