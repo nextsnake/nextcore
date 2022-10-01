@@ -98,6 +98,17 @@ class Dispatcher(Generic[EventNameT]):
         self._global_exception_handlers: list[GlobalExceptionHandler[EventNameT]] = []
         self._exception_handlers: defaultdict[EventNameT, list[ExceptionHandler]] = defaultdict(list)
 
+    def close(self) -> None:
+        """Clean up internal state and listeners."""
+        self._event_handlers.clear()
+        self._global_event_handlers.clear()
+
+        self._wait_for_handlers.clear()
+        self._global_wait_for_handlers.clear()
+
+        self._global_exception_handlers.clear()
+        self._exception_handlers.clear()
+
     # Registration
     @overload
     def listen(self, event_name: EventNameT) -> Callable[[EventCallback], EventCallback]:
