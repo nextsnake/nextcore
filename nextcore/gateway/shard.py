@@ -253,33 +253,17 @@ class Shard:
             raise RuntimeError("We are already reconnecting.")
 
         async with self._connect_lock:
-            async for _ in ExponentialBackoff(0.5, 2, 10):
-                try:
-                    ws = await self._http_client.connect_to_gateway(version=10, encoding="json", compress="zlib-stream")
-                except ClientConnectorError:
-                    self._logger.exception("Failed to connect to the gateway? Check your internet connection")
-                except WSServerHandshakeError:
-                    self._logger.exception("Failed to connect to the gateway")
-                else:
-                    break
+            ws = await self._connect_to_gateway()
 
             self._logger.debug("Connected to websocket")
 
             # Disconnect previously connected ws
-            if self._ws is not None and not self._ws.closed:
-                self.ready.clear()
-                await self._ws.close(code=999)
-                # Notify that we disconnected the ws, as the normal disconnect is for disconnects from discord.
-                # Disconnects from discord also include a error code, which we don't.
-                # This does include a bool if we closed the session.
-                await self.dispatcher.dispatch("client_disconnect", False)
+            await self.close(cleanup=False)
 
             # Reset session
             self._decompressor = Decompressor()
             self._received_heartbeat_ack = True
-
-            # Use the ws we connected with
-            self._ws = ws  # type: ignore [reportUnboundVariable] # This is always bound.
+            self._ws = ws # Use the new connection
 
             create_task(self._receive_loop())
 
@@ -293,7 +277,7 @@ class Shard:
                 # Which is too late for us.
                 self.ready.set()
             else:
-                # Clean up session_id and session_sequence_number
+                # Clean up session_id and session_sequence_number incase only one is set.
                 self.session_sequence_number = None
                 self.session_id = None
 
@@ -307,17 +291,40 @@ class Shard:
                     await wait_for(self.event_dispatcher.wait_for(lambda _: True, "READY"), timeout=5)
                 self._logger.debug("Done IDENTIFYing")
 
-    async def close(self) -> None:
+    async def _connect_to_gateway(self) -> ClientWebSocketResponse:
+        async for _ in ExponentialBackoff(0.5, 2, 10):
+                try:
+                    ws = await self._http_client.connect_to_gateway(version=10, encoding="json", compress="zlib-stream")
+                except ClientConnectorError:
+                    self._logger.exception("Failed to connect to the gateway? Check your internet connection")
+                except WSServerHandshakeError:
+                    self._logger.exception("Failed to connect to the gateway")
+                else:
+                    break
+        # TODO: This is a type hinting issue with ExponentialBackoff. For generators are always potentially limited in terms of type hinting
+        # So it assumes it can end early which isnt the case here.
+        return ws # type: ignore [reportUnboundVariable]
+
+
+    async def close(self, *, cleanup: bool = True) -> None:
         """Close the connection to the gateway and destroy the session.
 
         .. note::
             This will dispatch a ``client_disconnect`` event.
+
+        Parameters
+        ----------
+        cleanup:
+            Whether to close the Discord session.
+            This will stop you from being able to resume, but also remove the bots status faster.
         """
         if self._ws is not None:
-            # We are destroying the session
-            await self.dispatcher.dispatch("client_disconnect", True)
-
-            await self._ws.close()
+            if cleanup:
+                await self.dispatcher.dispatch("client_disconnect", True)
+                await self._ws.close() # Disconnecting with a 1000 close code deletes the session.
+            else:
+                await self.dispatcher.dispatch("client_disconnect", False)
+                await self._ws.close(code=999)
         self._ws = None  # Clear it to save some ram
 
     @property

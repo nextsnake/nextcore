@@ -39,6 +39,7 @@ typing-extensions = "^4.1.1" # Same as above
 orjson = {version = "^3.6.8", optional = true}
 types-orjson = {version = "^3.6.2", optional = true}
 discord-typings = "^0.5.0"
+tre = {path = "../../tre"}
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.4.0"
