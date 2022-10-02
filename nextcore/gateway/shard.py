@@ -570,9 +570,8 @@ class Shard:
             resume_after = 5 * jitter
             self._logger.debug("Re-identifying after %s seconds", resume_after)
             await sleep(resume_after)
-
-            async with self._identify_rate_limiter.acquire():
-                await self._identify()
+            
+            await self._identify_flow()
 
     async def _handle_dispatch(self, data: DispatchEvent) -> None:
         # Save sequence number for resuming.
