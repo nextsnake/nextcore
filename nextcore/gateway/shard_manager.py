@@ -133,9 +133,7 @@ class ShardManager:
         # Privates
         self._active_shard_count: int | None = self.shard_count
         self._pending_shard_count: int | None = None
-        self._identify_rate_limits: defaultdict[int, TimesPer] = defaultdict(
-            lambda: TimesPer(1, 5.1)
-        )  # Add a 100ms margin here for Discord to process things.
+        self._identify_rate_limits: defaultdict[int, TimesPer] = defaultdict(lambda: TimesPer(1, 5))
         self._http_client: HTTPClient = http_client
 
         # Checks
