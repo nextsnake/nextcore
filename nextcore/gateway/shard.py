@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from asyncio import Event, Lock, create_task, get_running_loop, sleep, wait_for
+from asyncio import Event, Lock, create_task, get_running_loop, sleep, wait, FIRST_COMPLETED
 from logging import Logger, getLogger
 from random import random
 from sys import platform
@@ -53,9 +53,11 @@ from .errors import (
     InvalidShardCountError,
     ReconnectCheckFailedError,
     UnhandledCloseCodeError,
+    DisconnectError
 )
 from .exponential_backoff import ExponentialBackoff
 from .op_code import GatewayOpcode
+from math import ceil
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
@@ -164,7 +166,7 @@ class Shard:
         "_heartbeat_sent_at",
         "_latency",
     )
-    """The gateway URL to connect to"""
+    _GATEWAY_SEND_RATE_LIMITS: tuple[int, int] = (120, 60) # Times, per
 
     def __init__(
         self,
@@ -204,7 +206,7 @@ class Shard:
         self._identify_rate_limiter: TimesPer = identify_rate_limiter
 
         # Internals
-        self._send_rate_limit = TimesPer(60 - 3, 120)
+        self._send_rate_limit: TimesPer | None = None
         self._connect_lock: Lock = Lock()
         self._ws: ClientWebSocketResponse | None = None
         self._decompressor: Decompressor = Decompressor()
@@ -239,6 +241,8 @@ class Shard:
 
         .. note::
             This will try to automatically resume if a session is set.
+        .. warning::
+            This might not have fully completed at the end of this call as re-connects will be done in the background.
 
         Raises
         ------
@@ -246,8 +250,6 @@ class Shard:
             :attr:`Shard.should_reconnect` was set to :data:`False` and a :meth:`Shard.identify` call was needed.
         RuntimeError
             We are already reconnecting.
-        asyncio.TimeoutError
-            Discord did not respond with a ``READY`` payload in time. Please try again.
         """
         if self._connect_lock.locked():
             raise RuntimeError("We are already reconnecting.")
@@ -267,29 +269,7 @@ class Shard:
 
             create_task(self._receive_loop())
 
-            # Identify/Resume
-            if self.session_id is not None and self.session_sequence_number is not None:
-                # Resuming
-                await self.resume()
-
-                # Manually set the ready flag as Discord does not send a resume acknowledge
-                # However it does send a RESUMED event, which is unfortunatly only sent when all events have been repeated.
-                # Which is too late for us.
-                self.ready.set()
-            else:
-                # Clean up session_id and session_sequence_number incase only one is set.
-                self.session_sequence_number = None
-                self.session_id = None
-
-                if not self.should_reconnect:
-                    # We should not re-IDENTIFY when should_reconnect is false.
-                    raise ReconnectCheckFailedError()
-
-                # Identify
-                async with self._identify_rate_limiter.acquire():
-                    await self.identify()
-                    await wait_for(self.event_dispatcher.wait_for(lambda _: True, "READY"), timeout=5)
-                self._logger.debug("Done IDENTIFYing")
+            # Connection logic is continued in _handle_hello to account for that rate limits are defined there.
 
     async def _connect_to_gateway(self) -> ClientWebSocketResponse:
         async for _ in ExponentialBackoff(0.5, 2, 10):
@@ -304,6 +284,10 @@ class Shard:
         # TODO: This is a type hinting issue with ExponentialBackoff. For generators are always potentially limited in terms of type hinting
         # So it assumes it can end early which isnt the case here.
         return ws # type: ignore [reportUnboundVariable]
+
+    @classmethod
+    def _calculate_heartbeat_rate_limit_spots(cls, heartbeat_interval: float) -> int:
+        return ceil(heartbeat_interval / 60) # 60 here being how often the send rate limit resets
 
 
     async def close(self, *, cleanup: bool = True) -> None:
@@ -326,6 +310,7 @@ class Shard:
                 await self.dispatcher.dispatch("client_disconnect", False)
                 await self._ws.close(code=999)
         self._ws = None  # Clear it to save some ram
+        self._send_rate_limit = None # No longer applies
 
     @property
     def latency(self) -> float:
@@ -350,15 +335,17 @@ class Shard:
         if wait_until_ready:
             self._logger.debug("Waiting until ready")
             await self.ready.wait()
-
+        assert self._send_rate_limit is not None, "Send rate limit was not set yet. Probably due to not receiving HELLO yet."
         async with self._send_rate_limit.acquire():
+            # These are inside the rate limit block in case it disconnects while waiting for the rate limit
+            # TODO: This should re-wait for the shard to connect.
             assert self._ws is not None, "Websocket is not connected"
             assert self._ws.closed is False, "Websocket is closed"
 
             await self._ws.send_json(data, dumps=json_dumps)
 
-            self._logger.debug("Sent: %s", data)
-            await self.dispatcher.dispatch("sent", data)
+        self._logger.debug("Sent: %s", data)
+        await self.dispatcher.dispatch("sent", data)
 
     # Loops
     async def _receive_loop(self) -> None:
@@ -381,6 +368,51 @@ class Shard:
         # Generally having the exit condition outside is more consistent that having it inside.
         self._logger.debug("Disconnected!")
         await self._on_disconnect(ws)
+
+    async def _identify_flow(self) -> None:
+        # Cleanup session info as they are no longer relevant.
+        self.session_id = None
+        self.session_sequence_number = None
+
+        if not self.should_reconnect:
+            raise ReconnectCheckFailedError()
+        
+        try:
+            async with self._identify_rate_limiter.acquire():
+                # Send a IDENTIFY command, hope it succeeds.
+                await self._identify()
+
+                # Tasks
+                ready_task = create_task(self.event_dispatcher.wait_for(lambda _: True, "READY"))
+                disconnect_task = create_task(self.dispatcher.wait_for(lambda _: True, "disconnect"))
+                
+                # Wait for the READY event to get sent or to get disconnected
+                done, pending = await wait([
+                    ready_task,
+                    disconnect_task
+                ], return_when=FIRST_COMPLETED, timeout=60)
+
+                # Cancel the ones that wasn't the first
+                for task in pending:
+                    task.cancel()
+
+                if len(done) == 0:
+                    # Both timed out. Try reconnecting on a fresh connection?
+                    create_task(self.connect())
+                    # TODO: Should we cancel the use of the rate limit here?
+                    return
+
+                task = done.pop() # The task that completed
+
+                if task == ready_task:
+                    # Everything good!
+                    self.ready.set()
+                else:
+                    raise DisconnectError()
+        except DisconnectError:
+            # Disconnects doesn't count towards the rate limit.
+            # This is just to error so the rate limit context manager undos our request
+            pass
 
     async def _heartbeat_loop(self, heartbeat_interval: float) -> None:
         assert self._ws is not None, "_ws is not set?"
@@ -476,10 +508,35 @@ class Shard:
     # Raw handlers
     # These should be prefixed by handle_ to avoid confusiuon with loop callbacks
     async def _handle_hello(self, data: HelloEvent) -> None:
+        # Start heartbeating
         heartbeat_interval = data["d"]["heartbeat_interval"] / 1000  # Convert from ms to seconds
 
         loop = get_running_loop()
         loop.create_task(self._heartbeat_loop(heartbeat_interval))
+
+        # Create a rate limiter
+        times, per = self._GATEWAY_SEND_RATE_LIMITS
+        
+        # Add space for heartbeats
+        reserved_for_heartbeats = self._calculate_heartbeat_rate_limit_spots(heartbeat_interval)
+        times = times - reserved_for_heartbeats
+
+        self._send_rate_limit = TimesPer(times, per)
+
+        if self.session_id is not None and self.session_sequence_number != 0:
+            # Send the resume command
+            await self._resume()
+
+
+            # Manually set the ready flag as Discord does not send a resume acknowledge
+            # However it does send a RESUMED event, which is unfortunatly only sent when all events have been repeated.
+            # Which can be a very long time.
+            self.ready.set()
+        else:
+            # Need to identify
+            # As this is more of a complicated process, i've split it into a seperate function
+            await self._identify_flow() # TODO: Better name?
+
 
     async def _handle_heartbeat_ack(self, data: GatewayEvent) -> None:
         del data  # Unused
@@ -515,7 +572,7 @@ class Shard:
             await sleep(resume_after)
 
             async with self._identify_rate_limiter.acquire():
-                await self.identify()
+                await self._identify()
 
     async def _handle_dispatch(self, data: DispatchEvent) -> None:
         # Save sequence number for resuming.
@@ -608,7 +665,7 @@ class Shard:
             raise RuntimeError(f"Close code not handled: {close_code}")
 
     # Send wrappers
-    async def identify(self) -> None:
+    async def _identify(self) -> None:
         """Identify to the gateway.
 
         .. note::
@@ -661,7 +718,7 @@ class Shard:
 
         await self._send(payload)
 
-    async def resume(self) -> None:
+    async def _resume(self) -> None:
         """Resume the session
 
         .. note::
