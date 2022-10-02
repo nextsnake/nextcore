@@ -98,7 +98,7 @@ class BaseHTTPClient(
         """Cleans up the HTTPClient
 
         .. warning::
-            After calling this, the HTTPClient should no longer be used.
+            After calling this, the :class:`BaseHTTPClient` should no longer be used.
         """
         ...
 
