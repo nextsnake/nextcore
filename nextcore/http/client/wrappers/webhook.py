@@ -680,12 +680,12 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         webhook_id:
             The id of the webhook.
         webhook_token:
-            The token of the webhook
+            The token of the webhook.
 
             .. warning::
                 You should keep this private!
         discord_wait:
-            Whether to wait for the message to be fully sent on Discord's end
+            Whether to wait for the message to be fully sent on Discord's end.
         thread_id:
             The id of the thread to post the message in.
 
@@ -739,7 +739,7 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             .. note::
                 Only the ``SUPRESS_EMBEDS`` flag can be set.
         thread_name:
-            The name of the thread to create
+            The name of the thread to create.
 
             .. warning::
                 This can only be provided when the webhook is for a forum channel.
@@ -758,15 +758,15 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         RateLimitedError
             You are rate limited, and ``wait`` was set to :data:`False`.
         aiohttp.ClientConnectorError
-            Could not connect due to a problem with your connection
+            Could not connect due to a problem with your connection.
         UnauthorizedError
-            A invalid token was provided
+            A invalid token was provided.
         NotFoundError
-            The channel was not found
+            The channel was not found.
         ForbiddenError
-            Missing permissions
+            Missing permissions.
         BadRequestError
-            You did not follow the requirements for some parameters
+            You did not follow the requirements for some parameters.
 
         Returns
         -------
