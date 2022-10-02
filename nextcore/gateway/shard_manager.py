@@ -130,9 +130,7 @@ class ShardManager:
         # Privates
         self._active_shard_count: int | None = self.shard_count
         self._pending_shard_count: int | None = None
-        self._identify_rate_limits: defaultdict[int, TimesPer] = defaultdict(
-            lambda: TimesPer(1, 5)
-        )
+        self._identify_rate_limits: defaultdict[int, TimesPer] = defaultdict(lambda: TimesPer(1, 5))
         self._http_client: HTTPClient = http_client
 
         # Checks

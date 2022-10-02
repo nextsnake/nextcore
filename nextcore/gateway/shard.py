@@ -21,8 +21,17 @@
 
 from __future__ import annotations
 
-from asyncio import Event, Lock, create_task, get_running_loop, sleep, wait, FIRST_COMPLETED
+from asyncio import (
+    FIRST_COMPLETED,
+    Event,
+    Lock,
+    create_task,
+    get_running_loop,
+    sleep,
+    wait,
+)
 from logging import Logger, getLogger
+from math import ceil
 from random import random
 from sys import platform
 from time import time
@@ -48,16 +57,15 @@ from .close_code import GatewayCloseCode
 from .decompressor import Decompressor
 from .errors import (
     DisallowedIntentsError,
+    DisconnectError,
     InvalidApiVersionError,
     InvalidIntentsError,
     InvalidShardCountError,
     ReconnectCheckFailedError,
     UnhandledCloseCodeError,
-    DisconnectError
 )
 from .exponential_backoff import ExponentialBackoff
 from .op_code import GatewayOpcode
-from math import ceil
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
@@ -166,7 +174,7 @@ class Shard:
         "_heartbeat_sent_at",
         "_latency",
     )
-    _GATEWAY_SEND_RATE_LIMITS: tuple[int, int] = (120, 60) # Times, per
+    _GATEWAY_SEND_RATE_LIMITS: tuple[int, int] = (120, 60)  # Times, per
 
     def __init__(
         self,
@@ -265,7 +273,7 @@ class Shard:
             # Reset session
             self._decompressor = Decompressor()
             self._received_heartbeat_ack = True
-            self._ws = ws # Use the new connection
+            self._ws = ws  # Use the new connection
 
             create_task(self._receive_loop())
 
@@ -273,22 +281,21 @@ class Shard:
 
     async def _connect_to_gateway(self) -> ClientWebSocketResponse:
         async for _ in ExponentialBackoff(0.5, 2, 10):
-                try:
-                    ws = await self._http_client.connect_to_gateway(version=10, encoding="json", compress="zlib-stream")
-                except ClientConnectorError:
-                    self._logger.exception("Failed to connect to the gateway? Check your internet connection")
-                except WSServerHandshakeError:
-                    self._logger.exception("Failed to connect to the gateway")
-                else:
-                    break
+            try:
+                ws = await self._http_client.connect_to_gateway(version=10, encoding="json", compress="zlib-stream")
+            except ClientConnectorError:
+                self._logger.exception("Failed to connect to the gateway? Check your internet connection")
+            except WSServerHandshakeError:
+                self._logger.exception("Failed to connect to the gateway")
+            else:
+                break
         # TODO: This is a type hinting issue with ExponentialBackoff. For generators are always potentially limited in terms of type hinting
         # So it assumes it can end early which isnt the case here.
-        return ws # type: ignore [reportUnboundVariable]
+        return ws  # type: ignore [reportUnboundVariable]
 
     @classmethod
     def _calculate_heartbeat_rate_limit_spots(cls, heartbeat_interval: float) -> int:
-        return ceil(heartbeat_interval / 60) # 60 here being how often the send rate limit resets
-
+        return ceil(heartbeat_interval / 60)  # 60 here being how often the send rate limit resets
 
     async def close(self, *, cleanup: bool = True) -> None:
         """Close the connection to the gateway and destroy the session.
@@ -305,12 +312,12 @@ class Shard:
         if self._ws is not None:
             if cleanup:
                 await self.dispatcher.dispatch("client_disconnect", True)
-                await self._ws.close() # Disconnecting with a 1000 close code deletes the session.
+                await self._ws.close()  # Disconnecting with a 1000 close code deletes the session.
             else:
                 await self.dispatcher.dispatch("client_disconnect", False)
                 await self._ws.close(code=999)
         self._ws = None  # Clear it to save some ram
-        self._send_rate_limit = None # No longer applies
+        self._send_rate_limit = None  # No longer applies
 
     @property
     def latency(self) -> float:
@@ -335,7 +342,9 @@ class Shard:
         if wait_until_ready:
             self._logger.debug("Waiting until ready")
             await self.ready.wait()
-        assert self._send_rate_limit is not None, "Send rate limit was not set yet. Probably due to not receiving HELLO yet."
+        assert (
+            self._send_rate_limit is not None
+        ), "Send rate limit was not set yet. Probably due to not receiving HELLO yet."
         async with self._send_rate_limit.acquire():
             # These are inside the rate limit block in case it disconnects while waiting for the rate limit
             # TODO: This should re-wait for the shard to connect.
@@ -376,7 +385,7 @@ class Shard:
 
         if not self.should_reconnect:
             raise ReconnectCheckFailedError()
-        
+
         try:
             async with self._identify_rate_limiter.acquire():
                 # Send a IDENTIFY command, hope it succeeds.
@@ -385,12 +394,9 @@ class Shard:
                 # Tasks
                 ready_task = create_task(self.event_dispatcher.wait_for(lambda _: True, "READY"))
                 disconnect_task = create_task(self.dispatcher.wait_for(lambda _: True, "disconnect"))
-                
+
                 # Wait for the READY event to get sent or to get disconnected
-                done, pending = await wait([
-                    ready_task,
-                    disconnect_task
-                ], return_when=FIRST_COMPLETED, timeout=60)
+                done, pending = await wait([ready_task, disconnect_task], return_when=FIRST_COMPLETED, timeout=60)
 
                 # Cancel the ones that wasn't the first
                 for task in pending:
@@ -402,7 +408,7 @@ class Shard:
                     # TODO: Should we cancel the use of the rate limit here?
                     return
 
-                task = done.pop() # The task that completed
+                task = done.pop()  # The task that completed
 
                 if task == ready_task:
                     # Everything good!
@@ -516,7 +522,7 @@ class Shard:
 
         # Create a rate limiter
         times, per = self._GATEWAY_SEND_RATE_LIMITS
-        
+
         # Add space for heartbeats
         reserved_for_heartbeats = self._calculate_heartbeat_rate_limit_spots(heartbeat_interval)
         times = times - reserved_for_heartbeats
@@ -527,7 +533,6 @@ class Shard:
             # Send the resume command
             await self._resume()
 
-
             # Manually set the ready flag as Discord does not send a resume acknowledge
             # However it does send a RESUMED event, which is unfortunatly only sent when all events have been repeated.
             # Which can be a very long time.
@@ -535,8 +540,7 @@ class Shard:
         else:
             # Need to identify
             # As this is more of a complicated process, i've split it into a seperate function
-            await self._identify_flow() # TODO: Better name?
-
+            await self._identify_flow()  # TODO: Better name?
 
     async def _handle_heartbeat_ack(self, data: GatewayEvent) -> None:
         del data  # Unused
@@ -570,7 +574,7 @@ class Shard:
             resume_after = 5 * jitter
             self._logger.debug("Re-identifying after %s seconds", resume_after)
             await sleep(resume_after)
-            
+
             await self._identify_flow()
 
     async def _handle_dispatch(self, data: DispatchEvent) -> None:
