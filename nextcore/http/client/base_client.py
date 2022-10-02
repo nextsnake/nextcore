@@ -94,6 +94,15 @@ class BaseHTTPClient(
         ...
 
     @abstractmethod
+    async def close(self) -> None:
+        """Cleans up the HTTPClient
+
+        .. warning::
+            After calling this, the :class:`BaseHTTPClient` should no longer be used.
+        """
+        ...
+
+    @abstractmethod
     async def connect_to_gateway(
         self,
         *,

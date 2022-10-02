@@ -193,6 +193,17 @@ class HTTPClient(BaseHTTPClient):
             raise RuntimeError("This method can only be called once!")
         self._session = ClientSession()
 
+    async def close(self) -> None:
+        """Clean up internal state"""
+        for rate_limit_storage in self.rate_limit_storages.values():
+            await rate_limit_storage.close()
+        self.rate_limit_storages.clear()
+
+        self.dispatcher.close()
+
+        if self._session is not None:
+            await self._session.close()
+
     async def _request(
         self,
         route: Route,
