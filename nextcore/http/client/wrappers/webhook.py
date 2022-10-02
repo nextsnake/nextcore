@@ -25,15 +25,25 @@ from abc import ABC
 from logging import getLogger
 from typing import TYPE_CHECKING
 
+from aiohttp import FormData
+
 from ....common import UNDEFINED, UndefinedType, json_dumps
 from ...route import Route
 from ..abstract_client import AbstractHTTPClient
-from aiohttp import FormData
 
 if TYPE_CHECKING:
     from typing import Any, Final, Iterable
 
-    from discord_typings import MessageData, Snowflake, WebhookData, AllowedMentionsData, EmbedData, MessageReferenceData, ActionRowData, AttachmentData
+    from discord_typings import (
+        ActionRowData,
+        AllowedMentionsData,
+        AttachmentData,
+        EmbedData,
+        MessageData,
+        MessageReferenceData,
+        Snowflake,
+        WebhookData,
+    )
 
     from ...authentication import BotAuthentication
     from ...file import File
@@ -662,7 +672,7 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         """Sends a message to a webhook
 
         Read the `documentation <https://discord.dev/resources/webhook#execute-webhook>`__
-        
+
         Parameters
         ----------
         authentication:
@@ -763,7 +773,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         discord_typings.MessageData
             The message that was sent.
         """
-        route = Route("POST", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token)
+        route = Route(
+            "POST", "/webhooks/{webhook_id}/{webhook_token}", webhook_id=webhook_id, webhook_token=webhook_token
+        )
         headers = {"Authorization": str(authentication)}
 
         query: dict[str, str] = {}
@@ -783,9 +795,9 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         if content is not UNDEFINED:
             payload["content"] = content
         if username is not UNDEFINED:
-            payload["username"] = username 
+            payload["username"] = username
         if avatar_url is not UNDEFINED:
-            payload["avatar_url"] = avatar_url 
+            payload["avatar_url"] = avatar_url
         if tts is not UNDEFINED:
             payload["tts"] = tts
         if embeds is not UNDEFINED:
@@ -827,7 +839,6 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
 
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
-
 
     # TODO: @ooliver1 should implement execute slack-compatible webhook
     # TODO: @ooliver1 should implement execute github-compatible webhook
