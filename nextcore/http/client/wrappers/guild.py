@@ -934,7 +934,7 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         authentication: BotAuthentication,
         guild_id: Snowflake,
         *,
-        nick: str | UndefinedType = UNDEFINED,
+        nick: str | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
         bucket_priority: int = 0,
         global_priority: int = 0,
