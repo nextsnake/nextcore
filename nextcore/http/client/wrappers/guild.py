@@ -933,9 +933,8 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         self,
         authentication: BotAuthentication,
         guild_id: Snowflake,
-        user_id: Snowflake,
         *,
-        nick: str | UndefinedType = UNDEFINED,
+        nick: str | None | UndefinedType = UNDEFINED,
         reason: str | UndefinedType = UNDEFINED,
         bucket_priority: int = 0,
         global_priority: int = 0,
@@ -977,7 +976,7 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         discord_typings.GuildMemberData
             The member after the update
         """
-        route = Route("PATCH", "/guilds/{guild_id}/members/{user_id}", guild_id=guild_id, user_id=user_id)
+        route = Route("PATCH", "/guilds/{guild_id}/members/@me", guild_id=guild_id)
 
         payload: dict[str, Any] = {}
 
