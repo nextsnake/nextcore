@@ -106,18 +106,18 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
         """
         route = Route("GET", "/applications/{application_id}/commands", application_id=application_id)
 
-        query = {}
+        params = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if with_localizations is not UNDEFINED:
-            query["with_localizations"] = with_localizations
+            params["with_localizations"] = with_localizations
 
         r = await self._request(
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            query=query,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
@@ -677,18 +677,18 @@ class ApplicationCommandsHTTPWrappers(AbstractHTTPClient, ABC):
             guild_id=guild_id,
         )
 
-        query = {}
+        params = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if with_localizations is not UNDEFINED:
-            query["with_localizations"] = with_localizations
+            params["with_localizations"] = with_localizations
 
         r = await self._request(
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            query=query,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,

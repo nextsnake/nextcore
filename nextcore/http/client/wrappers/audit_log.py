@@ -121,23 +121,23 @@ class AuditLogHTTPWrappers(AbstractHTTPClient, ABC):
                 A list of fields are available in the documentation.
         """
         route = Route("GET", "/guilds/{guild_id}/audit-logs", guild_id=guild_id)
-        query: dict[str, str] = {}
+        params: dict[str, str] = {}
 
         # They are NotRequired but can't be None.
         # This converts None to NotRequired
         if user_id is not UNDEFINED:
-            query["user_id"] = str(user_id)
+            params["user_id"] = str(user_id)
         if action_type is not UNDEFINED:
-            query["action_type"] = str(action_type)
+            params["action_type"] = str(action_type)
         if before is not UNDEFINED:
-            query["before"] = str(before)
+            params["before"] = str(before)
         if limit is not UNDEFINED:
-            query["limit"] = str(limit)
+            params["limit"] = str(limit)
 
         r = await self._request(
             route,
             rate_limit_key=authentication.rate_limit_key,
-            query=query,
+            params=params,
             headers={"Authorization": str(authentication)},
             bucket_priority=bucket_priority,
             global_priority=global_priority,

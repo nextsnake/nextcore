@@ -566,7 +566,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, headers=headers, rate_limit_key=authentication.rate_limit_key, global_priority=global_priority
+            route, headers=headers, rate_limit_key=authentication.rate_limit_key, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait,
         )
 
     @overload
@@ -703,24 +703,24 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         route = Route("GET", "/channels/{channel_id}/messages", channel_id=channel_id)
         headers = {"Authorization": str(authentication)}
 
-        query: dict[str, str] = {}
+        params: dict[str, str] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if around is not UNDEFINED:
-            query["around"] = str(around)
+            params["around"] = str(around)
         if before is not UNDEFINED:
-            query["before"] = str(before)
+            params["before"] = str(before)
         if after is not UNDEFINED:
-            query["after"] = str(after)
+            params["after"] = str(after)
         if limit is not UNDEFINED:
-            query["limit"] = str(limit)
+            params["limit"] = str(limit)
 
         r = await self._request(
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
-            query=query,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
@@ -1020,7 +1020,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
         )
 
     async def delete_own_reaction(
@@ -1084,7 +1084,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
         )
 
     async def delete_user_reaction(
@@ -1159,7 +1159,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
         )
 
     async def get_reactions(
@@ -1247,20 +1247,20 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         )
         headers = {"Authorization": str(authentication)}
 
-        query: dict[str, str] = {}
+        params: dict[str, str] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if after is not UNDEFINED:
-            query["after"] = str(after)
+            params["after"] = str(after)
         if limit is not UNDEFINED:
-            query["limit"] = str(limit)
+            params["limit"] = str(limit)
 
         r = await self._request(
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
-            query=query,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
@@ -1332,7 +1332,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
         )
 
     async def delete_all_reactions_for_emoji(
@@ -1392,7 +1392,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
         )
 
     async def edit_message(
@@ -1581,7 +1581,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
         )
 
     async def bulk_delete_messages(
@@ -1802,7 +1802,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         r = await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
         )
 
         # TODO: Make this verify the data from Discord
@@ -2021,7 +2021,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
         )
 
     async def follow_news_channel(
@@ -2122,7 +2122,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
         )
 
     async def get_pinned_messages(
@@ -2170,7 +2170,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         r = await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
         )
 
         # TODO: Make this verify the data from Discord
@@ -2232,7 +2232,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        await self._request(route, rate_limit_key=authentication.rate_limit_key, headers=headers)
+        await self._request(route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait)
 
     async def unpin_message(
         self,
@@ -2279,7 +2279,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
         )
 
     async def group_dm_add_recipient(
@@ -2322,7 +2322,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, global_priority=global_priority
+            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
         )
 
     async def group_dm_remove_recipient(
@@ -2890,14 +2890,14 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         RateLimitedError
             You are rate limited, and ``wait`` was set to :data:`False`
         """
-        query: dict[str, str] = {}
+        params: dict[str, str] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if before is not UNDEFINED:
-            query["before"] = before
+            params["before"] = before
         if limit is not UNDEFINED:
-            query["limit"] = str(limit)
+            params["limit"] = str(limit)
 
         route = Route("GET", "/channels/{channel_id}/threads/archived/public", channel_id=channel_id)
 
@@ -2905,7 +2905,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            query=query,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
@@ -2954,14 +2954,14 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         RateLimitedError
             You are rate limited, and ``wait`` was set to :data:`False`
         """
-        query: dict[str, str] = {}
+        params: dict[str, str] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if before is not UNDEFINED:
-            query["before"] = before
+            params["before"] = before
         if limit is not UNDEFINED:
-            query["limit"] = str(limit)
+            params["limit"] = str(limit)
 
         route = Route("GET", "/channels/{channel_id}/threads/archived/private", channel_id=channel_id)
 
@@ -2969,7 +2969,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            query=query,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
@@ -3018,14 +3018,14 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         RateLimitedError
             You are rate limited, and ``wait`` was set to :data:`False`
         """
-        query: dict[str, str] = {}
+        params: dict[str, str] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if before is not UNDEFINED:
-            query["before"] = before
+            params["before"] = before
         if limit is not UNDEFINED:
-            query["limit"] = str(limit)
+            params["limit"] = str(limit)
 
         route = Route("GET", "/channels/{channel_id}/users/@me/threads/archived/private", channel_id=channel_id)
 
@@ -3033,7 +3033,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            query=query,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,

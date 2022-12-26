@@ -88,17 +88,18 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
         """
         route = Route("GET", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
 
-        query = {}
+        params = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if with_user_count is not UNDEFINED:
-            query["with_user_count"] = with_user_count
+            params["with_user_count"] = with_user_count
 
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
             rate_limit_key=authentication.rate_limit_key,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
@@ -313,17 +314,18 @@ class GuildScheduledEventHTTPWrappers(AbstractHTTPClient, ABC):
             guild_scheduled_event_id=guild_scheduled_event_id,
         )
 
-        query = {}
+        params = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if with_user_count is not UNDEFINED:
-            query["with_user_count"] = with_user_count
+            params["with_user_count"] = with_user_count
 
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
             rate_limit_key=authentication.rate_limit_key,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,

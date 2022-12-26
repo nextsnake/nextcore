@@ -778,13 +778,13 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         )
         headers = {"Authorization": str(authentication)}
 
-        query: dict[str, str] = {}
+        params: dict[str, str] = {}
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if discord_wait is not UNDEFINED:
-            query["wait"] = str(discord_wait)
+            params["wait"] = str(discord_wait)
         if thread_id is not UNDEFINED:
-            query["thread_id"] = str(thread_id)
+            params["thread_id"] = str(thread_id)
 
         # We use payload_json here as the format is more strictly defined than form data.
         # This means we don't have to manually format the data.
@@ -832,6 +832,7 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
             data=form,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
@@ -900,12 +901,12 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             message_id=message_id,
         )
 
-        query = {}
+        params = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if thread_id is not UNDEFINED:
-            query["thread_id"] = thread_id
+            params["thread_id"] = thread_id
 
         r = await self._request(
             route,
@@ -913,7 +914,7 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
-            query=query,
+            params=params,
         )
 
         # TODO: Make this verify the payload from discord?
@@ -973,12 +974,12 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             message_id=message_id,
         )
 
-        query = {}
+        params = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if thread_id is not UNDEFINED:
-            query["thread_id"] = thread_id
+            params["thread_id"] = thread_id
 
         r = await self._request(
             route,
@@ -986,7 +987,7 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
-            query=query,
+            params=params,
         )
 
         # TODO: Make this verify the payload from discord?

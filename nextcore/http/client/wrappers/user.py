@@ -281,22 +281,22 @@ class UserHTTPWrappers(AbstractHTTPClient, ABC):
         """
         route = Route("GET", "/users/@me/guilds")
 
-        query = {}
+        params = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if before is not UNDEFINED:
-            query["before"] = before
+            params["before"] = before
         if after is not UNDEFINED:
-            query["after"] = after
+            params["after"] = after
         if limit is not UNDEFINED:
-            query["limit"] = limit
+            params["limit"] = limit
 
         r = await self._request(
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            query=query,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,

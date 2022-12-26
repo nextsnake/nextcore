@@ -235,18 +235,18 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         """
         route = Route("GET", "/guilds/{guild_id}", guild_id=guild_id)
 
-        query: dict[str, str] = {}
+        params: dict[str, str] = {}
 
         # Save a bit of bandwith by not including it by default
         # TODO: Not sure if this is worth it
         if with_counts is not UNDEFINED:
-            query["with_counts"] = str(with_counts).lower()  # Use true instead of True
+            params["with_counts"] = str(with_counts).lower()  # Use true instead of True
 
         r = await self._request(
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            query=query,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
@@ -612,20 +612,20 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         """
         route = Route("GET", "/guilds/{guild_id}/members", guild_id=guild_id)
 
-        query = {}
+        params = {}
         # These can technically be provided by default however its wasted bandwidth
         # TODO: Reconsider this?
         # This only adds them if they are provided (not Undefined)
         if after is not UNDEFINED:
-            query["after"] = after
+            params["after"] = after
         if limit is not UNDEFINED:
-            query["limit"] = limit
+            params["limit"] = limit
 
         r = await self._request(
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            query=query,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
@@ -678,19 +678,19 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         """
         route = Route("GET", "/guilds/{guild_id}/members/search", guild_id=guild_id)
 
-        url_query: dict[str, str] = {"query": query}  # Different name to not overwrite the query argument
+        params: dict[str, str] = {"query": query}
 
         # These can technically be provided by default however its wasted bandwidth
         # TODO: Reconsider this?
         # This only adds them if they are provided (not Undefined)
         if limit is not UNDEFINED:
-            url_query["limit"] = str(limit)
+            params["limit"] = str(limit)
 
         r = await self._request(
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers={"Authorization": str(authentication)},
-            query=url_query,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
@@ -1304,22 +1304,22 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         route = Route("GET", "/guilds/{guild_id}/bans", guild_id=guild_id)
         headers = {"Authorization": str(authentication)}
 
-        query: dict[str, str] = {}
+        params: dict[str, str] = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if before is not UNDEFINED:
-            query["before"] = str(before)
+            params["before"] = str(before)
         if after is not UNDEFINED:
-            query["after"] = str(after)
+            params["after"] = str(after)
         if limit is not UNDEFINED:
-            query["limit"] = str(limit)
+            params["limit"] = str(limit)
 
         r = await self._request(
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
-            query=query,
+            params=params,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
             wait=wait,
@@ -2052,20 +2052,20 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         """
         route = Route("GET", "/guilds/{guild_id}/prune", guild_id=guild_id)
 
-        query = {}
+        params = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
 
         if days is not UNDEFINED:
-            query["days"] = days
+            params["days"] = days
         if include_roles is not UNDEFINED:
-            query["include_roles"] = ",".join(include_roles)
+            params["include_roles"] = ",".join(include_roles)
 
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
-            query=query,
+            params=params,
             rate_limit_key=authentication.rate_limit_key,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
@@ -2124,17 +2124,17 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         """
         route = Route("GET", "/guilds/{guild_id}/prune", guild_id=guild_id)
 
-        query = {}
+        params = {}
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
 
         if days is not UNDEFINED:
-            query["days"] = days
+            params["days"] = days
         if compute_prune_count is not UNDEFINED:
-            query["compute_prune_count"] = compute_prune_count
+            params["compute_prune_count"] = compute_prune_count
         if include_roles is not UNDEFINED:
-            query["include_roles"] = ",".join(include_roles)
+            params["include_roles"] = ",".join(include_roles)
 
         headers = {}
 
@@ -2147,7 +2147,7 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
         r = await self._request(
             route,
             headers={"Authorization": str(authentication)},
-            query=query,
+            params=params,
             rate_limit_key=authentication.rate_limit_key,
             bucket_priority=bucket_priority,
             global_priority=global_priority,
