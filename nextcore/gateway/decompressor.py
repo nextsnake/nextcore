@@ -101,5 +101,5 @@ class Decompressor:
             raise ValueError("Data is corrupted. Please void all zlib context.") from None
 
         # If successful, clear the pending data.
-        self._buffer = bytearray()
+        self._buffer.clear()
         return data
