@@ -214,7 +214,7 @@ class EmojiHTTPWrappers(AbstractHTTPClient, ABC):
         if roles is not UNDEFINED:
             payload["roles"] = roles
 
-        r = self._request(
+        r = await self._request(
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
