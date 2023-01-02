@@ -24,6 +24,7 @@ from __future__ import annotations
 from logging import getLogger
 from time import time
 from typing import TYPE_CHECKING
+from collections import defaultdict
 
 from aiohttp import ClientSession
 
@@ -172,7 +173,7 @@ class HTTPClient(BaseHTTPClient):
             "User-Agent": f"DiscordBot (https://github.com/nextsnake/nextcore, {nextcore_version})"
         }
         self.max_retries: int = max_rate_limit_retries
-        self.rate_limit_storages: dict[str | None, RateLimitStorage] = {}  # User ID -> RateLimitStorage
+        self.rate_limit_storages: defaultdict[str | None, RateLimitStorage] = defaultdict(RateLimitStorage)  # User ID -> RateLimitStorage
         self.dispatcher: Dispatcher[Literal["request_response"]] = Dispatcher()
 
         # Internals
@@ -279,11 +280,7 @@ class HTTPClient(BaseHTTPClient):
             raise RuntimeError("HTTPClient is closed")
 
         # Get the per user rate limit storage
-        rate_limit_storage = self.rate_limit_storages.get(rate_limit_key)
-        if rate_limit_storage is None:
-            # None exists, create one
-            rate_limit_storage = RateLimitStorage()
-            self.rate_limit_storages[rate_limit_key] = rate_limit_storage
+        rate_limit_storage = self.rate_limit_storages[rate_limit_key]
 
         # Ensure headers exists
         if headers is None:
