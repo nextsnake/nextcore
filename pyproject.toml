@@ -81,7 +81,7 @@ testpaths = ["tests"]
 pythonPlatform = "All"
 typeCheckingMode = "strict"
 pythonVersion = "3.8"
-exclude = ["tests/"]
+#exclude = ["tests/"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
