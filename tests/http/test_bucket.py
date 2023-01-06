@@ -1,6 +1,7 @@
 import asyncio
 
-from pytest import mark
+from pytest import mark, raises
+from nextcore.common.errors import RateLimitedError
 
 from nextcore.http.bucket import Bucket
 from nextcore.http.bucket_metadata import BucketMetadata
@@ -73,6 +74,46 @@ async def test_unlimited() -> None:
     for _ in range(3):
         async with bucket.acquire():
             ...
+
+@mark.asyncio
+async def test_out_no_wait() -> None:
+    metadata = BucketMetadata(limit=1)
+    bucket = Bucket(metadata)
+
+    await bucket.update(0, 1)
+
+    with raises(RateLimitedError):
+        async with bucket.acquire(wait=False):
+            ...
+
+@mark.asyncio
+@mark.skipif(True, reason="Currently broken")
+@match_time(0, 0.1)
+async def test_re_release() -> None:
+    metadata = BucketMetadata(limit=1)
+    bucket = Bucket(metadata)
+
+    started: asyncio.Future[None] = asyncio.Future()
+    can_raise: asyncio.Future[None] = asyncio.Future()
+
+    await bucket.update(1, 1)
+
+    async def use():
+        try:
+            async with bucket.acquire():
+                started.set_result(None)
+                await can_raise
+                raise
+        except:
+            pass
+    
+    asyncio.create_task(use())
+
+    await started
+    can_raise.set_result(None)
+    async with bucket.acquire():
+        ...
+
 
 
 # Dirty tests

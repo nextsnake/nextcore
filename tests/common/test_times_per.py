@@ -3,6 +3,7 @@ from pytest import mark, raises
 from nextcore.common.errors import RateLimitedError
 from nextcore.common.times_per import TimesPer
 from tests.utils import match_time
+from asyncio import Future, sleep, create_task
 
 
 @mark.asyncio
@@ -41,6 +42,23 @@ async def test_exception_undos():
         except:
             pass
 
+@mark.asyncio
+@match_time(.1, .01)
+async def test_exception_undos_with_pending():
+    rate_limiter = TimesPer(1, 1)
+    waiting_future: Future[None] = Future()
+
+    async def wait_for_a_second():
+        async with rate_limiter.acquire():
+            waiting_future.set_result(None)
+            await sleep(.1)
+            raise
+
+    create_task(wait_for_a_second())
+    await waiting_future
+
+    async with rate_limiter.acquire():
+        ...
 
 @mark.asyncio
 async def test_no_wait():
