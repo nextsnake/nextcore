@@ -566,7 +566,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, headers=headers, rate_limit_key=authentication.rate_limit_key, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait,
+            route,
+            headers=headers,
+            rate_limit_key=authentication.rate_limit_key,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     @overload
@@ -1020,7 +1025,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def delete_own_reaction(
@@ -1084,7 +1094,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def delete_user_reaction(
@@ -1159,7 +1174,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def get_reactions(
@@ -1332,7 +1352,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def delete_all_reactions_for_emoji(
@@ -1392,7 +1417,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def edit_message(
@@ -1581,7 +1611,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def bulk_delete_messages(
@@ -1802,7 +1837,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         r = await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -2021,7 +2061,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             headers["X-Audit-Log-Reason"] = reason
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def follow_news_channel(
@@ -2122,7 +2167,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def get_pinned_messages(
@@ -2170,7 +2220,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         r = await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
         # TODO: Make this verify the data from Discord
@@ -2232,7 +2287,14 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        await self._request(route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait)
+        await self._request(
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
+        )
 
     async def unpin_message(
         self,
@@ -2279,7 +2341,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def group_dm_add_recipient(
@@ -2322,7 +2389,12 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         headers = {"Authorization": str(authentication)}
 
         await self._request(
-            route, rate_limit_key=authentication.rate_limit_key, headers=headers, bucket_priority=bucket_priority, global_priority=global_priority, wait=wait
+            route,
+            rate_limit_key=authentication.rate_limit_key,
+            headers=headers,
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
         )
 
     async def group_dm_remove_recipient(

@@ -75,6 +75,7 @@ async def test_stores_and_get_discord_id() -> None:
     await storage.store_bucket_by_discord_id("1", bucket)
     assert await storage.get_bucket_by_discord_id("1") is bucket, "Bucket was not stored"
 
+
 @mark.asyncio
 async def test_bucket_metadata_stored() -> None:
     storage = RateLimitStorage()

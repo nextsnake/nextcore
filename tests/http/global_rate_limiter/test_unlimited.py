@@ -1,4 +1,6 @@
-from asyncio import CancelledError, TimeoutError as AsyncioTimeoutError, sleep, wait_for
+from asyncio import CancelledError
+from asyncio import TimeoutError as AsyncioTimeoutError
+from asyncio import sleep, wait_for
 
 from pytest import mark, raises
 
@@ -48,12 +50,12 @@ async def test_no_wait() -> None:
         async with rate_limiter.acquire(wait=False):
             ...
 
+
 @mark.asyncio
 async def test_cancel() -> None:
     rate_limiter = UnlimitedGlobalRateLimiter()
-    
+
     with raises(CancelledError):
         async with rate_limiter.acquire():
             raise CancelledError()
-    assert len(rate_limiter._pending_requests) == 0, "Pending request was not cleared" # type: ignore [reportPrivateUsage]
-    
+    assert len(rate_limiter._pending_requests) == 0, "Pending request was not cleared"  # type: ignore [reportPrivateUsage]

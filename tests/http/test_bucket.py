@@ -1,8 +1,8 @@
 import asyncio
 
 from pytest import mark, raises
-from nextcore.common.errors import RateLimitedError
 
+from nextcore.common.errors import RateLimitedError
 from nextcore.http.bucket import Bucket
 from nextcore.http.bucket_metadata import BucketMetadata
 from tests.utils import match_time
@@ -75,6 +75,7 @@ async def test_unlimited() -> None:
         async with bucket.acquire():
             ...
 
+
 @mark.asyncio
 async def test_out_no_wait() -> None:
     metadata = BucketMetadata(limit=1)
@@ -85,6 +86,7 @@ async def test_out_no_wait() -> None:
     with raises(RateLimitedError):
         async with bucket.acquire(wait=False):
             ...
+
 
 @mark.asyncio
 @mark.skipif(True, reason="Currently broken")
@@ -106,14 +108,13 @@ async def test_re_release() -> None:
                 raise
         except:
             pass
-    
+
     asyncio.create_task(use())
 
     await started
     can_raise.set_result(None)
     async with bucket.acquire():
         ...
-
 
 
 # Dirty tests

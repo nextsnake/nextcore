@@ -21,10 +21,10 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from logging import getLogger
 from time import time
 from typing import TYPE_CHECKING
-from collections import defaultdict
 
 from aiohttp import ClientSession
 
@@ -173,7 +173,9 @@ class HTTPClient(BaseHTTPClient):
             "User-Agent": f"DiscordBot (https://github.com/nextsnake/nextcore, {nextcore_version})"
         }
         self.max_retries: int = max_rate_limit_retries
-        self.rate_limit_storages: defaultdict[str | None, RateLimitStorage] = defaultdict(RateLimitStorage)  # User ID -> RateLimitStorage
+        self.rate_limit_storages: defaultdict[str | None, RateLimitStorage] = defaultdict(
+            RateLimitStorage
+        )  # User ID -> RateLimitStorage
         self.dispatcher: Dispatcher[Literal["request_response"]] = Dispatcher()
 
         # Internals
