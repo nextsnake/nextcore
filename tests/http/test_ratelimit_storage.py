@@ -1,5 +1,4 @@
 import gc
-import sys
 
 from pytest import mark
 
@@ -15,10 +14,10 @@ async def test_does_gc_collect_unused_buckets() -> None:
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
 
-    await storage.store_bucket_by_nextcore_id(1, bucket)
+    await storage.store_bucket_by_nextcore_id("1", bucket)
     gc.collect()
 
-    assert await storage.get_bucket_by_nextcore_id(1) is None, "Bucket was not collected"
+    assert await storage.get_bucket_by_nextcore_id("1") is None, "Bucket was not collected"
 
 
 @mark.asyncio
@@ -30,10 +29,10 @@ async def test_does_not_collect_dirty_buckets() -> None:
 
     await bucket.update(0, 1)
 
-    await storage.store_bucket_by_nextcore_id(1, bucket)
+    await storage.store_bucket_by_nextcore_id("1", bucket)
     gc.collect()
 
-    assert await storage.get_bucket_by_nextcore_id(1) is not None, "Bucket should not be collected"
+    assert await storage.get_bucket_by_nextcore_id("1") is not None, "Bucket should not be collected"
 
 
 @mark.asyncio
@@ -58,10 +57,10 @@ async def test_stores_and_get_nextcore_id() -> None:
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
 
-    assert await storage.get_bucket_by_nextcore_id(1) is None, "Bucket should not exist as it is not added yet"
+    assert await storage.get_bucket_by_nextcore_id("1") is None, "Bucket should not exist as it is not added yet"
 
-    await storage.store_bucket_by_nextcore_id(1, bucket)
-    assert await storage.get_bucket_by_nextcore_id(1) is bucket, "Bucket was not stored"
+    await storage.store_bucket_by_nextcore_id("1", bucket)
+    assert await storage.get_bucket_by_nextcore_id("1") is bucket, "Bucket was not stored"
 
 
 @mark.asyncio
@@ -75,3 +74,13 @@ async def test_stores_and_get_discord_id() -> None:
 
     await storage.store_bucket_by_discord_id("1", bucket)
     assert await storage.get_bucket_by_discord_id("1") is bucket, "Bucket was not stored"
+
+
+@mark.asyncio
+async def test_bucket_metadata_stored() -> None:
+    storage = RateLimitStorage()
+    metadata = BucketMetadata()
+
+    await storage.store_metadata("1", metadata)
+
+    assert await storage.get_bucket_metadata("1") is not None

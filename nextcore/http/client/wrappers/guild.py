@@ -48,6 +48,7 @@ if TYPE_CHECKING:
         RoleData,
         RolePositionData,
         Snowflake,
+        VideoQualityModes,
         VoiceRegionData,
         WelcomeChannelData,
         WelcomeScreenData,
@@ -403,6 +404,180 @@ class GuildHTTPWrappers(AbstractHTTPClient, ABC):
 
         # TODO: Make this verify the data from Discord
         return await r.json()  # type: ignore [no-any-return]
+
+    async def create_guild_channel(
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        name: str,
+        *,
+        type: int | None | UndefinedType,
+        topic: str | None | UndefinedType = UNDEFINED,
+        bitrate: int | None | UndefinedType = UNDEFINED,
+        user_limit: int | None | UndefinedType = UNDEFINED,
+        rate_limit_per_user: int | None | UndefinedType = UNDEFINED,
+        position: int | None | UndefinedType = UNDEFINED,
+        permission_overwrites: list[dict[str, Any]] | None | UndefinedType = UNDEFINED,
+        parent_id: Snowflake | None | UndefinedType = UNDEFINED,
+        nsfw: bool | None | UndefinedType = UNDEFINED,
+        rtc_region: str | None | UndefinedType = UNDEFINED,
+        video_quality_mode: VideoQualityModes | None | UndefinedType = UNDEFINED,
+        default_auto_archive_duration: int | None | UndefinedType = UNDEFINED,
+        default_reaction_emoji: Any | None | UndefinedType = UNDEFINED,
+        available_tags: list[Any] | None | UndefinedType = UNDEFINED,
+        default_sort_order: int | None | UndefinedType = UNDEFINED,
+        reason: str | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
+    ) -> ChannelData:
+        """Creates a channel
+
+        Read the `documentation <https://discord.dev/resources/guild#create-guild-channel>`__
+
+        Parameters
+        ----------
+        authentication:
+            The auth info.
+        guild_id:
+            The guild to create a channel in.
+        name:
+            The name of the channel.
+
+            .. note::
+                This has to be between 1-100 characters.
+        type:
+            The type of the channel.
+        topic:
+            The channel topic or forum guidelines if creating a forum channel.
+
+            .. note::
+                This has to be between 0-1024 characters
+        bitrate:
+            The voice bitrate.
+
+            .. note::
+                This has to be more than 8000.
+
+                - If the guild is boost level 3 or it has the ``VIP_REGIONS`` feature, the max is 384000
+                - If the guild is boost level 2 this is 256000
+                - If the guild is boost level 1 this is 128000
+                - Else this is 96000
+        user_limit:
+            The most amount of people that can be in a voice channel at once
+
+            .. note::
+                Stage channels are not affected by this
+        rate_limit_per_user:
+            amount of seconds a user has to wait before sending another message or create another thread.
+
+            .. note::
+                This has to be between 0-21600
+            .. note::
+                Bots and members with ``MANAGE_MESSAGES`` or ``MANAGE_CHANNEL`` are immune.
+        position:
+            The sorting position of the channel inside its category.
+        permission_overwrites:
+            The channels permissions overwrites.
+
+            .. note::
+                The allow or deny keys default to 0.
+            .. note::
+                Only permissions your bot has can be allowed/denied.
+
+                ``MANAGE_ROLES`` can also only be allowed/denied by members with the ``ADMINISTRATOR`` permission
+        parent_id:
+            The category to put this channel under.
+        nsfw:
+            If the channel is age restricted.
+        rtc_region:
+            The voice region id to use. If this is :data:`None` this will automatically decide a voice region when needed.
+        video_quality_mode:
+            The quality mode for camera.
+
+            Only affects voice channels and stage channels.
+        default_auto_archive_duration:
+            The default auto archive duration used by the Discord client in minutes.
+        default_reaction_emoji:
+            The default reaction emoji that will be shown in forum channels on posts
+        available_tags:
+            The tags that can be added to forum posts.
+        default_sort_order:
+            The default sort order for the forum posts.
+        reason:
+            The reason to put in the audit log
+        global_priority:
+            The priority of the request for the global rate-limiter.
+        bucket_priority:
+            The priority of the request for the bucket rate-limiter.
+        wait:
+            Wait when rate limited.
+
+            This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
+
+        Raises
+        ------
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
+        """
+        route = Route("POST", "/guilds/{guild_id}/channels", guild_id=guild_id)
+
+        headers = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if reason is not UNDEFINED:
+            headers["X-Audit-Log-Reason"] = reason
+
+        payload: dict[str, Any] = {"name": name}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if type is not UNDEFINED:
+            payload["type"] = type
+        if topic is not UNDEFINED:
+            payload["topic"] = topic
+        if bitrate is not UNDEFINED:
+            payload["bitrate"] = bitrate
+        if user_limit is not UNDEFINED:
+            payload["user_limit"] = user_limit
+        if rate_limit_per_user is not UNDEFINED:
+            payload["rate_limit_per_user"] = rate_limit_per_user
+        if position is not UNDEFINED:
+            payload["position"] = position
+        if permission_overwrites is not UNDEFINED:
+            payload["permission_overwrites"] = permission_overwrites
+        if parent_id is not UNDEFINED:
+            payload["parent_id"] = parent_id
+        if nsfw is not UNDEFINED:
+            payload["nsfw"] = nsfw
+        if rtc_region is not UNDEFINED:
+            payload["rtc_region"] = rtc_region
+        if video_quality_mode is not UNDEFINED:
+            payload["video_quality_mode"] = video_quality_mode
+        if default_auto_archive_duration is not UNDEFINED:
+            payload["default_auto_archive_duration"] = default_auto_archive_duration
+        if default_reaction_emoji is not UNDEFINED:
+            payload["default_reaction_emoji"] = default_reaction_emoji
+        if available_tags is not UNDEFINED:
+            payload["available_tags"] = available_tags
+        if default_sort_order is not UNDEFINED:
+            payload["default_sort_order"] = default_sort_order
+
+        r = await self._request(
+            route,
+            json=payload,
+            rate_limit_key=authentication.rate_limit_key,
+            headers={"Authorization": str(authentication)},
+            bucket_priority=bucket_priority,
+            global_priority=global_priority,
+            wait=wait,
+        )
+
+        # TODO: Make this verify the data from Discord
+        return await r.json()  # type: ignore [no-any-return]
+
+
 
     # TODO: Implement create guild channel
 

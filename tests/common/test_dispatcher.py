@@ -180,3 +180,21 @@ async def test_wait_for_handler(event_name: str | None, caplog) -> None:
     # Check for logging errors.
     error_count = len([record for record in caplog.records if record.levelname == "ERROR"])
     assert error_count == 0, "Logged errors where present"
+
+@mark.asyncio
+@mark.parametrize("event_name", [None, "test"])
+async def test_remove_listener(event_name):
+    failed: Future[None] = Future()
+
+    async def handler():
+        failed.set_result(None)
+
+    dispatcher = Dispatcher()
+
+    dispatcher.add_listener(handler, event_name)
+    dispatcher.remove_listener(handler, event_name)
+
+    await dispatcher.dispatch(event_name)
+
+    with raises(AsyncioTimeoutError):
+        await wait_for(dispatcher.wait_for(lambda: True, event_name), timeout=1)

@@ -139,7 +139,6 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             global_priority=global_priority,
             wait=wait,
         )
-
         # TODO: Make this verify the payload from discord?
         return await r.json()  # type: ignore [no-any-return]
 
@@ -572,7 +571,7 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
 
-        r = await self._request(
+        await self._request(
             route,
             rate_limit_key=authentication.rate_limit_key,
             headers=headers,
@@ -580,9 +579,6 @@ class WebhookHTTPWrappers(AbstractHTTPClient, ABC):
             global_priority=global_priority,
             wait=wait,
         )
-
-        # TODO: Make this verify the payload from discord?
-        return await r.json()  # type: ignore [no-any-return]
 
     async def delete_webhook_with_token(
         self,
