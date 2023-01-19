@@ -114,7 +114,7 @@ class Bucket:
                 yield  # Let the user do the request
             except:
                 # Release one request as we assume the request failed.
-                if self._pending.qsize() > 1:
+                if self._pending.qsize() >= 1:
                     self._release_pending(1)
 
                 raise  # Re-raise the exception
@@ -136,7 +136,7 @@ class Bucket:
                 yield  # Let the user do the request
             except:
                 # Release one request as we assume the request failed.
-                if self._pending.qsize() > 1:
+                if self._pending.qsize() >= 1:
                     self._release_pending(1)
 
                 raise  # Re-raise the exception
