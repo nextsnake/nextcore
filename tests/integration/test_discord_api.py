@@ -4,12 +4,13 @@ import os
 import typing
 
 import pytest
-from discord_typings import GuildData, ReadyData, ChannelData, MessageData, ThreadChannelData
+from discord_typings import EmbedData, GuildData, ReadyData, ChannelData, MessageData, ThreadChannelData
 from pytest_harmony import TreeTests
 
 from nextcore.gateway import GatewayOpcode, ShardManager
 from nextcore.http import BotAuthentication, HTTPClient
 from nextcore.http.errors import BadRequestError
+from nextcore.http.file import File
 
 tree = TreeTests()
 
@@ -235,6 +236,19 @@ async def cleanup_create_reaction(state: dict[str, typing.Any]):
 
     await http_client.delete_own_reaction(authentication, channel["id"], message["id"], "👋")
 
+
+# Get token / create guild / create text channel / create message / create reaction / get reactions
+@create_reaction.append()
+async def get_reactions(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+    message: ChannelData = state["message"]
+
+    reactions = await http_client.get_reactions(authentication, channel["id"], message["id"], "👋", limit=1, after=0)
+    assert len(reactions) == 1
+
+
 # Get token / create guild / create text channel / create message / create thread
 @create_message.append()
 async def create_thread(state: dict[str, typing.Any]):
@@ -278,14 +292,66 @@ async def cleanup_modify_thread(state: dict[str, typing.Any]):
 
     await http_client.modify_thread(authentication, thread["id"], archived=False, locked=False)
 
-# Get token / create guild / create text channel / create message / create thread / modify thread
+# Get token / create guild / create text channel / create message / get channel messages
 @create_message.append()
-async def get_channel_history(state: dict[str, typing.Any]):
+async def get_channel_messages(state: dict[str, typing.Any]):
     http_client: HTTPClient = state["http_client"]
     authentication: BotAuthentication = state["authentication"]
     channel: ChannelData = state["channel"]
     message: MessageData = state["message"]
 
     messages = await http_client.get_channel_messages(authentication, channel["id"], around=message["id"], limit=1)
-
     assert len(messages) == 1
+
+    before_messages = await http_client.get_channel_messages(authentication, channel["id"], before=message["id"], limit=1)
+    assert len(before_messages) == 0
+
+    after_messages = await http_client.get_channel_messages(authentication, channel["id"], after=message["id"], limit=1)
+    assert len(after_messages) == 0
+
+# Get token / create guild / create text channel / create message / edit message
+@create_message.append()
+async def edit_message(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+    message: MessageData = state["message"]
+
+    new_message = await http_client.edit_message(authentication, channel["id"], message["id"], content="foobar")
+
+    assert new_message["content"] == "foobar"
+
+# Get token / create guild / create text channel / create message
+@create_text_channel.append()
+async def create_message_advanced(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+    
+    embeds: list[EmbedData] = [
+        {
+            "title": "Hi",
+            "description": "Hello"
+        }
+    ]
+    file = File("test.txt", "Test contents")
+
+    message = await http_client.create_message(authentication, channel["id"], embeds=embeds, files=[file])
+
+    state["message"] = message
+
+    assert len(message["embeds"]) == 1
+    assert len(message["attachments"]) == 1
+
+@create_message.cleanup()
+async def cleanup_create_message(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+    message: MessageData = state["message"]
+
+    await http_client.delete_message(authentication, channel["id"], message["id"])
+
+    del state["message"]
+
+
