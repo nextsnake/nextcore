@@ -1,13 +1,18 @@
 from __future__ import annotations
-from pytest_harmony import TreeTests
-import pytest
-import typing
+
 import os
+import typing
+
+import pytest
+from discord_typings import GuildData, ReadyData, ChannelData, MessageData, ThreadChannelData
+from pytest_harmony import TreeTests
+
+from nextcore.gateway import GatewayOpcode, ShardManager
 from nextcore.http import BotAuthentication, HTTPClient
-from nextcore.gateway import ShardManager, GatewayOpcode
-from discord_typings import GuildData, ReadyData
+from nextcore.http.errors import BadRequestError
 
 tree = TreeTests()
+
 
 @pytest.mark.asyncio
 async def test_discord_api():
@@ -28,6 +33,7 @@ async def get_token(state: dict[str, typing.Any]):
     http_client = HTTPClient()
     await http_client.setup()
     state["http_client"] = http_client
+
 
 @get_token.cleanup()
 async def cleanup_get_token(state: dict[str, typing.Any]):
@@ -58,6 +64,7 @@ async def create_guild(state: dict[str, typing.Any]):
 
     state["guild"] = guild
 
+
 @create_guild.cleanup()
 async def cleanup_create_guild(state: dict[str, typing.Any]):
     http_client: HTTPClient = state["http_client"]
@@ -78,8 +85,8 @@ async def get_audit_logs(state: dict[str, typing.Any]):
 
     logs = await http_client.get_guild_audit_log(authentication, guild["id"], limit=10)
 
-
     assert logs["audit_log_entries"] == []
+
 
 # Get token / connect to gateway
 @get_token.append()
@@ -87,7 +94,7 @@ async def connect_to_gateway(state: dict[str, typing.Any]):
     http_client: HTTPClient = state["http_client"]
     authentication: BotAuthentication = state["authentication"]
 
-    intents = 3276799 # Everything. TODO: Do this using a intents helper?
+    intents = 3276799  # Everything. TODO: Do this using a intents helper?
 
     gateway = ShardManager(authentication, intents, http_client)
 
@@ -98,6 +105,7 @@ async def connect_to_gateway(state: dict[str, typing.Any]):
     ready_data: ReadyData = (await gateway.event_dispatcher.wait_for(lambda _: True, "READY"))[0]
     state["bot_user"] = ready_data["user"]
 
+
 @connect_to_gateway.cleanup()
 async def cleanup_connect_to_gateway(state: dict[str, typing.Any]):
     gateway: ShardManager = state["gateway"]
@@ -106,6 +114,7 @@ async def cleanup_connect_to_gateway(state: dict[str, typing.Any]):
 
     del state["gateway"]
     del state["bot_user"]
+
 
 # Get token / connect to gateway / get latency
 @connect_to_gateway.append()
@@ -117,6 +126,7 @@ async def get_latency(state: dict[str, typing.Any]):
         await shard.raw_dispatcher.wait_for(lambda _: True, GatewayOpcode.HEARTBEAT_ACK)
         print(shard.latency)
 
+
 # Get token / connect to gateway
 @connect_to_gateway.append()
 async def rescale_shards(state: dict[str, typing.Any]):
@@ -126,7 +136,156 @@ async def rescale_shards(state: dict[str, typing.Any]):
 
     assert len(gateway.active_shards) == 5
 
+
 @rescale_shards.cleanup()
 async def cleanup_rescale_shards(state: dict[str, typing.Any]):
     gateway: ShardManager = state["gateway"]
     await gateway.rescale_shards(1)
+
+
+# Get token / create guild / create text channel
+@create_guild.append()
+async def create_text_channel(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    guild: GuildData = state["guild"]
+
+    channel = await http_client.create_guild_channel(authentication, guild["id"], "test-text", type=0)
+
+    state["channel"] = channel
+
+@create_text_channel.cleanup()
+async def cleanup_create_text_channel(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+
+    await http_client.delete_channel(authentication, channel["id"])
+
+    del state["channel"]
+
+
+# Get token / create guild / create text channel / get channel
+@create_text_channel.append()
+async def get_channel(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+
+    fetched_channel = await http_client.get_channel(authentication, channel["id"])
+
+    assert fetched_channel["id"] == channel["id"]
+
+# Get token / create guild / create text channel / modify text channel
+@create_text_channel.append()
+async def modify_text_channel(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+    
+    modified_channel = await http_client.modify_guild_channel(authentication, channel["id"], name="cool-name", topic="This is a cool channel topic", nsfw=True, rate_limit_per_user=50, default_auto_archive_duration=1440)
+
+    assert modified_channel["name"] == "cool-name"
+    assert modified_channel["topic"] == "This is a cool channel topic"
+    assert modified_channel["nsfw"] == True
+    assert modified_channel["rate_limit_per_user"] == 50
+    assert modified_channel["default_auto_archive_duration"] == 1440
+
+
+# Get token / create guild / create text channel / create message
+@create_text_channel.append()
+async def create_message(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+    
+    message = await http_client.create_message(authentication, channel["id"], content="Hello!")
+
+    state["message"] = message
+
+@create_message.cleanup()
+async def cleanup_create_message(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+    message: MessageData = state["message"]
+
+    await http_client.delete_message(authentication, channel["id"], message["id"])
+
+    del state["message"]
+
+
+# Get token / create guild / create text channel / create message / create reaction
+@create_message.append()
+async def create_reaction(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+    message: ChannelData = state["message"]
+
+    await http_client.create_reaction(authentication, channel["id"], message["id"], "👋")
+
+
+@create_message.cleanup()
+async def cleanup_create_reaction(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+    message: ChannelData = state["message"]
+
+    await http_client.delete_own_reaction(authentication, channel["id"], message["id"], "👋")
+
+# Get token / create guild / create text channel / create message / create thread
+@create_message.append()
+async def create_thread(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+    message: ChannelData = state["message"]
+
+    thread = await http_client.start_thread_from_message(authentication, channel["id"], message["id"], "Test thread stuff")
+    await http_client.join_thread(authentication, thread["id"])
+
+    state["thread"] = thread
+
+@create_thread.cleanup()
+async def cleanup_create_thread(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    thread: ThreadChannelData = state["thread"]
+
+    await http_client.leave_thread(authentication, thread["id"])
+    await http_client.delete_channel(authentication, thread["id"], reason="Bad thread")
+
+# Get token / create guild / create text channel / create message / create thread / modify thread
+@create_thread.append()
+async def modify_thread(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    thread: ThreadChannelData = state["thread"]
+
+    updated_thread = await http_client.modify_thread(authentication, thread["id"], archived=True, locked=True)
+    updated_metadata = updated_thread["thread_metadata"]
+    
+    assert updated_metadata["archived"]
+    assert updated_metadata["locked"]
+
+@modify_thread.cleanup()
+async def cleanup_modify_thread(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    thread: ThreadChannelData = state["thread"]
+
+    await http_client.modify_thread(authentication, thread["id"], archived=False, locked=False)
+
+# Get token / create guild / create text channel / create message / create thread / modify thread
+@create_message.append()
+async def get_channel_history(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+    message: MessageData = state["message"]
+
+    messages = await http_client.get_channel_messages(authentication, channel["id"], around=message["id"], limit=1)
+
+    assert len(messages) == 1
