@@ -59,3 +59,15 @@ async def test_cancel() -> None:
         async with rate_limiter.acquire():
             raise CancelledError()
     assert len(rate_limiter._pending_requests) == 0, "Pending request was not cleared"  # type: ignore [reportPrivateUsage]
+
+@mark.asyncio
+@match_time(1, .1)
+async def test_reset() -> None:
+    rate_limiter = UnlimitedGlobalRateLimiter()
+
+    rate_limiter.update(1)
+
+    await sleep(.5) # Ensure it registers
+
+    async with rate_limiter.acquire():
+        ...
