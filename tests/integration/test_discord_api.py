@@ -5,13 +5,15 @@ import typing
 import os
 from nextcore.http import BotAuthentication, HTTPClient
 from nextcore.gateway import ShardManager, GatewayOpcode
-from discord_typings import GuildData
+from discord_typings import GuildData, ReadyData
 
 tree = TreeTests()
 
 @pytest.mark.asyncio
 async def test_discord_api():
     await tree.run_tests()
+
+
 # Get token
 @tree.append()
 async def get_token(state: dict[str, typing.Any]):
@@ -35,6 +37,16 @@ async def cleanup_get_token(state: dict[str, typing.Any]):
     http_client: HTTPClient = state["http_client"]
 
     await http_client.close()
+    del state["http_client"]
+
+
+# Get gateway
+@get_token.append()
+async def get_gateway(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+
+    await http_client.get_gateway()
+
 
 # Get token / create guild
 @get_token.append()
@@ -53,6 +65,8 @@ async def cleanup_create_guild(state: dict[str, typing.Any]):
     guild: GuildData = state["guild"]
 
     await http_client.delete_guild(authentication, guild["id"])
+
+    del state["guild"]
 
 
 # Get token / create guild / get audit logs
@@ -81,13 +95,17 @@ async def connect_to_gateway(state: dict[str, typing.Any]):
 
     await gateway.connect()
 
-    await gateway.event_dispatcher.wait_for(lambda _: True, "READY")
+    ready_data: ReadyData = (await gateway.event_dispatcher.wait_for(lambda _: True, "READY"))[0]
+    state["bot_user"] = ready_data["user"]
 
 @connect_to_gateway.cleanup()
 async def cleanup_connect_to_gateway(state: dict[str, typing.Any]):
     gateway: ShardManager = state["gateway"]
 
     await gateway.close()
+
+    del state["gateway"]
+    del state["bot_user"]
 
 # Get token / connect to gateway / get latency
 @connect_to_gateway.append()
