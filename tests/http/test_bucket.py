@@ -89,7 +89,6 @@ async def test_out_no_wait() -> None:
 
 
 @mark.asyncio
-@mark.skipif(True, reason="Currently broken")
 @match_time(0, 0.1)
 async def test_re_release() -> None:
     metadata = BucketMetadata(limit=1)
@@ -105,7 +104,7 @@ async def test_re_release() -> None:
             async with bucket.acquire():
                 started.set_result(None)
                 await can_raise
-                raise
+                raise RuntimeError("Raising so bucket gets un-acquired")
         except:
             pass
 
