@@ -219,7 +219,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
 
     async def modify_guild_channel(
         self,
-        authentication: BearerAuthentication,
+        authentication: BotAuthentication,
         channel_id: Snowflake,
         *,
         name: str | UndefinedType = UNDEFINED,
