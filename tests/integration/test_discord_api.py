@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import os
 import typing
+from aiohttp import ContentTypeError
 
 import pytest
-from discord_typings import EmbedData, GuildData, ReadyData, ChannelData, MessageData, ThreadChannelData
+from discord_typings import EmbedData, GuildData, ReadyData, ChannelData, MessageData, ThreadChannelData, WebhookData
 from pytest_harmony import TreeTests
 
 from nextcore.gateway import GatewayOpcode, ShardManager
@@ -193,6 +194,25 @@ async def modify_text_channel(state: dict[str, typing.Any]):
     assert modified_channel["default_auto_archive_duration"] == 1440
 
 
+# Get token / create guild / create text channel / create webhook
+@create_text_channel.append()
+async def create_webhook(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    channel: ChannelData = state["channel"]
+
+    webhook = await http_client.create_webhook(authentication, channel["id"], "test")
+
+    state["webhook"] = webhook
+
+@create_webhook.cleanup()
+async def cleanup_create_webhook(state: dict[str, typing.Any]):
+    http_client: HTTPClient = state["http_client"]
+    authentication: BotAuthentication = state["authentication"]
+    webhook: WebhookData = state["webhook"]
+    
+    await http_client.delete_webhook(authentication, webhook["id"])
+
 # Get token / create guild / create text channel / create message
 @create_text_channel.append()
 async def create_message(state: dict[str, typing.Any]):
@@ -343,8 +363,8 @@ async def create_message_advanced(state: dict[str, typing.Any]):
     assert len(message["embeds"]) == 1
     assert len(message["attachments"]) == 1
 
-@create_message.cleanup()
-async def cleanup_create_message(state: dict[str, typing.Any]):
+@create_message_advanced.cleanup()
+async def cleanup_create_message_advanced(state: dict[str, typing.Any]):
     http_client: HTTPClient = state["http_client"]
     authentication: BotAuthentication = state["authentication"]
     channel: ChannelData = state["channel"]
