@@ -11,6 +11,11 @@ Welcome to Nextcore's documentation!
 
    events
 
+.. toctree::
+   :hidden:
+
+   contributing/getting_started
+
 
 Quickstart
 ==========
@@ -32,3 +37,9 @@ The documentation will now split into different pages depending on what function
 
 - :ref:`http` Sending requests to discord.
 - :ref:`gateway` Receiving events from discord.
+
+
+Helping out
+=============
+We would appriciate your help writing nextcore and related libraries.
+See :ref:`contributing` for more info
