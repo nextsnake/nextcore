@@ -36,14 +36,21 @@ if TYPE_CHECKING:
     from typing import Union  # pylint: disable=outdated-typing-union
     from typing import Any, Awaitable, Callable, Final
 
-    from typing_extensions import Unpack
+    from typing_extensions import Concatenate, ParamSpec, Unpack
 
     T = TypeVar("T")
 
     ManyT = Tuple[T, ...]
+    P = ParamSpec("P")
 
-    EventCallback = Callable[[Unpack[ManyT[Any]]], Any]
-    GlobalEventCallback = Callable[[EventNameT, Unpack[ManyT[Any]]], Any]
+    EventCallback = Callable[..., Any]
+
+    # Concatenate for (EventNameT, *P), and we can set `...` as a shorthand for
+    # `Any` for the arguments.
+    # A more "defined" way would be [Unpack[ManyT[Any]]], but that's a bit too
+    # verbose, and doesn't support kwargs.
+    GlobalEventCallbackParent = Callable[Concatenate[EventNameT, P], Any]
+    GlobalEventCallback = GlobalEventCallbackParent[EventNameT, ...]
 
     WaitForCheck = Callable[[Unpack[ManyT[Any]]], Union[Awaitable[bool], bool]]
     GlobalWaitForCheck = Callable[[EventNameT, Unpack[ManyT[Any]]], Union[Awaitable[bool], bool]]
@@ -141,19 +148,8 @@ class Dispatcher(Generic[EventNameT]):
             The event name to register the listener to. If this is :data:`None`, the listener is considered a global event.
         """
 
-        @overload
         def decorator(callback: EventCallback) -> EventCallback:
-            ...
-
-        @overload
-        def decorator(callback: GlobalEventCallback[EventNameT]) -> GlobalEventCallback[EventNameT]:
-            ...
-
-        def decorator(
-            callback: EventCallback | GlobalEventCallback[EventNameT],
-        ) -> EventCallback | GlobalEventCallback[EventNameT]:
-            # This is fine due to @overload's
-            self.add_listener(callback, event_name)  # type: ignore
+            self.add_listener(callback, event_name)
             return callback
 
         return decorator
