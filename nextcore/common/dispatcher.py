@@ -52,8 +52,10 @@ if TYPE_CHECKING:
     GlobalEventCallbackParent = Callable[Concatenate[EventNameT, P], Any]
     GlobalEventCallback = GlobalEventCallbackParent[EventNameT, ...]
 
-    WaitForCheck = Callable[[Unpack[ManyT[Any]]], Union[Awaitable[bool], bool]]
-    GlobalWaitForCheck = Callable[[EventNameT, Unpack[ManyT[Any]]], Union[Awaitable[bool], bool]]
+    WaitForCheck = Callable[..., Union[Awaitable[bool], bool]]
+    GlobalWaitForCheckParent = Callable[Concatenate[EventNameT, P], Union[Awaitable[bool], bool]]
+    GlobalWaitForCheck = GlobalWaitForCheckParent[EventNameT, ...]
+
     WaitForReturn = Tuple[Unpack[ManyT[Any]]]
     GlobalWaitForReturn = Tuple[EventNameT, Unpack[ManyT[Any]]]
 
