@@ -51,6 +51,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 intersphinx_mapping = {
     "aiohttp": ("https://docs.aiohttp.org/en/stable/", None),
     "python": ("https://docs.python.org/3/", None),
+    "towncrier": ("https://towncrier.readthedocs.io/en/stable", None),
 }
 
 # -- Options for HTML output -------------------------------------------------
