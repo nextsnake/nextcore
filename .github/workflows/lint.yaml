@@ -36,26 +36,47 @@ jobs:
         run: poetry run task isort_check
   pyright:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+      fail-fast: false
     steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
-      - name: Install poetry
-        run: pip install poetry
+          python-version: ${{ matrix.python-version }}
+          cache: poetry
+
       - name: Install dependencies
         run: poetry install -E speed
-      - uses: actions/setup-node@v2
-        name: Install node
+
+      - name: Set up pyright
+        run: echo "PYRIGHT_VERSION=$(python -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_ENV
+
+      - name: Run pyright (Linux)
+        uses: jakebailey/pyright-action@v1.4.2
         with:
-          node-version: "14"
-      - name: Install pyright
-        run: npm install -g pyright
-      - name: Enable the problem checker
-        run: echo "::add-matcher::.github/checkers/pyright.json"
-      - name: Run pyright
-        run: poetry run pyright nextcore/
+          version: ${{ env.PYRIGHT_VERSION }}
+          python-version: ${{ matrix.python-version }}
+          python-platform: Linux
+          # only add comments for 3.8
+          no-comments: ${{ matrix.python-version != '3.8' }}
+          warnings: true
+
+      - name: Run pyright (Windows)
+        uses: jakebailey/pyright-action@v1.0.3
+        # run anyway
+        if: success() || failure()
+        with:
+          version: ${{ env.PYRIGHT_VERSION }}
+          python-version: ${{ matrix.python-version }}
+          python-platform: Windows
+          # only add comments for one platform
+          no-comments: true
+          warnings: true
   style-guide:
     runs-on: ubuntu-latest
     steps:
@@ -94,4 +115,3 @@ jobs:
         run: poetry install
       - name: Run slotscheck
         run: poetry run slotscheck nextcore/
-
