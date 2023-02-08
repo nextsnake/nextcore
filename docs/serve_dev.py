@@ -22,6 +22,7 @@
 from livereload import Server, shell
 
 if __name__ == '__main__':
+    shell("make.bat html")  # initial make
     server = Server()
     server.watch('*.rst', shell('make.bat html'), delay=1)
     server.watch('*.md', shell('make.bat html'), delay=1)
