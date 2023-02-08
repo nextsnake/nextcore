@@ -34,7 +34,7 @@ Before submitting we recommend checking a few things
 
 Do's and Dont's
 ----------------
-- Do keep your PR scope small. We would rather review many small PRs with seperate features than one giant one.
+- Do keep your PR scope small. We would rather review many small PRs with separate features than one giant one.
 - Make draft PRs.
 
 Project structure
@@ -45,6 +45,6 @@ Nextcore is currently split into 3 main modules
 - nextcore.http
 - nextcore.gateway
 
-Common is for common utilies that needs to be shared between the other modules.
+Common is for common utilities that needs to be shared between the other modules.
 HTTP is for the REST API.
 Gateway is for the WebSocket gateway.
