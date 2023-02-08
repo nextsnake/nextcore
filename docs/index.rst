@@ -41,5 +41,5 @@ The documentation will now split into different pages depending on what function
 
 Helping out
 =============
-We would appreciate your help maintaining nextcore and its related libraries.
+We would appreciate your help in developing nextcore and its related libraries.
 Please see :ref:`contributing` for more info
