@@ -21,8 +21,8 @@
 
 """Do requests to Discord over the HTTP API.
 
-This module includes a HTTP client that handles rate limits for you,
-and gives you convinient methods around the API.
+This module includes an HTTP client that handles rate limits for you,
+and gives you convenient methods around the API.
 """
 
 from .authentication import *

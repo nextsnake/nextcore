@@ -33,7 +33,8 @@ if TYPE_CHECKING:
 
 __all__: Final[tuple[str, ...]] = ("File",)
 
-# This is not a attr.dataclass because it does not support slots.
+
+# This is not an attr.dataclass because it does not support slots.
 class File:
     """A utility class for uploading files to the API.
 
@@ -43,7 +44,7 @@ class File:
         The name of the file.
 
         .. warning::
-            Only files ending with a `supported file extension <https://discord.dev/reference#image-formatting-image-formats>`__ can be included in embeds.
+            Only files ending with a `supported file extension <https://discord.dev/reference#image-formatting-image-formats>`__ can be used in embeds.
     contents:
         The contents of the file.
 
@@ -53,7 +54,7 @@ class File:
         The name of the file.
 
         .. warning::
-            Only files ending with a `supported file extension <https://discord.dev/reference#image-formatting-image-formats>`__ can be included in embeds.
+            Only files ending with a `supported file extension <https://discord.dev/reference#image-formatting-image-formats>`__ can be used in embeds.
     contents:
         The contents of the file.
     """

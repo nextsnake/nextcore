@@ -38,7 +38,7 @@ class BucketMetadata:
         The maximum number of requests that can be made in the given time period.
     unlimited:
         Whether the bucket has an unlimited number of requests. If this is :class:`True`,
-        limit has to be None.
+        limit must be None.
 
     Attributes
     ----------
@@ -50,7 +50,7 @@ class BucketMetadata:
 
             This will also be :data:`None` if no limit has been fetched yet.
     unlimited:
-        Wheter the bucket has no rate limiting enabled.
+        Whether the bucket has an unlimited number of requests.
     """
 
     __slots__ = ("limit", "unlimited")

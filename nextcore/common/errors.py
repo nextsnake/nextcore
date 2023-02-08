@@ -26,8 +26,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Final
 
-__all__: Final[tuple[str, ...]] = ()
+__all__: Final[tuple[str, ...]] = ("RateLimitedError",)
 
 
 class RateLimitedError(Exception):
-    """A error for when a :class:`~nextcore.common.TimesPer` is rate limited and ``wait`` was :data:`False`"""
+    """An error for when a :class:`~nextcore.common.TimesPer` is rate limited and ``wait`` was :data:`False`"""
