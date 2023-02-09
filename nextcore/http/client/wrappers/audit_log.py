@@ -22,7 +22,7 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
 
 from ....common import UNDEFINED, UndefinedType
 from ...route import Route
@@ -47,6 +47,57 @@ class AuditLogHTTPWrappers(AbstractHTTPClient, ABC):
 
     __slots__ = ()
 
+    @overload
+    async def get_guild_audit_log(
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        *,
+        user_id: int | UndefinedType = UNDEFINED,
+        action_type: AuditLogEvents | UndefinedType = UNDEFINED,
+        before: UndefinedType = UNDEFINED,
+        after: int,
+        limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
+    ) -> AuditLogData:
+        ...
+
+    @overload
+    async def get_guild_audit_log(
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        *,
+        user_id: int | UndefinedType = UNDEFINED,
+        action_type: AuditLogEvents | UndefinedType = UNDEFINED,
+        before: int,
+        after: UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
+    ) -> AuditLogData:
+        ...
+
+    @overload
+    async def get_guild_audit_log(
+        self,
+        authentication: BotAuthentication,
+        guild_id: Snowflake,
+        *,
+        user_id: int | UndefinedType = UNDEFINED,
+        action_type: AuditLogEvents | UndefinedType = UNDEFINED,
+        before: UndefinedType = UNDEFINED,
+        after: UndefinedType = UNDEFINED,
+        limit: int | UndefinedType = UNDEFINED,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
+    ) -> AuditLogData:
+        ...
+
     async def get_guild_audit_log(
         self,
         authentication: BotAuthentication,
@@ -55,6 +106,7 @@ class AuditLogHTTPWrappers(AbstractHTTPClient, ABC):
         user_id: int | UndefinedType = UNDEFINED,
         action_type: AuditLogEvents | UndefinedType = UNDEFINED,
         before: int | UndefinedType = UNDEFINED,
+        after: int | UndefinedType = UNDEFINED,
         limit: int | UndefinedType = UNDEFINED,
         bucket_priority: int = 0,
         global_priority: int = 0,
@@ -81,6 +133,11 @@ class AuditLogHTTPWrappers(AbstractHTTPClient, ABC):
             The action type to filter the audit log by.
         before:
             Get entries before this entry.
+
+            .. note::
+                This does not have to be a valid entry id.
+        after:
+            Get entries before after entry.
 
             .. note::
                 This does not have to be a valid entry id.
@@ -131,6 +188,8 @@ class AuditLogHTTPWrappers(AbstractHTTPClient, ABC):
             params["action_type"] = str(action_type)
         if before is not UNDEFINED:
             params["before"] = str(before)
+        if after is not UNDEFINED:
+            params["after"] = str(before)
         if limit is not UNDEFINED:
             params["limit"] = str(limit)
 
