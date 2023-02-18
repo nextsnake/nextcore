@@ -744,7 +744,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
         embeds: list[EmbedData] | UndefinedType = UNDEFINED,
         allowed_mentions: AllowedMentionsData | UndefinedType = UNDEFINED,
         message_reference: MessageReferenceData | UndefinedType = UNDEFINED,
-        componenets: list[ActionRowData] | UndefinedType = UNDEFINED,
+        components: list[ActionRowData] | UndefinedType = UNDEFINED,
         sticker_ids: list[int] | UndefinedType = UNDEFINED,
         files: Iterable[File] | UndefinedType = UNDEFINED,
         attachments: list[AttachmentData] | UndefinedType = UNDEFINED,  # TODO: Partial
@@ -787,7 +787,7 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             The allowed mentions for the message.
         message_reference:
             The message to reply to.
-        componenets:
+        components:
             The components to send with the message.
         sticker_ids:
             A list of sticker ids to attach to the message.
@@ -855,8 +855,8 @@ class ChannelHTTPWrappers(AbstractHTTPClient, ABC):
             payload["allowed_mentions"] = allowed_mentions
         if message_reference is not UNDEFINED:
             payload["message_reference"] = message_reference
-        if componenets is not UNDEFINED:
-            payload["componenets"] = componenets
+        if components is not UNDEFINED:
+            payload["components"] = components
         if sticker_ids is not UNDEFINED:
             payload["sticker_ids"] = sticker_ids
         if attachments is not UNDEFINED:
