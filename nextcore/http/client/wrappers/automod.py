@@ -66,7 +66,7 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
 
         Parameters
         ----------
-        authentication: BotAuthenticaA
+        authentication: BotAuthentication
         guild_id: Snowflake
             The guild to list the auto moderation rules for.
         wait: bool
