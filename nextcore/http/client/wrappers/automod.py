@@ -20,22 +20,27 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 from abc import ABC
-from ..abstract_client import AbstractHTTPClient
+from typing import TYPE_CHECKING
+
+from ....common import UNDEFINED, UndefinedType
 from ...route import Route
-from ....common import UndefinedType, UNDEFINED
+from ..abstract_client import AbstractHTTPClient
+
 if TYPE_CHECKING:
-    from ...authentication import BotAuthentication
     from typing import Any
+
     from discord_typings import (
-        AutoModerationRuleData,
-        AutoModerationEventTypes,
-        AutoModerationTriggerTypes,
-        AutoModerationTriggerMetadataData,
         AutoModerationActionData,
-        Snowflake, 
+        AutoModerationEventTypes,
+        AutoModerationRuleData,
+        AutoModerationTriggerMetadataData,
+        AutoModerationTriggerTypes,
+        Snowflake,
     )
+
+    from ...authentication import BotAuthentication
 
 
 class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
