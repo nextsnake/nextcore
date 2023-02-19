@@ -49,7 +49,7 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
     This is an abstract base class that should not be used directly.
     """
 
-    __sltos__ = ()
+    __slots__ = ()
 
     async def list_auto_moderation_rules_for_guild(
         self,
@@ -67,6 +67,7 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
         Parameters
         ----------
         authentication: BotAuthentication
+            Authentication info.
         guild_id: Snowflake
             The guild to list the auto moderation rules for.
         wait: bool
