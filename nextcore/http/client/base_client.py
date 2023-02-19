@@ -29,6 +29,7 @@ from ...common import UNDEFINED, UndefinedType
 from .wrappers import (
     ApplicationCommandsHTTPWrappers,
     AuditLogHTTPWrappers,
+    AutoModerationHTTPWrappers,
     ChannelHTTPWrappers,
     EmojiHTTPWrappers,
     GatewayHTTPWrappers,
@@ -57,6 +58,7 @@ __all__: Final[tuple[str, ...]] = ("BaseHTTPClient",)
 class BaseHTTPClient(
     ApplicationCommandsHTTPWrappers,
     AuditLogHTTPWrappers,
+    AutoModerationHTTPWrappers,
     ChannelHTTPWrappers,
     EmojiHTTPWrappers,
     GuildHTTPWrappers,
