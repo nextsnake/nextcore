@@ -55,6 +55,7 @@ pre-commit = "^2.18.1"
 sphinxext-opengraph = "^0.6.3"
 slotscheck = "^0.14.0"
 sphinx-inline-tabs = "^2022.1.2-beta.11"
+livereload = "^2.6.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

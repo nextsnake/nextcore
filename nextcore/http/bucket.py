@@ -56,7 +56,7 @@ class Bucket:
 
     def __init__(self, metadata: BucketMetadata):
         self.metadata: BucketMetadata = metadata
-        self._remaining: int | None = None  # None signifies unlimited or not used yet (due to a optimization)
+        self._remaining: int | None = None  # None signifies unlimited or not used yet (due to an optimization)
         self._pending: PriorityQueue[RequestSession] = PriorityQueue()
         self._reserved: list[RequestSession] = []
         self._resetting: bool = False
@@ -66,7 +66,7 @@ class Bucket:
 
     @asynccontextmanager
     async def acquire(self, *, priority: int = 0, wait: bool = True) -> AsyncIterator[None]:
-        """Use a spot in the rate limit.
+        """Uses a spot in the rate limit.
 
         Parameters
         ----------
@@ -105,9 +105,9 @@ class Bucket:
                     raise RateLimitedError()
                 self._pending.put_nowait(
                     session
-                )  # This can't raise a exception as pending is always infinite unless someone else modified it
+                )  # This can't raise an exception as pending is always infinite unless someone else modified it
                 await session.pending_future  # Wait for a spot in the rate limit.
-                # This will automatically be removed by the waker.
+                # This will automatically be removed by the waker. TODO: maybe find out what this is and describe it.
 
             self._reserved.append(session)
             try:
@@ -122,10 +122,10 @@ class Bucket:
                 self._reserved.remove(session)
             return
 
-        # We have no info on rate limits, so we have to do a "blind" request to find out what the rate limits is.
-        # We will only do one "blind" request at a time per bucket though in case the rate limit is small.
-        # This could be tweaked to use more on routes with higher rate limits, however this would require hard coding which is not a thing I want
-        # for nextcore.
+        # We have no info on rate limits, so we have to do a "blind" request to find out what the rate limits is. We
+        # will only do one "blind" request at a time per bucket though in case the rate limit is small. This could be
+        # tweaked to use more on routes with higher rate limits, however this would require complex code which is not
+        # a thing I want for nextcore.  # TODO: maybe something to mention in the contributor docs?
         session = RequestSession(priority=priority)
 
         if self._can_do_blind_request.is_set():
@@ -191,7 +191,7 @@ class Bucket:
 
     def _reset_callback(self) -> None:
         self._resetting = False  # Allow future resets
-        self._remaining = None  # It should use metadata's limit as a starting point.
+        self._remaining = None  # It should use the metadata limit as a starting point.
 
         # Reset up to the limit
         self._release_pending(self.metadata.limit)
@@ -203,9 +203,9 @@ class Bucket:
             max_count = min(max_count, self._pending.qsize())
 
         for _ in range(max_count):
-            session = self._pending.get_nowait()  # This can't raise a exception due to the guard clause.
+            session = self._pending.get_nowait()  # This can't raise an exception due to the guard clause.
 
-            # Mark it as completed in the queue to avoid a infinitly overflowing int
+            # Mark it as completed in the queue to avoid an infinitely overflowing int
             self._pending.task_done()
 
             session.pending_future.set_result(None)

@@ -45,7 +45,7 @@ class RateLimitingFailedError(Exception):
     """When rate limiting has failed more than :attr:`HTTPClient.max_retries` times
 
     .. hint::
-        This can be due to a un-syncronized clock.
+        This can be due to an un-synchronised clock.
 
         You can change :attr:`HTTPClient.trust_local_time` to :data:`False` to disable using your local clock,
         or you could sync your clock.
@@ -100,14 +100,14 @@ class RateLimitingFailedError(Exception):
     Parameters
     ----------
     max_retries:
-        How many retries the request used that failed.
+        How many retries were allowed for the request.
     response:
         The response to the last request that failed.
 
     Attributes
     ----------
     max_retries:
-        How many retries the request used that failed.
+        How many retries were allowed for the request.
     response:
         The response to the last request that failed.
     """
@@ -139,7 +139,7 @@ class HTTPRequestStatusError(Exception):
     message:
         The error message.
     error:
-        The error json from the body.
+        The error in json from the body.
     """
 
     def __init__(self, error: HTTPErrorResponseData, response: ClientResponse) -> None:
@@ -153,29 +153,32 @@ class HTTPRequestStatusError(Exception):
         super().__init__(f"({self.error_code}) {self.message}")
 
 
-# TODO: Can the docstrings be improved here?
 class BadRequestError(HTTPRequestStatusError):
-    """A 400 error."""
+    """Indicates that the server cannot or will not process the request due to something that is perceived to be a
+    client error"""
 
 
 class UnauthorizedError(HTTPRequestStatusError):
-    """A 401 error."""
+    """Indicates that the client request has not been completed because it lacks valid authentication credentials for
+    the requested resource."""
 
 
 class ForbiddenError(HTTPRequestStatusError):
-    """A 403 error."""
+    """Indicates that the server understands the request but refuses to authorize it, typically means that
+    permissions are missing for the resource requested."""
 
 
 class NotFoundError(HTTPRequestStatusError):
-    """A 404 error."""
+    """Indicates that the server cannot find the requested resource."""
 
 
 class InternalServerError(HTTPRequestStatusError):
-    """A 5xx error."""
+    """A 5xx error. Indicates that the server encountered an unexpected condition that prevented it from fulfilling
+    the request, this is typically not a user error."""
 
 
 class CloudflareBanError(Exception):
-    """A error for when you get banned by cloudflare
+    """An error for when you get banned by cloudflare
 
     This happens due to getting too many ``401``, ``403`` or ``429`` responses from discord.
     This will block your access to the API temporarily for an hour.

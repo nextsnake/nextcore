@@ -7,7 +7,7 @@ This is a document showing you the arguments from the different instances of :cl
 
 Raw Dispatcher
 --------------
-Can be found on :attr:`ShardManadger.raw_dispatcher <gateway.ShardManager.raw_dispatcher>` and :attr:`Shard.raw_dispatcher <gateway.Shard.raw_dispatcher>`.
+Can be found on :attr:`ShardManager.raw_dispatcher <gateway.ShardManager.raw_dispatcher>` and :attr:`Shard.raw_dispatcher <gateway.Shard.raw_dispatcher>`.
 These are the raw dispatchers that just relay raw events from the discord websocket (the gateway).
 
 The event name here is the gateway `opcode <https://discord.dev/docs/topics/gateway#gateway-opcodes>`__.
@@ -22,7 +22,7 @@ The event name here is the gateway `opcode <https://discord.dev/docs/topics/gate
 
 Event Dispatcher
 ----------------
-Can be found on :attr:`ShardManadger.event_dispatcher <gateway.ShardManager.event_dispatcher>` and :attr:`Shard.event_dispatcher <gateway.Shard.event_dispatcher>`.
+Can be found on :attr:`ShardManager.event_dispatcher <gateway.ShardManager.event_dispatcher>` and :attr:`Shard.event_dispatcher <gateway.Shard.event_dispatcher>`.
 These dispatchers dispatch the data inside the ``d`` key of a :attr:`GatewayOpcode.DISPATCH` event.
 
 The event name is the Dispatch `event name <https://discord.dev/topics/gateway#commands-and-events-gateway-events>`__.

@@ -46,7 +46,7 @@ class Route:
     guild_id:
     channel_id:
     webhook_id:
-    webhhook_token:
+    webhook_token:
         Major parameters which will be included in ``parameters`` and count towards the rate limit.
     parameters:
         The parameters of the route. These will be used to format the path.
@@ -56,7 +56,7 @@ class Route:
     Attributes
     ----------
     method:
-        The HTTP method of the route
+        The HTTP method of the route.
     route:
         The path of the route. This can include python formatting strings ({var_here}) from kwargs.
     path:

@@ -19,42 +19,14 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-from __future__ import annotations
+from livereload import Server, shell
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from typing import Final
-
-__all__: Final[tuple[str, ...]] = ("BucketMetadata",)
-
-
-class BucketMetadata:
-    """Metadata about a discord bucket.
-
-    Parameters
-    ----------
-    limit:
-        The maximum number of requests that can be made in the given time period.
-    unlimited:
-        Whether the bucket has an unlimited number of requests. If this is :class:`True`,
-        limit must be None.
-
-    Attributes
-    ----------
-    limit:
-        The maximum number of requests that can be made in the given time period.
-
-        .. note::
-            This will be :data:`None` if :attr:`BucketMetadata.unlimited` is :data:`True`.
-
-            This will also be :data:`None` if no limit has been fetched yet.
-    unlimited:
-        Whether the bucket has an unlimited number of requests.
-    """
-
-    __slots__ = ("limit", "unlimited")
-
-    def __init__(self, limit: int | None = None, *, unlimited: bool = False) -> None:
-        self.limit: int | None = limit
-        self.unlimited: bool = unlimited
+if __name__ == '__main__':
+    shell("make.bat html")  # initial make
+    server = Server()
+    server.watch('*.rst', shell('make.bat html'), delay=1)
+    server.watch('*.md', shell('make.bat html'), delay=1)
+    server.watch('*.py', shell('make.bat html'), delay=1)
+    server.watch('_static/*', shell('make.bat html'), delay=1)
+    server.watch('contributing/*', shell('make.bat html'), delay=1)
+    server.serve(root='_build/html')
