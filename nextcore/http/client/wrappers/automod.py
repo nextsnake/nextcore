@@ -76,7 +76,7 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
             The priority of the request for the global rate-limiter.
         bucket_priority:
             The priority of the request for the bucket rate-limiter.
-        
+
         Raises
         ------
         RateLimitedError
@@ -101,10 +101,10 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
             headers={"Authorization": str(authentication)},
             bucket_priority=bucket_priority,
             global_priority=global_priority,
-            wait=wait
+            wait=wait,
         )
         return await r.json()  # type: ignore [no-type-return]
-    
+
     async def get_auto_moderation_rule(
         self,
         authentication: BotAuthentication,
@@ -137,7 +137,7 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
             The priority of the request for the global rate-limiter.
         bucket_priority:
             The priority of the request for the bucket rate-limiter.
-        
+
         Raises
         ------
         RateLimitedError
@@ -163,10 +163,10 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
             headers={"Authorization": str(authentication)},
             bucket_priority=bucket_priority,
             global_priority=global_priority,
-            wait=wait
+            wait=wait,
         )
         return await r.json()  # type: ignore [no-any-return]
-    
+
     async def create_auto_moderation_rule(
         self,
         authentication: BotAuthentication,
@@ -224,7 +224,7 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
             The priority of the request for the global rate-limiter.
         bucket_priority:
             The priority of the request for the bucket rate-limiter.
-        
+
         Raises
         ------
         RateLimitedError
@@ -248,11 +248,11 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
             "event_type": event_type,
             "trigger_type": trigger_type,
             "actions": actions,
-        } # TODO: Use a typehint for payload
+        }  # TODO: Use a typehint for payload
         headers = {"Authorization": str(authentication)}
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
-        
+
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
         if trigger_metadata is not UNDEFINED:
@@ -273,7 +273,7 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
             json=payload,
         )
         return await r.json()  # typing: ignore [no-any-return]
-    
+
     async def update_auto_moderation_rule(
         self,
         authentication: BotAuthentication,
@@ -330,9 +330,9 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
             A reason for the audit log.
 
             .. note::
-                
+
                 This must be in 1 and 512 characters.
-        wait: bool 
+        wait: bool
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
@@ -347,27 +347,27 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
             guild_id=guild_id,
             rule_id=rule_id,
         )
-        payload: dict[str, Any] = {} # TODO: Use a typehint for payload
+        payload: dict[str, Any] = {}  # TODO: Use a typehint for payload
 
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
 
         if name is not UNDEFINED:
-            payload['name'] = name
+            payload["name"] = name
         if event_type is not UNDEFINED:
-            payload['event_type'] = event_type
+            payload["event_type"] = event_type
         if trigger_type is not UNDEFINED:
-            payload['trigger_type'] = trigger_type
+            payload["trigger_type"] = trigger_type
         if trigger_metadata is not UNDEFINED:
-            payload['trigger_metadata'] = trigger_metadata
+            payload["trigger_metadata"] = trigger_metadata
         if actions is not UNDEFINED:
-            payload['actions'] = actions
+            payload["actions"] = actions
         if enabled is not UNDEFINED:
-            payload['enabled'] = enabled
+            payload["enabled"] = enabled
         if exempt_roles is not UNDEFINED:
-            payload['exempt_roles'] = exempt_roles
+            payload["exempt_roles"] = exempt_roles
         if exempt_channels is not UNDEFINED:
-            payload['exempt_channels'] = exempt_channels
+            payload["exempt_channels"] = exempt_channels
         headers = {"Authorization": str(authentication)}
         if reason is not UNDEFINED:
             headers["X-Audit-Log-Reason"] = reason
@@ -381,7 +381,7 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
             json=payload,
         )
         return await r.json()  # typing: ignore [no-any-return]
-    
+
     async def delete_auto_moderation_rule(
         self,
         authentication: BotAuthentication,
@@ -414,9 +414,9 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
             A reason for the audit log.
 
             .. note::
-                
+
                 This must be in 1 and 512 characters.
-        wait: bool 
+        wait: bool
             Wait when rate limited.
 
             This will raise :exc:`RateLimitedError` if set to :data:`False` and you are rate limited.
@@ -442,4 +442,3 @@ class AutoModerationHTTPWrappers(AbstractHTTPClient, ABC):
             headers=headers,
             wait=wait,
         )
-
