@@ -38,6 +38,10 @@ The documentation will now split into different pages depending on what function
 - :ref:`http` Sending requests to discord.
 - :ref:`gateway` Receiving events from discord.
 
+.. warning::
+
+   Using :data:`logging.DEBUG` logging may include secrets.
+
 
 Helping out
 =============
