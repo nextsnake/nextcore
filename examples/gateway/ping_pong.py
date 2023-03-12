@@ -64,7 +64,7 @@ async def main():
     await shard_manager.connect()
 
     # Raise a error and exit whenever a critical error occurs
-    error = await shard_manager.dispatcher.wait_for(lambda: True, "critical")
+    (error,) = await shard_manager.dispatcher.wait_for(lambda: True, "critical")
 
     raise cast(Exception, error)
 
