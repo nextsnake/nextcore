@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING
 from aiohttp import ClientConnectionError
 
 from ..common import Dispatcher, TimesPer
+from ..http import Route
 from .errors import InvalidShardCountError
 from .exponential_backoff import ExponentialBackoff
 from .shard import Shard
@@ -144,9 +145,9 @@ class ShardManager:
         """Connect all the shards to the gateway.
 
         .. note::
-            This will return once all shard have started connecting.
+            This will return once all shards have started connecting.
         .. note::
-            This will do a request to :class:`HTTPClient.get_gateway_bot`
+            This will do a request to ``GET /gateway/bot``
 
         Raises
         ------
@@ -158,9 +159,15 @@ class ShardManager:
 
         # Get max concurrency and recommended shard count
         # Exponential backoff for get_gateway_bot
+        route = Route("GET", "/gateway/bot")
         async for _ in ExponentialBackoff(0.5, 2, 10):
             try:
-                connection_info = await self._http_client.get_gateway_bot(self.authentication)
+                response = await self._http_client.request(
+                    route,
+                    rate_limit_key=self.authentication.rate_limit_key,
+                    headers={"Authorization": str(self.authentication)},
+                )
+                connection_info = await response.json()
             except ClientConnectionError:
                 logger.exception("Failed to connect to the gateway? Check your internet connection")
             else:

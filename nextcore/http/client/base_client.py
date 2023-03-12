@@ -46,7 +46,7 @@ class BaseHTTPClient(ABC):
     __slots__ = ()
 
     @abstractmethod
-    async def _request(
+    async def request(
         self,
         route: Route,
         rate_limit_key: str | None,

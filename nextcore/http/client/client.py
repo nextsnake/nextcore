@@ -44,7 +44,7 @@ from ..errors import (
 )
 from ..rate_limit_storage import RateLimitStorage
 from ..route import Route
-from .base_client import BaseHTTPClient 
+from .base_client import BaseHTTPClient
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
