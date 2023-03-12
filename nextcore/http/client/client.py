@@ -44,7 +44,7 @@ from ..errors import (
 )
 from ..rate_limit_storage import RateLimitStorage
 from ..route import Route
-from .base_client import BaseHTTPClient
+from .base_client import BaseHTTPClient 
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
@@ -207,7 +207,7 @@ class HTTPClient(BaseHTTPClient):
         if self._session is not None:
             await self._session.close()
 
-    async def _request(
+    async def request(
         self,
         route: Route,
         rate_limit_key: str | None,
