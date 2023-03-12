@@ -32,7 +32,7 @@ from typing import cast
 from discord_typings import MessageData
 
 from nextcore.gateway import ShardManager
-from nextcore.http import BotAuthentication, HTTPClient
+from nextcore.http import BotAuthentication, HTTPClient, Route
 
 # Constants
 AUTHENTICATION = BotAuthentication(environ["TOKEN"])
@@ -53,7 +53,13 @@ async def on_message(message: MessageData):
     # This function will be called every time a message is sent.
     if message["content"] == "ping":
         # Send a pong message to respond.
-        await http_client.create_message(AUTHENTICATION, message["channel_id"], content="pong")
+        route = Route("POST", "/channels/{channel_id}/messages", channel_id=message["channel_id"])
+        await http_client.request(
+            route,
+            rate_limit_key=AUTHENTICATION.rate_limit_key,
+            json={"content": "pong"},
+            headers={"Authorization": str(AUTHENTICATION)},
+        )
 
 
 async def main():
