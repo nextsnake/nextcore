@@ -33,9 +33,6 @@ HTTP reference
 .. autoclass:: UnlimitedGlobalRateLimiter
    :members:
 
-.. autoclass:: File
-    :members:
-
 HTTP errors
 -----------
 .. autoexception:: RateLimitingFailedError
