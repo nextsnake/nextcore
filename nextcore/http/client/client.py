@@ -252,6 +252,8 @@ class HTTPClient(BaseHTTPClient):
             :meth:`HTTPClient.setup` was not called yet.
         RuntimeError
             HTTPClient was closed.
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         CloudflareBanError
             You have been temporarily banned from the Discord API for 1 hour due to too many requests.
             Read the `documentation <https://discord.dev/opics/rate-limits#invalid-request-limit-aka-cloudflare-bans>`__ for more information.
@@ -267,8 +269,6 @@ class HTTPClient(BaseHTTPClient):
             Discord is having issues. Try again later.
         HTTPRequestStatusError
             A non-200 status code was returned.
-        RateLimitedError
-            You are rate limited, and ``wait`` was set to :data:`False`
         """
         # Make sure we have a session
         if self._session is None:
