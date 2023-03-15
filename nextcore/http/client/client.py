@@ -61,16 +61,11 @@ class HTTPClient(BaseHTTPClient):
 
     **Example usage**
 
-    .. code-block:: python3
 
-        http_client = HTTPClient()
-        await http_client.setup()
-
-        gateway = await http_client.get_gateway()
-
-        print(gateway["url"])
-
-        await http_client.close()
+    .. literalinclude:: ../examples/http/get_gateway.py
+       :lines: 27-39
+       :language: python
+       :dedent: 4
 
     Parameters
     ----------

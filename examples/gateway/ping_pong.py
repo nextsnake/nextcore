@@ -54,9 +54,10 @@ async def on_message(message: MessageData):
     if message["content"] == "ping":
         # Send a pong message to respond.
         route = Route("POST", "/channels/{channel_id}/messages", channel_id=message["channel_id"])
+
         await http_client.request(
             route,
-            rate_limit_key=AUTHENTICATION.rate_limit_key,
+            rate_limit_key=AUTHENTICATION.rate_limit_key, # See HTTP examples for a explanation of this!
             json={"content": "pong"},
             headers={"Authorization": str(AUTHENTICATION)},
         )

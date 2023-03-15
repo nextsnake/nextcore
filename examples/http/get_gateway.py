@@ -1,5 +1,6 @@
 # The MIT License (MIT)
-# Copyright (c) 2021-present nextcore developers
+#
+# Copyright (c) 2022-present nextcore developers
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -7,7 +8,6 @@
 # the rights to use, copy, modify, merge, publish, distribute, sublicense,
 # and/or sell copies of the Software, and to permit persons to whom the
 # Software is furnished to do so, subject to the following conditions:
-#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
 #
@@ -19,18 +19,23 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-"""Do requests to Discord over the HTTP API.
+from nextcore.http import HTTPClient, Route
+import asyncio
+from discord_typings import GetGatewayData
 
-This module includes a HTTP client that handles rate limits for you,
-and gives you convinient methods around the API.
-"""
+async def main():
+    http_client = HTTPClient()
+    await http_client.setup()
 
-from .authentication import *
-from .bucket import *
-from .bucket_metadata import *
-from .client import *
-from .errors import *
-from .global_rate_limiter import *
-from .rate_limit_storage import *
-from .request_session import *
-from .route import *
+    # This can be found on https://discord.dev/topics/gateway#get-gateway
+    route = Route("GET", "/gateway")
+    
+    # No authentication is used, so rate_limit_key None here is equivilent of your IP.
+    response = await http_client.request(route, rate_limit_key=None)
+    gateway: GetGatewayData = await response.json()
+
+    print(gateway["url"])
+
+    await http_client.close()
+
+asyncio.run(main())
