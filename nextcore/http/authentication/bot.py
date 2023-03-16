@@ -52,4 +52,22 @@ class BotAuthentication(BaseAuthentication):
     def __init__(self, token: str) -> None:
         self.prefix: Literal["Bot"] = "Bot"
         self.token: str = token
-        self.rate_limit_key: str = f"{self.prefix} {self.token}"
+
+    @property
+    def rate_limit_key(self) -> str:
+        """The key used for rate limiting
+
+        This will be in the format ``Bot AABBCC.DDEEFF.GGHHII``
+        """
+        return f"{self.prefix} {self.token}"
+
+    @property
+    def headers(self) -> dict[str, str]:
+        """Headers for doing a authenticated request.
+        
+        This will return a dict with a ``Authorization`` field.
+        """
+
+        return {
+            "Authorization": f"{self.prefix} {self.token}"
+        }

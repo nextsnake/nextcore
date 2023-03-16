@@ -37,14 +37,14 @@ class BearerAuthentication(BaseAuthentication):
     Parameters
     ----------
     token:
-        The bot token.
+        The bearer token.
 
     Attributes
     ----------
     prefix:
         The prefix of the token.
     token:
-        The bot token
+        The bearer token
     """
 
     __slots__: tuple[str, ...] = ()
@@ -52,4 +52,21 @@ class BearerAuthentication(BaseAuthentication):
     def __init__(self, token: str) -> None:
         self.prefix: Literal["Bearer"] = "Bearer"
         self.token: str = token
-        self.rate_limit_key: str = f"{self.prefix} {self.token}"
+
+    @property
+    def rate_limit_key(self) -> str:
+        """The key used for rate limiting
+
+        This will be in the format ``Bearer AABBCCDDEEFFGGHHII``
+        """
+        return f"{self.prefix} {self.token}"
+
+    @property
+    def headers(self) -> dict[str, str]:
+        """Headers for doing a authenticated request.
+        
+        This will return a dict with a ``Authorization`` field.
+        """
+        return {
+            "Authorization": f"{self.prefix} {self.token}"
+        }

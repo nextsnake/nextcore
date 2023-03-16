@@ -124,6 +124,20 @@ HTTP reference
 .. autoclass:: RateLimitStorage
    :members:
 
+Authentication
+^^^^^^^^^^^^^^^
+.. autoclass:: BaseAuthentication
+   :members:
+
+.. autoclass:: BotAuthentication
+   :members:
+
+.. autoclass:: BearerAuthentication
+   :members:
+
+
+Bucket rate limiting
+^^^^^^^^^^^^^^^^^^^^^
 .. autoclass:: Bucket
    :members:
 
@@ -132,6 +146,9 @@ HTTP reference
 
 .. autoclass:: RequestSession
    :members:
+
+Global rate limiting
+^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: BaseGlobalRateLimiter
    :members:
