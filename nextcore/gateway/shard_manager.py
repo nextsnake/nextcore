@@ -331,10 +331,14 @@ class ShardManager:
                 return
 
             logger.info("Automatically re-scaling due to too few shards!")
-            
+
             route = Route("GET", "/gateway/bot")
 
-            response = await self._http_client.request(route, rate_limit_key=self.authentication.rate_limit_key, headers={"Authorization": str(self.authentication)})
+            response = await self._http_client.request(
+                route,
+                rate_limit_key=self.authentication.rate_limit_key,
+                headers={"Authorization": str(self.authentication)},
+            )
 
             gateway: GetGatewayBotData = await response.json()
             recommended_shard_count = gateway["shards"]
