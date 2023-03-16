@@ -37,8 +37,7 @@ from .shard import Shard
 if TYPE_CHECKING:
     from typing import Any, Coroutine, Final
 
-    from discord_typings import GatewayEvent
-    from discord_typings.gateway import UpdatePresenceData
+    from discord_typings import GatewayEvent, GetGatewayBotData, UpdatePresenceData
 
     from ..http import BotAuthentication, HTTPClient
 
@@ -332,8 +331,12 @@ class ShardManager:
                 return
 
             logger.info("Automatically re-scaling due to too few shards!")
+            
+            route = Route("GET", "/gateway/bot")
 
-            gateway = await self._http_client.get_gateway_bot(self.authentication)
+            response = await self._http_client.request(route, rate_limit_key=self.authentication.rate_limit_key, headers={"Authorization": str(self.authentication)})
+
+            gateway: GetGatewayBotData = await response.json()
             recommended_shard_count = gateway["shards"]
 
             await self.rescale_shards(recommended_shard_count)
