@@ -25,121 +25,36 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import TYPE_CHECKING
 
-from ...common import UNDEFINED, UndefinedType
-from .wrappers import (
-    ApplicationCommandsHTTPWrappers,
-    AuditLogHTTPWrappers,
-    ChannelHTTPWrappers,
-    EmojiHTTPWrappers,
-    GatewayHTTPWrappers,
-    GuildHTTPWrappers,
-    GuildScheduledEventHTTPWrappers,
-    GuildTemplateHTTPWrappers,
-    InviteHTTPWrappers,
-    OAuth2HTTPWrappers,
-    StageInstanceHTTPWrappers,
-    StickerHTTPWrappers,
-    UserHTTPWrappers,
-    VoiceHTTPWrappers,
-    WebhookHTTPWrappers,
-)
+from ..route import Route
 
 if TYPE_CHECKING:
-    from typing import Final, Literal
+    from typing import Any, Final
 
-    from aiohttp import ClientWebSocketResponse
+    from aiohttp import ClientResponse
 
 logger = getLogger(__name__)
 
 __all__: Final[tuple[str, ...]] = ("BaseHTTPClient",)
 
 
-class BaseHTTPClient(
-    ApplicationCommandsHTTPWrappers,
-    AuditLogHTTPWrappers,
-    ChannelHTTPWrappers,
-    EmojiHTTPWrappers,
-    GuildHTTPWrappers,
-    GuildScheduledEventHTTPWrappers,
-    GuildTemplateHTTPWrappers,
-    InviteHTTPWrappers,
-    StageInstanceHTTPWrappers,
-    StickerHTTPWrappers,
-    UserHTTPWrappers,
-    VoiceHTTPWrappers,
-    WebhookHTTPWrappers,
-    GatewayHTTPWrappers,
-    OAuth2HTTPWrappers,
-    ABC,
-):
-    """Abstract base class for HTTP clients.
+class BaseHTTPClient(ABC):
+    """Base class for HTTP clients.
 
-    This defines :meth:`AbstractHTTPClient._request` for HTTP endpoint wrappers to use.
+    This defines :meth:`BaseHTTPClient._request` for HTTP endpoint wrappers to use.
     """
 
     __slots__ = ()
 
     @abstractmethod
-    async def setup(self) -> None:
-        """Sets up the HTTP session
-
-        .. warning::
-            This has to be called before :meth:`BaseHTTPClient._request` or :meth:`BaseHTTPClient.connect_to_gateway`
-
-        Raises
-        ------
-        RuntimeError
-            This can only be called once
-        """
-        ...
-
-    @abstractmethod
-    async def close(self) -> None:
-        """Cleans up the HTTPClient
-
-        .. warning::
-            After calling this, the :class:`BaseHTTPClient` should no longer be used.
-        """
-        ...
-
-    @abstractmethod
-    async def connect_to_gateway(
+    async def request(
         self,
+        route: Route,
+        rate_limit_key: str | None,
         *,
-        version: Literal[6, 7, 8, 9, 10] | UndefinedType = UNDEFINED,
-        encoding: Literal["json", "etf"] | UndefinedType = UNDEFINED,
-        compress: Literal["zlib-stream"] | UndefinedType = UNDEFINED,
-    ) -> ClientWebSocketResponse:
-        """Connects to the gateway
-
-        **Example usage:**
-
-        .. code-block:: python
-
-            ws = await http_client.connect_to_gateway()
-
-
-        Parameters
-        ----------
-        version:
-            The major API version to use
-
-            .. hint::
-                It is a good idea to pin this to make sure something doesn't unexpectedly change
-        encoding:
-            Whether to use json or etf for payloads
-        compress:
-            Payload compression from data sent from Discord.
-
-        Raises
-        ------
-        RuntimeError
-            :meth:`BaseHTTPClient.setup` was not called yet.
-        RuntimeError
-            BaseHTTPClient was closed.
-
-        Returns
-        -------
-        aiohttp.ClientWebSocketResponse
-            The gateway websocket
-        """
+        headers: dict[str, str] | None = None,
+        bucket_priority: int = 0,
+        global_priority: int = 0,
+        wait: bool = True,
+        **kwargs: Any,
+    ) -> ClientResponse:
+        ...

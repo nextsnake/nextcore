@@ -30,7 +30,6 @@ from .bucket import *
 from .bucket_metadata import *
 from .client import *
 from .errors import *
-from .file import *
 from .global_rate_limiter import *
 from .rate_limit_storage import *
 from .request_session import *

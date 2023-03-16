@@ -61,16 +61,11 @@ class HTTPClient(BaseHTTPClient):
 
     **Example usage**
 
-    .. code-block:: python3
 
-        http_client = HTTPClient()
-        await http_client.setup()
-
-        gateway = await http_client.get_gateway()
-
-        print(gateway["url"])
-
-        await http_client.close()
+    .. literalinclude:: ../examples/http/get_gateway.py
+       :lines: 30-42
+       :language: python
+       :dedent: 4
 
     Parameters
     ----------
@@ -207,7 +202,7 @@ class HTTPClient(BaseHTTPClient):
         if self._session is not None:
             await self._session.close()
 
-    async def _request(
+    async def request(
         self,
         route: Route,
         rate_limit_key: str | None,
@@ -257,6 +252,8 @@ class HTTPClient(BaseHTTPClient):
             :meth:`HTTPClient.setup` was not called yet.
         RuntimeError
             HTTPClient was closed.
+        RateLimitedError
+            You are rate limited, and ``wait`` was set to :data:`False`
         CloudflareBanError
             You have been temporarily banned from the Discord API for 1 hour due to too many requests.
             Read the `documentation <https://discord.dev/opics/rate-limits#invalid-request-limit-aka-cloudflare-bans>`__ for more information.
@@ -272,8 +269,6 @@ class HTTPClient(BaseHTTPClient):
             Discord is having issues. Try again later.
         HTTPRequestStatusError
             A non-200 status code was returned.
-        RateLimitedError
-            You are rate limited, and ``wait`` was set to :data:`False`
         """
         # Make sure we have a session
         if self._session is None:

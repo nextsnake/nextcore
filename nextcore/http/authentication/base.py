@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
 __all__: Final[tuple[str, ...]] = ("BaseAuthentication",)
 
 
-class BaseAuthentication:
+class BaseAuthentication(ABC):
     """A wrapper around discord credentials.
 
     .. warning::
@@ -43,12 +44,22 @@ class BaseAuthentication:
         The bot's token.
     """
 
-    __slots__ = ("prefix", "token", "rate_limit_key")
+    __slots__ = ("prefix", "token")
 
-    def __init__(self, prefix: str, token: str) -> None:
-        self.prefix: str = prefix
-        self.token: str = token
-        self.rate_limit_key: str = token
+    @property
+    @abstractmethod
+    def rate_limit_key(self) -> str | None:
+        """The key used for rate limiting
 
-    def __str__(self) -> str:
-        return f"{self.prefix} {self.token}"
+        This is usually the prefix + token for for example ``Bot AABBCC.DDEEFF.GGHHII``
+        """
+        ...
+
+    @property
+    @abstractmethod
+    def headers(self) -> dict[str, str]:
+        """Headers used for making a authenticated request.
+
+        This may return a empty dict if headers is not used for authenticating this type of authentication.
+        """
+        ...
