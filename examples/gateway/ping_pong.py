@@ -57,7 +57,7 @@ async def on_message(message: MessageData):
 
         await http_client.request(
             route,
-            rate_limit_key=AUTHENTICATION.rate_limit_key, # See HTTP examples for a explanation of this!
+            rate_limit_key=AUTHENTICATION.rate_limit_key,  # See HTTP examples for a explanation of this!
             json={"content": "pong"},
             headers={"Authorization": str(AUTHENTICATION)},
         )

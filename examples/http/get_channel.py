@@ -20,24 +20,38 @@
 # DEALINGS IN THE SOFTWARE.
 
 import asyncio
+from os import environ
 
-from discord_typings import GetGatewayData
+from discord_typings import ChannelData
 
-from nextcore.http import HTTPClient, Route
+from nextcore.http import BotAuthentication, HTTPClient, Route
+
+# Constants
+AUTHENTICATION = BotAuthentication(environ["TOKEN"])
+CHANNEL_ID = environ["CHANNEL_ID"]
 
 
 async def main():
     http_client = HTTPClient()
     await http_client.setup()
 
-    # This can be found on https://discord.dev/topics/gateway#get-gateway
-    route = Route("GET", "/gateway")
+    # Documentation can be found on https://discord.dev/resources/channel#get-channel
+
+    # Making Routes is almost like a f-string.
+    # What you do is you take the route from the docs, "/channels/{channel.id}" for example
+    # And replace . with _ and pass parameters as kwargs
+    # Do note that you cannot replace {channel_id} directly with your channel id, that will cause issues.
+    route = Route("GET", "/channels/{channel_id}", channel_id=CHANNEL_ID)
 
     # No authentication is used, so rate_limit_key None here is equivilent of your IP.
-    response = await http_client.request(route, rate_limit_key=None)
-    gateway: GetGatewayData = await response.json()
+    response = await http_client.request(
+        route,
+        rate_limit_key=AUTHENTICATION.rate_limit_key,
+        headers={"Authorization": str(AUTHENTICATION)},
+    )
+    channel: ChannelData = await response.json()
 
-    print(gateway["url"])
+    print(channel.get("name"))  # DM channels do not have names
 
     await http_client.close()
 

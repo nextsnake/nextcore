@@ -63,7 +63,7 @@ class HTTPClient(BaseHTTPClient):
 
 
     .. literalinclude:: ../examples/http/get_gateway.py
-       :lines: 27-39
+       :lines: 30-42
        :language: python
        :dedent: 4
 
