@@ -64,10 +64,8 @@ class BotAuthentication(BaseAuthentication):
     @property
     def headers(self) -> dict[str, str]:
         """Headers for doing a authenticated request.
-        
+
         This will return a dict with a ``Authorization`` field.
         """
 
-        return {
-            "Authorization": f"{self.prefix} {self.token}"
-        }
+        return {"Authorization": f"{self.prefix} {self.token}"}

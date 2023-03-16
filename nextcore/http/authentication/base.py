@@ -21,8 +21,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Final
@@ -54,6 +54,7 @@ class BaseAuthentication(ABC):
         This is usually the prefix + token for for example ``Bot AABBCC.DDEEFF.GGHHII``
         """
         ...
+
     @property
     @abstractmethod
     def headers(self) -> dict[str, str]:
