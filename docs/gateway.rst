@@ -6,6 +6,9 @@ Gateway
 Gateway quickstart
 ------------------
 
+.. hint::
+   We recommend that you read the :ref:`Making requests` tutorial before this, as we will not explain HTTP concepts here.
+
 Basic ping-pong example
 ************************
 This will respond with ``pong`` every time someone sends ``ping`` in chat.
