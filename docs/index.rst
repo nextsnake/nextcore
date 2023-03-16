@@ -10,6 +10,7 @@ Welcome to Nextcore's documentation!
    common
 
    events
+   releasenotes
 
 .. toctree::
    :hidden:
