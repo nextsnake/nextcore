@@ -47,7 +47,7 @@ async def main():
     response = await http_client.request(
         route,
         rate_limit_key=AUTHENTICATION.rate_limit_key,
-        headers={"Authorization": str(AUTHENTICATION)},
+        headers=AUTHENTICATION.headers,
     )
     channel: ChannelData = await response.json()
 

@@ -74,7 +74,7 @@ The kwargs will be parameters to the path.
 
 .. code-block:: python3
 
-    route = Route("GET", "/channels/{channel_id}", channel_id=1234567890)
+    route = Route("GET", "/channels/{channel_id}", channel_id=CHANNEL_ID)
 
 Doing the request
 ^^^^^^^^^^^^^^^^^^
@@ -84,7 +84,7 @@ To do a request, you will need to use :meth:`HTTPClient.request`.
 
    response = await http_client.request(route,
         rate_limit_key=AUTHENTICATION.rate_limit_key,
-        headers={"Authorization": str(AUTHENTICATION)}
+        headers=AUTHENTICATION.headers
    )
 
 This will return a :class:`aiohttp.ClientResponse` for you to process.

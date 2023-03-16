@@ -164,7 +164,7 @@ class ShardManager:
                 response = await self._http_client.request(
                     route,
                     rate_limit_key=self.authentication.rate_limit_key,
-                    headers={"Authorization": str(self.authentication)},
+                    headers=self.authentication.headers,
                 )
                 connection_info = await response.json()
             except ClientConnectionError:
@@ -337,7 +337,7 @@ class ShardManager:
             response = await self._http_client.request(
                 route,
                 rate_limit_key=self.authentication.rate_limit_key,
-                headers={"Authorization": str(self.authentication)},
+                headers=self.authentication.headers,
             )
 
             gateway: GetGatewayBotData = await response.json()

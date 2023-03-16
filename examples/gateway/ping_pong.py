@@ -59,7 +59,7 @@ async def on_message(message: MessageData):
             route,
             rate_limit_key=AUTHENTICATION.rate_limit_key,
             json={"content": "pong"},
-            headers={"Authorization": str(AUTHENTICATION)},
+            headers=AUTHENTICATION.headers,
         )
 
 
