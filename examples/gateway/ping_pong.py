@@ -39,7 +39,10 @@ AUTHENTICATION = BotAuthentication(environ["TOKEN"])
 
 # Intents are a way to select what intents Discord should send to you.
 # For a list of intents see https://discord.dev/topics/gateway#gateway-intents
-INTENTS = 1 << 9 | 1 << 15  # Guild messages and message content intents.
+GUILD_MESSAGES_INTENT = 1 << 9
+MESSAGE_CONTENT_INTENT = 1 << 15
+
+INTENTS = GUILD_MESSAGES_INTENT | MESSAGE_CONTENT_INTENT # Guild messages and message content intents.
 
 
 # Create a HTTPClient and a ShardManager.
