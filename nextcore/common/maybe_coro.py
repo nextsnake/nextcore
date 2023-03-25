@@ -25,12 +25,16 @@ from asyncio import iscoroutine
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Final
+    from typing import Callable, Final, TypeVar
+    from typing_extensions import ParamSpec
+
+    P = ParamSpec("P")
+    T = TypeVar("T")
 
 __all__: Final[tuple[str, ...]] = ("maybe_coro",)
 
 
-async def maybe_coro(coro: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+async def maybe_coro(coro: Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
     """Execute a sync or async function
 
     Parameters
