@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from typing import Union  # pylint: disable=outdated-typing-union
     from typing import Any, Awaitable, Callable, Final
 
-    from typing_extensions import Unpack, ParamSpec, Concatenate
+    from typing_extensions import Concatenate, ParamSpec, Unpack
 
     T = TypeVar("T")
     P = ParamSpec("P")
@@ -151,7 +151,7 @@ class Dispatcher(Generic[EventNameT]):
         event_name:
             The event name to register the listener to. If this is :data:`None`, the listener is considered a global event.
         """
-        
+
         # EventCallback also includes GlobalEventCallback, so TODO decide if its better if we are verbose here and add GlobalEventCallback here too.
         def decorator(
             callback: EventCallback,
