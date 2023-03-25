@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from typing import Any, Final
 
 try:
-    import orjson
+    import orjson # type: ignore [reportMissingImports] # orjson is optional
 
     _has_orjson: bool = True
 except ImportError:
@@ -55,7 +55,7 @@ def json_loads(data: str) -> Any:
         data must be a :class:`str`
     """
     if _has_orjson:
-        return orjson.loads(data)
+        return orjson.loads(data) # type: ignore [reportUnknownMemberType] # this will never be ran if it does not exist
     return json.loads(data)
 
 
@@ -68,5 +68,5 @@ def json_dumps(to_dump: Any) -> str:
         The python object to dump.
     """
     if _has_orjson:
-        return orjson.dumps(to_dump).decode("utf-8")
+        return orjson.dumps(to_dump).decode("utf-8") # type: ignore [reportUnknownMemberType] # this will never be ran if this does not exist
     return json.dumps(to_dump)
