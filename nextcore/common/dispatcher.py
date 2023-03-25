@@ -36,17 +36,28 @@ if TYPE_CHECKING:
     from typing import Union  # pylint: disable=outdated-typing-union
     from typing import Any, Awaitable, Callable, Final
 
-    from typing_extensions import Unpack
+    from typing_extensions import Unpack, ParamSpec, Concatenate
 
     T = TypeVar("T")
+    P = ParamSpec("P")
 
+    # TODO: Typings for this is a giant mess. Please make me commented and nicer!
     ManyT = Tuple[T, ...]
 
-    EventCallback = Callable[[Unpack[ManyT[Any]]], Any]
-    GlobalEventCallback = Callable[[EventNameT, Unpack[ManyT[Any]]], Any]
+    EventCallback = Callable[..., Any]
+    EventCallbackT = TypeVar("EventCallbackT", bound=EventCallback)
 
-    WaitForCheck = Callable[[Unpack[ManyT[Any]]], Union[Awaitable[bool], bool]]
-    GlobalWaitForCheck = Callable[[EventNameT, Unpack[ManyT[Any]]], Union[Awaitable[bool], bool]]
+    # Global variant
+    # TODO: Make this weird hack around the typing system clearer
+    GlobalEventCallbackParent = Callable[Concatenate[EventNameT, P], Any]
+    GlobalEventCallback = GlobalEventCallbackParent[EventNameT, ...]
+
+    WaitForCheck = Callable[..., Union[Awaitable[bool], bool]]
+    # Global variant
+    # TODO: Make this weird hack around the typing system clearer
+    GlobalWaitForCheckParent = Callable[Concatenate[EventNameT, P], Union[Awaitable[bool], bool]]
+    GlobalWaitForCheck = GlobalWaitForCheckParent[EventNameT, ...]
+
     WaitForReturn = Tuple[Unpack[ManyT[Any]]]
     GlobalWaitForReturn = Tuple[EventNameT, Unpack[ManyT[Any]]]
 
@@ -111,7 +122,7 @@ class Dispatcher(Generic[EventNameT]):
 
     # Registration
     @overload
-    def listen(self, event_name: EventNameT) -> Callable[[EventCallback], EventCallback]:
+    def listen(self, event_name: EventNameT) -> Callable[[EventCallbackT], EventCallbackT]:
         ...
 
     @overload
@@ -122,7 +133,7 @@ class Dispatcher(Generic[EventNameT]):
 
     def listen(
         self, event_name: EventNameT | None = None
-    ) -> Callable[[EventCallback], EventCallback] | Callable[
+    ) -> Callable[[EventCallbackT], EventCallbackT] | Callable[
         [GlobalEventCallback[EventNameT]], GlobalEventCallback[EventNameT]
     ]:
         """Decorator to register a event listener.
@@ -140,20 +151,12 @@ class Dispatcher(Generic[EventNameT]):
         event_name:
             The event name to register the listener to. If this is :data:`None`, the listener is considered a global event.
         """
-
-        @overload
-        def decorator(callback: EventCallback) -> EventCallback:
-            ...
-
-        @overload
-        def decorator(callback: GlobalEventCallback[EventNameT]) -> GlobalEventCallback[EventNameT]:
-            ...
-
+        
+        # EventCallback also includes GlobalEventCallback, so TODO decide if its better if we are verbose here and add GlobalEventCallback here too.
         def decorator(
-            callback: EventCallback | GlobalEventCallback[EventNameT],
-        ) -> EventCallback | GlobalEventCallback[EventNameT]:
-            # This is fine due to @overload's
-            self.add_listener(callback, event_name)  # type: ignore
+            callback: EventCallback,
+        ) -> EventCallback:
+            self.add_listener(callback, event_name)
             return callback
 
         return decorator
