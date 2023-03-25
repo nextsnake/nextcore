@@ -22,15 +22,27 @@
 from __future__ import annotations
 
 from asyncio import iscoroutine
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload, cast
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Final
+    from typing import Callable, Final, TypeVar, Coroutine, Any
+    from typing_extensions import ParamSpec
+
+    P = ParamSpec("P")
+    T = TypeVar("T")
 
 __all__: Final[tuple[str, ...]] = ("maybe_coro",)
 
+@overload
+async def maybe_coro(coro: Callable[P, Coroutine[Any, Any, T]], *args: P.args, **kwargs: P.kwargs) -> T:
+    ...
 
-async def maybe_coro(coro: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+@overload
+async def maybe_coro(coro: Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
+    ...
+
+
+async def maybe_coro(coro: Callable[P, T | Coroutine[Any, Any, T]], *args: P.args, **kwargs: P.kwargs) -> T:
     """Execute a sync or async function
 
     Parameters
@@ -54,4 +66,5 @@ async def maybe_coro(coro: Callable[..., Any], *args: Any, **kwargs: Any) -> Any
         return await result
 
     # Not a async function, just return the result
+    result = cast("T", result) # The case where this is Coroutine[Any, Any, T] is handled by iscouroutine.
     return result
