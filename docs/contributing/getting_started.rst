@@ -30,6 +30,10 @@ Before submitting we recommend checking a few things
 
 1. You have linted your code. This can be done by running ``task lint``
 2. You have checked your code for type errors. This can be done by running ``pyright``
+
+.. hint::
+    Pyright needs to be installed. This can be done by using ``npm install --global pyright``
+
 3. Did you remember to write a changelog? See :external+towncrier:doc:`the towncrier tutorial <tutorial>`
 
 Do's and Dont's
