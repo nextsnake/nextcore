@@ -11,9 +11,9 @@ Gateway quickstart
 .. hint::
    The finished example can be found `here <https://github.com/nextsnake/nextcore/blob/master/examples/gateway/ping_pong.py>`__
 .. note::
-   We will use await at the top level here as its easier to explain. For your own code, please use a async function.
+   We will use await at the top level here as it's easier to explain. For your own code, please use an async function.
 
-   If you want a example of how it can be done in a async function, see the full example.
+   If you want a example of how it can be done in an async function, see the full example.
 
 Setting up
 ^^^^^^^^^^
@@ -33,7 +33,7 @@ Setting up
 
 Intents
 ^^^^^^^
-Discord uses intents to select what you want to be sent from the gateway to reduce wasted resources
+Discord uses intents to select what you want to be received from the gateway to reduce wasted resources.
 This is done via bitflags.
 
 A list of intents can be found on the `intents page <https://discord.dev/topics/gateway#gateway-intents>`__
@@ -46,20 +46,20 @@ In this example we want the message intent, and the message content intent.
    MESSAGE_CONTENT_INTENT = 1 << 15
 
 .. note::
-   This can also be stored in binary representation
+   This can also be stored in binary representation.
 
    .. code-block:: python3
 
         GUILD_MESSAGES_INTENT = 0b1000000000
         MESSAGE_CONTENT_INTENT = 0b1000000000000000
 
-If you want to use multiple intents, you can combine them using bitwise or (``|``)
+If you want to use multiple intents, you can combine them using bitwise or (``|``).
 
 .. code-block:: python3
 
    INTENTS = GUILD_MESSAGES_INTENT | MESSAGE_CONTENT_INTENT
 
-Now just give it to the :class:`ShardManager`
+Now just give it to the :class:`ShardManager`.
 
 .. code-block:: python3
    
@@ -97,7 +97,7 @@ Now just check if someone said ``ping`` and respond with ``pong``
         )
 
 .. hint::
-   Confused by this? Check out the :ref:`Making requests` tutorial
+   Confused by this? Check out the :ref:`Making requests` tutorial!
 
 Connecting to Discord
 ^^^^^^^^^^^^^^^^^^^^^
@@ -129,8 +129,8 @@ We can wait for a critical error before closing to fix this.
 
 Continuing
 ^^^^^^^^^^
-We suggest you look into `interactions & application commands <https://discord.dev/interactions/application-commands>`__ as your next topic.
-They allow you to add `buttons <https://discord.dev/interactions/message-components#buttons>`__ and `slash commands <https://discord.dev/interactions/application-commands#slash-commands>`__ and other cool stuff
+We suggest that you look into `interactions & application commands <https://discord.dev/interactions/application-commands>`__ as your next topic.
+They allow you to add `buttons <https://discord.dev/interactions/message-components#buttons>`__ and `slash commands <https://discord.dev/interactions/application-commands#slash-commands>`__ and other cool stuff!
     
 
 Gateway reference
