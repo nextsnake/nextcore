@@ -43,6 +43,17 @@ __all__: Final[tuple[str, ...]] = ("Bucket",)
 class Bucket:
     """A discord rate limit implementation around a bucket.
 
+    **Example usage**
+
+    .. code-block:: python3
+
+        bucket_metadata = BucketMetadata()
+        bucket = Bucket(bucket_metadata)
+
+        async with bucket.acquire():
+            # Do request
+            await bucket.update(remaining, reset_after_seconds, unlimited=False)
+
     Parameters
     ----------
     metadata:
@@ -52,6 +63,8 @@ class Bucket:
     ----------
     metadata:
         The metadata for the bucket.
+
+        This should also be updated with info that applies to all buckets like limit and if it is unlimited.
     """
 
     def __init__(self, metadata: BucketMetadata):
@@ -67,6 +80,14 @@ class Bucket:
     @asynccontextmanager
     async def acquire(self, *, priority: int = 0, wait: bool = True) -> AsyncIterator[None]:
         """Use a spot in the rate limit.
+
+        **Example usage**
+
+        .. code-block:: python3
+
+            async with bucket.acquire():
+                # Do request
+                await bucket.update(remaining, reset_after_seconds, unlimited=False)
 
         Parameters
         ----------
@@ -212,7 +233,10 @@ class Bucket:
 
     @property
     def dirty(self) -> bool:
-        """Whether the bucket is currently any different from a clean bucket created from a :class:`BucketMetadata`."""
+        """Whether the bucket is currently any different from a clean bucket created from a :class:`BucketMetadata`.
+        
+        This can be for example if any requests is being made, or if the bucket is waiting for a reset.
+        """
         if self._reserved:
             return True  # Currently doing a request.
 
