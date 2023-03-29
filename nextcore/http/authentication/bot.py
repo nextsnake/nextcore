@@ -34,6 +34,15 @@ __all__: Final[tuple[str, ...]] = ("BotAuthentication",)
 class BotAuthentication(BaseAuthentication):
     """A wrapper around bot token authentication.
 
+    **Example usage**
+
+    .. code-block:: python3
+        
+        authentication = BotAuthentication(os.environ["TOKEN"])
+        
+        route = Route("GET", "/gateway/bot")
+        await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers)
+
     Parameters
     ----------
     token:
@@ -58,6 +67,12 @@ class BotAuthentication(BaseAuthentication):
         """The key used for rate limiting
 
         This will be in the format ``Bot AABBCC.DDEEFF.GGHHII``
+        
+        **Example usage**
+
+        .. code-block:: python3
+            
+            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...) 
         """
         return f"{self.prefix} {self.token}"
 
@@ -66,6 +81,12 @@ class BotAuthentication(BaseAuthentication):
         """Headers for doing a authenticated request.
 
         This will return a dict with a ``Authorization`` field.
+
+        **Example usage**
+
+        .. code-block:: python3
+            
+            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...) 
         """
 
         return {"Authorization": f"{self.prefix} {self.token}"}

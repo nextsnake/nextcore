@@ -35,6 +35,8 @@ class RequestSession:
 
     Parameters
     ----------
+    priority:
+        The priority of the request. Lower is better!
     unlimited:
         If this request was made when the bucket was unlimited.
 
@@ -42,12 +44,14 @@ class RequestSession:
 
     Attributes
     ----------
+    pending_future:
+        The future that when set will execute the request.
+    priority:
+        The priority of the request. Lower is better!
     unlimited:
         If this request was made when the bucket was unlimited.
 
         This exists to make sure that there is no bad state when switching between unlimited and limited.
-    pending_future:
-        The future that when set will execute the request.
     """
 
     __slots__: Final[tuple[str, ...]] = ("pending_future", "priority", "unlimited")

@@ -35,6 +35,12 @@ __all__: Final[tuple[str, ...]] = ("Route",)
 class Route:
     """Metadata about a discord API route
 
+    **Example usage**
+    
+    .. code-block:: python3
+        
+        route = Route("GET", "/guilds/{guild_id}", guild_id=1234567890)
+
     Parameters
     ----------
     method:

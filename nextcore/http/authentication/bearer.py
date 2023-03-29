@@ -58,6 +58,12 @@ class BearerAuthentication(BaseAuthentication):
         """The key used for rate limiting
 
         This will be in the format ``Bearer AABBCCDDEEFFGGHHII``
+
+        **Example usage**
+
+        .. code-block:: python3
+            
+            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...) 
         """
         return f"{self.prefix} {self.token}"
 
@@ -66,5 +72,11 @@ class BearerAuthentication(BaseAuthentication):
         """Headers for doing a authenticated request.
 
         This will return a dict with a ``Authorization`` field.
+
+        **Example usage**
+
+        .. code-block:: python3
+            
+            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...) 
         """
         return {"Authorization": f"{self.prefix} {self.token}"}

@@ -7,7 +7,7 @@ Making requests
 ---------------
 
 .. hint::
-   The finished example can be found `here <https://github.com/nextsnake/nextcore/blob/master/examples/http/get_channel.py>`__
+   The finished example can be found `here <https://github.com/nextsnake/nextcore/tree/master/examples/http/get_channel>`__
 .. note::
    We will use await at the top level here as its easier to explain. For your own code, please use a async function.
 

@@ -32,6 +32,19 @@ __all__: Final[tuple[str, ...]] = ("BucketMetadata",)
 class BucketMetadata:
     """Metadata about a discord bucket.
 
+    **Example usage**
+
+    .. code-block:: python3
+        
+        bucket_metadata = BucketMetadata()
+        bucket = Bucket(bucket_metadata)
+
+        async with bucket.acquire():
+            ...
+
+            bucket_metadata.limit = 5 # This can be found in the response headers from discord.
+            bucket_metadata.unlimited = False
+
     Parameters
     ----------
     limit:
