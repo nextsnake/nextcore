@@ -35,7 +35,7 @@ from math import ceil
 from random import random
 from sys import platform
 from time import time
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, overload, cast
 
 from aiohttp import (
     ClientConnectorError,
@@ -367,11 +367,11 @@ class Shard:
 
         async for message in ws:
             # Aiohttp is not typing this? This should probably be fixed in aiohttp?
-            # Or is this a pyright bug?
-            message_type: WSMsgType = message.type  # pyright: ignore [reportUnknownMemberType]
+            # The type ignore is because we are accessing a Unknown type (message.type)
+            message_type = cast(WSMsgType, message.type) # pyright: ignore [reportUnknownMemberType]
             if message_type is WSMsgType.BINARY:
                 # Same issue as above here.
-                message_data: bytes = message.data  # pyright: ignore [reportUnknownMemberType]
+                message_data = cast(bytes, message.data)  # pyright: ignore [reportUnknownMemberType]
                 await self._on_raw_receive(message_data)
 
         # Generally having the exit condition outside is more consistent that having it inside.
