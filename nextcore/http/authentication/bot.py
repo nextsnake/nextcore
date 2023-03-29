@@ -37,9 +37,9 @@ class BotAuthentication(BaseAuthentication):
     **Example usage**
 
     .. code-block:: python3
-        
+
         authentication = BotAuthentication(os.environ["TOKEN"])
-        
+
         route = Route("GET", "/gateway/bot")
         await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers)
 
@@ -67,12 +67,12 @@ class BotAuthentication(BaseAuthentication):
         """The key used for rate limiting
 
         This will be in the format ``Bot AABBCC.DDEEFF.GGHHII``
-        
+
         **Example usage**
 
         .. code-block:: python3
-            
-            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...) 
+
+            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...)
         """
         return f"{self.prefix} {self.token}"
 
@@ -85,8 +85,8 @@ class BotAuthentication(BaseAuthentication):
         **Example usage**
 
         .. code-block:: python3
-            
-            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...) 
+
+            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...)
         """
 
         return {"Authorization": f"{self.prefix} {self.token}"}

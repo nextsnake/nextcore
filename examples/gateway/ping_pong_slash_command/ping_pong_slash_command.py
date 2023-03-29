@@ -39,7 +39,7 @@ AUTHENTICATION = BotAuthentication(environ["TOKEN"])
 
 # Intents are a way to select what intents Discord should send to you.
 # For a list of intents see https://discord.dev/topics/gateway#gateway-intents
-INTENTS = 0 # Guild messages and message content intents.
+INTENTS = 0  # Guild messages and message content intents.
 
 
 # Create a HTTPClient and a ShardManager.
@@ -51,20 +51,20 @@ shard_manager = ShardManager(AUTHENTICATION, INTENTS, http_client)
 @shard_manager.event_dispatcher.listen("INTERACTION_CREATE")
 async def on_interaction_create(interaction: InteractionCreateData):
     # Only accept application comamnds. See https://discord.dev/interactions/receiving-and-responding#interaction-object-interaction-type for a list of types
-    if interaction["type"] != 2: 
+    if interaction["type"] != 2:
         return
     # Only respond to the ping command
     if interaction["data"]["name"] != "ping":
         return
 
-    response = {
-        "type": 4,
-        "data": {
-            "content": "Pong!"
-        }
-    }
+    response = {"type": 4, "data": {"content": "Pong!"}}
 
-    route = Route("POST", "/interactions/{interaction_id}/{interaction_token}/callback", interaction_id=interaction["id"], interaction_token = interaction["token"])
+    route = Route(
+        "POST",
+        "/interactions/{interaction_id}/{interaction_token}/callback",
+        interaction_id=interaction["id"],
+        interaction_token=interaction["token"],
+    )
     # Authentication is interaction id and interaction token, not bot authenication
     await http_client.request(route, rate_limit_key=None, json=response)
 

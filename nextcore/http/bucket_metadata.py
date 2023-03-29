@@ -35,7 +35,7 @@ class BucketMetadata:
     **Example usage**
 
     .. code-block:: python3
-        
+
         bucket_metadata = BucketMetadata()
         bucket = Bucket(bucket_metadata)
 

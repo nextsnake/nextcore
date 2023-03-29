@@ -234,7 +234,7 @@ class Bucket:
     @property
     def dirty(self) -> bool:
         """Whether the bucket is currently any different from a clean bucket created from a :class:`BucketMetadata`.
-        
+
         This can be for example if any requests is being made, or if the bucket is waiting for a reset.
         """
         if self._reserved:

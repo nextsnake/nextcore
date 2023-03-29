@@ -37,7 +37,7 @@ class BaseAuthentication(ABC):
         This is a base class. You should probably use :class:`BotAuthentication` or :class:`BearerAuthentication` instead.
 
     **Example implementation**
-    
+
     .. this is relative to the docs directory
     .. literalinclude:: ../nextcore/http/authentication/bot.py
        :language: python3
@@ -59,11 +59,11 @@ class BaseAuthentication(ABC):
         """The key used for rate limiting
 
         This is usually the prefix + token for for example ``Bot AABBCC.DDEEFF.GGHHII``
-        
+
         **Example usage**
 
         .. code-block:: python3
-            
+
             await http_client.request(route, rate_limit_key=authentication.rate_limit_key, ...)
         """
         ...
@@ -78,8 +78,8 @@ class BaseAuthentication(ABC):
         **Example usage**
 
         .. code-block:: python3
-            
-            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...) 
+
+            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...)
 
         """
         ...

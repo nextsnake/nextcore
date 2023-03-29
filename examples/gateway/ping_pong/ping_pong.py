@@ -42,7 +42,7 @@ AUTHENTICATION = BotAuthentication(environ["TOKEN"])
 GUILD_MESSAGES_INTENT = 1 << 9
 MESSAGE_CONTENT_INTENT = 1 << 15
 
-INTENTS = GUILD_MESSAGES_INTENT | MESSAGE_CONTENT_INTENT # Guild messages and message content intents.
+INTENTS = GUILD_MESSAGES_INTENT | MESSAGE_CONTENT_INTENT  # Guild messages and message content intents.
 
 
 # Create a HTTPClient and a ShardManager.

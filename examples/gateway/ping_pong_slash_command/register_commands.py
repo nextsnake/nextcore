@@ -28,33 +28,38 @@ NOTE: This only needs to be run once per bot, and should be ran before the examp
 WARNING: This will remove all other commands
 """
 
-from __future__ import annotations # We want to use newer type hinting. If you are using python 3.9+ feel free to remove this.
+from __future__ import (  # We want to use newer type hinting. If you are using python 3.9+ feel free to remove this.
+    annotations,
+)
 
 import asyncio
 from os import environ
+
 from discord_typings import ApplicationCommandPayload
-from nextcore.http import BotAuthentication, Route, HTTPClient
+
+from nextcore.http import BotAuthentication, HTTPClient, Route
 
 # Constants
 AUTHENTICATION = BotAuthentication(environ["TOKEN"])
-APPLICATION_ID = environ["APPLICATION_ID"] # This should also usually be the same as your bots id.
-COMMANDS: list[ApplicationCommandPayload] = [ # TODO: Currently we have no TypedDict for this.
-    {
-        "name": "ping",
-        "description": "Responds with pong!"
-    }
+APPLICATION_ID = environ["APPLICATION_ID"]  # This should also usually be the same as your bots id.
+COMMANDS: list[ApplicationCommandPayload] = [  # TODO: Currently we have no TypedDict for this.
+    {"name": "ping", "description": "Responds with pong!"}
 ]
 
 http_client = HTTPClient()
+
 
 async def main() -> None:
     await http_client.setup()
 
     route = Route("PUT", "/applications/{application_id}/commands", application_id=APPLICATION_ID)
-    await http_client.request(route, rate_limit_key=AUTHENTICATION.rate_limit_key, headers=AUTHENTICATION.headers, json=COMMANDS)
+    await http_client.request(
+        route, rate_limit_key=AUTHENTICATION.rate_limit_key, headers=AUTHENTICATION.headers, json=COMMANDS
+    )
 
     print("Commands registered")
 
     await http_client.close()
+
 
 asyncio.run(main())

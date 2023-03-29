@@ -62,8 +62,8 @@ class BearerAuthentication(BaseAuthentication):
         **Example usage**
 
         .. code-block:: python3
-            
-            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...) 
+
+            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...)
         """
         return f"{self.prefix} {self.token}"
 
@@ -76,7 +76,7 @@ class BearerAuthentication(BaseAuthentication):
         **Example usage**
 
         .. code-block:: python3
-            
-            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...) 
+
+            await http_client.request(route, rate_limit_key=authentication.rate_limit_key, headers=authentication.headers, ...)
         """
         return {"Authorization": f"{self.prefix} {self.token}"}
