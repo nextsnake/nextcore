@@ -41,7 +41,7 @@ types-orjson = {version = "^3.6.2", optional = true}
 discord-typings = "^0.5.0"
 
 [tool.poetry.group.dev.dependencies]
-Sphinx = "^4.4.0"
+Sphinx = "^5.0.0"
 sphinx-copybutton = "^0.4.0"
 furo = "*" # CalVer, the version does not make sense to lock.
 isort = "^5.10.1"
