@@ -9,7 +9,7 @@ Gateway quickstart
 .. hint::
    We recommend that you read the :ref:`Making requests` tutorial before this, as we will not explain HTTP concepts here.
 .. hint::
-   The finished example can be found `here <https://github.com/nextsnake/nextcore/blob/master/examples/gateway/ping_pong.py>`__
+   The finished example can be found `here <https://github.com/nextsnake/nextcore/tree/master/examples/gateway/ping_pong>`__
 .. note::
    We will use await at the top level here as it's easier to explain. For your own code, please use an async function.
 
