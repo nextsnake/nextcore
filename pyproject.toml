@@ -41,9 +41,9 @@ types-orjson = {version = "^3.6.2", optional = true}
 discord-typings = "^0.5.0"
 
 [tool.poetry.group.dev.dependencies]
-Sphinx = "^4.4.0"
+Sphinx = "^5.0.0"
 sphinx-copybutton = "^0.4.0"
-furo = "^2022.1.2"
+furo = "*" # CalVer, the version does not make sense to lock.
 isort = "^5.10.1"
 black = "^22.6.0"
 pytest = "^6.2.5"
@@ -53,7 +53,7 @@ pytest-mock = "^3.7.0"
 pre-commit = "^2.18.1"
 sphinxext-opengraph = "^0.6.3"
 slotscheck = "^0.14.0"
-sphinx-inline-tabs = "^2022.1.2-beta.11"
+sphinx-inline-tabs = "*" # CalVer, the version does not make sense to lock.
 towncrier = "^22.12.0"
 
 [build-system]
