@@ -1,5 +1,8 @@
 .. currentmodule:: nextcore.gateway
 
+:og:title: Nextcore gateway documentation
+:og:description: Documentation for the gateway part of nextcore. This is for things like connecting as a bot and receiving messages.
+
 Gateway
 =======
 

@@ -1,5 +1,8 @@
 .. currentmodule:: nextcore.http
 
+:og:title: Nextcore HTTP documentation
+:og:description: Documentation for the HTTP part of nextcore. This is for things like making HTTP requests and HTTP specific rate limiting.
+
 HTTP
 ====
 

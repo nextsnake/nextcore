@@ -1,3 +1,6 @@
+:og:title: Nextcore contribution guide
+:og:description: Info about getting started helping out with the nextcore project!
+
 Contributing
 =============
 
