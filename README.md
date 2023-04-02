@@ -1,25 +1,41 @@
-<img alt="" src="docs/_static/logo.svg" width="30%" />
+<div align="center">
 
-# Nextcore
-A low level Discord API wrapper
-
-## Features
-### Speed
-We try to make the library as fast as possible, without compromising on readability of the code or features.  
-<video src="https://user-images.githubusercontent.com/35035079/172221406-b8d618e6-75fd-45d4-a470-62aeeab5bc0a.mp4" />
-
-### Modularity
-All the components can easily be swapped out with your own.
-
-### Control
-Nextcore offers fine-grained control over things most libraries don't support.  
+  <img alt="" src="docs/_static/logo.svg" width="180px"/>
   
-This currently includes:  
-- Setting priority for individual requests
-- Swapping out components
+  # Nextcore
+  <sub>A low level Discord API wrapper.</sub>
+  
+</div>
 
-## Examples
-### Ping pong
+### ✨ Features
+
+- #### Speed
+
+  We try to make the library as fast as possible, without compromising on readability of the code or features.
+  
+  <video src="https://user-images.githubusercontent.com/35035079/172221406-b8d618e6-75fd-45d4-a470-62aeeab5bc0a.mp4" />
+
+- #### Modularity
+
+  All the components can easily be swapped out with your own.
+
+- #### Control
+
+  Nextcore offers fine-grained control over things most libraries don't support.  
+  
+  This currently includes:  
+  - Setting priority for individual requests
+  - Swapping out components
+
+<br>
+
+<div align="center">
+
+  # Examples
+  
+</div>
+
+### 🏓 Ping pong
 ```py
 import asyncio
 from os import environ
@@ -68,7 +84,9 @@ async def main():
 asyncio.run(main())
 ```
 
-More examples can be seen in the [examples](examples/) directory.
+> More examples can be seen in the [examples](examples/) directory.
+
+<br>
 
 ## Contributing
 Want to help us out? Please read our [contributing](https://nextcore.readthedocs.io/en/latest/contributing/getting_started.html) docs.
