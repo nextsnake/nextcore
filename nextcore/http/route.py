@@ -50,9 +50,12 @@ class Route:
     ignore_global:
         If this route bypasses the global rate limit.
     guild_id:
+        Major parameters which will be included in ``parameters`` and count towards the rate limit.
     channel_id:
+        Major parameters which will be included in ``parameters`` and count towards the rate limit.
     webhook_id:
-    webhhook_token:
+        Major parameters which will be included in ``parameters`` and count towards the rate limit.
+    webhook_token:
         Major parameters which will be included in ``parameters`` and count towards the rate limit.
     parameters:
         The parameters of the route. These will be used to format the path.
