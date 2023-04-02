@@ -1,4 +1,5 @@
-![Nextsnake logo](docs/_static/logo.svg)
+<img alt="" src="docs/_static/logo.svg" width="30%" />
+
 # Nextcore
 A low level Discord API wrapper
 
