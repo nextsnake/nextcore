@@ -67,7 +67,7 @@ async def main():
 asyncio.run(main())
 ```
 
-More can be seen in the [examples](examples/) directory
+More examples can be seen in the [examples](examples/) directory.
 
 ## Contributing
 Want to help us out? Please read our [contributing](https://nextcore.readthedocs.io/en/latest/contributing/getting_started.html) docs.
