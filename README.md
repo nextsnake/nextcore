@@ -36,6 +36,8 @@
 </div>
 
 ### 🏓 Ping pong
+A simple "ping pong" example in nextcore.
+This will respond with "pong" each time someone sends "ping" in the chat.
 ```py
 import asyncio
 from os import environ
