@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img alt="" src="docs/_static/logo.svg" width="180px"/>
+  <img alt="" src="docs/_static/logo.svg" width="160px"/>
   
   # Nextcore
   <sub>A low level Discord API wrapper.</sub>
