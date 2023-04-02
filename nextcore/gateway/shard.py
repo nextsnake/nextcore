@@ -35,7 +35,7 @@ from math import ceil
 from random import random
 from sys import platform
 from time import time
-from typing import TYPE_CHECKING, overload, cast
+from typing import TYPE_CHECKING, cast, overload
 
 from aiohttp import (
     ClientConnectorError,
@@ -368,7 +368,7 @@ class Shard:
         async for message in ws:
             # Aiohttp is not typing this? This should probably be fixed in aiohttp?
             # The type ignore is because we are accessing a Unknown type (message.type)
-            message_type = cast(WSMsgType, message.type) # pyright: ignore [reportUnknownMemberType]
+            message_type = cast(WSMsgType, message.type)  # pyright: ignore [reportUnknownMemberType]
             if message_type is WSMsgType.BINARY:
                 # Same issue as above here.
                 message_data = cast(bytes, message.data)  # pyright: ignore [reportUnknownMemberType]
