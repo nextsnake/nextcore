@@ -1,5 +1,7 @@
 .. currentmodule:: nextcore.common
 
+:og:title: Nextcore common documentation
+:og:description: Documentation for the common part of nextcore. This is for things that does not neccesarily fit into any specific module in nextcore.
 
 Common
 ======

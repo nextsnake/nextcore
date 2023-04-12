@@ -1,3 +1,5 @@
+:og:description: A super fast low level Discord library for full control.
+
 Welcome to Nextcore's documentation!
 ====================================
 

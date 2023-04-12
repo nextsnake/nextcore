@@ -1,5 +1,7 @@
 .. currentmodule:: nextcore
 
+:og:title: Nextcore event reference
+:og:description: This gives you examples for some Dispatcher events.
 
 Events
 ======

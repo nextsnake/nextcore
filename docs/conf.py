@@ -54,6 +54,10 @@ intersphinx_mapping = {
     "towncrier": ("https://towncrier.readthedocs.io/en/stable", None),
 }
 
+# Opengraph
+ogp_image = "/_static/logo.svg"
+ogp_site_name = "Nextcore Documentation"
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
