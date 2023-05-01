@@ -97,7 +97,12 @@ class TimesPer:
             self._pending.put_nowait(item)
 
             logger.debug("Added request to queue with priority %s", priority)
-            await future
+            try:
+                await future
+            except CancelledError:
+                logger.debug("Cancelled .acquire, removing from queue.")
+                self._pending.queue.remove(item)
+                return
             logger.debug("Out of queue, doing request")
 
         self._in_progress += 1
