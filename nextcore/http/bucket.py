@@ -22,9 +22,9 @@
 from __future__ import annotations
 
 from asyncio import CancelledError, Event, get_running_loop
-from queue import PriorityQueue
 from contextlib import asynccontextmanager
 from logging import getLogger
+from queue import PriorityQueue
 from typing import TYPE_CHECKING, cast, overload
 
 from nextcore.common.errors import RateLimitedError

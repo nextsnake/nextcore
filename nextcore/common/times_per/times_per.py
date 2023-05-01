@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from asyncio import Future, CancelledError, get_running_loop
+from asyncio import CancelledError, Future, get_running_loop
 from contextlib import asynccontextmanager
 from logging import getLogger
 from queue import PriorityQueue
@@ -161,4 +161,3 @@ class TimesPer:
         # No need to clear this, as the .acquire function does it for us.
         for request in self._pending.queue:
             request.future.set_exception(CancelledError)
-

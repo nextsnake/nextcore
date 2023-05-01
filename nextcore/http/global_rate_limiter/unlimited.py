@@ -32,8 +32,8 @@ from nextcore.common.errors import RateLimitedError
 from .base import BaseGlobalRateLimiter
 
 if TYPE_CHECKING:
-    from typing import Final
     from asyncio import Task
+    from typing import Final
 
 __all__: Final[tuple[str, ...]] = ("UnlimitedGlobalRateLimiter",)
 
@@ -153,11 +153,10 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
         .. warning::
             Continued use of this instance will result in instability
         """
-        
+
         # No need to run .clear on this, as the .acquire function does it for us.
         for request in self._pending_requests:
             request.set_exception(CancelledError)
-        
+
         if self._async_update_task is not None:
             self._async_update_task.cancel()
-
