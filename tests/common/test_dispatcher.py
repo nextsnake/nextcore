@@ -47,6 +47,8 @@ async def test_listeners(event_name: str | None, func_sync: bool) -> None:
     with raises(AsyncioTimeoutError):
         await wait_for(got_response, timeout=0.1)
 
+    dispatcher.close()
+
 
 @mark.asyncio
 @mark.parametrize("event_name", [None, "test"])
@@ -77,6 +79,8 @@ async def test_listen(event_name: str | None, func_sync: bool) -> None:
 
     await dispatcher.dispatch("test")
     await wait_for(got_response, timeout=1)
+
+    dispatcher.close()
 
 
 @mark.asyncio
@@ -110,6 +114,7 @@ async def test_error_handler(event_name: str | None) -> None:
     with raises(AsyncioTimeoutError):
         await wait_for(got_response, timeout=0.1)
 
+    dispatcher.close()
 
 @mark.asyncio
 @mark.parametrize("event_name", [None, "test"])
@@ -139,6 +144,7 @@ async def test_default_error_handler(caplog, event_name: str | None) -> None:
     error_count = len([record for record in caplog.records if record.levelname == "ERROR"])
     assert error_count == 1
 
+    dispatcher.close()
 
 def test_remove_nonexistant_listener() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
@@ -149,6 +155,7 @@ def test_remove_nonexistant_listener() -> None:
     with raises(ValueError):
         dispatcher.remove_listener(sync_callback, "test")
 
+    dispatcher.close()
 
 @mark.asyncio
 @mark.parametrize("event_name", [None, "test"])
@@ -180,3 +187,5 @@ async def test_wait_for_handler(event_name: str | None, caplog) -> None:
     # Check for logging errors.
     error_count = len([record for record in caplog.records if record.levelname == "ERROR"])
     assert error_count == 0, "Logged errors where present"
+
+    dispatcher.close()
