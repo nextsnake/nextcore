@@ -21,7 +21,8 @@
 
 from __future__ import annotations
 
-from asyncio import Event, PriorityQueue, get_running_loop
+from asyncio import CancelledError, Event, get_running_loop
+from queue import PriorityQueue
 from contextlib import asynccontextmanager
 from logging import getLogger
 from typing import TYPE_CHECKING, cast, overload
@@ -247,3 +248,14 @@ class Bucket:
             return True  # Some edits to remaining has been done
 
         return False
+
+    async def close(self):
+        """Cleanup this instance.
+
+        This should be done when this instance is never going to be used anymore
+
+        .. warning::
+            Continued use of this instance will result in instability
+        """
+        for session in self._pending.queue:
+            session.pending_future.set_exception(CancelledError)

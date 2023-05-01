@@ -18,6 +18,8 @@ async def test_consecutive() -> None:
         async with bucket.acquire():
             await bucket.update(0, 0.1)
 
+    await bucket.close()
+
 
 async def use_bucket(bucket: Bucket) -> None:
     async with bucket.acquire():
@@ -36,6 +38,8 @@ async def test_concurrently() -> None:
     tasks = [use_bucket(bucket) for _ in range(3)]
     await asyncio.gather(*tasks)
 
+    await bucket.close()
+
 
 @mark.asyncio
 @match_time(0, 0.1)
@@ -46,6 +50,8 @@ async def test_failure_no_info() -> None:
     for _ in range(5):
         async with bucket.acquire():
             ...
+
+    await bucket.close()
 
 
 @mark.asyncio
@@ -59,6 +65,8 @@ async def test_failure_initial_info() -> None:
     for _ in range(3):
         async with bucket.acquire():
             ...
+
+    await bucket.close()
 
 
 @mark.asyncio
@@ -74,13 +82,18 @@ async def test_unlimited() -> None:
         async with bucket.acquire():
             ...
 
+    await bucket.close()
+
 
 # Dirty tests
-def test_clean_bucket_is_not_dirty() -> None:
+@mark.asyncio
+async def test_clean_bucket_is_not_dirty() -> None:
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
 
     assert not bucket.dirty, "Bucket was dirty on a clean bucket."
+
+    await bucket.close()
 
 
 @mark.asyncio
@@ -90,6 +103,8 @@ async def test_dirty_bucket_reserved() -> None:
 
     async with bucket.acquire():
         assert bucket.dirty, "Bucket was not dirty on a bucket that was reserved"
+
+    await bucket.close()
 
 
 @mark.asyncio
@@ -101,3 +116,5 @@ async def test_dirty_remaining_used() -> None:
         await bucket.update(0, 1)
 
     assert bucket.dirty, "Bucket was not dirty on a bucket that was used"
+
+    await bucket.close()
