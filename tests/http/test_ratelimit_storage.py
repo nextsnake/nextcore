@@ -68,12 +68,15 @@ async def test_stores_and_get_nextcore_id() -> None:
 
     nextcore_id = "abc123"
 
-    assert await storage.get_bucket_by_nextcore_id(nextcore_id) is None, "Bucket should not exist as it is not added yet"
+    assert (
+        await storage.get_bucket_by_nextcore_id(nextcore_id) is None
+    ), "Bucket should not exist as it is not added yet"
 
     await storage.store_bucket_by_nextcore_id(nextcore_id, bucket)
     assert await storage.get_bucket_by_nextcore_id(nextcore_id) is bucket, "Bucket was not stored"
 
     await storage.close()
+
 
 @mark.asyncio
 async def test_stores_and_get_discord_id() -> None:
@@ -84,7 +87,9 @@ async def test_stores_and_get_discord_id() -> None:
 
     discord_bucket_hash = "abc123"
 
-    assert await storage.get_bucket_by_discord_id(discord_bucket_hash) is None, "Bucket should not exist as it is not added yet"
+    assert (
+        await storage.get_bucket_by_discord_id(discord_bucket_hash) is None
+    ), "Bucket should not exist as it is not added yet"
 
     await storage.store_bucket_by_discord_id(discord_bucket_hash, bucket)
     assert await storage.get_bucket_by_discord_id(discord_bucket_hash) is bucket, "Bucket was not stored"
