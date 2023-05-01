@@ -116,6 +116,7 @@ async def test_error_handler(event_name: str | None) -> None:
 
     dispatcher.close()
 
+
 @mark.asyncio
 @mark.parametrize("event_name", [None, "test"])
 async def test_default_error_handler(caplog, event_name: str | None) -> None:
@@ -146,6 +147,7 @@ async def test_default_error_handler(caplog, event_name: str | None) -> None:
 
     dispatcher.close()
 
+
 def test_remove_nonexistant_listener() -> None:
     dispatcher: Dispatcher[str] = Dispatcher()
 
@@ -156,6 +158,7 @@ def test_remove_nonexistant_listener() -> None:
         dispatcher.remove_listener(sync_callback, "test")
 
     dispatcher.close()
+
 
 @mark.asyncio
 @mark.parametrize("event_name", [None, "test"])

@@ -15,10 +15,12 @@ async def test_does_gc_collect_unused_buckets() -> None:
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
 
-    await storage.store_bucket_by_nextcore_id(1, bucket)
+    nextcore_id = "abc123"
+
+    await storage.store_bucket_by_nextcore_id(nextcore_id, bucket)
     gc.collect()
 
-    assert await storage.get_bucket_by_nextcore_id(1) is None, "Bucket was not collected"
+    assert await storage.get_bucket_by_nextcore_id(nextcore_id) is None, "Bucket was not collected"
 
     await storage.close()
 
@@ -30,12 +32,14 @@ async def test_does_not_collect_dirty_buckets() -> None:
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
 
+    nextcore_id = "abc123"
+
     await bucket.update(0, 1)
 
-    await storage.store_bucket_by_nextcore_id(1, bucket)
+    await storage.store_bucket_by_nextcore_id(nextcore_id, bucket)
     gc.collect()
 
-    assert await storage.get_bucket_by_nextcore_id(1) is not None, "Bucket should not be collected"
+    assert await storage.get_bucket_by_nextcore_id(nextcore_id) is not None, "Bucket should not be collected"
 
     await storage.close()
 
@@ -53,6 +57,7 @@ async def test_cleans_up_gc_hook() -> None:
     print(gc.callbacks)
     assert len(gc.callbacks) == before_callbacks_length - 1, "Hook was not removed"
 
+
 # Getting and storing buckets
 @mark.asyncio
 async def test_stores_and_get_nextcore_id() -> None:
@@ -61,12 +66,17 @@ async def test_stores_and_get_nextcore_id() -> None:
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
 
-    assert await storage.get_bucket_by_nextcore_id(1) is None, "Bucket should not exist as it is not added yet"
+    nextcore_id = "abc123"
 
-    await storage.store_bucket_by_nextcore_id(1, bucket)
-    assert await storage.get_bucket_by_nextcore_id(1) is bucket, "Bucket was not stored"
+    assert (
+        await storage.get_bucket_by_nextcore_id(nextcore_id) is None
+    ), "Bucket should not exist as it is not added yet"
+
+    await storage.store_bucket_by_nextcore_id(nextcore_id, bucket)
+    assert await storage.get_bucket_by_nextcore_id(nextcore_id) is bucket, "Bucket was not stored"
 
     await storage.close()
+
 
 @mark.asyncio
 async def test_stores_and_get_discord_id() -> None:
@@ -75,9 +85,13 @@ async def test_stores_and_get_discord_id() -> None:
     metadata = BucketMetadata()
     bucket = Bucket(metadata)
 
-    assert await storage.get_bucket_by_discord_id("1") is None, "Bucket should not exist as it is not added yet"
+    discord_bucket_hash = "abc123"
 
-    await storage.store_bucket_by_discord_id("1", bucket)
-    assert await storage.get_bucket_by_discord_id("1") is bucket, "Bucket was not stored"
+    assert (
+        await storage.get_bucket_by_discord_id(discord_bucket_hash) is None
+    ), "Bucket should not exist as it is not added yet"
+
+    await storage.store_bucket_by_discord_id(discord_bucket_hash, bucket)
+    assert await storage.get_bucket_by_discord_id(discord_bucket_hash) is bucket, "Bucket was not stored"
 
     await storage.close()

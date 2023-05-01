@@ -28,6 +28,7 @@ async def test_should_sleep():
 
     await rate_limiter.close()
 
+
 def test_repr():
     repr(TimesPer(1, 1))
 
@@ -45,6 +46,7 @@ async def test_exception_undos():
             pass
 
     await rate_limiter.close()
+
 
 @mark.asyncio
 async def test_no_wait():
