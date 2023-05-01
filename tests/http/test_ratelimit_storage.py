@@ -20,6 +20,8 @@ async def test_does_gc_collect_unused_buckets() -> None:
 
     assert await storage.get_bucket_by_nextcore_id(1) is None, "Bucket was not collected"
 
+    await storage.close()
+
 
 @mark.asyncio
 async def test_does_not_collect_dirty_buckets() -> None:
@@ -35,6 +37,8 @@ async def test_does_not_collect_dirty_buckets() -> None:
 
     assert await storage.get_bucket_by_nextcore_id(1) is not None, "Bucket should not be collected"
 
+    await storage.close()
+
 
 @mark.asyncio
 async def test_cleans_up_gc_hook() -> None:
@@ -49,7 +53,6 @@ async def test_cleans_up_gc_hook() -> None:
     print(gc.callbacks)
     assert len(gc.callbacks) == before_callbacks_length - 1, "Hook was not removed"
 
-
 # Getting and storing buckets
 @mark.asyncio
 async def test_stores_and_get_nextcore_id() -> None:
@@ -63,6 +66,7 @@ async def test_stores_and_get_nextcore_id() -> None:
     await storage.store_bucket_by_nextcore_id(1, bucket)
     assert await storage.get_bucket_by_nextcore_id(1) is bucket, "Bucket was not stored"
 
+    await storage.close()
 
 @mark.asyncio
 async def test_stores_and_get_discord_id() -> None:
@@ -75,3 +79,5 @@ async def test_stores_and_get_discord_id() -> None:
 
     await storage.store_bucket_by_discord_id("1", bucket)
     assert await storage.get_bucket_by_discord_id("1") is bucket, "Bucket was not stored"
+
+    await storage.close()

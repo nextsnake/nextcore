@@ -14,6 +14,8 @@ async def test_should_not_sleep():
         async with rate_limiter.acquire():
             ...
 
+    await rate_limiter.close()
+
 
 @mark.asyncio
 @match_time(0.1, 0.01)
@@ -24,6 +26,7 @@ async def test_should_sleep():
         async with rate_limiter.acquire():
             ...
 
+    await rate_limiter.close()
 
 def test_repr():
     repr(TimesPer(1, 1))
@@ -41,6 +44,7 @@ async def test_exception_undos():
         except:
             pass
 
+    await rate_limiter.close()
 
 @mark.asyncio
 async def test_no_wait():
@@ -52,3 +56,5 @@ async def test_no_wait():
     with raises(RateLimitedError):
         async with rate_limiter.acquire(wait=False):
             ...
+
+    await rate_limiter.close()
