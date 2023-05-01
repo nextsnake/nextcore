@@ -32,6 +32,7 @@ from nextcore.common.errors import RateLimitedError
 from .base import BaseGlobalRateLimiter
 
 if TYPE_CHECKING:
+    from asyncio import Task
     from typing import Final
 
 __all__: Final[tuple[str, ...]] = ("UnlimitedGlobalRateLimiter",)
@@ -54,11 +55,12 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
         There is some extra delay due to ping due to this.
     """
 
-    __slots__ = ("_pending_requests", "_pending_release")
+    __slots__ = ("_pending_requests", "_pending_release", "_async_update_task")
 
     def __init__(self) -> None:
         self._pending_requests: deque[Future[None]] = deque()
         self._pending_release: Lock = Lock()
+        self._async_update_task: Task[None] | None = None
 
     @asynccontextmanager
     async def acquire(self, *, priority: int = 0, wait: bool = True) -> AsyncIterator[None]:
@@ -116,12 +118,17 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
                 The JSON field has more precision than the header.
         """
         logger.debug("Exceeded global rate-limit, however this is expected.")
-        create_task(self._async_update(retry_after))
+        if self._pending_release.locked():
+            logger.debug("Ignoring update because of already running update task.")
+            return
+        self._async_update_task = create_task(self._async_update(retry_after))
 
     async def _async_update(self, retry_after: float) -> None:
         """Async version of :attr:`UnlimitedGlobalRateLimiter`"""
+        # Sanity check due to race conditions
         if self._pending_release.locked():
             logger.debug("Ignoring update because of already running update task.")
+            self._async_update_task = None
             return
         async with self._pending_release:
             logger.debug("Resetting global lock after %ss", retry_after)
@@ -135,3 +142,21 @@ class UnlimitedGlobalRateLimiter(BaseGlobalRateLimiter):
 
             # Release it to do the request
             future.set_result(None)
+
+        self._async_update_task = None
+
+    async def close(self) -> None:
+        """Cleanup this instance.
+
+        This should be done when this instance is never going to be used anymore
+
+        .. warning::
+            Continued use of this instance will result in instability
+        """
+
+        # No need to run .clear on this, as the .acquire function does it for us.
+        for request in self._pending_requests:
+            request.set_exception(CancelledError)
+
+        if self._async_update_task is not None:
+            self._async_update_task.cancel()

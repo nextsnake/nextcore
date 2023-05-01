@@ -1,4 +1,4 @@
-from asyncio import create_task, sleep
+from asyncio import Task, create_task, sleep
 from logging import getLogger
 
 from pytest import mark
@@ -16,6 +16,8 @@ async def test_with_limit() -> None:
         async with rate_limiter.acquire():
             ...
 
+    await rate_limiter.close()
+
 
 @mark.asyncio
 @match_time(1, 0.1)
@@ -25,6 +27,8 @@ async def test_exceeds_limit() -> None:
     for _ in range(4):
         async with rate_limiter.acquire():
             ...
+
+    await rate_limiter.close()
 
 
 @mark.asyncio
@@ -36,13 +40,13 @@ async def test_exceeds_limit_concurrent() -> None:
             ...
 
     rate_limiter = LimitedGlobalRateLimiter(limit=4)
+    tasks: list[Task[None]] = []
 
     for i in range(9):
         logger.debug("Created task %s", i)
-        create_task(use_rate_limiter())
-    await sleep(1)  # No clue why .1 is needed here...
-    pending_requests = rate_limiter._pending.qsize()
-    assert pending_requests == 1, f"Expected 1 pending request, got {pending_requests}"
+        tasks.append(create_task(use_rate_limiter()))
+    await sleep(1.1)  # Add a bit of extra margin just in case
+    pending_requests = [task for task in tasks if not task.done()]
+    assert len(pending_requests) == 1, f"Expected 1 pending request, got {len(pending_requests)}"
 
-    # Cancel the remaining task for a clean output
-    rate_limiter._pending.get_nowait().future.set_result(None)
+    await rate_limiter.close()

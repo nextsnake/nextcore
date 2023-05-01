@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from asyncio import Future, get_running_loop
+from asyncio import CancelledError, Future, get_running_loop
 from contextlib import asynccontextmanager
 from logging import getLogger
 from queue import PriorityQueue
@@ -149,3 +149,15 @@ class TimesPer:
 
             loop = get_running_loop()
             loop.call_later(self.per, self._reset)
+
+    async def close(self) -> None:
+        """Cleanup this instance.
+
+        This should be done when this instance is never going to be used anymore
+
+        .. warning::
+            Continued use of this instance will result in instability
+        """
+        # No need to clear this, as the .acquire function does it for us.
+        for request in self._pending.queue:
+            request.future.set_exception(CancelledError)

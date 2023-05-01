@@ -17,6 +17,8 @@ async def test_no_limit() -> None:
         async with rate_limiter.acquire():
             ...
 
+    await rate_limiter.close()
+
 
 @mark.asyncio
 async def test_locking() -> None:
@@ -33,6 +35,8 @@ async def test_locking() -> None:
     with raises(AsyncioTimeoutError):
         await wait_for(use_lock(), timeout=0.1)
 
+    await rate_limiter.close()
+
 
 @mark.asyncio
 async def test_no_wait() -> None:
@@ -48,3 +52,5 @@ async def test_no_wait() -> None:
     with raises(RateLimitedError):
         async with rate_limiter.acquire(wait=False):
             ...
+
+    await rate_limiter.close()

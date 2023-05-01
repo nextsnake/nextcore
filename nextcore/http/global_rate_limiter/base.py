@@ -79,3 +79,14 @@ class BaseGlobalRateLimiter(ABC):
                 The JSON field has more precision than the header.
         """
         ...
+
+    @abstractmethod
+    async def close(self) -> None:
+        """Cleanup this instance.
+
+        This should be done when this instance is never going to be used anymore
+
+        .. warning::
+            Continued use of this instance may result in instability
+        """
+        ...

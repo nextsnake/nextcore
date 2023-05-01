@@ -163,7 +163,12 @@ class RateLimitStorage:
         # Remove the garbage collection callback
         gc.callbacks.remove(self._cleanup_buckets)
 
+        await self.global_rate_limiter.close()
+
         # Clear up the buckets
+        for bucket in self._nextcore_buckets.values():
+            await bucket.close()
+
         self._nextcore_buckets.clear()
 
         # Clear up the metadata
