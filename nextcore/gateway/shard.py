@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from asyncio import (
     FIRST_COMPLETED,
     Event,
@@ -279,6 +280,15 @@ class Shard:
 
             # Connection logic is continued in _handle_hello to account for that rate limits are defined there.
 
+            try:
+                await asyncio.wait_for(self.raw_dispatcher.wait_for(lambda _: True, GatewayOpcode.HELLO), timeout=10)
+            except asyncio.TimeoutError:
+                self._logger.warning("Timeout waiting for HELLO. Reconnecting!")
+
+                # A task is used here because of the connect lock.
+                # TODO: This can probably be done in a cleaner way?
+                asyncio.create_task(self.connect())
+
     async def _connect_to_gateway(self) -> ClientWebSocketResponse:
         async for _ in ExponentialBackoff(0.5, 2, 10):
             try:
@@ -396,7 +406,7 @@ class Shard:
                 disconnect_task = create_task(self.dispatcher.wait_for(lambda _: True, "disconnect"))
 
                 # Wait for the READY event to get sent or to get disconnected
-                done, pending = await wait([ready_task, disconnect_task], return_when=FIRST_COMPLETED, timeout=60)
+                done, pending = await wait([ready_task, disconnect_task], return_when=FIRST_COMPLETED, timeout=30)
 
                 # Cancel the ones that wasn't the first
                 for task in pending:
