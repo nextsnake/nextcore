@@ -36,6 +36,7 @@ from random import random
 from sys import platform
 from time import time
 from typing import TYPE_CHECKING, cast, overload
+import asyncio
 
 from aiohttp import (
     ClientConnectorError,
@@ -279,6 +280,15 @@ class Shard:
 
             # Connection logic is continued in _handle_hello to account for that rate limits are defined there.
 
+            try:
+                await asyncio.wait_for(self.raw_dispatcher.wait_for(lambda _: True, GatewayOpcode.HELLO), timeout=10)
+            except asyncio.TimeoutError:
+                self._logger.warning("Timeout waiting for HELLO. Reconnecting!")
+
+                # A task is used here because of the connect lock.
+                # TODO: This can probably be done in a cleaner way?
+                asyncio.create_task(self.connect())
+
     async def _connect_to_gateway(self) -> ClientWebSocketResponse:
         async for _ in ExponentialBackoff(0.5, 2, 10):
             try:
@@ -372,7 +382,7 @@ class Shard:
             if message_type is WSMsgType.BINARY:
                 # Same issue as above here.
                 message_data = cast(bytes, message.data)  # pyright: ignore [reportUnknownMemberType]
-                await self._on_raw_receive(message_data)
+                # await self._on_raw_receive(message_data)
 
         # Generally having the exit condition outside is more consistent that having it inside.
         self._logger.debug("Disconnected!")
@@ -396,7 +406,7 @@ class Shard:
                 disconnect_task = create_task(self.dispatcher.wait_for(lambda _: True, "disconnect"))
 
                 # Wait for the READY event to get sent or to get disconnected
-                done, pending = await wait([ready_task, disconnect_task], return_when=FIRST_COMPLETED, timeout=60)
+                done, pending = await wait([ready_task, disconnect_task], return_when=FIRST_COMPLETED, timeout=30)
 
                 # Cancel the ones that wasn't the first
                 for task in pending:
