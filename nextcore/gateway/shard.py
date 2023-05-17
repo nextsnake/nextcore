@@ -382,7 +382,7 @@ class Shard:
             if message_type is WSMsgType.BINARY:
                 # Same issue as above here.
                 message_data = cast(bytes, message.data)  # pyright: ignore [reportUnknownMemberType]
-                # await self._on_raw_receive(message_data)
+                await self._on_raw_receive(message_data)
 
         # Generally having the exit condition outside is more consistent that having it inside.
         self._logger.debug("Disconnected!")
