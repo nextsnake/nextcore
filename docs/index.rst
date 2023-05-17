@@ -10,15 +10,11 @@ Welcome to Nextcore's documentation!
    http
    gateway
    common
-
    events
+
    releasenotes
-
-.. toctree::
-   :hidden:
-
+   optimizing
    contributing/getting_started
-
 
 Quickstart
 ==========
