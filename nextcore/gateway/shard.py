@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from asyncio import (
     FIRST_COMPLETED,
     Event,
@@ -36,7 +37,6 @@ from random import random
 from sys import platform
 from time import time
 from typing import TYPE_CHECKING, cast, overload
-import asyncio
 
 from aiohttp import (
     ClientConnectorError,
