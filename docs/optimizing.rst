@@ -8,7 +8,7 @@ Heres a few tips to make your bot run a tiny bit faster, from most impact to lea
 
 Relative time
 -------------
-Nextcore uses your computers time to work with rate limits.
+Nextcore uses your computer's time to work with rate limits.
 
 By default this is on, however your clock might not be syncronized.
 
