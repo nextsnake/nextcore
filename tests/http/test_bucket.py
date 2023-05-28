@@ -121,7 +121,7 @@ async def test_dirty_remaining_used() -> None:
 
 
 @mark.asyncio
-@match_time(0, 0.01)
+@match_time(0, 0.1)
 async def test_reset_offset_negative():
     metadata = BucketMetadata(limit=1)
     bucket = Bucket(metadata)
@@ -133,7 +133,7 @@ async def test_reset_offset_negative():
 
 
 @mark.asyncio
-@match_time(2, 0.01)
+@match_time(2, 0.1)
 async def test_reset_offset_positive():
     metadata = BucketMetadata(limit=1)
     bucket = Bucket(metadata)

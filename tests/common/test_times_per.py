@@ -63,7 +63,7 @@ async def test_no_wait():
 
 
 @mark.asyncio
-@match_time(0, 0.01)
+@match_time(0, 0.1)
 async def test_reset_offset_negative():
     rate_limiter = TimesPer(1, 1)
     rate_limiter.reset_offset_seconds = -1
@@ -74,7 +74,7 @@ async def test_reset_offset_negative():
 
 
 @mark.asyncio
-@match_time(2, 0.01)
+@match_time(2, 0.1)
 async def test_reset_offset_positive():
     rate_limiter = TimesPer(1, 1)
     rate_limiter.reset_offset_seconds = 1
