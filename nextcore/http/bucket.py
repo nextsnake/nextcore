@@ -72,7 +72,15 @@ class Bucket:
         This will be added to the reset time, so for example a offset of ``1`` will make resetting 1 second slower.
     """
 
-    __slots__ = ("metadata", "reset_offset_seconds", "_remaining", "_pending", "_reserved", "_resetting", "_can_do_blind_request")
+    __slots__ = (
+        "metadata",
+        "reset_offset_seconds",
+        "_remaining",
+        "_pending",
+        "_reserved",
+        "_resetting",
+        "_can_do_blind_request",
+    )
 
     def __init__(self, metadata: BucketMetadata):
         self.metadata: BucketMetadata = metadata
