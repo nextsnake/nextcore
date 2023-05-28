@@ -66,10 +66,26 @@ class Bucket:
         The metadata for the bucket.
 
         This should also be updated with info that applies to all buckets like limit and if it is unlimited.
+    reset_offset_seconds:
+        How much the resetting should be offset to account for processing/networking delays.
+
+        This will be added to the reset time, so for example a offset of ``1`` will make resetting 1 second slower.
     """
+
+    __slots__ = (
+        "metadata",
+        "reset_offset_seconds",
+        "_remaining",
+        "_pending",
+        "_reserved",
+        "_resetting",
+        "_can_do_blind_request",
+        "__weakref__",
+    )
 
     def __init__(self, metadata: BucketMetadata):
         self.metadata: BucketMetadata = metadata
+        self.reset_offset_seconds: float = 0
         self._remaining: int | None = None  # None signifies unlimited or not used yet (due to a optimization)
         self._pending: PriorityQueue[RequestSession] = PriorityQueue()
         self._reserved: list[RequestSession] = []
@@ -209,7 +225,7 @@ class Bucket:
             # Call the reset callback (after the reset duration)
             reset_after = cast(float, reset_after)
             loop = get_running_loop()
-            loop.call_later(reset_after, self._reset_callback)
+            loop.call_later(reset_after + self.reset_offset_seconds, self._reset_callback)
 
     def _reset_callback(self) -> None:
         self._resetting = False  # Allow future resets

@@ -104,7 +104,6 @@ class ShardManager:
         "_http_client",
     )
 
-    # TODO: Fix typehints in the docstring for shard_ids
     def __init__(
         self,
         authentication: BotAuthentication,

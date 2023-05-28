@@ -118,3 +118,27 @@ async def test_dirty_remaining_used() -> None:
     assert bucket.dirty, "Bucket was not dirty on a bucket that was used"
 
     await bucket.close()
+
+
+@mark.asyncio
+@match_time(0, 0.1)
+async def test_reset_offset_negative():
+    metadata = BucketMetadata(limit=1)
+    bucket = Bucket(metadata)
+    bucket.reset_offset_seconds = -1
+
+    for _ in range(100):
+        async with bucket.acquire():
+            await bucket.update(0, 1)
+
+
+@mark.asyncio
+@match_time(2, 0.1)
+async def test_reset_offset_positive():
+    metadata = BucketMetadata(limit=1)
+    bucket = Bucket(metadata)
+    bucket.reset_offset_seconds = 1
+
+    for _ in range(2):
+        async with bucket.acquire():
+            await bucket.update(0, 1)
