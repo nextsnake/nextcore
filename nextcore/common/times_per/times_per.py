@@ -47,14 +47,25 @@ class TimesPer:
         The amount of times the rate limiter can be used
     per:
         How often this resets in seconds
+    Attributes
+    ----------
+    limit:
+        The amount of times the rate limiter can be used
+    per:
+        How often this resets in seconds
+    reset_offset_seconds:
+        How much the resetting should be offset to account for processing/networking delays.
+
+        This will be added to the reset time, so for example a offset of ``1`` will make resetting 1 second slower.
     """
 
-    __slots__ = ("limit", "per", "remaining", "_pending", "_in_progress", "_pending_reset")
+    __slots__ = ("limit", "per", "remaining", "reset_offset_seconds", "_pending", "_in_progress", "_pending_reset")
 
     def __init__(self, limit: int, per: float) -> None:
         self.limit: int = limit
         self.per: float = per
         self.remaining: int = limit
+        self.reset_offset_seconds: float = 0
         self._pending: PriorityQueue[PriorityQueueContainer] = PriorityQueue()
         self._in_progress: int = 0
         self._pending_reset: bool = False
@@ -126,7 +137,7 @@ class TimesPer:
             if not self._pending_reset:
                 self._pending_reset = True
                 loop = get_running_loop()
-                loop.call_later(self.per, self._reset)
+                loop.call_later(self.per + self.reset_offset_seconds, self._reset)
 
             self._in_progress -= 1
 
@@ -153,7 +164,7 @@ class TimesPer:
             self._pending_reset = True
 
             loop = get_running_loop()
-            loop.call_later(self.per, self._reset)
+            loop.call_later(self.per + self.reset_offset_seconds, self._reset)
 
     async def close(self) -> None:
         """Cleanup this instance.

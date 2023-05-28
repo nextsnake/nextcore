@@ -60,3 +60,23 @@ async def test_no_wait():
             ...
 
     await rate_limiter.close()
+
+@mark.asyncio
+@match_time(0, .01)
+async def test_reset_offset_negative():
+    rate_limiter = TimesPer(1, 1)
+    rate_limiter.reset_offset_seconds = -1
+
+    for _ in range(100):
+        async with rate_limiter.acquire():
+            ...
+
+@mark.asyncio
+@match_time(2, .01)
+async def test_reset_offset_positive():
+    rate_limiter = TimesPer(1, 1)
+    rate_limiter.reset_offset_seconds = 1
+
+    for _ in range(2):
+        async with rate_limiter.acquire():
+            ...
