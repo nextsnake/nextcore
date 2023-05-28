@@ -80,7 +80,7 @@ class Bucket:
         "_reserved",
         "_resetting",
         "_can_do_blind_request",
-        "__weakref__"
+        "__weakref__",
     )
 
     def __init__(self, metadata: BucketMetadata):

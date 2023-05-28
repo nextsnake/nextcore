@@ -103,6 +103,7 @@ class ShardManager:
         "_identify_rate_limits",
         "_http_client",
     )
+
     def __init__(
         self,
         authentication: BotAuthentication,
