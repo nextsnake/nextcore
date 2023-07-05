@@ -2,7 +2,7 @@
 name = "nextcore"
 version = "2.0.0"
 description = "A low level Discord API wrapper"
-authors = ["nextcore developers"]
+authors = ["tag-epic"]
 license = "MIT"
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -17,10 +17,10 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed"
 ]
-readme = "README.md"
-homepage = "https://nextcord.dev" # TODO: Replace this?
+readme = "pypi-README.md"
+#homepage = "https://nextcord.dev" # TODO: Replace this?
 repository = "https://github.com/nextsnake/nextcore"
-documentation = "https://docs.nextcord.gay" # TODO: Replace this
+documentation = "https://nextcore.readthedocs.io"
 keywords = ["discord", "bot", "wrapper", "api"]
 packages = [
     { include = "nextcore" }
@@ -28,6 +28,7 @@ packages = [
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/nextsnake/nextcore/issues"
+"Discord" = "https://discord.gg/3RFUm3eP5c"
 
 [tool.poetry.dependencies]
 python = "^3.8"
