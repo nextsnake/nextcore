@@ -1,0 +1,26 @@
+name: Release
+on:
+  release:
+    types: ["created"]
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write
+
+jobs:
+  release:
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install dependencies
+        run: |
+          poetry install --no-root
+      - name: Build
+        run: |
+          poetry build
+      - name: Publish release
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+
