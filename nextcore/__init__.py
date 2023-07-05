@@ -26,5 +26,5 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Final
 
-__version__: Final[str] = "1.0.0a"
+__version__: Final[str] = "2.0.0"
 __all__: Final[tuple[str, ...]] = ("__version__",)

@@ -1,11 +1,10 @@
 [tool.poetry]
 name = "nextcore"
-version = "1.0.0a"
+version = "2.0.0"
 description = "A low level Discord API wrapper"
 authors = ["nextcore developers"]
 license = "MIT"
 classifiers = [
-    "Private :: Do Not Upload",
     "Development Status :: 3 - Alpha",
     "Framework :: AsyncIO",
     "Framework :: aiohttp",
