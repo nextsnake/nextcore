@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "nextcore"
-copyright = "2022 nextcore developers"
-author = "nextcore developers"
+copyright = "2022 tag-epic"
+author = "tag-epic"
 
 
 # -- General configuration ---------------------------------------------------
