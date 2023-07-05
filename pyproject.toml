@@ -55,6 +55,7 @@ sphinxext-opengraph = "^0.6.3"
 slotscheck = "^0.14.0"
 sphinx-inline-tabs = "*" # CalVer, the version does not make sense to lock.
 towncrier = "^22.12.0"
+style-guide = {git = "https://github.com/nextsnake/style-guide"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
