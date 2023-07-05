@@ -46,14 +46,17 @@ from typing import cast
 from discord_typings import MessageData
 
 from nextcore.gateway import ShardManager
-from nextcore.http import BotAuthentication, HTTPClient
+from nextcore.http import BotAuthentication, HTTPClient, Route
 
 # Constants
 AUTHENTICATION = BotAuthentication(environ["TOKEN"])
 
 # Intents are a way to select what intents Discord should send to you.
 # For a list of intents see https://discord.dev/topics/gateway#gateway-intents
-INTENTS = 1 << 9 | 1 << 15  # Guild messages and message content intents.
+GUILD_MESSAGES_INTENT = 1 << 9
+MESSAGE_CONTENT_INTENT = 1 << 15
+
+INTENTS = GUILD_MESSAGES_INTENT | MESSAGE_CONTENT_INTENT  # Guild messages and message content intents.
 
 
 # Create a HTTPClient and a ShardManager.
@@ -67,7 +70,14 @@ async def on_message(message: MessageData):
     # This function will be called every time a message is sent.
     if message["content"] == "ping":
         # Send a pong message to respond.
-        await http_client.create_message(AUTHENTICATION, message["channel_id"], content="pong")
+        route = Route("POST", "/channels/{channel_id}/messages", channel_id=message["channel_id"])
+
+        await http_client.request(
+            route,
+            rate_limit_key=AUTHENTICATION.rate_limit_key,
+            json={"content": "pong"},
+            headers=AUTHENTICATION.headers,
+        )
 
 
 async def main():
@@ -78,7 +88,7 @@ async def main():
     await shard_manager.connect()
 
     # Raise a error and exit whenever a critical error occurs
-    error = await shard_manager.dispatcher.wait_for(lambda: True, "critical")
+    (error,) = await shard_manager.dispatcher.wait_for(lambda: True, "critical")
 
     raise cast(Exception, error)
 
