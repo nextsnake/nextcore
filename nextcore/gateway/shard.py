@@ -133,6 +133,10 @@ class Shard:
         A value between 50 and 250 that determines how many members a guild needs for the gateway to stop sending offline members in the guild member list.
     library_name:
         The name of the library that is using this gateway. This should be set if you are making your own library on top of nextcore.
+    connected:
+        When this shard is connected to the gateway, but not identified yet.
+
+        This also requires the gateway to send the `HELLO <https://discord.dev/topics/gateway-events#hello>` event, as rate-limiters are not setup yet.
     ready:
         Fires when the gateway has connected and received the READY event.
     raw_dispatcher:
@@ -157,6 +161,7 @@ class Shard:
         "presence",
         "large_threshold",
         "library_name",
+        "connected",
         "ready",
         "raw_dispatcher",
         "event_dispatcher",
@@ -200,6 +205,7 @@ class Shard:
         self.library_name: str = library_name
 
         # Publics
+        self.connected: Event = Event()
         self.ready: Event = Event()
         self.raw_dispatcher: Dispatcher[int] = Dispatcher()
         self.event_dispatcher: Dispatcher[str] = Dispatcher()
@@ -281,7 +287,7 @@ class Shard:
             # Connection logic is continued in _handle_hello to account for that rate limits are defined there.
 
             try:
-                await asyncio.wait_for(self.raw_dispatcher.wait_for(lambda _: True, GatewayOpcode.HELLO), timeout=10)
+                await asyncio.wait_for(self.connected.wait(), timeout=10)
             except asyncio.TimeoutError:
                 self._logger.warning("Timeout waiting for HELLO. Reconnecting!")
 
@@ -328,6 +334,7 @@ class Shard:
                 await self._ws.close(code=999)
         self._ws = None  # Clear it to save some ram
         self._send_rate_limit = None  # No longer applies
+        self.connected.clear()
 
     @property
     def latency(self) -> float:
@@ -510,6 +517,7 @@ class Shard:
             await self.event_dispatcher.dispatch(dispatch_data["t"], dispatch_data["d"])
 
     async def _on_disconnect(self, ws: ClientWebSocketResponse) -> None:
+        self.connected.clear()
         self.ready.clear()
 
         close_code = ws.close_code
@@ -524,6 +532,8 @@ class Shard:
     # Raw handlers
     # These should be prefixed by handle_ to avoid confusiuon with loop callbacks
     async def _handle_hello(self, data: HelloEvent) -> None:
+        self.connected.set()
+
         # Start heartbeating
         heartbeat_interval = data["d"]["heartbeat_interval"] / 1000  # Convert from ms to seconds
 
