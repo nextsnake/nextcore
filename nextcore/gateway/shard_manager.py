@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from asyncio import CancelledError, gather, get_running_loop
+from asyncio import CancelledError, Task, gather, get_running_loop
 from collections import defaultdict
 from logging import getLogger
 from typing import TYPE_CHECKING
@@ -188,8 +188,10 @@ class ShardManager:
         else:
             shard_ids = self.shard_ids
 
+        connect_tasks: list[Task[None]] = []
         for shard_id in shard_ids:
-            shard = self._spawn_shard(shard_id, self._active_shard_count)
+            shard, connect_task = self._spawn_shard(shard_id, self._active_shard_count)
+            connect_tasks.append(connect_task)
 
             # Register event listeners
             shard.raw_dispatcher.add_listener(self._on_raw_shard_receive)
@@ -200,7 +202,9 @@ class ShardManager:
 
             self.active_shards.append(shard)
 
-    def _spawn_shard(self, shard_id: int, shard_count: int) -> Shard:
+        await gather(*connect_tasks)
+
+    def _spawn_shard(self, shard_id: int, shard_count: int) -> tuple[Shard, Task[None]]:
         assert self.max_concurrency is not None, "max_concurrency is not set. This is set in connect"
         rate_limiter = self._identify_rate_limits[shard_id % self.max_concurrency]
 
@@ -216,9 +220,9 @@ class ShardManager:
 
         # Here we lazy connect the shard. This gives us a bit more speed when connecting large sets of shards.
         loop = get_running_loop()
-        loop.create_task(shard.connect())
+        task = loop.create_task(shard.connect())
 
-        return shard
+        return (shard, task)
 
     async def rescale_shards(self, shard_count: int, shard_ids: list[int] | None = None) -> None:
         """Change the shard count without restarting

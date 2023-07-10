@@ -177,6 +177,8 @@ class Shard:
         "_logger",
         "_received_heartbeat_ack",
         "_http_client",
+        "_receive_task",
+        "_heartbeat_task",
         "_heartbeat_sent_at",
         "_latency",
     )
@@ -228,6 +230,8 @@ class Shard:
         self._logger: Logger = getLogger(f"{__name__}.{self.shard_id}")
         self._received_heartbeat_ack: bool = True
         self._http_client: HTTPClient = http_client  # TODO: Should this be private?
+        self._receive_task: asyncio.Task[None] | None = None
+        self._heartbeat_task: asyncio.Task[None] | None = None
 
         # Latency
         self._heartbeat_sent_at: float | None = None
@@ -282,7 +286,7 @@ class Shard:
             self._received_heartbeat_ack = True
             self._ws = ws  # Use the new connection
 
-            create_task(self._receive_loop())
+            self._receive_task = create_task(self._receive_loop())
 
             # Connection logic is continued in _handle_hello to account for that rate limits are defined there.
 
@@ -334,6 +338,19 @@ class Shard:
                 await self._ws.close(code=999)
         self._ws = None  # Clear it to save some ram
         self._send_rate_limit = None  # No longer applies
+
+        # safely stop running tasks
+
+        if self._receive_task is not None:
+            self._receive_task.cancel()
+            await self._receive_task
+            self._receive_task = None
+
+        if self._heartbeat_task is not None:
+            self._heartbeat_task.cancel()
+            await self._heartbeat_task
+            self._heartbeat_task = None
+
         self.connected.clear()
 
     @property
@@ -538,7 +555,7 @@ class Shard:
         heartbeat_interval = data["d"]["heartbeat_interval"] / 1000  # Convert from ms to seconds
 
         loop = get_running_loop()
-        loop.create_task(self._heartbeat_loop(heartbeat_interval))
+        self._heartbeat_task = loop.create_task(self._heartbeat_loop(heartbeat_interval))
 
         # Create a rate limiter
         times, per = self._GATEWAY_SEND_RATE_LIMITS
