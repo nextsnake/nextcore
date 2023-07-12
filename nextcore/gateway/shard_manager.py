@@ -27,6 +27,7 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 from aiohttp import ClientConnectionError
+from anyio import create_task_group
 
 from ..common import Dispatcher, TimesPer
 from ..http import Route
@@ -188,23 +189,22 @@ class ShardManager:
         else:
             shard_ids = self.shard_ids
 
-        connect_tasks: list[Task[None]] = []
-        for shard_id in shard_ids:
-            shard, connect_task = self._spawn_shard(shard_id, self._active_shard_count)
-            connect_tasks.append(connect_task)
+        async with create_task_group() as tg:
+            for shard_id in shard_ids:
+                shard = self._spawn_shard(shard_id, self._active_shard_count)
+                # Here we lazy connect the shard. This gives us a bit more speed when connecting large sets of shards.
+                await tg.spawn(shard.connect)
 
-            # Register event listeners
-            shard.raw_dispatcher.add_listener(self._on_raw_shard_receive)
-            shard.event_dispatcher.add_listener(self._on_shard_dispatch)
-            shard.dispatcher.add_listener(self._on_shard_critical, "critical")
+                # Register event listeners
+                shard.raw_dispatcher.add_listener(self._on_raw_shard_receive)
+                shard.event_dispatcher.add_listener(self._on_shard_dispatch)
+                shard.dispatcher.add_listener(self._on_shard_critical, "critical")
 
-            logger.info("Added shard event listeners")
+                logger.info("Added shard event listeners")
 
-            self.active_shards.append(shard)
+                self.active_shards.append(shard)
 
-        await gather(*connect_tasks)
-
-    def _spawn_shard(self, shard_id: int, shard_count: int) -> tuple[Shard, Task[None]]:
+    def _spawn_shard(self, shard_id: int, shard_count: int) -> Shard:
         assert self.max_concurrency is not None, "max_concurrency is not set. This is set in connect"
         rate_limiter = self._identify_rate_limits[shard_id % self.max_concurrency]
 
@@ -218,11 +218,7 @@ class ShardManager:
             presence=self.presence,
         )
 
-        # Here we lazy connect the shard. This gives us a bit more speed when connecting large sets of shards.
-        loop = get_running_loop()
-        task = loop.create_task(shard.connect())
-
-        return (shard, task)
+        return shard
 
     async def rescale_shards(self, shard_count: int, shard_ids: list[int] | None = None) -> None:
         """Change the shard count without restarting
