@@ -24,13 +24,15 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import TYPE_CHECKING
+from nextcore.common import UNDEFINED
 
 from ..route import Route
 
 if TYPE_CHECKING:
-    from typing import Any, Final
+    from typing import Any, Final, Literal
+    from nextcore.common import UndefinedType
 
-    from aiohttp import ClientResponse
+    from aiohttp import ClientResponse, ClientWebSocketResponse
 
 logger = getLogger(__name__)
 
@@ -57,4 +59,81 @@ class BaseHTTPClient(ABC):
         wait: bool = True,
         **kwargs: Any,
     ) -> ClientResponse:
+        ...
+
+    @abstractmethod
+    async def connect_to_gateway(
+        self,
+        *,
+        version: Literal[6, 7, 8, 9, 10] | UndefinedType = UNDEFINED,
+        encoding: Literal["json", "etf"] | UndefinedType = UNDEFINED,
+        compress: Literal["zlib-stream"] | UndefinedType = UNDEFINED,
+    ) -> ClientWebSocketResponse:
+        """Connects to the gateway
+
+        **Example usage:**
+
+        .. code-block:: python
+
+            ws = await http_client.connect_to_gateway()
+
+
+        Parameters
+        ----------
+        version:
+            The major API version to use
+
+            .. hint::
+                It is a good idea to pin this to make sure something doesn't unexpectedly change
+        encoding:
+            Whether to use json or etf for payloads
+        compress:
+            Payload compression from data sent from Discord.
+
+        Returns
+        -------
+        aiohttp.ClientWebSocketResponse
+            The gateway websocket
+        """
+        
+        ...
+
+
+    @abstractmethod
+    async def connect_to_voice_websocket(
+        self,
+        endpoint: str,
+        *,
+        version: Literal[1,2,3,4] | UndefinedType = UNDEFINED,
+    ) -> ClientWebSocketResponse:
+        """Connects to the voice WebSocket gateway
+
+        **Example usage:**
+
+        .. code-block:: python
+
+            ws = await http_client.connect_to_voice_websocket()
+
+
+        Parameters
+        ----------
+        endpoint:
+            The voice server to connect to. 
+
+            .. note::
+                This can obtained from the `voice server update event <https://discord.dev/topics/gateway-events#voice-server-update>` and is usually in the format of ``servername.discord.media:443``
+        version:
+            The major API version to use
+
+            .. hint::
+                It is a good idea to pin this to make sure something doesn't unexpectedly change
+            .. note::
+                A list of versions can be found on the `voice versioning page <https://discord.dev/topics/voice-connections#voice-gateway-versioning>`__
+
+        Returns
+        -------
+        aiohttp.ClientWebSocketResponse
+            The voice websocket gateway
+        """
+        
         ...

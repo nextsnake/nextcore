@@ -438,6 +438,65 @@ class HTTPClient(BaseHTTPClient):
         # TODO: Aiohttp bug
         return await self._session.ws_connect("wss://gateway.discord.gg", params=params)  # type: ignore [reportUnknownMemberType]
 
+
+    async def connect_to_voice_websocket(
+        self,
+        endpoint: str,
+        *,
+        version: Literal[1,2,3,4] | UndefinedType = UNDEFINED,
+    ) -> ClientWebSocketResponse:
+        """Connects to the voice WebSocket gateway
+
+        **Example usage:**
+
+        .. code-block:: python
+
+            ws = await http_client.connect_to_voice_websocket()
+
+
+        Parameters
+        ----------
+        endpoint:
+            The voice server to connect to. 
+
+            .. note::
+                This can obtained from the `voice server update event <https://discord.dev/topics/gateway-events#voice-server-update>` and is usually in the format of ``servername.discord.media:443``
+        version:
+            The major API version to use
+
+            .. hint::
+                It is a good idea to pin this to make sure something doesn't unexpectedly change
+            .. note::
+                A list of versions can be found on the `voice versioning page <https://discord.dev/topics/voice-connections#voice-gateway-versioning>`__
+
+        Raises
+        ------
+        RuntimeError
+            :meth:`HTTPClient.setup` was not called yet.
+        RuntimeError
+            HTTPClient was closed.
+
+        Returns
+        -------
+        aiohttp.ClientWebSocketResponse
+            The voice websocket gateway
+        """
+
+        if self._session is None:
+            raise RuntimeError("HTTPClient.setup was not called yet!")
+        if self._session.closed:
+            raise RuntimeError("HTTPClient is closed!")
+
+        params = {}
+
+        # These have different behaviour when not provided and set to None.
+        # This only adds them if they are provided (not Undefined)
+        if version is not UNDEFINED:
+            params["version"] = version
+
+        # TODO: Aiohttp bug
+        return await self._session.ws_connect("wss://" + endpoint, params=params)  # type: ignore [reportUnknownMemberType]
+
     async def _get_bucket(self, route: Route, rate_limit_storage: RateLimitStorage) -> Bucket:
         """Gets a bucket object for a route.
 
