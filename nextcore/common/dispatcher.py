@@ -448,18 +448,18 @@ class Dispatcher(Generic[EventNameT]):
             # Tasks are used here as some event handler/check might take a long time.
             for handler in self._global_event_handlers:
                 logger.debug("Dispatching to a global handler")
-                await tg.spawn(self._run_global_event_handler, handler, event_name, *args)
+                tg.start_soon(self._run_global_event_handler, handler, event_name, *args)
             for handler in self._event_handlers.get(event_name, []):
                 logger.debug("Dispatching to a local handler")
-                await tg.spawn(self._run_event_handler, handler, event_name, *args)
+                tg.start_soon(self._run_event_handler, handler, event_name, *args)
 
             # Wait for handlers
             for check, future in self._global_wait_for_handlers:
                 logger.debug("Dispatching to a global wait_for handler")
-                await tg.spawn(self._run_global_wait_for_handler, check, future, event_name, *args)
+                tg.start_soon(self._run_global_wait_for_handler, check, future, event_name, *args)
             for check, future in self._wait_for_handlers.get(event_name, []):
                 logger.debug("Dispatching to a wait_for handler")
-                await tg.spawn(self._run_wait_for_handler, check, future, event_name, *args)
+                tg.start_soon(self._run_wait_for_handler, check, future, event_name, *args)
 
     async def _run_event_handler(self, callback: EventCallback, event_name: EventNameT, *args: Any) -> None:
         """Run event with exception handlers"""
