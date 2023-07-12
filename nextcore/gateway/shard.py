@@ -343,12 +343,10 @@ class Shard:
 
         if self._receive_task is not None:
             self._receive_task.cancel()
-            await self._receive_task
             self._receive_task = None
 
         if self._heartbeat_task is not None:
             self._heartbeat_task.cancel()
-            await self._heartbeat_task
             self._heartbeat_task = None
 
         self.connected.clear()
