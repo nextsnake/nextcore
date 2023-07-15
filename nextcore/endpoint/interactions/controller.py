@@ -54,15 +54,33 @@ class InteractionController:
 
     # Built-in checks
     def check_has_required_headers(self, request: InteractionRequest) -> None:
-        signature = request.headers.get("X-Signature-Ed25519")
-        timestamp = request.headers.get("X-Signature-Timestamp")
+        """A request check that makes sure the signature and timestamp headers are present
 
-        if signature is None:
-            raise RequestVerificationError("Missing X-Signature-Ed25519 header")
-        if timestamp is None:
-            raise RequestVerificationError("Missing X-Signature-Timestamp header")
+        .. note::
+            This check is added by default to :attr:`request_checks`
+        .. warning::
+            This must be included before :meth:`check_has_valid_signature` unless you have something else similar.
+
+            If not, a server error will happen.
+        
+        The headers that are checked for are:
+        - ``X-Signature-Ed25519``
+        - ``X-Signature-Timestamp``
+        """
+        required_headers = ["X-Signature-Ed25519", "X-Signature-Timestamp"]
+
+        for header in required_headers:
+            if header not in request.headers:
+                raise RequestVerificationError(f"Missing the \"{header}\" header")
 
     def check_has_valid_signature(self, request: InteractionRequest) -> None:
+        """A request check that makes sure the request is signed by your applications public key.
+
+        .. note::
+            This check is added by default to :attr:`request_checks`
+        .. warning::
+            This or something similar must check the request or Discord will reject adding the interactions endpoint url.
+        """
         signature = request.headers["X-Signature-Ed25519"]
         timestamp = request.headers["X-Signature-Timestamp"]
         is_from_discord = self.request_verifier.is_valid(signature, timestamp, request.body)
