@@ -40,6 +40,10 @@ orjson = {version = "^3.6.8", optional = true}
 types-orjson = {version = "^3.6.2", optional = true}
 discord-typings = "^0.5.0"
 pynacl = "^1.5.0"
+fastapi = {version = "^0.100.0", optional = true} # TODO: Complain to devs about zerover.
+pydantic = {version = "^2.0.2", optional = true}
+multidict = {version = "^6.0.4", optional = true}
+
 
 [tool.poetry.group.dev.dependencies]
 Sphinx = "^5.0.0"
@@ -64,6 +68,8 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.extras]
 speed = ["orjson", "types-orjson"]
+endpoint = ["multidict"]
+endpoint-adapter-fastapi = ["fastapi", "pydantic"]
 
 # Tools
 [tool.taskipy.tasks]

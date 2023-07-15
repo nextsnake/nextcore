@@ -43,7 +43,7 @@ class RequestVerifier:
 
         self.verify_key: Final[VerifyKey] = VerifyKey(public_key)
 
-    def check(self, signature: str | bytes, timestamp: str, body: str) -> bool:
+    def is_valid(self, signature: str | bytes, timestamp: str, body: str) -> bool:
         """Check if a request was made by Discord
 
         Parameters
