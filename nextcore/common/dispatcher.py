@@ -21,7 +21,7 @@
 
 from __future__ import annotations
 
-from asyncio import CancelledError, Future, create_task
+from asyncio import CancelledError, Future, Task, create_task, gather
 from collections import defaultdict
 from logging import getLogger
 from typing import TYPE_CHECKING, Generic, Hashable, TypeVar, cast, overload
@@ -423,7 +423,7 @@ class Dispatcher(Generic[EventNameT]):
         return result  # type: ignore [return-value]
 
     # Dispatching
-    async def dispatch(self, event_name: EventNameT, *args: Any) -> None:
+    async def dispatch(self, event_name: EventNameT, *args: Any, wait: bool = False) -> None:
         """Dispatch a event
 
         **Example usage:**
@@ -438,25 +438,35 @@ class Dispatcher(Generic[EventNameT]):
             The event name to dispatch to.
         args:
             The event arguments. This will be passed to the listeners.
+        wait:
+            Wait for all listeners to complete.
         """
         logger.debug("Dispatching event %s", event_name)
+
+        tasks: list[Task[None]] = []
 
         # Event handlers
         # Tasks are used here as some event handler/check might take a long time.
         for handler in self._global_event_handlers:
             logger.debug("Dispatching to a global handler")
-            create_task(self._run_global_event_handler(handler, event_name, *args))
+            tasks.append(create_task(self._run_global_event_handler(handler, event_name, *args)))
         for handler in self._event_handlers.get(event_name, []):
             logger.debug("Dispatching to a local handler")
-            create_task(self._run_event_handler(handler, event_name, *args))
+            tasks.append(create_task(self._run_event_handler(handler, event_name, *args)))
 
         # Wait for handlers
         for check, future in self._wait_for_handlers.get(event_name, []):
             logger.debug("Dispatching to a wait_for handler")
-            create_task(self._run_wait_for_handler(check, future, event_name, *args))
+            tasks.append(create_task(self._run_wait_for_handler(check, future, event_name, *args)))
         for check, future in self._global_wait_for_handlers:
             logger.debug("Dispatching to a global wait_for handler")
-            create_task(self._run_global_wait_for_handler(check, future, event_name, *args))
+            tasks.append(create_task(self._run_global_wait_for_handler(check, future, event_name, *args)))
+
+        # Optional waiting
+        logger.debug("Dispatching via %s tasks", len(tasks))
+
+        if wait:
+            await gather(*tasks)
 
     async def _run_event_handler(self, callback: EventCallback, event_name: EventNameT, *args: Any) -> None:
         """Run event with exception handlers"""
