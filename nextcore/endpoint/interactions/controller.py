@@ -20,8 +20,10 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
+from logging import getLogger
 from typing import TYPE_CHECKING
 from ...common.maybe_coro import maybe_coro
+from ...common.json import json_dumps
 from .request import InteractionRequest
 from .response import InteractionResponse
 from .request_verifier import RequestVerifier
@@ -33,6 +35,8 @@ if TYPE_CHECKING:
 
     RequestCheck: TypeAlias = Callable[[InteractionRequest], Union[Awaitable[None], None]]
 
+logger = getLogger(__name__)
+
 # TODO: The controller name is stupid.
 class InteractionController:
     """A class for handling endpoint interactions"""
@@ -41,14 +45,48 @@ class InteractionController:
         self.request_checks: list[RequestCheck] = [self.check_has_required_headers, self.check_has_valid_signature]
 
     async def handle_interaction_request(self, request: InteractionRequest) -> InteractionResponse:
+        """Callback for handling a interaction request
+
+        .. note::
+            This is meant to be called by a web-framework adapter.
+
+        Parameters
+        ----------
+        request:
+            The HTTP request that was received for this interaction
+
+        Returns
+        -------
+        InteractionResponse:
+            What to respond with.
+
+        """
         try:
             await self.verify_request(request)
         except RequestVerificationError as error:
             return InteractionResponse(401, error.reason)
+        except:
+            logger.exception("Error occured while handling interaction")
+            error_response = {"detail": f"Internal check error. Check the {__name__} logger for details"}
+            return InteractionResponse(500, json_dumps(error_response))
 
         return InteractionResponse(status_code=200, body="{\"type\": 1}")
 
     async def verify_request(self, request: InteractionRequest) -> None:
+        """Try all request checks
+
+        Parameters
+        ----------
+        request:
+            The request made
+        Raises
+        ------
+        RequestVerificationError:
+            The request checks did not succeed, so you should not let it execute.
+            The reason it did not succeed is also in the error.
+        Exception:
+            A error in one of the checks was raised. In this case, 
+        """
         for check in self.request_checks:
             await maybe_coro(check, request)
 
