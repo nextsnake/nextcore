@@ -22,16 +22,21 @@
 from __future__ import annotations
 from logging import getLogger
 from typing import TYPE_CHECKING
+
+from nextcore.common.dispatcher import Dispatcher
 from ...common.maybe_coro import maybe_coro
-from ...common.json import json_dumps
+from ...common.json import json_dumps, json_loads
 from .request import InteractionRequest
 from .response import InteractionResponse
 from .request_verifier import RequestVerifier
 from .errors import RequestVerificationError
+from .interaction import Interaction
 
 if TYPE_CHECKING:
-    from typing import Final, Callable, Awaitable, Union
+    from typing import Final, Callable, Awaitable, Union, Literal
     from typing_extensions import TypeAlias
+
+    from discord_typings import InteractionData
 
     RequestCheck: TypeAlias = Callable[[InteractionRequest], Union[Awaitable[None], None]]
 
@@ -39,10 +44,25 @@ logger = getLogger(__name__)
 
 # TODO: The controller name is stupid.
 class InteractionController:
-    """A class for handling endpoint interactions"""
+    """A class for handling endpoint interactions
+    
+    .. warn::
+        Endpoint interactions are weird.
+
+        While endpoint interactions are easier to scale, gateway interactions are easier to use and seem more stable.
+    """
     def __init__(self, public_key: str | bytes) -> None:
+        self.dispatcher: Final[Dispatcher[Literal["raw_request", "check_failed", "check_error"]]] = Dispatcher()
+        self.interaction_dispatcher: Final[Dispatcher[int]] = Dispatcher()
+
+        # Request verification
         self.request_verifier: Final[RequestVerifier] = RequestVerifier(public_key)
         self.request_checks: list[RequestCheck] = [self.check_has_required_headers, self.check_has_valid_signature]
+
+        self.add_default_interaction_handlers()
+
+    def add_default_interaction_handlers(self):
+        self.interaction_dispatcher.add_listener(self.handle_interaction_ping, 1) # TODO: Extract magic value to a enum
 
     async def handle_interaction_request(self, request: InteractionRequest) -> InteractionResponse:
         """Callback for handling a interaction request
@@ -61,16 +81,29 @@ class InteractionController:
             What to respond with.
 
         """
+        await self.dispatcher.dispatch("raw_request", request)
         try:
             await self.verify_request(request)
         except RequestVerificationError as error:
+            await self.dispatcher.dispatch("check_failed", error.reason)
             return InteractionResponse(401, error.reason)
-        except:
+        except Exception as error:
+            await self.dispatcher.dispatch("check_error", error)
             logger.exception("Error occured while handling interaction")
             error_response = {"detail": f"Internal check error. Check the {__name__} logger for details"}
             return InteractionResponse(500, json_dumps(error_response))
+        
+        data: InteractionData = json_loads(request.body)
 
-        return InteractionResponse(status_code=200, body="{\"type\": 1}")
+        interaction = Interaction(request, data)
+        await self.interaction_dispatcher.dispatch(data["type"], interaction, wait=True)
+
+        if interaction.response is None:
+            error_response = {"detail": "Interaction.response was never set!"}
+            logger.error("No interaction.response was set!")
+            return InteractionResponse(500, json_dumps(error_response))
+
+        return InteractionResponse(200, json_dumps(interaction.response))
 
     async def verify_request(self, request: InteractionRequest) -> None:
         """Try all request checks
@@ -125,3 +158,8 @@ class InteractionController:
 
         if not is_from_discord:
             raise RequestVerificationError("Request signature is invalid")
+
+    # Default handlers
+    async def handle_interaction_ping(self, interaction: Interaction):
+        # Acknowledge ping
+        interaction.response = {"type": 1}
