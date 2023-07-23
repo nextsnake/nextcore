@@ -80,5 +80,6 @@ class RequestVerifier:
             return False
         except ValueError:
             logger.debug("Request did not pass check because of ValueError. This is probably due to wrong length")
+            return False
 
         return True
