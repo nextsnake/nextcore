@@ -20,15 +20,18 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from nacl.signing import VerifyKey
-from nacl.exceptions import BadSignatureError
-from typing import TYPE_CHECKING
+
 from logging import getLogger
+from typing import TYPE_CHECKING
+
+from nacl.exceptions import BadSignatureError
+from nacl.signing import VerifyKey
 
 if TYPE_CHECKING:
     from typing import Final
 
 logger = getLogger(__name__)
+
 
 class RequestVerifier:
     """Helper class to verify requests from Discord
@@ -64,7 +67,7 @@ class RequestVerifier:
 
             If this is :data:`False` you should reject the request with a ``401`` status code.
         """
-        
+
         if isinstance(signature, str):
             try:
                 signature = bytes.fromhex(signature)
