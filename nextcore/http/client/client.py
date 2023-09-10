@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING
 from aiohttp import ClientSession
 
 from ... import __version__ as nextcore_version
-from ...common import UNDEFINED, Dispatcher, UndefinedType, json_dumps
+from ...common import UNDEFINED, Dispatcher, UndefinedType, json_loads
 from ..bucket import Bucket
 from ..bucket_metadata import BucketMetadata
 from ..errors import (
@@ -189,7 +189,7 @@ class HTTPClient(BaseHTTPClient):
         """
         if self._session is not None:
             raise RuntimeError("This method can only be called once!")
-        self._session = ClientSession(json_serialize=json_dumps)
+        self._session = ClientSession(json_serialize=json_loads)
 
     async def close(self) -> None:
         """Clean up internal state"""
