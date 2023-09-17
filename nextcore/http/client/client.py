@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING
 from aiohttp import ClientSession
 
 from ... import __version__ as nextcore_version
-from ...common import UNDEFINED, Dispatcher, UndefinedType
+from ...common import UNDEFINED, Dispatcher, UndefinedType, json_dumps
 from ..bucket import Bucket
 from ..bucket_metadata import BucketMetadata
 from ..errors import (
@@ -45,10 +45,12 @@ from ..errors import (
 from ..rate_limit_storage import RateLimitStorage
 from ..route import Route
 from .base_client import BaseHTTPClient
+from .client_response import ClientResponse
 
 if TYPE_CHECKING:
     from typing import Any, Final, Literal
 
+    # ClientResponse is still imported here because ours is "incompatible"
     from aiohttp import ClientResponse, ClientWebSocketResponse
 
 logger = getLogger(__name__)
@@ -189,7 +191,7 @@ class HTTPClient(BaseHTTPClient):
         """
         if self._session is not None:
             raise RuntimeError("This method can only be called once!")
-        self._session = ClientSession()
+        self._session = ClientSession(json_serialize=json_dumps, response_class=ClientResponse)
 
     async def close(self) -> None:
         """Clean up internal state"""
