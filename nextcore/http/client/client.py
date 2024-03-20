@@ -429,7 +429,7 @@ class HTTPClient(BaseHTTPClient):
         # These have different behaviour when not provided and set to None.
         # This only adds them if they are provided (not Undefined)
         if version is not UNDEFINED:
-            params["version"] = version
+            params["v"] = version
         if encoding is not UNDEFINED:
             params["encoding"] = encoding
         if compress is not UNDEFINED:
