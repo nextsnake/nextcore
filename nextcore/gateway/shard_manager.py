@@ -21,12 +21,13 @@
 
 from __future__ import annotations
 
-from asyncio import CancelledError, gather, get_running_loop
+from asyncio import CancelledError, Task, gather, get_running_loop
 from collections import defaultdict
 from logging import getLogger
 from typing import TYPE_CHECKING
 
 from aiohttp import ClientConnectionError
+from anyio import create_task_group
 
 from ..common import Dispatcher, TimesPer
 from ..http import Route
@@ -188,17 +189,20 @@ class ShardManager:
         else:
             shard_ids = self.shard_ids
 
-        for shard_id in shard_ids:
-            shard = self._spawn_shard(shard_id, self._active_shard_count)
+        async with create_task_group() as tg:
+            for shard_id in shard_ids:
+                shard = self._spawn_shard(shard_id, self._active_shard_count)
+                # Here we lazy connect the shard. This gives us a bit more speed when connecting large sets of shards.
+                await tg.spawn(shard.connect)
 
-            # Register event listeners
-            shard.raw_dispatcher.add_listener(self._on_raw_shard_receive)
-            shard.event_dispatcher.add_listener(self._on_shard_dispatch)
-            shard.dispatcher.add_listener(self._on_shard_critical, "critical")
+                # Register event listeners
+                shard.raw_dispatcher.add_listener(self._on_raw_shard_receive)
+                shard.event_dispatcher.add_listener(self._on_shard_dispatch)
+                shard.dispatcher.add_listener(self._on_shard_critical, "critical")
 
-            logger.info("Added shard event listeners")
+                logger.info("Added shard event listeners")
 
-            self.active_shards.append(shard)
+                self.active_shards.append(shard)
 
     def _spawn_shard(self, shard_id: int, shard_count: int) -> Shard:
         assert self.max_concurrency is not None, "max_concurrency is not set. This is set in connect"
@@ -213,10 +217,6 @@ class ShardManager:
             self._http_client,
             presence=self.presence,
         )
-
-        # Here we lazy connect the shard. This gives us a bit more speed when connecting large sets of shards.
-        loop = get_running_loop()
-        loop.create_task(shard.connect())
 
         return shard
 
