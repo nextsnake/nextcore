@@ -3,8 +3,11 @@
   <img alt="" src="docs/_static/logo.svg" width="160px"/>
   
   # Nextcore
-  <sub>A low level Discord API wrapper.</sub>
-  
+  <sub>A low-level Discord API wrapper.</sub>
+
+  [![Pypi Badge](https://img.shields.io/pypi/v/nextcore?style=flat)](https://pypi.org/project/nextcore "We're on pypi!")
+  [![Python Badge](https://img.shields.io/pypi/pyversions/nextcore?style=flat)](https://pypi.org/project/nextcore "Supported python versions.")
+
 </div>
 
 ### ✨ Features
@@ -27,6 +30,26 @@
   - Setting priority for individual requests
   - Swapping out components
 
+<br>
+
+<div align="center">
+
+  # Install
+  
+</div>
+
+### 🎉 We're available on pypi!
+```sh
+# Pip
+pip install novacore
+
+# Poetry
+poetry add nextcore
+```
+⚡ Speed ups are also available with the optional ``[speed]`` package.
+```sh
+pip install nextcore[speed]
+```
 <br>
 
 <div align="center">
