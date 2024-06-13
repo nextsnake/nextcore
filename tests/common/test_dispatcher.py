@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from asyncio import Future
-from asyncio import TimeoutError as AsyncioTimeoutError
-from asyncio import create_task, get_running_loop, wait_for
+from asyncio import TimeoutError as AsyncioTimeoutError, Future, sleep, create_task, get_running_loop, wait_for
 from typing import TYPE_CHECKING
+from tests.utils import match_time
 
 from pytest import mark, raises
 
@@ -192,3 +191,15 @@ async def test_wait_for_handler(event_name: str | None, caplog) -> None:
     assert error_count == 0, "Logged errors where present"
 
     dispatcher.close()
+
+@mark.asyncio
+@match_time(1, 0.1)
+async def test_dispatch_wait():
+    dispatcher: Dispatcher[str] = Dispatcher()
+
+    async def handler():
+        await sleep(1)
+
+    dispatcher.add_listener(handler, "test")
+
+    await dispatcher.dispatch("test", wait=True)
